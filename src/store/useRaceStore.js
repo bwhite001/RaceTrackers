@@ -81,6 +81,29 @@ const useRaceStore = create(
         }
       },
 
+      getAllRaces: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          const races = await StorageService.getAllRaces();
+          set({ isLoading: false });
+          return races;
+        } catch (error) {
+          set({ error: error.message, isLoading: false });
+          throw error;
+        }
+      },
+
+      switchToRace: async (raceId) => {
+        set({ isLoading: true, error: null });
+        try {
+          await get().loadRace(raceId);
+          set({ mode: APP_MODES.SETUP });
+        } catch (error) {
+          set({ error: error.message, isLoading: false });
+          throw error;
+        }
+      },
+
       deleteRace: async (raceId) => {
         set({ isLoading: true, error: null });
         try {
@@ -242,6 +265,18 @@ const useRaceStore = create(
 
         try {
           return await StorageService.exportRaceConfig(currentRaceId);
+        } catch (error) {
+          set({ error: error.message });
+          throw error;
+        }
+      },
+
+      exportRaceResults: async (format = 'csv') => {
+        const { currentRaceId, raceConfig, runners } = get();
+        if (!currentRaceId) throw new Error('No race to export');
+
+        try {
+          return await StorageService.exportRaceResults(currentRaceId, raceConfig, runners, format);
         } catch (error) {
           set({ error: error.message });
           throw error;

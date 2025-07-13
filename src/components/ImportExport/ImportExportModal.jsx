@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import QRCode from 'qrcode.react';
 import useRaceStore from '../../store/useRaceStore.js';
 
 const ImportExportModal = ({ isOpen, onClose }) => {
-  const { exportRaceConfig, importRaceConfig, raceConfig } = useRaceStore();
+  const { exportRaceConfig, exportRaceResults, importRaceConfig, raceConfig } = useRaceStore();
   
   const [activeTab, setActiveTab] = useState('export');
   const [exportData, setExportData] = useState(null);
@@ -11,17 +11,35 @@ const ImportExportModal = ({ isOpen, onClose }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [exportType, setExportType] = useState('config'); // 'config' or 'results'
+  const fileInputRef = useRef(null);
 
   const handleExport = async () => {
     setIsProcessing(true);
     setError('');
     
     try {
-      const data = await exportRaceConfig();
-      setExportData(data);
-      setSuccess('Race configuration exported successfully!');
+      let data;
+      if (exportType === 'config') {
+        data = await exportRaceConfig();
+        setExportData(data);
+        setSuccess('Race configuration exported successfully!');
+      } else if (exportType === 'results') {
+        data = await exportRaceResults('csv');
+        // For CSV, trigger download directly
+        const blob = new Blob([data.content], { type: data.mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = data.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        setSuccess('Race results exported successfully!');
+      }
     } catch (err) {
-      setError('Failed to export race configuration: ' + err.message);
+      setError('Failed to export: ' + err.message);
     } finally {
       setIsProcessing(false);
     }
@@ -75,6 +93,33 @@ const ImportExportModal = ({ isOpen, onClose }) => {
     URL.revokeObjectURL(url);
   };
 
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.type !== 'application/json') {
+      setError('Please select a JSON file');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target.result;
+        setImportText(content);
+        setError('');
+        setSuccess('File loaded successfully. Click "Import Configuration" to proceed.');
+      } catch (err) {
+        setError('Failed to read file');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleCopyToClipboard = async () => {
     if (!exportData) return;
 
@@ -109,6 +154,7 @@ const ImportExportModal = ({ isOpen, onClose }) => {
     setError('');
     setSuccess('');
     setActiveTab('export');
+    setExportType('config');
     onClose();
   };
 
@@ -190,7 +236,53 @@ const ImportExportModal = ({ isOpen, onClose }) => {
           {/* Export Tab */}
           {activeTab === 'export' && (
             <div className="space-y-6">
-              {!exportData ? (
+              {/* Export Type Selection */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                  Export Type
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <input
+                      type="radio"
+                      name="exportType"
+                      value="config"
+                      checked={exportType === 'config'}
+                      onChange={(e) => setExportType(e.target.value)}
+                      className="text-primary-600"
+                    />
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        Race Configuration
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-300">
+                        Export race setup for sharing or backup
+                      </div>
+                    </div>
+                  </label>
+                  
+                  <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <input
+                      type="radio"
+                      name="exportType"
+                      value="results"
+                      checked={exportType === 'results'}
+                      onChange={(e) => setExportType(e.target.value)}
+                      className="text-primary-600"
+                    />
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        Race Results (CSV)
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-300">
+                        Export runner results and times
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {!exportData && exportType === 'config' ? (
                 <div className="text-center">
                   <p className="text-gray-600 dark:text-gray-300 mb-4">
                     Export your race configuration to share with other devices or as a backup.
@@ -212,6 +304,31 @@ const ImportExportModal = ({ isOpen, onClose }) => {
                   {!raceConfig && (
                     <p className="text-sm text-red-600 dark:text-red-400 mt-2">
                       No race configuration available to export
+                    </p>
+                  )}
+                </div>
+              ) : exportType === 'results' ? (
+                <div className="text-center">
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    Export race results as a CSV file with runner numbers, statuses, times, and notes.
+                  </p>
+                  <button
+                    onClick={handleExport}
+                    disabled={isProcessing || !raceConfig}
+                    className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isProcessing ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 spinner"></div>
+                        <span>Exporting...</span>
+                      </div>
+                    ) : (
+                      'Export Race Results (CSV)'
+                    )}
+                  </button>
+                  {!raceConfig && (
+                    <p className="text-sm text-red-600 dark:text-red-400 mt-2">
+                      No race available to export
                     </p>
                   )}
                 </div>
@@ -293,8 +410,32 @@ const ImportExportModal = ({ isOpen, onClose }) => {
                   Import Race Configuration
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Paste the race configuration JSON data below or scan a QR code from another device.
+                  Upload a JSON file, paste the race configuration data below, or scan a QR code from another device.
                 </p>
+
+                {/* File Upload Section */}
+                <div className="mb-6">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".json,application/json"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={triggerFileUpload}
+                    className="btn-secondary flex items-center space-x-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <span>Upload JSON File</span>
+                  </button>
+                </div>
+
+                <div className="text-center text-gray-500 dark:text-gray-400 mb-4">
+                  or
+                </div>
                 
                 <textarea
                   value={importText}

@@ -285,6 +285,73 @@ export class StorageService {
     }
   }
 
+  static async exportRaceResults(raceId, raceConfig, runners, format = 'csv') {
+    try {
+      if (format === 'csv') {
+        return this.generateCSV(raceConfig, runners);
+      } else {
+        throw new Error('Unsupported export format');
+      }
+    } catch (error) {
+      console.error('Error exporting race results:', error);
+      throw new Error('Failed to export race results');
+    }
+  }
+
+  static generateCSV(raceConfig, runners) {
+    const headers = [
+      'Runner Number',
+      'Status',
+      'Recorded Time',
+      'Time from Start',
+      'Notes'
+    ];
+
+    const raceStartTime = new Date(`${raceConfig.date}T${raceConfig.startTime}`);
+    
+    const rows = runners.map(runner => {
+      let timeFromStart = '';
+      if (runner.recordedTime && runner.status === 'passed') {
+        const recordedTime = new Date(runner.recordedTime);
+        const diffMs = recordedTime.getTime() - raceStartTime.getTime();
+        const hours = Math.floor(diffMs / (1000 * 60 * 60));
+        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+        timeFromStart = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
+
+      return [
+        runner.number,
+        runner.status,
+        runner.recordedTime ? new Date(runner.recordedTime).toLocaleString() : '',
+        timeFromStart,
+        runner.notes || ''
+      ];
+    });
+
+    // Sort by runner number
+    rows.sort((a, b) => a[0] - b[0]);
+
+    // Create CSV content
+    const csvContent = [
+      `# Race: ${raceConfig.name}`,
+      `# Date: ${raceConfig.date}`,
+      `# Start Time: ${raceConfig.startTime}`,
+      `# Exported: ${new Date().toLocaleString()}`,
+      '',
+      headers.join(','),
+      ...rows.map(row => row.map(cell => 
+        typeof cell === 'string' && cell.includes(',') ? `"${cell}"` : cell
+      ).join(','))
+    ].join('\n');
+
+    return {
+      content: csvContent,
+      filename: `race-results-${raceConfig.name.replace(/\s+/g, '-')}-${raceConfig.date}.csv`,
+      mimeType: 'text/csv'
+    };
+  }
+
   // Database maintenance
   static async getDatabaseSize() {
     try {

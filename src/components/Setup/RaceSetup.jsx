@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useRaceStore from '../../store/useRaceStore.js';
 import TimeUtils from '../../services/timeUtils.js';
 import { APP_MODES } from '../../types/index.js';
@@ -6,7 +6,17 @@ import ErrorMessage from '../Layout/ErrorMessage.jsx';
 import LoadingSpinner from '../Layout/LoadingSpinner.jsx';
 
 const RaceSetup = () => {
-  const { createRace, setMode, isLoading, error, clearError } = useRaceStore();
+  const { 
+    createRace, 
+    setMode, 
+    isLoading, 
+    error, 
+    clearError, 
+    getAllRaces, 
+    switchToRace, 
+    deleteRace,
+    raceConfig 
+  } = useRaceStore();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -17,6 +27,9 @@ const RaceSetup = () => {
   });
 
   const [validationErrors, setValidationErrors] = useState({});
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [existingRaces, setExistingRaces] = useState([]);
+  const [loadingRaces, setLoadingRaces] = useState(true);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -92,6 +105,8 @@ const RaceSetup = () => {
       };
 
       await createRace(raceData);
+      setShowCreateForm(false);
+      await loadExistingRaces(); // Refresh the list
       // Race created successfully, stay in setup mode to choose operation mode
     } catch (err) {
       console.error('Failed to create race:', err);
@@ -128,20 +143,167 @@ const RaceSetup = () => {
     parseRunnerRange(value);
   };
 
-  if (isLoading) {
-    return <LoadingSpinner message="Setting up race..." />;
+  // Load existing races on component mount
+  useEffect(() => {
+    loadExistingRaces();
+  }, []);
+
+  const loadExistingRaces = async () => {
+    try {
+      setLoadingRaces(true);
+      const races = await getAllRaces();
+      setExistingRaces(races);
+    } catch (error) {
+      console.error('Failed to load races:', error);
+    } finally {
+      setLoadingRaces(false);
+    }
+  };
+
+  const handleSelectRace = async (raceId) => {
+    try {
+      await switchToRace(raceId);
+    } catch (error) {
+      console.error('Failed to switch to race:', error);
+    }
+  };
+
+  const handleDeleteRace = async (raceId, raceName) => {
+    if (window.confirm(`Are you sure you want to delete the race "${raceName}"? This action cannot be undone.`)) {
+      try {
+        await deleteRace(raceId);
+        await loadExistingRaces(); // Refresh the list
+      } catch (error) {
+        console.error('Failed to delete race:', error);
+      }
+    }
+  };
+
+  const handleCreateNewRace = () => {
+    setShowCreateForm(true);
+    setFormData({
+      name: '',
+      date: TimeUtils.getTodayDateString(),
+      startTime: '08:00',
+      minRunner: '',
+      maxRunner: ''
+    });
+    setValidationErrors({});
+    setRangeInput('');
+  };
+
+  if (isLoading || loadingRaces) {
+    return <LoadingSpinner message="Loading races..." />;
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6">
       <div className="card p-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          Race Setup
+          Race Management
         </h2>
 
         <ErrorMessage error={error} onDismiss={clearError} />
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Existing Races Section */}
+        {!showCreateForm && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Existing Races
+              </h3>
+              <button
+                onClick={handleCreateNewRace}
+                className="btn-primary"
+              >
+                Create New Race
+              </button>
+            </div>
+
+            {existingRaces.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  No races found. Create your first race to get started.
+                </p>
+                <button
+                  onClick={handleCreateNewRace}
+                  className="btn-primary"
+                >
+                  Create First Race
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {existingRaces.map((race) => (
+                  <div
+                    key={race.id}
+                    className={`border rounded-lg p-4 transition-colors ${
+                      raceConfig?.id === race.id
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 dark:text-white">
+                          {race.name}
+                        </h4>
+                        <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                          <span>{race.date}</span>
+                          <span className="mx-2">•</span>
+                          <span>{race.startTime}</span>
+                          <span className="mx-2">•</span>
+                          <span>Runners: {race.minRunner}-{race.maxRunner}</span>
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          Created: {new Date(race.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div className="flex space-x-2 ml-4">
+                        {raceConfig?.id !== race.id && (
+                          <button
+                            onClick={() => handleSelectRace(race.id)}
+                            className="btn-secondary text-sm"
+                          >
+                            Select
+                          </button>
+                        )}
+                        {raceConfig?.id === race.id && (
+                          <span className="text-sm text-primary-600 dark:text-primary-400 font-medium">
+                            Current
+                          </span>
+                        )}
+                        <button
+                          onClick={() => handleDeleteRace(race.id, race.name)}
+                          className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Create Race Form */}
+        {showCreateForm && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Create New Race
+              </h3>
+              <button
+                onClick={() => setShowCreateForm(false)}
+                className="btn-secondary"
+              >
+                Cancel
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
           {/* Race Name */}
           <div>
             <label htmlFor="name" className="form-label">
@@ -277,20 +439,22 @@ const RaceSetup = () => {
           )}
 
           {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? 'Creating Race...' : 'Create Race'}
-          </button>
-        </form>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Creating Race...' : 'Create Race'}
+              </button>
+            </form>
+          </div>
+        )}
 
-        {/* Mode Selection - Show after race is created */}
-        {useRaceStore.getState().raceConfig && (
+        {/* Mode Selection - Show when a race is selected */}
+        {raceConfig && !showCreateForm && (
           <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Select Operation Mode
+              Select Operation Mode for "{raceConfig.name}"
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button
