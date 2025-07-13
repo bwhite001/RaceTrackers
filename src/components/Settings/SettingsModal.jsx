@@ -159,7 +159,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                     className={`p-2 text-sm rounded-md border transition-colors ${
                       localSettings.fontSize === option.value
                         ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
-                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-200'
                     }`}
                   >
                     {option.label}
@@ -188,8 +188,8 @@ const SettingsModal = ({ isOpen, onClose }) => {
                   onClick={() => handleSettingChange('runnerViewMode', 'grid')}
                   className={`flex-1 p-3 rounded-md border transition-colors ${
                     localSettings.runnerViewMode === 'grid'
-                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
+                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-200'
                   }`}
                 >
                   <div className="flex items-center justify-center space-x-2">
@@ -203,8 +203,8 @@ const SettingsModal = ({ isOpen, onClose }) => {
                   onClick={() => handleSettingChange('runnerViewMode', 'list')}
                   className={`flex-1 p-3 rounded-md border transition-colors ${
                     localSettings.runnerViewMode === 'list'
-                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
+                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-200'
                   }`}
                 >
                   <div className="flex items-center justify-center space-x-2">
