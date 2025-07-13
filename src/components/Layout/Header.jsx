@@ -31,11 +31,17 @@ const Header = ({ onSettingsClick, onImportExportClick }) => {
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
               <div className="flex-shrink-0">
+                <img
+                  src="/favicon_io/android-chrome-192x192.png"
+                  alt="RaceTracker Pro Logo"
+                  className="h-10 w-10 mr-3"
+                />
+              </div>
+              <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                   {getModeTitle()}
                 </h1>
               </div>
-              
               {raceConfig && (
                 <div className="ml-4 flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
                   <span className="hidden sm:inline">

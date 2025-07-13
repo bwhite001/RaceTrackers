@@ -5,9 +5,9 @@ class RaceTrackerDB extends Dexie {
   constructor() {
     super('RaceTrackerDB');
     
-    this.version(1).stores({
+    this.version(2).stores({
       races: '++id, name, date, startTime, minRunner, maxRunner, createdAt',
-      runners: '++id, raceId, number, status, recordedTime, notes',
+      runners: '++id, [raceId+number], raceId, number, status, recordedTime, notes',
       segments: '++id, raceId, startTime, endTime, called',
       settings: 'key, value'
     });
