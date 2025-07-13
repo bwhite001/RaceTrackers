@@ -1,0 +1,159 @@
+﻿Overview
+This proposal outlines the design for an offline-capable race tracking application, suitable for both desktop and mobile platforms. The app is intended to streamline the process of tracking runners during races, supporting both checkpoint and base station operations. All features are designed to function without an internet connection, with local data storage and easy configuration sharing.
+Key Features
+1. Race Setup
+* Race Creation: Users can set up a new race by entering the event date and start time.
+* Customizable Runner Ranges: Flexible input for runner numbers, supporting ranges like 100–200, 1200–1400, or any custom sequence.
+* Local Data Storage: All race data is stored locally on the device, ensuring offline operation.
+* Config Sharing: Export or import race configurations via QR code or email, enabling quick setup on multiple devices.
+2. Checkpoint Mode
+Checkpoint mode is designed for volunteers or staff at race checkpoints. It features three core tabs:
+Tab 1: Runner Mark-Off
+* Grid/List View: Display all runner numbers as interactive squares or in a list, depending on user preference.
+* Search Functionality: A search bar allows instant filtering by runner number.
+* Quick Mark-Off: Tapping a runner marks them as "passed," recording the timestamp automatically.
+* Accessibility: Supports both grid (for large screens) and list (for mobile or preference) layouts.
+Tab 2: Callout Sheet
+* 5-Minute Segmentation: Automatically groups runners who have passed into 5-minute time intervals, from the earliest to the latest.
+* Call-In Tracking: Each segment can be marked as "called in" once reported, with visual indicators for completion.
+* Chronological Organization: Segments are sorted from earliest to latest for efficient communication.
+Tab 3: Overview
+* Status Dashboard: Shows all runners in the configured range, with color-coded status indicators:
+   * Passed
+   * Not started
+   * Non-starter
+   * Did not finish (DNF)
+* Manual Status Updates: Mark runners as non-starter or DNF.
+* Counts and Progress: Displays numbers for runners left, passed, and other statuses.
+* Timing Information: Shows when each runner passed and the common time from callout segments.
+3. Base Station Mode
+Base station mode is tailored for central race operations, with two main tabs:
+Tab 1: Data Entry
+* Common Time Assignment: Enter a time (e.g., when a group finishes) and then input runner numbers (individually or in bulk).
+* Flexible Input: Runners can be entered in any order or grouping.
+* Batch Processing: Assign the same timestamp to multiple runners efficiently.
+Tab 2: Race Overview
+* Status Dashboard: Identical to Checkpoint Tab 3, showing all runners and their statuses.
+* Manual Updates: Mark non-starters and DNFs directly from the overview.
+* Progress Tracking: View the real-time status of all racers.
+Design & User Experience
+* Offline-First: All features work without internet; data is stored locally (using IndexedDB or similar technology).
+* Responsive Design: Adapts seamlessly to desktop, tablet, and mobile screens.
+* Accessibility: Adjustable text size for enhanced readability.
+* Customizable Appearance:
+   * Dark and light mode support.
+   * User-defined colors for each status (e.g., passed, DNF).
+* Config Sharing:
+   * Export/import race setup via QR code (for scanning) or email (as JSON).
+   * Easy for another device to load configuration via screenshot or paste.
+Technical Architecture
+Component
+	Technology/Approach
+	Platform
+	Progressive Web App (PWA)
+	UI Framework
+	React (with hooks) or similar
+	Local Storage
+	IndexedDB (via Dexie.js or idb)
+	Styling
+	Tailwind CSS or similar
+	QR Code
+	qrcode.react or equivalent
+	State Management
+	React Context or lightweight store
+	Workflow Example
+1. Setup: Organizer sets up the race with date, time, and runner range.
+2. Role Selection: Device is put into either checkpoint or base station mode.
+3. Checkpoint Mode: Staff mark runners as they pass, group them for callouts, and monitor overall progress.
+4. Base Station Mode: Staff enter finish times for groups, update statuses, and monitor race completion.
+5. Sharing: Race config can be exported/imported via QR code or email as needed.
+Benefits
+* Works Anywhere: No internet required—ideal for remote race locations.
+* Fast & Efficient: Quick runner mark-off and batch processing for large groups.
+* Customizable: Adapts to the needs of different races and user preferences.
+* Data Integrity: Local storage prevents loss due to connectivity issues.
+* Easy to Share: Simple configuration sharing between devices.
+Optional Enhancements
+* Grouping/Pagination: For large runner ranges, group numbers (e.g., by 50s or 100s) with quick navigation and search for efficient mark-off.
+* Advanced Analytics: Future versions could include pace predictions, outlier detection, or integration with timing chips.
+* Accessibility Upgrades: Further enhancements for screen readers and high-contrast modes.
+Conclusion
+This app will provide race organizers and volunteers with a robust, offline solution for efficiently tracking runners. Its dual-mode design, flexible configuration, and local-first approach make it ideal for events of any size, especially those in areas with limited connectivity. The combination of responsive UI, customizable appearance, and easy data sharing ensures a smooth experience for all users.
+
+
+App Overview: Pages and View Modes
+The race tracking app is designed with a clear, role-based navigation structure, supporting both desktop and mobile devices. Its offline-first architecture ensures all features are accessible without internet connectivity. Below is an overview of the key pages and view modes:
+1. Race Setup Page
+* Purpose: Configure a new race before tracking begins.
+* Key Features:
+   * Enter race name, date, and starting time.
+   * Define runner number ranges (e.g., 100–200, 1200–1400).
+   * Option to import race configuration via QR code or email.
+   * Responsive layout for both desktop and mobile.
+   * Accessible controls for text size and color scheme.
+2. Role Selection Page
+* Purpose: Choose the operational mode for the device.
+* Options:
+   * Checkpoint Mode
+   * Base Station Mode
+3. Checkpoint Mode
+Checkpoint Mode is tailored for volunteers or staff stationed at race checkpoints. It features three main tabs:
+a. Runner Mark-Off (Tab 1)
+* Grid/List View: Displays all runner numbers as interactive squares or a list.
+* Search Bar: Quickly filter runner numbers.
+* Quick Mark-Off: Tap a number to mark a runner as "passed," automatically recording the timestamp.
+* Grouping/Pagination: For large ranges, runners can be grouped (by 10s, 25s, 50s, or 100s) or paginated for efficient navigation and mark-off.
+b. Callout Sheet (Tab 2)
+* Time Segmentation: Groups runners who have passed into 5-minute intervals, from earliest to latest.
+* Call-In Tracking: Each segment can be marked as "called in" once reported, with visual completion indicators.
+* Chronological Organization: Segments are sorted for efficient communication.
+c. Overview (Tab 3)
+* Status Dashboard: Shows all runners in the configured range with color-coded statuses:
+   * Not Started
+   * Passed
+   * Non-Starter
+   * Did Not Finish (DNF)
+* Manual Status Updates: Mark runners as non-starter or DNF.
+* Counts and Progress: Displays numbers for runners left, passed, and other statuses.
+* Timing Information: Shows when each runner passed and whether their time segment has been called in.
+4. Base Station Mode
+Base Station Mode is intended for central race operations, focusing on data entry and overall race management. It features two main tabs:
+a. Data Entry (Tab 1)
+* Common Time Assignment: Enter a time and assign it to multiple runners (in any order or grouping).
+* Flexible Input: Add runner numbers individually or in bulk.
+* Batch Processing: Efficiently assign the same timestamp to groups of runners.
+b. Race Overview (Tab 2)
+* Comprehensive Dashboard: Mirrors the Checkpoint Overview tab, showing all runners and their statuses.
+* Manual Updates: Mark non-starters and DNFs directly from the overview.
+* Progress Tracking: View real-time status and timing for all racers.
+5. Settings & Configuration Sharing
+* Accessible from any page.
+* Features:
+   * Toggle dark/light mode.
+   * Adjust text size for readability.
+   * Customize status colors.
+   * Export or import race configuration via QR code or email.
+6. Additional Navigation & Features
+* Responsive Design: All pages adapt to device size and orientation.
+* Offline Operation: All data is stored locally; no internet required.
+* Accessibility: High-contrast modes, screen reader support, and scalable UI elements.
+Summary Table: Pages and Main Functions
+Page/Mode
+	Key Functions
+	Race Setup
+	Configure race details, runner ranges, import/export config
+	Role Selection
+	Choose between Checkpoint or Base Station mode
+	Checkpoint Tab 1
+	Mark runners as passed (grid/list, search, grouping/pagination)
+	Checkpoint Tab 2
+	Group runners by 5-min intervals, mark segments as called in
+	Checkpoint Tab 3
+	Overview of all runners, status updates, progress counts, timing info
+	Base Station Tab 1
+	Enter common time, assign to runners, batch processing
+	Base Station Tab 2
+	Overview of all runners, status updates, progress tracking
+	Settings
+	Theme, text size, status color customization, config sharing
+	This structure ensures an intuitive workflow for both checkpoint and base station roles, supporting efficient, error-resistant race management in any environment.
