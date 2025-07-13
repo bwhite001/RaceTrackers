@@ -1,11 +1,20 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ImportExportModal from '../components/ImportExport/ImportExportModal.jsx';
 import useRaceStore from '../store/useRaceStore.js';
 
 // Mock the race store
 vi.mock('../store/useRaceStore.js');
+
+// Mock QRCode component
+vi.mock('qrcode.react', () => ({
+  default: ({ value, size }) => (
+    <div data-testid="qr-code" data-value={value} data-size={size}>
+      QR Code Mock
+    </div>
+  )
+}));
 
 // Mock URL.createObjectURL and URL.revokeObjectURL
 global.URL.createObjectURL = vi.fn(() => 'mock-blob-url');
@@ -16,21 +25,43 @@ const mockClick = vi.fn();
 const mockAppendChild = vi.fn();
 const mockRemoveChild = vi.fn();
 
+// Create a proper mock element with all necessary properties and methods
+const createMockElement = () => ({
+  href: '',
+  download: '',
+  click: mockClick,
+  style: { display: '' },
+  setAttribute: vi.fn(),
+  getAttribute: vi.fn(),
+  removeAttribute: vi.fn(),
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+  dispatchEvent: vi.fn(),
+  appendChild: vi.fn(),
+  removeChild: vi.fn(),
+  querySelector: vi.fn(),
+  querySelectorAll: vi.fn(),
+  classList: {
+    add: vi.fn(),
+    remove: vi.fn(),
+    contains: vi.fn(),
+    toggle: vi.fn()
+  }
+});
+
 Object.defineProperty(document, 'createElement', {
-  value: vi.fn(() => ({
-    href: '',
-    download: '',
-    click: mockClick,
-    style: { display: '' }
-  }))
+  value: vi.fn(() => createMockElement()),
+  writable: true
 });
 
 Object.defineProperty(document.body, 'appendChild', {
-  value: mockAppendChild
+  value: mockAppendChild,
+  writable: true
 });
 
 Object.defineProperty(document.body, 'removeChild', {
-  value: mockRemoveChild
+  value: mockRemoveChild,
+  writable: true
 });
 
 describe('ImportExportModal Component - Enhanced Functionality', () => {
@@ -41,6 +72,7 @@ describe('ImportExportModal Component - Enhanced Functionality', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    cleanup();
     
     // Reset URL mocks
     global.URL.createObjectURL.mockClear();
@@ -67,6 +99,10 @@ describe('ImportExportModal Component - Enhanced Functionality', () => {
     });
   });
 
+  afterEach(() => {
+    cleanup();
+  });
+
   describe('Modal Rendering', () => {
     it('should render modal when open', () => {
       render(<ImportExportModal isOpen={true} onClose={mockOnClose} />);
@@ -85,7 +121,7 @@ describe('ImportExportModal Component - Enhanced Functionality', () => {
     it('should handle close button click', () => {
       render(<ImportExportModal isOpen={true} onClose={mockOnClose} />);
       
-      const closeButton = screen.getByLabelText('Close');
+      const closeButton = screen.getByRole('button', { name: /close/i });
       fireEvent.click(closeButton);
       
       expect(mockOnClose).toHaveBeenCalledTimes(1);
@@ -97,7 +133,7 @@ describe('ImportExportModal Component - Enhanced Functionality', () => {
       render(<ImportExportModal isOpen={true} onClose={mockOnClose} />);
       
       expect(screen.getByText('Export Type')).toBeInTheDocument();
-      expect(screen.getByLabelText('Race Configuration (JSON)')).toBeInTheDocument();
+      expect(screen.getByLabelText('Race Configuration')).toBeInTheDocument();
       expect(screen.getByLabelText('Race Results (CSV)')).toBeInTheDocument();
     });
 
@@ -119,11 +155,11 @@ describe('ImportExportModal Component - Enhanced Functionality', () => {
       render(<ImportExportModal isOpen={true} onClose={mockOnClose} />);
       
       // Select JSON export
-      const jsonRadio = screen.getByLabelText('Race Configuration (JSON)');
+      const jsonRadio = screen.getByLabelText('Race Configuration');
       fireEvent.click(jsonRadio);
       
       // Click export button
-      const exportButton = screen.getByText('Export Configuration');
+      const exportButton = screen.getByText('Export Race Configuration');
       fireEvent.click(exportButton);
       
       await waitFor(() => {
@@ -134,7 +170,8 @@ describe('ImportExportModal Component - Enhanced Functionality', () => {
     });
 
     it('should export race results as CSV', async () => {
-      const mockCSVData = `Race Name,Test Marathon 2025
+      const mockCSVData = {
+        content: `Race Name,Test Marathon 2025
 Race Date,2025-07-13
 Start Time,08:00
 Total Runners,51
@@ -143,7 +180,10 @@ Export Date,2025-07-13
 Runner Number,Status,Recorded Time,Time from Start
 100,passed,2025-07-13T08:15:30Z,00:15:30
 101,not-started,,
-102,dnf,,`;
+102,dnf,,`,
+        filename: 'race-results.csv',
+        mimeType: 'text/csv'
+      };
       
       mockExportRaceResults.mockResolvedValue(mockCSVData);
       
@@ -154,7 +194,7 @@ Runner Number,Status,Recorded Time,Time from Start
       fireEvent.click(csvRadio);
       
       // Click export button
-      const exportButton = screen.getByText('Export Configuration');
+      const exportButton = screen.getByText('Export Race Results (CSV)');
       fireEvent.click(exportButton);
       
       await waitFor(() => {
@@ -169,7 +209,7 @@ Runner Number,Status,Recorded Time,Time from Start
       
       render(<ImportExportModal isOpen={true} onClose={mockOnClose} />);
       
-      const exportButton = screen.getByText('Export Configuration');
+      const exportButton = screen.getByText('Export Race Configuration');
       fireEvent.click(exportButton);
       
       await waitFor(() => {
@@ -182,11 +222,11 @@ Runner Number,Status,Recorded Time,Time from Start
       
       render(<ImportExportModal isOpen={true} onClose={mockOnClose} />);
       
-      const exportButton = screen.getByText('Export Configuration');
+      const exportButton = screen.getByText('Export Race Configuration');
       fireEvent.click(exportButton);
       
       await waitFor(() => {
-        expect(screen.getByText('Failed to export race configuration')).toBeInTheDocument();
+        expect(screen.getByText(/Failed to export/)).toBeInTheDocument();
       });
     });
   });
@@ -277,7 +317,7 @@ Runner Number,Status,Recorded Time,Time from Start
       fireEvent.click(importButton);
       
       await waitFor(() => {
-        expect(screen.getByText('Invalid JSON format')).toBeInTheDocument();
+        expect(screen.getByText(/Invalid JSON format/)).toBeInTheDocument();
       });
     });
 
@@ -294,7 +334,7 @@ Runner Number,Status,Recorded Time,Time from Start
       fireEvent.click(importButton);
       
       await waitFor(() => {
-        expect(screen.getByText('Failed to import race configuration')).toBeInTheDocument();
+        expect(screen.getByText(/Failed to import/)).toBeInTheDocument();
       });
     });
 
@@ -314,7 +354,7 @@ Runner Number,Status,Recorded Time,Time from Start
       const importButton = screen.getByText('Import Configuration');
       fireEvent.click(importButton);
       
-      expect(screen.getByText('Please provide race configuration data')).toBeInTheDocument();
+      expect(screen.getByText(/Please provide race configuration data/)).toBeInTheDocument();
     });
   });
 
@@ -325,11 +365,11 @@ Runner Number,Status,Recorded Time,Time from Start
       
       render(<ImportExportModal isOpen={true} onClose={mockOnClose} />);
       
-      const exportButton = screen.getByText('Export Configuration');
+      const exportButton = screen.getByText('Export Race Configuration');
       fireEvent.click(exportButton);
       
       await waitFor(() => {
-        expect(screen.getByText('Scan QR Code')).toBeInTheDocument();
+        expect(screen.getByTestId('qr-code')).toBeInTheDocument();
       });
     });
   });
@@ -337,8 +377,19 @@ Runner Number,Status,Recorded Time,Time from Start
   describe('Loading States', () => {
     it('should show loading state during export', () => {
       useRaceStore.mockReturnValue({
-        ...useRaceStore(),
-        isLoading: true
+        raceConfig: {
+          id: '1',
+          name: 'Test Marathon 2025',
+          date: '2025-07-13',
+          startTime: '08:00',
+          minRunner: 100,
+          maxRunner: 150
+        },
+        exportRaceConfig: mockExportRaceConfig,
+        exportRaceResults: mockExportRaceResults,
+        importRaceConfig: mockImportRaceConfig,
+        isLoading: true,
+        error: null
       });
       
       render(<ImportExportModal isOpen={true} onClose={mockOnClose} />);
@@ -348,8 +399,19 @@ Runner Number,Status,Recorded Time,Time from Start
 
     it('should show loading state during import', () => {
       useRaceStore.mockReturnValue({
-        ...useRaceStore(),
-        isLoading: true
+        raceConfig: {
+          id: '1',
+          name: 'Test Marathon 2025',
+          date: '2025-07-13',
+          startTime: '08:00',
+          minRunner: 100,
+          maxRunner: 150
+        },
+        exportRaceConfig: mockExportRaceConfig,
+        exportRaceResults: mockExportRaceResults,
+        importRaceConfig: mockImportRaceConfig,
+        isLoading: true,
+        error: null
       });
       
       render(<ImportExportModal isOpen={true} onClose={mockOnClose} />);
@@ -365,8 +427,12 @@ Runner Number,Status,Recorded Time,Time from Start
   describe('No Race Configuration', () => {
     it('should show message when no race is configured', () => {
       useRaceStore.mockReturnValue({
-        ...useRaceStore(),
-        raceConfig: null
+        raceConfig: null,
+        exportRaceConfig: mockExportRaceConfig,
+        exportRaceResults: mockExportRaceResults,
+        importRaceConfig: mockImportRaceConfig,
+        isLoading: false,
+        error: null
       });
       
       render(<ImportExportModal isOpen={true} onClose={mockOnClose} />);

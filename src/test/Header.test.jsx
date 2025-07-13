@@ -11,6 +11,13 @@ describe('Header Component - Back Navigation', () => {
   const mockSetMode = vi.fn();
   const mockOnSettingsClick = vi.fn();
   const mockOnImportExportClick = vi.fn();
+  const mockGetRunnerCounts = vi.fn(() => ({
+    total: 0,
+    notStarted: 0,
+    passed: 0,
+    nonStarter: 0,
+    dnf: 0
+  }));
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -19,7 +26,8 @@ describe('Header Component - Back Navigation', () => {
     useRaceStore.mockReturnValue({
       mode: APP_MODES.SETUP,
       raceConfig: null,
-      setMode: mockSetMode
+      setMode: mockSetMode,
+      getRunnerCounts: mockGetRunnerCounts
     });
   });
 
@@ -31,9 +39,9 @@ describe('Header Component - Back Navigation', () => {
       />
     );
 
-    expect(screen.getByText('RaceTracker Pro')).toBeInTheDocument();
-    expect(screen.getByLabelText('Settings')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Back to Setup')).not.toBeInTheDocument();
+    expect(screen.getByText('Race Setup')).toBeInTheDocument();
+    expect(screen.getByTitle('Settings')).toBeInTheDocument();
+    expect(screen.queryByTitle('Back to Race Setup')).not.toBeInTheDocument();
   });
 
   it('should show back button in checkpoint mode', () => {
@@ -46,7 +54,14 @@ describe('Header Component - Back Navigation', () => {
         minRunner: 100,
         maxRunner: 150
       },
-      setMode: mockSetMode
+      setMode: mockSetMode,
+      getRunnerCounts: vi.fn(() => ({
+        total: 250,
+        notStarted: 200,
+        passed: 40,
+        nonStarter: 5,
+        dnf: 5
+      }))
     });
 
     render(
@@ -56,10 +71,10 @@ describe('Header Component - Back Navigation', () => {
       />
     );
 
-    expect(screen.getByLabelText('Back to Setup')).toBeInTheDocument();
-    expect(screen.getByText('Test Marathon 2025')).toBeInTheDocument();
-    expect(screen.getByText('2025-07-13')).toBeInTheDocument();
-    expect(screen.getByText('Runners: 100-150')).toBeInTheDocument();
+    expect(screen.getByTitle('Back to Race Setup')).toBeInTheDocument();
+    expect(screen.getAllByText('Test Marathon 2025')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('2025-07-13')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Runners: 100-150')[0]).toBeInTheDocument();
   });
 
   it('should show back button in base station mode', () => {
@@ -72,7 +87,14 @@ describe('Header Component - Back Navigation', () => {
         minRunner: 1,
         maxRunner: 50
       },
-      setMode: mockSetMode
+      setMode: mockSetMode,
+      getRunnerCounts: vi.fn(() => ({
+        total: 50,
+        notStarted: 30,
+        passed: 15,
+        nonStarter: 3,
+        dnf: 2
+      }))
     });
 
     render(
@@ -82,9 +104,9 @@ describe('Header Component - Back Navigation', () => {
       />
     );
 
-    expect(screen.getByLabelText('Back to Setup')).toBeInTheDocument();
-    expect(screen.getByText('Sprint Championship 2025')).toBeInTheDocument();
-    expect(screen.getByText('Runners: 1-50')).toBeInTheDocument();
+    expect(screen.getByTitle('Back to Race Setup')).toBeInTheDocument();
+    expect(screen.getAllByText('Sprint Championship 2025')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Runners: 1-50')[0]).toBeInTheDocument();
   });
 
   it('should handle back button click', () => {
@@ -97,7 +119,8 @@ describe('Header Component - Back Navigation', () => {
         minRunner: 1,
         maxRunner: 100
       },
-      setMode: mockSetMode
+      setMode: mockSetMode,
+      getRunnerCounts: mockGetRunnerCounts
     });
 
     render(
@@ -107,7 +130,7 @@ describe('Header Component - Back Navigation', () => {
       />
     );
 
-    const backButton = screen.getByLabelText('Back to Setup');
+    const backButton = screen.getByTitle('Back to Race Setup');
     fireEvent.click(backButton);
 
     expect(mockSetMode).toHaveBeenCalledWith(APP_MODES.SETUP);
@@ -121,7 +144,7 @@ describe('Header Component - Back Navigation', () => {
       />
     );
 
-    const settingsButton = screen.getByLabelText('Settings');
+    const settingsButton = screen.getByTitle('Settings');
     fireEvent.click(settingsButton);
 
     expect(mockOnSettingsClick).toHaveBeenCalledTimes(1);
@@ -137,7 +160,8 @@ describe('Header Component - Back Navigation', () => {
         minRunner: 1,
         maxRunner: 100
       },
-      setMode: mockSetMode
+      setMode: mockSetMode,
+      getRunnerCounts: mockGetRunnerCounts
     });
 
     render(
@@ -147,7 +171,7 @@ describe('Header Component - Back Navigation', () => {
       />
     );
 
-    expect(screen.getByLabelText('Import/Export')).toBeInTheDocument();
+    expect(screen.getByTitle('Import/Export')).toBeInTheDocument();
   });
 
   it('should handle import/export button click', () => {
@@ -160,7 +184,8 @@ describe('Header Component - Back Navigation', () => {
         minRunner: 1,
         maxRunner: 100
       },
-      setMode: mockSetMode
+      setMode: mockSetMode,
+      getRunnerCounts: mockGetRunnerCounts
     });
 
     render(
@@ -170,7 +195,7 @@ describe('Header Component - Back Navigation', () => {
       />
     );
 
-    const importExportButton = screen.getByLabelText('Import/Export');
+    const importExportButton = screen.getByTitle('Import/Export');
     fireEvent.click(importExportButton);
 
     expect(mockOnImportExportClick).toHaveBeenCalledTimes(1);
@@ -180,7 +205,8 @@ describe('Header Component - Back Navigation', () => {
     useRaceStore.mockReturnValue({
       mode: APP_MODES.SETUP,
       raceConfig: null,
-      setMode: mockSetMode
+      setMode: mockSetMode,
+      getRunnerCounts: mockGetRunnerCounts
     });
 
     render(
@@ -190,7 +216,7 @@ describe('Header Component - Back Navigation', () => {
       />
     );
 
-    expect(screen.queryByLabelText('Import/Export')).not.toBeInTheDocument();
+    expect(screen.queryByTitle('Import/Export')).not.toBeInTheDocument();
   });
 
   it('should display race information correctly', () => {
@@ -206,7 +232,8 @@ describe('Header Component - Back Navigation', () => {
     useRaceStore.mockReturnValue({
       mode: APP_MODES.CHECKPOINT,
       raceConfig,
-      setMode: mockSetMode
+      setMode: mockSetMode,
+      getRunnerCounts: mockGetRunnerCounts
     });
 
     render(
@@ -216,8 +243,8 @@ describe('Header Component - Back Navigation', () => {
       />
     );
 
-    expect(screen.getByText('Ultra Marathon Championship 2025')).toBeInTheDocument();
-    expect(screen.getByText('2025-12-25')).toBeInTheDocument();
-    expect(screen.getByText('Runners: 500-999')).toBeInTheDocument();
+    expect(screen.getAllByText('Ultra Marathon Championship 2025')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('2025-12-25')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Runners: 500-999')[0]).toBeInTheDocument();
   });
 });

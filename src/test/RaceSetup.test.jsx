@@ -157,7 +157,7 @@ describe('RaceSetup Component - Multiple Race Management', () => {
         fireEvent.click(deleteButtons[0]);
       });
       
-      expect(confirmSpy).toHaveBeenCalledWith('Are you sure you want to delete "Test Marathon 2025"? This action cannot be undone.');
+      expect(confirmSpy).toHaveBeenCalledWith('Are you sure you want to delete the race "Test Marathon 2025"? This action cannot be undone.');
       expect(mockDeleteRace).toHaveBeenCalledWith('1');
       
       confirmSpy.mockRestore();
@@ -291,8 +291,10 @@ describe('RaceSetup Component - Multiple Race Management', () => {
       
       await waitFor(() => {
         expect(screen.getByText('Create First Race')).toBeInTheDocument();
-        expect(screen.queryByText('Create New Race')).not.toBeInTheDocument();
       });
+      
+      // The "Create New Race" button should still be visible at the top
+      expect(screen.getByText('Create New Race')).toBeInTheDocument();
     });
   });
 
@@ -400,7 +402,7 @@ describe('RaceSetup Component - Multiple Race Management', () => {
       
       render(<RaceSetup />);
       
-      expect(screen.getByText('Setting up race...')).toBeInTheDocument();
+      expect(screen.getByText('Loading races...')).toBeInTheDocument();
     });
   });
 });

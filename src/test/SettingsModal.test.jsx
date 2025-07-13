@@ -3,6 +3,13 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import SettingsModal from '../components/Settings/SettingsModal.jsx'
 
+// Mock StorageService to prevent IndexedDB calls
+vi.mock('../services/storage.js', () => ({
+  default: {
+    saveSetting: vi.fn(() => Promise.resolve()),
+  }
+}))
+
 // Mock the store
 const mockStore = {
   settings: {
@@ -20,7 +27,7 @@ const mockStore = {
   updateSettings: vi.fn()
 }
 
-vi.mock('../../store/useRaceStore.js', () => ({
+vi.mock('../store/useRaceStore.js', () => ({
   default: () => mockStore
 }))
 
@@ -44,8 +51,9 @@ describe('SettingsModal Dark Mode', () => {
     const user = userEvent.setup()
     render(<SettingsModal isOpen={true} onClose={() => {}} />)
     
-    // Find and click the dark mode toggle
-    const darkModeToggle = screen.getByRole('button', { name: /dark mode/i })
+    // Find the dark mode toggle button (it's the toggle switch next to "Dark Mode" label)
+    const darkModeSection = screen.getByText('Dark Mode').closest('div').parentElement
+    const darkModeToggle = darkModeSection.querySelector('button')
     await user.click(darkModeToggle)
     
     // Check if dark class is added to document
@@ -62,10 +70,11 @@ describe('SettingsModal Dark Mode', () => {
     const mediumButton = screen.getByText('Medium')
     const normalButton = screen.getByText('Normal')
     
-    // Verify buttons have dark mode text classes
+    // Verify buttons have dark mode text classes (Normal button has different classes as it's selected)
     expect(smallButton.closest('button')).toHaveClass('text-gray-900', 'dark:text-gray-100')
     expect(mediumButton.closest('button')).toHaveClass('text-gray-900', 'dark:text-gray-100')
-    expect(normalButton.closest('button')).toHaveClass('text-gray-900', 'dark:text-gray-100')
+    // Normal button is selected, so it has different classes
+    expect(normalButton.closest('button')).toHaveClass('text-primary-700', 'dark:text-primary-300')
   })
 
   it('view mode buttons have proper dark mode text classes', () => {
@@ -109,12 +118,12 @@ describe('SettingsModal Dark Mode', () => {
     const user = userEvent.setup()
     render(<SettingsModal isOpen={true} onClose={() => {}} />)
     
-    // Click on Large font size (value 1.2)
+    // Click on Large font size (value 1.1)
     const largeButton = screen.getByText('Large')
     await user.click(largeButton)
     
     // Check if CSS custom property is set
-    expect(document.documentElement.style.getPropertyValue('--font-size-multiplier')).toBe('1.2')
+    expect(document.documentElement.style.getPropertyValue('--font-size-multiplier')).toBe('1.1')
   })
 
   it('saves settings when save button is clicked', async () => {

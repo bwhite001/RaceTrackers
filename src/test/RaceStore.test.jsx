@@ -134,7 +134,7 @@ Runner Number,Status,Recorded Time,Time from Start
         expect(csvData).toBe(expectedCSV);
       });
       
-      expect(StorageService.exportRaceResults).toHaveBeenCalledWith('1');
+      expect(StorageService.exportRaceResults).toHaveBeenCalledWith('1', expect.any(Object), expect.any(Array), 'csv');
     });
 
     it('should handle CSV export errors', async () => {

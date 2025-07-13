@@ -3,7 +3,7 @@ import QRCode from 'qrcode.react';
 import useRaceStore from '../../store/useRaceStore.js';
 
 const ImportExportModal = ({ isOpen, onClose }) => {
-  const { exportRaceConfig, exportRaceResults, importRaceConfig, raceConfig } = useRaceStore();
+  const { exportRaceConfig, exportRaceResults, importRaceConfig, raceConfig, isLoading } = useRaceStore();
   
   const [activeTab, setActiveTab] = useState('export');
   const [exportData, setExportData] = useState(null);
@@ -289,10 +289,10 @@ const ImportExportModal = ({ isOpen, onClose }) => {
                   </p>
                   <button
                     onClick={handleExport}
-                    disabled={isProcessing || !raceConfig}
+                    disabled={isProcessing || isLoading || !raceConfig}
                     className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isProcessing ? (
+                    {(isProcessing || isLoading) ? (
                       <div className="flex items-center space-x-2">
                         <div className="w-4 h-4 spinner"></div>
                         <span>Exporting...</span>
@@ -314,10 +314,10 @@ const ImportExportModal = ({ isOpen, onClose }) => {
                   </p>
                   <button
                     onClick={handleExport}
-                    disabled={isProcessing || !raceConfig}
+                    disabled={isProcessing || isLoading || !raceConfig}
                     className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isProcessing ? (
+                    {(isProcessing || isLoading) ? (
                       <div className="flex items-center space-x-2">
                         <div className="w-4 h-4 spinner"></div>
                         <span>Exporting...</span>
@@ -449,10 +449,10 @@ const ImportExportModal = ({ isOpen, onClose }) => {
               <div className="flex space-x-3">
                 <button
                   onClick={handleImport}
-                  disabled={isProcessing || !importText.trim()}
+                  disabled={isProcessing || isLoading || !importText.trim()}
                   className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isProcessing ? (
+                  {(isProcessing || isLoading) ? (
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 spinner"></div>
                       <span>Importing...</span>
