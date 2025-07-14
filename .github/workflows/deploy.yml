@@ -35,22 +35,21 @@ jobs:
 
       - name: Run tests
         run: npm run test:run
-        continue-on-error: true
+        continue-on-error: false
         id: tests
 
       - name: Check test results
-        if: steps.tests.outcome == 'failure'
+        if: failure()
         run: |
-          echo "⚠️ Tests failed but continuing with deployment for tagged releases"
+          echo "⚠️ Tests failed but continuing with deployment as per workflow configuration"
           echo "Please fix failing tests in future releases"
 
   build-and-deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.ref_type == 'tag' || needs.test.result != 'failure'
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
       - name: Checkout
@@ -77,7 +76,6 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: './dist'
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
