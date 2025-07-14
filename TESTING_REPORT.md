@@ -66,7 +66,7 @@ This document provides a complete testing report for the Race Tracker Pro applic
 
 **Test:** Application loads correctly on startup  
 **Status:** ✅ PASS  
-**Screenshot:** `01-initial-application-launch.png` (see UI_SCREENSHOTS_DOCUMENTATION.md)
+**Screenshot:** ![Initial Application Launch](screenshots/01-initial-application-launch.png)
 
 **Verified:**
 - ✅ Application loads without errors at http://localhost:3000
@@ -82,7 +82,9 @@ This document provides a complete testing report for the Race Tracker Pro applic
 
 **Test:** Complete race creation process  
 **Status:** ✅ PASS  
-**Screenshots:** `02-race-creation-form-empty.png`, `03-race-form-with-data.png`
+**Screenshots:** 
+![Race Creation Form Empty](screenshots/02-race-creation-form-empty.png)
+![Race Form with Data](screenshots/03-race-form-with-data.png)
 
 **Verified:**
 - ✅ Form opens when clicking "Create First Race"
@@ -101,7 +103,8 @@ This document provides a complete testing report for the Race Tracker Pro applic
 
 **Test:** Runner range parsing and calculation  
 **Status:** ✅ PASS  
-**Screenshot:** `03-race-form-with-data.png` (demonstrates 500-750 = 251 runners)
+**Screenshot:** ![Race Form with Data Entry](screenshots/03-race-form-with-data.png)
+*Demonstrates 500-750 = 251 runners calculation*
 
 **Verified:**
 - ✅ Quick input accepts "500-750" format
@@ -115,7 +118,7 @@ This document provides a complete testing report for the Race Tracker Pro applic
 
 **Test:** Race list and management features  
 **Status:** ✅ PASS  
-**Screenshot:** `04-race-created-mode-selection.png`
+**Screenshot:** ![Race Created and Mode Selection](screenshots/04-race-created-mode-selection.png)
 
 **Verified:**
 - ✅ Created race appears in "Existing Races" section
@@ -132,7 +135,7 @@ This document provides a complete testing report for the Race Tracker Pro applic
 
 **Test:** Operation mode selection  
 **Status:** ✅ PASS  
-**Screenshot:** `04-race-created-mode-selection.png`
+**Screenshot:** ![Mode Selection Interface](screenshots/04-race-created-mode-selection.png)
 
 **Verified:**
 - ✅ Mode selection appears after race creation
@@ -147,7 +150,7 @@ This document provides a complete testing report for the Race Tracker Pro applic
 
 **Test:** Checkpoint mode functionality  
 **Status:** ✅ PASS  
-**Screenshot:** `05-checkpoint-mode-interface.png`
+**Screenshot:** ![Checkpoint Mode Interface](screenshots/05-checkpoint-mode-interface.png)
 
 **Verified:**
 - ✅ Successfully switches to Checkpoint Mode
@@ -170,7 +173,7 @@ This document provides a complete testing report for the Race Tracker Pro applic
 
 **Test:** Base station mode functionality  
 **Status:** ✅ PASS  
-**Screenshot:** `06-base-station-data-entry.png`
+**Screenshot:** ![Base Station Mode Data Entry](screenshots/06-base-station-data-entry.png)
 
 **Verified:**
 - ✅ Successfully switches to Base Station Mode
@@ -194,7 +197,7 @@ This document provides a complete testing report for the Race Tracker Pro applic
 
 **Test:** Race overview and statistics  
 **Status:** ✅ PASS  
-**Screenshot:** `07-race-overview-statistics.png`
+**Screenshot:** ![Race Overview with Statistics](screenshots/07-race-overview-statistics.png)
 
 **Verified:**
 - ✅ Statistics cards show correct data:
@@ -217,7 +220,7 @@ This document provides a complete testing report for the Race Tracker Pro applic
 
 **Test:** Settings and preferences  
 **Status:** ✅ PASS  
-**Screenshot:** `08-settings-modal-light.png`
+**Screenshot:** ![Settings Modal Light Mode](screenshots/08-settings-modal-light.png)
 
 **Verified:**
 - ✅ Settings modal opens from header gear icon (⚙️)
@@ -237,7 +240,7 @@ This document provides a complete testing report for the Race Tracker Pro applic
 
 **Test:** Dark theme implementation  
 **Status:** ✅ PASS  
-**Screenshot:** `09-dark-mode-interface.png`
+**Screenshot:** ![Dark Mode Interface](screenshots/09-dark-mode-interface.png)
 
 **Verified:**
 - ✅ Dark mode toggle works instantly

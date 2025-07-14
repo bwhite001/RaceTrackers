@@ -18,6 +18,7 @@ Race Tracker Pro is an offline-capable race management application designed for 
 When you first open Race Tracker Pro, you'll see a clean interface with no races configured.
 
 ![Initial Application Launch](screenshots/01-initial-application-launch.png)
+*Clean startup interface showing the race management dashboard*
 
 The main screen shows:
 - **Header**: Contains the app logo, current race info (when available), and settings
@@ -35,6 +36,10 @@ The main screen shows:
 Click either "Create First Race" or "Create New Race" to open the race setup form.
 
 ### Step 2: Fill Race Details
+
+![Race Creation Form](screenshots/02-race-creation-form-empty.png)
+*Race creation form with default values and input fields*
+
 The race creation form includes:
 
 **Race Name**: Enter a descriptive name for your race
@@ -60,6 +65,10 @@ The application supports flexible runner numbering:
 - **Small Range**: `1-50` (creates runners 1 through 50)
 
 ### Step 4: Create the Race
+
+![Race Form with Data](screenshots/03-race-form-with-data.png)
+*Race form filled with sample data showing real-time calculations*
+
 Click "Create Race" to finalize your race setup. The system will:
 - Validate all inputs
 - Create the race configuration
@@ -71,12 +80,19 @@ Click "Create Race" to finalize your race setup. The system will:
 After creating a race, you'll choose between two operation modes:
 
 ### Mode Selection Screen
+
+![Mode Selection](screenshots/04-race-created-mode-selection.png)
+*Mode selection interface after successful race creation*
+
 - **Checkpoint Mode**: For tracking runners passing through checkpoints
 - **Base Station Mode**: For entering finish times and managing race completion data
 
 Both modes can be switched between at any time during the race.
 
 ## Checkpoint Mode
+
+![Checkpoint Mode Interface](screenshots/05-checkpoint-mode-interface.png)
+*Checkpoint mode showing runner tracking and grouping functionality*
 
 Checkpoint Mode is designed for volunteers stationed at checkpoints along the race route.
 
@@ -139,6 +155,9 @@ Checkpoint Mode is designed for volunteers stationed at checkpoints along the ra
 
 ## Base Station Mode
 
+![Base Station Mode](screenshots/06-base-station-data-entry.png)
+*Base station data entry interface for finish times*
+
 Base Station Mode is designed for the finish line or race headquarters.
 
 ### Data Entry Tab
@@ -166,6 +185,9 @@ Base Station Mode is designed for the finish line or race headquarters.
 
 ### Race Overview Tab
 
+![Race Overview](screenshots/07-race-overview-statistics.png)
+*Comprehensive race statistics and runner management interface*
+
 **Purpose**: Identical to Checkpoint Overview but with finish line perspective
 
 **Additional Features**:
@@ -175,9 +197,15 @@ Base Station Mode is designed for the finish line or race headquarters.
 
 ## Settings & Customization
 
+![Settings Modal](screenshots/08-settings-modal-light.png)
+*Settings modal showing customization options in light theme*
+
 Access settings via the gear icon in the top-right corner.
 
 ### Appearance Settings
+
+![Dark Mode Interface](screenshots/09-dark-mode-interface.png)
+*Application interface in dark theme showing consistent styling*
 
 **Dark Mode**:
 - Toggle between light and dark themes

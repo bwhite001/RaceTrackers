@@ -143,3 +143,49 @@ After deployment, verify:
 2. All assets (CSS, JS, images) load properly
 3. PWA functionality works (offline capability, install prompt)
 4. Navigation and core features function as expected
+
+### Visual Verification Checklist
+
+Use these screenshots as reference to verify the deployed application matches expected functionality:
+
+#### Core Application Flow
+![Initial Launch](screenshots/01-initial-application-launch.png)
+*Verify clean startup interface loads correctly*
+
+![Race Creation](screenshots/02-race-creation-form-empty.png)
+*Confirm race creation form displays properly*
+
+![Data Entry](screenshots/03-race-form-with-data.png)
+*Test real-time calculations work correctly*
+
+#### Operation Modes
+![Mode Selection](screenshots/04-race-created-mode-selection.png)
+*Verify mode selection interface appears after race creation*
+
+![Checkpoint Mode](screenshots/05-checkpoint-mode-interface.png)
+*Test checkpoint mode functionality and runner grouping*
+
+![Base Station Mode](screenshots/06-base-station-data-entry.png)
+*Confirm base station data entry interface works*
+
+#### Advanced Features
+![Race Overview](screenshots/07-race-overview-statistics.png)
+*Verify statistics and race management features*
+
+![Settings Modal](screenshots/08-settings-modal-light.png)
+*Test settings modal and customization options*
+
+![Dark Mode](screenshots/09-dark-mode-interface.png)
+*Confirm dark mode theme consistency*
+
+![Final State](screenshots/10-final-interface-state.png)
+*Verify complete application functionality*
+
+### Deployment Verification Steps
+1. **Initial Load**: Compare with Screenshot 1 - clean startup interface
+2. **Race Creation**: Test form functionality against Screenshots 2-3
+3. **Mode Selection**: Verify interface matches Screenshot 4
+4. **Feature Testing**: Test both checkpoint and base station modes (Screenshots 5-6)
+5. **Settings**: Verify customization options work (Screenshots 8-9)
+6. **Theme Switching**: Test dark/light mode functionality
+7. **Overall Functionality**: Ensure all features work as shown in screenshots

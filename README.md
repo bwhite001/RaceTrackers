@@ -2,6 +2,42 @@
 
 An offline-capable race tracking application designed for desktop and mobile platforms. This app streamlines the process of tracking runners during races, supporting both checkpoint and base station operations without requiring an internet connection.
 
+## 📸 Visual Overview
+
+### Application Workflow
+![Initial Application Launch](screenshots/01-initial-application-launch.png)
+*Clean startup interface with race management dashboard*
+
+![Race Creation Form](screenshots/02-race-creation-form-empty.png)
+*Intuitive race setup with flexible runner range configuration*
+
+![Race Form with Data](screenshots/03-race-form-with-data.png)
+*Real-time calculations and validation during race creation*
+
+### Operation Modes
+![Mode Selection](screenshots/04-race-created-mode-selection.png)
+*Clear operation mode selection after race creation*
+
+![Checkpoint Mode](screenshots/05-checkpoint-mode-interface.png)
+*Checkpoint mode with runner tracking and grouping functionality*
+
+![Base Station Mode](screenshots/06-base-station-data-entry.png)
+*Base station data entry interface for finish times*
+
+### Race Management
+![Race Overview](screenshots/07-race-overview-statistics.png)
+*Comprehensive race statistics and runner management*
+
+### Customization
+![Settings Modal](screenshots/08-settings-modal-light.png)
+*Extensive customization options in light theme*
+
+![Dark Mode](screenshots/09-dark-mode-interface.png)
+*Professional dark theme with consistent styling*
+
+![Final Interface](screenshots/10-final-interface-state.png)
+*Production-ready interface showing complete functionality*
+
 ## Features
 
 ### 🏃‍♂️ Race Setup

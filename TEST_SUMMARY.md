@@ -18,6 +18,14 @@ This document provides a concise summary of the comprehensive testing performed 
 - **Browser**: Puppeteer-controlled Chrome
 - **Test Scenarios**: 10 major workflows
 - **Features Tested**: Complete application functionality
+- **Screenshots**: 10 comprehensive UI screenshots captured
+
+#### Visual Test Coverage
+![Application Launch](screenshots/01-initial-application-launch.png) ![Race Creation](screenshots/02-race-creation-form-empty.png) ![Data Entry](screenshots/03-race-form-with-data.png) ![Mode Selection](screenshots/04-race-created-mode-selection.png) ![Checkpoint Mode](screenshots/05-checkpoint-mode-interface.png)
+
+![Base Station](screenshots/06-base-station-data-entry.png) ![Race Overview](screenshots/07-race-overview-statistics.png) ![Settings](screenshots/08-settings-modal-light.png) ![Dark Mode](screenshots/09-dark-mode-interface.png) ![Final State](screenshots/10-final-interface-state.png)
+
+*Complete visual documentation of all major application workflows*
 
 ## 📊 Test Breakdown
 
@@ -48,20 +56,20 @@ This document provides a concise summary of the comprehensive testing performed 
 ## 🚀 Live Application Testing
 
 ### Core Functionality Verified
-- ✅ **Application Launch**: Loads correctly at http://localhost:3000
-- ✅ **Race Creation**: Complete form workflow with validation
-- ✅ **Runner Management**: Range parsing and calculations (1000-1500 = 501 runners)
-- ✅ **Mode Switching**: Seamless transition between Checkpoint and Base Station modes
-- ✅ **Data Persistence**: Race information properly stored and displayed
-- ✅ **Settings Management**: All preferences apply immediately
-- ✅ **Theme Switching**: Dark/Light mode works instantly across all components
+- ✅ **Application Launch**: Loads correctly at http://localhost:3000 ([Screenshot 1](screenshots/01-initial-application-launch.png))
+- ✅ **Race Creation**: Complete form workflow with validation ([Screenshots 2-3](screenshots/02-race-creation-form-empty.png))
+- ✅ **Runner Management**: Range parsing and calculations (500-750 = 251 runners) ([Screenshot 3](screenshots/03-race-form-with-data.png))
+- ✅ **Mode Switching**: Seamless transition between Checkpoint and Base Station modes ([Screenshot 4](screenshots/04-race-created-mode-selection.png))
+- ✅ **Data Persistence**: Race information properly stored and displayed ([Screenshot 4](screenshots/04-race-created-mode-selection.png))
+- ✅ **Settings Management**: All preferences apply immediately ([Screenshot 8](screenshots/08-settings-modal-light.png))
+- ✅ **Theme Switching**: Dark/Light mode works instantly across all components ([Screenshot 9](screenshots/09-dark-mode-interface.png))
 
 ### Advanced Features Tested
-- ✅ **Checkpoint Mode**: Runner tracking, grouping, search functionality
-- ✅ **Base Station Mode**: Data entry, race overview, statistics
-- ✅ **Race Overview**: Statistics cards, runner tables, action buttons
-- ✅ **Settings Modal**: Appearance, display options, immediate preview
-- ✅ **Dark Mode**: Complete theme consistency across all UI elements
+- ✅ **Checkpoint Mode**: Runner tracking, grouping, search functionality ([Screenshot 5](screenshots/05-checkpoint-mode-interface.png))
+- ✅ **Base Station Mode**: Data entry, race overview, statistics ([Screenshot 6](screenshots/06-base-station-data-entry.png))
+- ✅ **Race Overview**: Statistics cards, runner tables, action buttons ([Screenshot 7](screenshots/07-race-overview-statistics.png))
+- ✅ **Settings Modal**: Appearance, display options, immediate preview ([Screenshot 8](screenshots/08-settings-modal-light.png))
+- ✅ **Dark Mode**: Complete theme consistency across all UI elements ([Screenshot 9](screenshots/09-dark-mode-interface.png))
 
 ## 📱 User Experience Validation
 
