@@ -223,7 +223,13 @@ describe('RaceSetup Component - Multiple Race Management', () => {
           date: expect.any(String),
           startTime: '08:00',
           minRunner: 1,
-          maxRunner: 100
+          maxRunner: 100,
+          checkpoints: [
+            {
+              name: 'Checkpoint 1',
+              number: 1,
+            },
+          ],
         });
       });
     });

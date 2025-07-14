@@ -64,9 +64,9 @@ const useRaceStore = create(
             currentRaceId: raceId,
             runners,
             calledSegments: segments.map(s => TimeUtils.getSegmentKey(s.startTime)),
-            checkpoints,
-            checkpointResults,
-            currentCheckpoint: checkpoints.length > 0 ? checkpoints[0].number : 1,
+            checkpoints: checkpoints || [],
+            checkpointResults: checkpointResults || [],
+            currentCheckpoint: checkpoints && checkpoints.length > 0 ? checkpoints[0].number : 1,
             isLoading: false
           });
         } catch (error) {
