@@ -18,6 +18,9 @@ const Header = ({ onSettingsClick, onImportExportClick }) => {
         return 'RaceTracker Pro';
     }
   };
+  const getIconBaseUrl = () => {
+    return process.env.NODE_ENV === 'production' ? '/RaceTrackers/' : '/'
+  }
 
   const canSwitchMode = () => {
     return raceConfig && mode !== APP_MODES.SETUP;
@@ -47,11 +50,11 @@ const Header = ({ onSettingsClick, onImportExportClick }) => {
                 </button>
               )}
               <div className="flex-shrink-0">
-                <img
-                  src="/favicon_io/android-chrome-192x192.png"
+                (<img
+                  src={getIconBaseUrl() + 'favicon_io/android-chrome-192x192.png'}
                   alt="RaceTracker Pro Logo"
                   className="h-10 w-10 mr-3"
-                />
+                />)
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">
