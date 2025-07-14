@@ -5,16 +5,22 @@ import { RUNNER_STATUSES } from '../../types/index.js';
 
 const DataEntry = () => {
   const { 
-    bulkMarkRunners, 
+    bulkMarkRunners,
+    bulkMarkRunnersAtCheckpoint,
+    importCheckpointResults,
     raceConfig, 
     runners,
+    checkpoints,
     isLoading 
   } = useRaceStore();
 
   const [commonTime, setCommonTime] = useState('');
   const [runnerInput, setRunnerInput] = useState('');
+  const [selectedCheckpoint, setSelectedCheckpoint] = useState(1);
+  const [importData, setImportData] = useState('');
   const [validationErrors, setValidationErrors] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showImportSection, setShowImportSection] = useState(false);
 
   const handleTimeChange = (e) => {
     setCommonTime(e.target.value);
@@ -110,7 +116,12 @@ const DataEntry = () => {
       const numbers = parseRunnerNumbers(runnerInput);
       const timestamp = TimeUtils.datetimeLocalToISO(commonTime);
       
-      await bulkMarkRunners(numbers, RUNNER_STATUSES.PASSED, timestamp);
+      // Use checkpoint-specific marking if checkpoints are available
+      if (checkpoints && checkpoints.length > 0) {
+        await bulkMarkRunnersAtCheckpoint(numbers, selectedCheckpoint, null, timestamp, RUNNER_STATUSES.PASSED);
+      } else {
+        await bulkMarkRunners(numbers, RUNNER_STATUSES.PASSED, timestamp);
+      }
       
       // Clear form on success
       setRunnerInput('');
@@ -118,6 +129,23 @@ const DataEntry = () => {
       
     } catch (error) {
       console.error('Failed to assign times:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleImportCheckpointData = async () => {
+    if (!importData.trim()) return;
+
+    setIsProcessing(true);
+    try {
+      const data = JSON.parse(importData.trim());
+      await importCheckpointResults(data);
+      setImportData('');
+      setShowImportSection(false);
+    } catch (error) {
+      console.error('Failed to import checkpoint data:', error);
+      setValidationErrors(prev => ({ ...prev, import: 'Invalid checkpoint data format' }));
     } finally {
       setIsProcessing(false);
     }
@@ -158,6 +186,30 @@ const DataEntry = () => {
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Checkpoint Selection */}
+          {checkpoints && checkpoints.length > 1 && (
+            <div>
+              <label htmlFor="selectedCheckpoint" className="form-label">
+                Checkpoint
+              </label>
+              <select
+                id="selectedCheckpoint"
+                value={selectedCheckpoint}
+                onChange={(e) => setSelectedCheckpoint(parseInt(e.target.value))}
+                className="form-input"
+              >
+                {checkpoints.map(checkpoint => (
+                  <option key={checkpoint.number} value={checkpoint.number}>
+                    {checkpoint.name}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Select which checkpoint these times apply to
+              </p>
+            </div>
+          )}
+
           {/* Common Time Input */}
           <div>
             <label htmlFor="commonTime" className="form-label">
@@ -276,6 +328,80 @@ const DataEntry = () => {
             )}
           </button>
         </form>
+      </div>
+
+      {/* Import Checkpoint Data Section */}
+      <div className="card p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Import Checkpoint Data
+          </h3>
+          <button
+            type="button"
+            onClick={() => setShowImportSection(!showImportSection)}
+            className="btn-secondary"
+          >
+            {showImportSection ? 'Hide' : 'Show'} Import
+          </button>
+        </div>
+
+        {showImportSection && (
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="importData" className="form-label">
+                Checkpoint Export Data
+              </label>
+              <textarea
+                id="importData"
+                value={importData}
+                onChange={(e) => setImportData(e.target.value)}
+                rows={8}
+                className={`form-input font-mono text-sm ${validationErrors.import ? 'border-red-500' : ''}`}
+                placeholder="Paste checkpoint export JSON data here..."
+              />
+              {validationErrors.import && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {validationErrors.import}
+                </p>
+              )}
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Import checkpoint results from other devices
+              </p>
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                type="button"
+                onClick={handleImportCheckpointData}
+                disabled={isProcessing || !importData.trim()}
+                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isProcessing ? 'Importing...' : 'Import Checkpoint Data'}
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => setImportData('')}
+                className="btn-secondary"
+              >
+                Clear
+              </button>
+            </div>
+
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                Import Instructions
+              </h4>
+              <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                <li>• Get checkpoint export data from checkpoint operators</li>
+                <li>• Paste the JSON data into the text area above</li>
+                <li>• Click "Import Checkpoint Data" to merge the results</li>
+                <li>• This will add checkpoint-specific times and call-in data</li>
+                <li>• Duplicate entries will be updated with new data</li>
+              </ul>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Quick Actions */}

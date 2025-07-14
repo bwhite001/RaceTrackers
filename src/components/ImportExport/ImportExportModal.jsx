@@ -3,7 +3,16 @@ import QRCode from 'qrcode.react';
 import useRaceStore from '../../store/useRaceStore.js';
 
 const ImportExportModal = ({ isOpen, onClose }) => {
-  const { exportRaceConfig, exportRaceResults, importRaceConfig, raceConfig, isLoading } = useRaceStore();
+  const { 
+    exportRaceConfig, 
+    exportRaceResults, 
+    exportCheckpointResults,
+    importRaceConfig, 
+    importCheckpointResults,
+    raceConfig, 
+    checkpoints,
+    isLoading 
+  } = useRaceStore();
   
   const [activeTab, setActiveTab] = useState('export');
   const [exportData, setExportData] = useState(null);
@@ -11,7 +20,8 @@ const ImportExportModal = ({ isOpen, onClose }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [exportType, setExportType] = useState('config'); // 'config' or 'results'
+  const [exportType, setExportType] = useState('config'); // 'config', 'results', or 'checkpoint'
+  const [selectedCheckpoint, setSelectedCheckpoint] = useState(1);
   const fileInputRef = useRef(null);
 
   const handleExport = async () => {
@@ -37,6 +47,10 @@ const ImportExportModal = ({ isOpen, onClose }) => {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
         setSuccess('Race results exported successfully!');
+      } else if (exportType === 'checkpoint') {
+        data = await exportCheckpointResults(selectedCheckpoint);
+        setExportData(data);
+        setSuccess('Checkpoint results exported successfully!');
       }
     } catch (err) {
       setError('Failed to export: ' + err.message);
@@ -47,7 +61,7 @@ const ImportExportModal = ({ isOpen, onClose }) => {
 
   const handleImport = async () => {
     if (!importText.trim()) {
-      setError('Please enter the race configuration data');
+      setError('Please enter the configuration data');
       return;
     }
 
@@ -57,8 +71,16 @@ const ImportExportModal = ({ isOpen, onClose }) => {
 
     try {
       const data = JSON.parse(importText.trim());
-      await importRaceConfig(data);
-      setSuccess('Race configuration imported successfully!');
+      
+      // Determine import type based on data structure
+      if (data.exportType === 'checkpoint-results') {
+        await importCheckpointResults(data);
+        setSuccess('Checkpoint results imported successfully!');
+      } else {
+        await importRaceConfig(data);
+        setSuccess('Race configuration imported successfully!');
+      }
+      
       setImportText('');
       
       // Close modal after successful import
@@ -69,7 +91,7 @@ const ImportExportModal = ({ isOpen, onClose }) => {
       if (err instanceof SyntaxError) {
         setError('Invalid JSON format. Please check the configuration data.');
       } else {
-        setError('Failed to import race configuration: ' + err.message);
+        setError('Failed to import data: ' + err.message);
       }
     } finally {
       setIsProcessing(false);
@@ -241,7 +263,7 @@ const ImportExportModal = ({ isOpen, onClose }) => {
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
                   Export Type
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
                     <input
                       type="radio"
@@ -279,13 +301,58 @@ const ImportExportModal = ({ isOpen, onClose }) => {
                       </div>
                     </div>
                   </label>
+
+                  {checkpoints && checkpoints.length > 0 && (
+                    <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <input
+                        type="radio"
+                        name="exportType"
+                        value="checkpoint"
+                        checked={exportType === 'checkpoint'}
+                        onChange={(e) => setExportType(e.target.value)}
+                        className="text-primary-600"
+                      />
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">
+                          Checkpoint Results
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-300">
+                          Export specific checkpoint data
+                        </div>
+                      </div>
+                    </label>
+                  )}
                 </div>
+
+                {/* Checkpoint Selection */}
+                {exportType === 'checkpoint' && checkpoints && checkpoints.length > 0 && (
+                  <div className="mt-4">
+                    <label htmlFor="selectedCheckpoint" className="form-label">
+                      Select Checkpoint
+                    </label>
+                    <select
+                      id="selectedCheckpoint"
+                      value={selectedCheckpoint}
+                      onChange={(e) => setSelectedCheckpoint(parseInt(e.target.value))}
+                      className="form-input"
+                    >
+                      {checkpoints.map(checkpoint => (
+                        <option key={checkpoint.number} value={checkpoint.number}>
+                          {checkpoint.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
-              {!exportData && exportType === 'config' ? (
+              {!exportData && (exportType === 'config' || exportType === 'checkpoint') ? (
                 <div className="text-center">
                   <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    Export your race configuration to share with other devices or as a backup.
+                    {exportType === 'config' 
+                      ? 'Export your race configuration to share with other devices or as a backup.'
+                      : 'Export checkpoint results to share with the base station or other devices.'
+                    }
                   </p>
                   <button
                     onClick={handleExport}
@@ -298,7 +365,7 @@ const ImportExportModal = ({ isOpen, onClose }) => {
                         <span>Exporting...</span>
                       </div>
                     ) : (
-                      'Export Race Configuration'
+                      exportType === 'config' ? 'Export Race Configuration' : 'Export Checkpoint Results'
                     )}
                   </button>
                   {!raceConfig && (
@@ -476,11 +543,12 @@ const ImportExportModal = ({ isOpen, onClose }) => {
                   Import Instructions
                 </h4>
                 <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                  <li>• Copy the JSON configuration data from another device</li>
+                  <li>• Copy JSON data from another device (race config or checkpoint results)</li>
                   <li>• Paste it into the text area above</li>
-                  <li>• Click "Import Configuration" to load the race setup</li>
-                  <li>• This will create a new race with the imported settings</li>
-                  <li>• All runner data will be reset to "Not Started" status</li>
+                  <li>• Click "Import Configuration" to load the data</li>
+                  <li>• Race configs will create a new race with imported settings</li>
+                  <li>• Checkpoint results will merge with existing race data</li>
+                  <li>• The system will automatically detect the data type</li>
                 </ul>
               </div>
             </div>

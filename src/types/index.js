@@ -5,6 +5,22 @@
  */
 
 /**
+ * @typedef {Object} Checkpoint
+ * @property {number} number - Checkpoint number (1, 2, 3, etc.)
+ * @property {string} name - Optional checkpoint name/description
+ */
+
+/**
+ * @typedef {Object} CheckpointResult
+ * @property {number} runnerNumber - Runner number
+ * @property {number} checkpointNumber - Checkpoint number
+ * @property {string|null} callInTime - ISO timestamp when runner called in
+ * @property {string|null} markOffTime - ISO timestamp when runner was marked off
+ * @property {RunnerStatus} status - Status at this checkpoint
+ * @property {string|null} notes - Optional notes for this checkpoint
+ */
+
+/**
  * @typedef {Object} RaceConfig
  * @property {string} id - Unique identifier for the race
  * @property {string} name - Name of the race
@@ -12,15 +28,17 @@
  * @property {string} startTime - Race start time in HH:MM format
  * @property {number} minRunner - Minimum runner number
  * @property {number} maxRunner - Maximum runner number
+ * @property {Checkpoint[]} checkpoints - Array of checkpoints for this race
  * @property {string} createdAt - ISO timestamp when race was created
  */
 
 /**
  * @typedef {Object} Runner
  * @property {number} number - Runner number
- * @property {RunnerStatus} status - Current status of the runner
- * @property {string|null} recordedTime - ISO timestamp when runner passed checkpoint
+ * @property {RunnerStatus} status - Current overall status of the runner
+ * @property {string|null} recordedTime - ISO timestamp when runner passed final checkpoint (for backward compatibility)
  * @property {string|null} notes - Optional notes about the runner
+ * @property {CheckpointResult[]} checkpointResults - Array of results for each checkpoint
  */
 
 /**
@@ -58,8 +76,11 @@
 /**
  * @typedef {Object} ExportData
  * @property {RaceConfig} raceConfig - Race configuration to export
+ * @property {CheckpointResult[]} checkpointResults - Checkpoint results to export (for checkpoint exports)
+ * @property {number|null} checkpointNumber - Specific checkpoint number (null for full race export)
  * @property {string} exportedAt - ISO timestamp when exported
  * @property {string} version - App version
+ * @property {string} exportType - Type of export ('race-config', 'checkpoint-results', 'full-race')
  */
 
 export const RUNNER_STATUSES = {

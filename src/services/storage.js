@@ -4,12 +4,27 @@ import Dexie from 'dexie';
 class RaceTrackerDB extends Dexie {
   constructor() {
     super('RaceTrackerDB');
-    
+
     this.version(2).stores({
       races: '++id, name, date, startTime, minRunner, maxRunner, createdAt',
       runners: '++id, [raceId+number], raceId, number, status, recordedTime, notes',
       segments: '++id, raceId, startTime, endTime, called',
       settings: 'key, value'
+    });
+
+    // Version 3: Add checkpoints and checkpoint results
+    this.version(3).stores({
+      races: '++id, name, date, startTime, minRunner, maxRunner, createdAt',
+      runners: '++id, [raceId+number], raceId, number, status, recordedTime, notes',
+      segments: '++id, raceId, startTime, endTime, called',
+      settings: 'key, value',
+      checkpoints: '++id, raceId, number, name',
+      checkpoint_results: '++id, [raceId+runnerNumber+checkpointNumber], raceId, runnerNumber, checkpointNumber, callInTime, markOffTime, status, notes'
+    }).upgrade(tx => {
+      // Migration logic for existing races - add default checkpoint
+      return tx.table('races').toCollection().modify(race => {
+        // This will be handled in the application layer
+      });
     });
   }
 }
@@ -24,7 +39,24 @@ export class StorageService {
         ...raceConfig,
         createdAt: new Date().toISOString()
       });
-      
+
+      // Save checkpoints if provided
+      if (raceConfig.checkpoints && raceConfig.checkpoints.length > 0) {
+        const checkpoints = raceConfig.checkpoints.map(checkpoint => ({
+          raceId,
+          number: checkpoint.number,
+          name: checkpoint.name || `Checkpoint ${checkpoint.number}`
+        }));
+        await db.checkpoints.bulkAdd(checkpoints);
+      } else {
+        // Add default checkpoint for backward compatibility
+        await db.checkpoints.add({
+          raceId,
+          number: 1,
+          name: 'Checkpoint 1'
+        });
+      }
+
       // Initialize runners for the race
       const runners = [];
       for (let i = raceConfig.minRunner; i <= raceConfig.maxRunner; i++) {
@@ -36,8 +68,8 @@ export class StorageService {
           notes: null
         });
       }
-      
       await db.runners.bulkAdd(runners);
+
       return raceId;
     } catch (error) {
       console.error('Error saving race:', error);
@@ -377,7 +409,7 @@ export class StorageService {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
-      
+
       const oldRaces = await db.races
         .where('createdAt')
         .below(cutoffDate.toISOString())
@@ -391,6 +423,225 @@ export class StorageService {
     } catch (error) {
       console.error('Error cleaning up old races:', error);
       return 0;
+    }
+  }
+
+  // Checkpoint management methods
+  static async getCheckpoints(raceId) {
+    try {
+      return await db.checkpoints.where('raceId').equals(raceId).sortBy('number');
+    } catch (error) {
+      console.error('Error getting checkpoints:', error);
+      return [];
+    }
+  }
+
+  static async addCheckpoint(raceId, checkpointNumber, name) {
+    try {
+      return await db.checkpoints.add({
+        raceId,
+        number: checkpointNumber,
+        name: name || `Checkpoint ${checkpointNumber}`
+      });
+    } catch (error) {
+      console.error('Error adding checkpoint:', error);
+      throw new Error('Failed to add checkpoint');
+    }
+  }
+
+  static async updateCheckpoint(checkpointId, updates) {
+    try {
+      await db.checkpoints.update(checkpointId, updates);
+    } catch (error) {
+      console.error('Error updating checkpoint:', error);
+      throw new Error('Failed to update checkpoint');
+    }
+  }
+
+  static async deleteCheckpoint(checkpointId) {
+    try {
+      await db.transaction('rw', db.checkpoints, db.checkpoint_results, async () => {
+        await db.checkpoints.delete(checkpointId);
+        // Also delete related checkpoint results
+        const checkpoint = await db.checkpoints.get(checkpointId);
+        if (checkpoint) {
+          await db.checkpoint_results
+            .where(['raceId', 'checkpointNumber'])
+            .equals([checkpoint.raceId, checkpoint.number])
+            .delete();
+        }
+      });
+    } catch (error) {
+      console.error('Error deleting checkpoint:', error);
+      throw new Error('Failed to delete checkpoint');
+    }
+  }
+
+  // Checkpoint results methods
+  static async getCheckpointResults(raceId, checkpointNumber = null) {
+    try {
+      if (checkpointNumber !== null) {
+        return await db.checkpoint_results
+          .where(['raceId', 'checkpointNumber'])
+          .equals([raceId, checkpointNumber])
+          .toArray();
+      } else {
+        return await db.checkpoint_results.where('raceId').equals(raceId).toArray();
+      }
+    } catch (error) {
+      console.error('Error getting checkpoint results:', error);
+      return [];
+    }
+  }
+
+  static async recordCheckpointResult(raceId, runnerNumber, checkpointNumber, data) {
+    try {
+      const existing = await db.checkpoint_results
+        .where(['raceId', 'runnerNumber', 'checkpointNumber'])
+        .equals([raceId, runnerNumber, checkpointNumber])
+        .first();
+
+      if (existing) {
+        await db.checkpoint_results.update(existing.id, data);
+        return existing.id;
+      } else {
+        return await db.checkpoint_results.add({
+          raceId,
+          runnerNumber,
+          checkpointNumber,
+          ...data
+        });
+      }
+    } catch (error) {
+      console.error('Error recording checkpoint result:', error);
+      throw new Error('Failed to record checkpoint result');
+    }
+  }
+
+  static async markRunnerAtCheckpoint(raceId, runnerNumber, checkpointNumber, callInTime = null, markOffTime = null, status = 'passed') {
+    try {
+      const data = {
+        status,
+        callInTime: callInTime || new Date().toISOString(),
+        markOffTime: markOffTime || new Date().toISOString()
+      };
+
+      await this.recordCheckpointResult(raceId, runnerNumber, checkpointNumber, data);
+
+      // Also update the main runner record for backward compatibility
+      if (status === 'passed') {
+        await this.markRunnerPassed(raceId, runnerNumber, markOffTime || data.markOffTime);
+      } else {
+        await this.markRunnerStatus(raceId, runnerNumber, status);
+      }
+    } catch (error) {
+      console.error('Error marking runner at checkpoint:', error);
+      throw new Error('Failed to mark runner at checkpoint');
+    }
+  }
+
+  static async bulkMarkRunnersAtCheckpoint(raceId, runnerNumbers, checkpointNumber, callInTime = null, markOffTime = null, status = 'passed') {
+    try {
+      const timestamp = markOffTime || callInTime || new Date().toISOString();
+      
+      const checkpointResults = runnerNumbers.map(runnerNumber => ({
+        raceId,
+        runnerNumber,
+        checkpointNumber,
+        status,
+        callInTime: callInTime || timestamp,
+        markOffTime: markOffTime || timestamp
+      }));
+
+      // Use upsert logic for checkpoint results
+      for (const result of checkpointResults) {
+        await this.recordCheckpointResult(raceId, result.runnerNumber, checkpointNumber, {
+          status: result.status,
+          callInTime: result.callInTime,
+          markOffTime: result.markOffTime
+        });
+      }
+
+      // Also update main runner records for backward compatibility
+      if (status === 'passed') {
+        await this.bulkUpdateRunners(raceId, runnerNumbers, {
+          status: 'passed',
+          recordedTime: timestamp
+        });
+      } else {
+        await this.bulkUpdateRunners(raceId, runnerNumbers, { status });
+      }
+    } catch (error) {
+      console.error('Error bulk marking runners at checkpoint:', error);
+      throw new Error('Failed to bulk mark runners at checkpoint');
+    }
+  }
+
+  // Enhanced export methods
+  static async exportCheckpointResults(raceId, checkpointNumber) {
+    try {
+      const race = await this.getRace(raceId);
+      const checkpoints = await this.getCheckpoints(raceId);
+      const checkpointResults = await this.getCheckpointResults(raceId, checkpointNumber);
+      
+      const checkpoint = checkpoints.find(cp => cp.number === checkpointNumber);
+      
+      return {
+        raceConfig: {
+          id: race.id,
+          name: race.name,
+          date: race.date,
+          startTime: race.startTime,
+          minRunner: race.minRunner,
+          maxRunner: race.maxRunner,
+          checkpoints: checkpoints.map(cp => ({ number: cp.number, name: cp.name }))
+        },
+        checkpointResults,
+        checkpointNumber,
+        checkpointName: checkpoint?.name || `Checkpoint ${checkpointNumber}`,
+        exportedAt: new Date().toISOString(),
+        version: '1.0.0',
+        exportType: 'checkpoint-results'
+      };
+    } catch (error) {
+      console.error('Error exporting checkpoint results:', error);
+      throw new Error('Failed to export checkpoint results');
+    }
+  }
+
+  static async importCheckpointResults(exportData) {
+    try {
+      const { raceConfig, checkpointResults, checkpointNumber } = exportData;
+      
+      if (!raceConfig || !checkpointResults || checkpointNumber === undefined) {
+        throw new Error('Invalid checkpoint export data');
+      }
+
+      // Find or create the race
+      let raceId;
+      const existingRace = await db.races.where('name').equals(raceConfig.name).first();
+      
+      if (existingRace) {
+        raceId = existingRace.id;
+      } else {
+        // Create new race if it doesn't exist
+        raceId = await this.saveRace(raceConfig);
+      }
+
+      // Import checkpoint results
+      for (const result of checkpointResults) {
+        await this.recordCheckpointResult(raceId, result.runnerNumber, result.checkpointNumber, {
+          callInTime: result.callInTime,
+          markOffTime: result.markOffTime,
+          status: result.status,
+          notes: result.notes
+        });
+      }
+
+      return raceId;
+    } catch (error) {
+      console.error('Error importing checkpoint results:', error);
+      throw new Error('Failed to import checkpoint results');
     }
   }
 }

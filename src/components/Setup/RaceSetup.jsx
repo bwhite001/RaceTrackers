@@ -23,7 +23,9 @@ const RaceSetup = () => {
     date: TimeUtils.getTodayDateString(),
     startTime: '08:00',
     minRunner: '',
-    maxRunner: ''
+    maxRunner: '',
+    numCheckpoints: 1,
+    checkpoints: [{ number: 1, name: 'Checkpoint 1' }]
   });
 
   const [validationErrors, setValidationErrors] = useState({});
@@ -39,6 +41,26 @@ const RaceSetup = () => {
     if (validationErrors[name]) {
       setValidationErrors(prev => ({ ...prev, [name]: '' }));
     }
+  };
+
+  const handleCheckpointCountChange = (e) => {
+    const numCheckpoints = parseInt(e.target.value) || 1;
+    const checkpoints = [];
+    
+    for (let i = 1; i <= numCheckpoints; i++) {
+      checkpoints.push({
+        number: i,
+        name: formData.checkpoints[i - 1]?.name || `Checkpoint ${i}`
+      });
+    }
+    
+    setFormData(prev => ({ ...prev, numCheckpoints, checkpoints }));
+  };
+
+  const handleCheckpointNameChange = (index, name) => {
+    const checkpoints = [...formData.checkpoints];
+    checkpoints[index] = { ...checkpoints[index], name };
+    setFormData(prev => ({ ...prev, checkpoints }));
   };
 
   const validateForm = () => {
@@ -101,7 +123,8 @@ const RaceSetup = () => {
         date: formData.date,
         startTime: TimeUtils.parseTimeInput(formData.startTime),
         minRunner: parseInt(formData.minRunner),
-        maxRunner: parseInt(formData.maxRunner)
+        maxRunner: parseInt(formData.maxRunner),
+        checkpoints: formData.checkpoints
       };
 
       await createRace(raceData);
@@ -186,7 +209,9 @@ const RaceSetup = () => {
       date: TimeUtils.getTodayDateString(),
       startTime: '08:00',
       minRunner: '',
-      maxRunner: ''
+      maxRunner: '',
+      numCheckpoints: 1,
+      checkpoints: [{ number: 1, name: 'Checkpoint 1' }]
     });
     setValidationErrors({});
     setRangeInput('');
@@ -428,12 +453,58 @@ const RaceSetup = () => {
             </div>
           </div>
 
+          {/* Checkpoint Configuration */}
+          <div className="space-y-4">
+            <h4 className="font-medium text-gray-900 dark:text-white">
+              Checkpoint Configuration
+            </h4>
+            
+            <div>
+              <label htmlFor="numCheckpoints" className="form-label">
+                Number of Checkpoints
+              </label>
+              <select
+                id="numCheckpoints"
+                value={formData.numCheckpoints}
+                onChange={handleCheckpointCountChange}
+                className="form-input"
+              >
+                {[1, 2, 3, 4, 5].map(num => (
+                  <option key={num} value={num}>{num}</option>
+                ))}
+              </select>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Select the number of checkpoints for this race
+              </p>
+            </div>
+
+            {/* Checkpoint Names */}
+            {formData.checkpoints.map((checkpoint, index) => (
+              <div key={checkpoint.number}>
+                <label htmlFor={`checkpoint-${index}`} className="form-label">
+                  Checkpoint {checkpoint.number} Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  id={`checkpoint-${index}`}
+                  value={checkpoint.name}
+                  onChange={(e) => handleCheckpointNameChange(index, e.target.value)}
+                  className="form-input"
+                  placeholder={`Checkpoint ${checkpoint.number}`}
+                />
+              </div>
+            ))}
+          </div>
+
           {/* Runner Count Preview */}
           {formData.minRunner && formData.maxRunner && 
            !validationErrors.minRunner && !validationErrors.maxRunner && (
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
               <p className="text-sm text-blue-800 dark:text-blue-200">
                 Total runners: {parseInt(formData.maxRunner) - parseInt(formData.minRunner) + 1}
+              </p>
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                Checkpoints: {formData.numCheckpoints} ({formData.checkpoints.map(cp => cp.name).join(', ')})
               </p>
             </div>
           )}
