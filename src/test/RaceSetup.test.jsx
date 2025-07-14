@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RaceSetup from '../components/Setup/RaceSetup.jsx';
 import useRaceStore from '../store/useRaceStore.js';
@@ -400,7 +400,9 @@ describe('RaceSetup Component - Multiple Race Management', () => {
         isLoading: true
       });
       
-      render(<RaceSetup />);
+      await act(async () => {
+        render(<RaceSetup />);
+      });
       
       expect(screen.getByText('Loading races...')).toBeInTheDocument();
     });

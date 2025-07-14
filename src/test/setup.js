@@ -189,7 +189,7 @@ vi.mock('react-dom', async () => {
 })
 
 // Setup DOM environment
-import { beforeEach } from 'vitest'
+import { beforeEach, afterEach } from 'vitest'
 
 beforeEach(() => {
   // Clear document body
@@ -199,4 +199,14 @@ beforeEach(() => {
   const div = document.createElement('div')
   div.setAttribute('id', 'root')
   document.body.appendChild(div)
+  
+  // Add a div for portals (modals, tooltips, etc.)
+  const portalDiv = document.createElement('div')
+  portalDiv.setAttribute('id', 'portal-root')
+  document.body.appendChild(portalDiv)
+})
+
+afterEach(() => {
+  // Clean up DOM after each test
+  document.body.innerHTML = ''
 })
