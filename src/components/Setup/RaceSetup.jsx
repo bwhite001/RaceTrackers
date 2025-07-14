@@ -54,7 +54,11 @@ const RaceSetup = () => {
       });
     }
     
-    setFormData(prev => ({ ...prev, numCheckpoints, checkpoints }));
+    setFormData(prev => ({ 
+      ...prev, 
+      numCheckpoints: numCheckpoints, 
+      checkpoints: checkpoints 
+    }));
   };
 
   const handleCheckpointNameChange = (index, name) => {
