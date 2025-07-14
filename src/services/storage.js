@@ -276,16 +276,42 @@ export class StorageService {
   static async exportRaceConfig(raceId) {
     try {
       const race = await this.getRace(raceId);
+      const checkpoints = await this.getCheckpoints(raceId);
+      const runners = await this.getRunners(raceId);
+      const checkpointResults = await this.getCheckpointResults(raceId);
+      const segments = await this.getCalledSegments(raceId);
+      
       return {
         raceConfig: {
           name: race.name,
           date: race.date,
           startTime: race.startTime,
           minRunner: race.minRunner,
-          maxRunner: race.maxRunner
+          maxRunner: race.maxRunner,
+          checkpoints: checkpoints.map(cp => ({ number: cp.number, name: cp.name }))
         },
+        runners: runners.map(runner => ({
+          number: runner.number,
+          status: runner.status,
+          recordedTime: runner.recordedTime,
+          notes: runner.notes
+        })),
+        checkpointResults: checkpointResults.map(result => ({
+          runnerNumber: result.runnerNumber,
+          checkpointNumber: result.checkpointNumber,
+          callInTime: result.callInTime,
+          markOffTime: result.markOffTime,
+          status: result.status,
+          notes: result.notes
+        })),
+        calledSegments: segments.map(segment => ({
+          startTime: segment.startTime,
+          endTime: segment.endTime,
+          called: segment.called
+        })),
         exportedAt: new Date().toISOString(),
-        version: '1.0.0'
+        version: '2.0.0',
+        exportType: 'full-race-data'
       };
     } catch (error) {
       console.error('Error exporting race config:', error);
@@ -295,7 +321,7 @@ export class StorageService {
 
   static async importRaceConfig(exportData) {
     try {
-      const { raceConfig } = exportData;
+      const { raceConfig, runners, checkpointResults, calledSegments, exportType } = exportData;
       
       // Validate the imported data
       if (!raceConfig || !raceConfig.name || !raceConfig.date || 
@@ -304,16 +330,161 @@ export class StorageService {
         throw new Error('Invalid race configuration data');
       }
 
-      // Create a new race with imported config
-      const newRaceConfig = {
-        ...raceConfig,
-        id: undefined // Let the database generate a new ID
-      };
+      // Check if race already exists (by name and date)
+      const existingRace = await db.races
+        .where('name').equals(raceConfig.name)
+        .and(race => race.date === raceConfig.date)
+        .first();
 
-      return await this.saveRace(newRaceConfig);
+      let raceId;
+
+      if (existingRace && exportType === 'full-race-data') {
+        // Merge with existing race
+        raceId = existingRace.id;
+        await this.mergeRaceData(raceId, exportData);
+      } else {
+        // Create new race
+        const newRaceConfig = {
+          ...raceConfig,
+          id: undefined // Let the database generate a new ID
+        };
+        raceId = await this.saveRace(newRaceConfig);
+
+        // Import additional data if it's a full race export
+        if (exportType === 'full-race-data') {
+          await this.importFullRaceData(raceId, exportData);
+        }
+      }
+
+      return raceId;
     } catch (error) {
       console.error('Error importing race config:', error);
       throw new Error('Failed to import race configuration');
+    }
+  }
+
+  static async mergeRaceData(raceId, exportData) {
+    try {
+      const { runners, checkpointResults, calledSegments } = exportData;
+
+      // Merge runner data
+      if (runners && runners.length > 0) {
+        for (const importedRunner of runners) {
+          const existingRunner = await db.runners
+            .where(['raceId', 'number'])
+            .equals([raceId, importedRunner.number])
+            .first();
+
+          if (existingRunner) {
+            // Merge runner data - prefer more recent or more complete data
+            const updates = {};
+            
+            // Update status if imported status is more advanced
+            const statusPriority = { 'not-started': 0, 'passed': 1, 'dnf': 2, 'non-starter': 3 };
+            if (statusPriority[importedRunner.status] > statusPriority[existingRunner.status]) {
+              updates.status = importedRunner.status;
+            }
+
+            // Update recorded time if imported time exists and existing doesn't, or if imported is more recent
+            if (importedRunner.recordedTime && (!existingRunner.recordedTime || 
+                new Date(importedRunner.recordedTime) > new Date(existingRunner.recordedTime))) {
+              updates.recordedTime = importedRunner.recordedTime;
+            }
+
+            // Merge notes
+            if (importedRunner.notes && importedRunner.notes !== existingRunner.notes) {
+              updates.notes = existingRunner.notes ? 
+                `${existingRunner.notes} | ${importedRunner.notes}` : 
+                importedRunner.notes;
+            }
+
+            if (Object.keys(updates).length > 0) {
+              await db.runners.update(existingRunner.id, updates);
+            }
+          }
+        }
+      }
+
+      // Merge checkpoint results
+      if (checkpointResults && checkpointResults.length > 0) {
+        for (const result of checkpointResults) {
+          await this.recordCheckpointResult(raceId, result.runnerNumber, result.checkpointNumber, {
+            callInTime: result.callInTime,
+            markOffTime: result.markOffTime,
+            status: result.status,
+            notes: result.notes
+          });
+        }
+      }
+
+      // Merge called segments
+      if (calledSegments && calledSegments.length > 0) {
+        for (const segment of calledSegments) {
+          // Check if segment already exists
+          const existingSegment = await db.segments
+            .where('raceId').equals(raceId)
+            .and(s => s.startTime === segment.startTime && s.endTime === segment.endTime)
+            .first();
+
+          if (!existingSegment) {
+            await db.segments.add({
+              raceId,
+              startTime: segment.startTime,
+              endTime: segment.endTime,
+              called: segment.called
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error merging race data:', error);
+      throw new Error('Failed to merge race data');
+    }
+  }
+
+  static async importFullRaceData(raceId, exportData) {
+    try {
+      const { runners, checkpointResults, calledSegments } = exportData;
+
+      // Import runner status updates (only if they're more advanced than default)
+      if (runners && runners.length > 0) {
+        for (const importedRunner of runners) {
+          if (importedRunner.status !== 'not-started' || importedRunner.recordedTime || importedRunner.notes) {
+            await this.updateRunner(raceId, importedRunner.number, {
+              status: importedRunner.status,
+              recordedTime: importedRunner.recordedTime,
+              notes: importedRunner.notes
+            });
+          }
+        }
+      }
+
+      // Import checkpoint results
+      if (checkpointResults && checkpointResults.length > 0) {
+        for (const result of checkpointResults) {
+          await this.recordCheckpointResult(raceId, result.runnerNumber, result.checkpointNumber, {
+            callInTime: result.callInTime,
+            markOffTime: result.markOffTime,
+            status: result.status,
+            notes: result.notes
+          });
+        }
+      }
+
+      // Import called segments
+      if (calledSegments && calledSegments.length > 0) {
+        for (const segment of calledSegments) {
+          await db.segments.add({
+            raceId,
+            startTime: segment.startTime,
+            endTime: segment.endTime,
+            called: segment.called
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error importing full race data:', error);
+      throw new Error('Failed to import full race data');
     }
   }
 

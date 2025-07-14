@@ -32,6 +32,7 @@ const RaceSetup = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [existingRaces, setExistingRaces] = useState([]);
   const [loadingRaces, setLoadingRaces] = useState(true);
+  const [checkpointCount, setCheckpointCount] = useState(1);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -45,21 +46,45 @@ const RaceSetup = () => {
 
   const handleCheckpointCountChange = (e) => {
     const numCheckpoints = parseInt(e.target.value) || 1;
-    const checkpoints = [];
+    setCheckpointCount(numCheckpoints);
     
+    // Update form data immediately
+    const checkpoints = [];
     for (let i = 1; i <= numCheckpoints; i++) {
       checkpoints.push({
         number: i,
-        name: formData.checkpoints[i - 1]?.name || `Checkpoint ${i}`
+        name: `Checkpoint ${i}`
       });
     }
     
-    setFormData(prev => ({ 
-      ...prev, 
-      numCheckpoints: numCheckpoints, 
-      checkpoints: checkpoints 
+    setFormData(prev => ({
+      ...prev,
+      numCheckpoints,
+      checkpoints
     }));
+    
+    // Clear validation errors
+    if (validationErrors.numCheckpoints) {
+      setValidationErrors(prev => ({ ...prev, numCheckpoints: '' }));
+    }
   };
+
+  // Sync checkpoint count with form data
+  useEffect(() => {
+    const checkpoints = [];
+    for (let i = 1; i <= checkpointCount; i++) {
+      checkpoints.push({
+        number: i,
+        name: `Checkpoint ${i}`
+      });
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      numCheckpoints: checkpointCount,
+      checkpoints
+    }));
+  }, [checkpointCount]);
 
   const handleCheckpointNameChange = (index, name) => {
     const checkpoints = [...formData.checkpoints];
@@ -208,6 +233,7 @@ const RaceSetup = () => {
 
   const handleCreateNewRace = () => {
     setShowCreateForm(true);
+    setCheckpointCount(1);
     setFormData({
       name: '',
       date: TimeUtils.getTodayDateString(),

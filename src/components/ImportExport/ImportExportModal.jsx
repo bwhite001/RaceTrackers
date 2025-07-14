@@ -76,6 +76,9 @@ const ImportExportModal = ({ isOpen, onClose }) => {
       if (data.exportType === 'checkpoint-results') {
         await importCheckpointResults(data);
         setSuccess('Checkpoint results imported successfully!');
+      } else if (data.exportType === 'full-race-data') {
+        await importRaceConfig(data);
+        setSuccess('Full race data imported and merged successfully! All checkpoint data has been consolidated.');
       } else {
         await importRaceConfig(data);
         setSuccess('Race configuration imported successfully!');
@@ -415,7 +418,7 @@ const ImportExportModal = ({ isOpen, onClose }) => {
                       />
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
-                      Scan this QR code with another device to import the configuration
+                      Scan this QR code with another device to import complete race data including all checkpoints, runners, and timing information
                     </p>
                   </div>
 
@@ -543,12 +546,12 @@ const ImportExportModal = ({ isOpen, onClose }) => {
                   Import Instructions
                 </h4>
                 <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                  <li>• Copy JSON data from another device (race config or checkpoint results)</li>
-                  <li>• Paste it into the text area above</li>
-                  <li>• Click "Import Configuration" to load the data</li>
-                  <li>• Race configs will create a new race with imported settings</li>
-                  <li>• Checkpoint results will merge with existing race data</li>
-                  <li>• The system will automatically detect the data type</li>
+                  <li>• <strong>QR Code Sharing:</strong> Scan QR codes from other devices to import complete race data</li>
+                  <li>• <strong>Smart Merging:</strong> If the race already exists, data will be intelligently merged</li>
+                  <li>• <strong>Checkpoint Consolidation:</strong> BaseStation can merge data from all checkpoint operators</li>
+                  <li>• <strong>Data Priority:</strong> More recent times and advanced statuses take precedence</li>
+                  <li>• <strong>Full Race Data:</strong> Includes all runners, checkpoints, times, and call-in data</li>
+                  <li>• <strong>Backward Compatible:</strong> Works with older race configuration formats</li>
                 </ul>
               </div>
             </div>
