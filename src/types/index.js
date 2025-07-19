@@ -92,6 +92,7 @@ export const RUNNER_STATUSES = {
 
 export const APP_MODES = {
   SETUP: 'setup',
+  RACE_CONFIG: 'race-config',
   CHECKPOINT: 'checkpoint',
   BASE_STATION: 'base-station'
 };

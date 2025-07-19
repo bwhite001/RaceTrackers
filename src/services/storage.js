@@ -59,15 +59,47 @@ export class StorageService {
 
       // Initialize runners for the race
       const runners = [];
-      for (let i = raceConfig.minRunner; i <= raceConfig.maxRunner; i++) {
-        runners.push({
-          raceId,
-          number: i,
-          status: 'not-started',
-          recordedTime: null,
-          notes: null
-        });
+      
+      // If runnerRanges are provided, use them to create runners
+      if (raceConfig.runnerRanges && raceConfig.runnerRanges.length > 0) {
+        for (const range of raceConfig.runnerRanges) {
+          if (range.isIndividual && range.individualNumbers) {
+            // Add individual numbers
+            for (const number of range.individualNumbers) {
+              runners.push({
+                raceId,
+                number: number,
+                status: 'not-started',
+                recordedTime: null,
+                notes: null
+              });
+            }
+          } else {
+            // Add range numbers
+            for (let i = range.min; i <= range.max; i++) {
+              runners.push({
+                raceId,
+                number: i,
+                status: 'not-started',
+                recordedTime: null,
+                notes: null
+              });
+            }
+          }
+        }
+      } else {
+        // Fallback to single range for backward compatibility
+        for (let i = raceConfig.minRunner; i <= raceConfig.maxRunner; i++) {
+          runners.push({
+            raceId,
+            number: i,
+            status: 'not-started',
+            recordedTime: null,
+            notes: null
+          });
+        }
       }
+      
       await db.runners.bulkAdd(runners);
 
       return raceId;

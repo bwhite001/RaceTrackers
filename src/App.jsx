@@ -8,7 +8,8 @@ import LoadingSpinner from './components/Layout/LoadingSpinner.jsx';
 import ErrorMessage from './components/Layout/ErrorMessage.jsx';
 
 // View Components
-import RaceSetup from './components/Setup/RaceSetup.jsx';
+import Homepage from './components/Home/Homepage.jsx';
+import RaceConfig from './components/Setup/RaceConfig.jsx';
 import CheckpointView from './views/CheckpointView.jsx';
 import BaseStationView from './views/BaseStationView.jsx';
 
@@ -89,17 +90,16 @@ function App() {
 
   // Determine which view to show
   const getCurrentView = () => {
-    if (!raceConfig || mode === APP_MODES.SETUP) {
-      return <RaceSetup />;
-    }
-
     switch (mode) {
+      case APP_MODES.RACE_CONFIG:
+        return <RaceConfig />;
       case APP_MODES.CHECKPOINT:
         return <CheckpointView />;
       case APP_MODES.BASE_STATION:
         return <BaseStationView />;
+      case APP_MODES.SETUP:
       default:
-        return <RaceSetup />;
+        return <Homepage />;
     }
   };
 
