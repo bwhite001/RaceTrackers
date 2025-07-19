@@ -1,6 +1,6 @@
-# GitHub Pages Deployment Guide
+# Production Deployment Guide
 
-This project is configured to automatically deploy to GitHub Pages when specific conditions are met.
+This project is configured to automatically deploy to production (https://wicen.bwhite.id.au/) when specific conditions are met.
 
 ## Deployment Triggers
 
@@ -52,20 +52,21 @@ git push origin v1.0.0
    - Continues even if tests fail (with warnings)
    
 2. **Build & Deploy Stage**: Only runs for version tags
-   - Builds the production application with GitHub Pages base path
-   - Deploys to GitHub Pages
+   - Builds the production application for root domain deployment
+   - Deploys to production
 
-### GitHub Pages Configuration
+### Production Configuration
 - **Source**: GitHub Actions
-- **URL**: `https://bwhite001.github.io/RaceTrackers/`
-- **Base Path**: `/RaceTrackers/` (automatically configured for production builds)
+- **URL**: `https://wicen.bwhite.id.au/`
+- **Base Path**: `/` (root domain deployment)
 
-## Setting Up GitHub Pages (One-time Setup)
+## Setting Up Production Deployment (One-time Setup)
 
 1. Go to your repository **Settings**
 2. Navigate to **Pages** in the sidebar
 3. Under **Source**, select "GitHub Actions"
 4. Save the settings
+5. Configure your domain (wicen.bwhite.id.au) to point to the GitHub Pages deployment
 
 ## Manual Deployment
 
@@ -111,8 +112,8 @@ The deployment workflow is configured to continue despite test failures, but the
 
 ### PWA Not Working
 - Verify service worker is properly generated
-- Check manifest.json is accessible at the base path
-- Ensure HTTPS is enabled (GitHub Pages provides this automatically)
+- Check manifest.json is accessible at the root domain
+- Ensure HTTPS is enabled (required for PWA functionality)
 
 ## Version Management
 
@@ -134,12 +135,12 @@ git tag v1.1.0
 git push origin v1.1.0
 ```
 
-The deployment will automatically start and your changes will be live at `https://bwhite001.github.io/RaceTrackers/` once complete.
+The deployment will automatically start and your changes will be live at `https://wicen.bwhite.id.au/` once complete.
 
 ## Testing the Deployment
 
 After deployment, verify:
-1. Application loads correctly at the GitHub Pages URL
+1. Application loads correctly at https://wicen.bwhite.id.au/
 2. All assets (CSS, JS, images) load properly
 3. PWA functionality works (offline capability, install prompt)
 4. Navigation and core features function as expected

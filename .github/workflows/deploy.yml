@@ -62,8 +62,6 @@ jobs:
       - name: Build for production
         run: |
           NODE_ENV=production npm run build
-        env:
-          VITE_BASE_PATH: /RaceTrackers/
       
       - name: Setup Pages
         uses: actions/configure-pages@v4

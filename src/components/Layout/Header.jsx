@@ -19,7 +19,7 @@ const Header = ({ onSettingsClick, onImportExportClick }) => {
     }
   };
   const getIconBaseUrl = () => {
-    return process.env.NODE_ENV === 'production' ? '/RaceTrackers/' : '/'
+    return '/'
   }
 
   const canSwitchMode = () => {
