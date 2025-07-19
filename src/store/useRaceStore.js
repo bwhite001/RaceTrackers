@@ -340,11 +340,258 @@ const useRaceStore = create(
         return get().runners.find(runner => runner.number === runnerNumber);
       },
 
+      // New isolated tracking state
+      checkpointRunners: {}, // { [checkpointNumber]: [...runners] }
+      baseStationRunners: [],
+      checkpointSegments: {}, // { [checkpointNumber]: [...segments] }
+
       // Checkpoint actions
       setCurrentCheckpoint: (checkpointNumber) => {
         set({ currentCheckpoint: checkpointNumber });
       },
 
+      // New isolated checkpoint methods
+      loadCheckpointRunners: async (checkpointNumber) => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) return;
+
+        set({ isLoading: true, error: null });
+        try {
+          let checkpointRunners = await StorageService.getCheckpointRunners(currentRaceId, checkpointNumber);
+          
+          // Initialize if empty
+          if (checkpointRunners.length === 0) {
+            checkpointRunners = await StorageService.initializeCheckpointRunners(currentRaceId, checkpointNumber);
+          }
+
+          set(state => ({
+            checkpointRunners: {
+              ...state.checkpointRunners,
+              [checkpointNumber]: checkpointRunners
+            },
+            isLoading: false
+          }));
+        } catch (error) {
+          set({ error: error.message, isLoading: false });
+          throw error;
+        }
+      },
+
+      markCheckpointRunner: async (runnerNumber, checkpointNumber = null, callInTime = null, markOffTime = null, status = 'passed') => {
+        const { currentRaceId, currentCheckpoint } = get();
+        if (!currentRaceId) return;
+
+        const checkpoint = checkpointNumber || currentCheckpoint;
+        set({ isLoading: true, error: null });
+        
+        try {
+          await StorageService.markCheckpointRunner(currentRaceId, checkpoint, runnerNumber, callInTime, markOffTime, status);
+          
+          // Reload checkpoint runners
+          await get().loadCheckpointRunners(checkpoint);
+          
+          set({ isLoading: false });
+        } catch (error) {
+          set({ error: error.message, isLoading: false });
+          throw error;
+        }
+      },
+
+      bulkMarkCheckpointRunners: async (runnerNumbers, checkpointNumber = null, callInTime = null, markOffTime = null, status = 'passed') => {
+        const { currentRaceId, currentCheckpoint } = get();
+        if (!currentRaceId) return;
+
+        const checkpoint = checkpointNumber || currentCheckpoint;
+        set({ isLoading: true, error: null });
+        
+        try {
+          await StorageService.bulkMarkCheckpointRunners(currentRaceId, checkpoint, runnerNumbers, callInTime, markOffTime, status);
+          
+          // Reload checkpoint runners
+          await get().loadCheckpointRunners(checkpoint);
+          
+          set({ isLoading: false });
+        } catch (error) {
+          set({ error: error.message, isLoading: false });
+          throw error;
+        }
+      },
+
+      getCheckpointRunners: (checkpointNumber = null) => {
+        const { checkpointRunners, currentCheckpoint } = get();
+        const checkpoint = checkpointNumber || currentCheckpoint;
+        
+        return checkpointRunners[checkpoint] || [];
+      },
+
+      getCheckpointRunner: (runnerNumber, checkpointNumber = null) => {
+        const { checkpointRunners, currentCheckpoint } = get();
+        const checkpoint = checkpointNumber || currentCheckpoint;
+        
+        const runners = checkpointRunners[checkpoint] || [];
+        return runners.find(runner => runner.number === runnerNumber);
+      },
+
+      // New isolated base station methods
+      loadBaseStationRunners: async () => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) return;
+
+        set({ isLoading: true, error: null });
+        try {
+          let baseStationRunners = await StorageService.getBaseStationRunners(currentRaceId);
+          
+          // Initialize if empty
+          if (baseStationRunners.length === 0) {
+            baseStationRunners = await StorageService.initializeBaseStationRunners(currentRaceId);
+          }
+
+          set({ baseStationRunners, isLoading: false });
+        } catch (error) {
+          set({ error: error.message, isLoading: false });
+          throw error;
+        }
+      },
+
+      markBaseStationRunner: async (runnerNumber, callInTime = null, markOffTime = null, status = 'passed') => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) return;
+
+        set({ isLoading: true, error: null });
+        
+        try {
+          await StorageService.markBaseStationRunner(currentRaceId, runnerNumber, callInTime, markOffTime, status);
+          
+          // Reload base station runners
+          await get().loadBaseStationRunners();
+          
+          set({ isLoading: false });
+        } catch (error) {
+          set({ error: error.message, isLoading: false });
+          throw error;
+        }
+      },
+
+      bulkMarkBaseStationRunners: async (runnerNumbers, callInTime = null, markOffTime = null, status = 'passed') => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) return;
+
+        set({ isLoading: true, error: null });
+        
+        try {
+          await StorageService.bulkMarkBaseStationRunners(currentRaceId, runnerNumbers, callInTime, markOffTime, status);
+          
+          // Reload base station runners
+          await get().loadBaseStationRunners();
+          
+          set({ isLoading: false });
+        } catch (error) {
+          set({ error: error.message, isLoading: false });
+          throw error;
+        }
+      },
+
+      // New checkpoint segments methods
+      loadCheckpointSegments: async (checkpointNumber) => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) return;
+
+        set({ isLoading: true, error: null });
+        try {
+          const segments = await StorageService.getCheckpointSegments(currentRaceId, checkpointNumber);
+          
+          set(state => ({
+            checkpointSegments: {
+              ...state.checkpointSegments,
+              [checkpointNumber]: segments
+            },
+            isLoading: false
+          }));
+        } catch (error) {
+          set({ error: error.message, isLoading: false });
+          throw error;
+        }
+      },
+
+      markCheckpointSegmentCalled: async (startTime, endTime, checkpointNumber = null) => {
+        const { currentRaceId, currentCheckpoint } = get();
+        if (!currentRaceId) return;
+
+        const checkpoint = checkpointNumber || currentCheckpoint;
+        set({ isLoading: true, error: null });
+        
+        try {
+          await StorageService.markCheckpointSegmentCalled(currentRaceId, checkpoint, startTime, endTime);
+          
+          // Reload checkpoint segments
+          await get().loadCheckpointSegments(checkpoint);
+          
+          set({ isLoading: false });
+        } catch (error) {
+          set({ error: error.message, isLoading: false });
+          throw error;
+        }
+      },
+
+      getCheckpointSegments: (checkpointNumber = null) => {
+        const { checkpointSegments, currentCheckpoint } = get();
+        const checkpoint = checkpointNumber || currentCheckpoint;
+        
+        return checkpointSegments[checkpoint] || [];
+      },
+
+      // New export methods for isolated data
+      exportIsolatedCheckpointResults: async (checkpointNumber = null) => {
+        const { currentRaceId, currentCheckpoint } = get();
+        if (!currentRaceId) throw new Error('No race to export');
+
+        const checkpoint = checkpointNumber || currentCheckpoint;
+        
+        try {
+          return await StorageService.exportIsolatedCheckpointResults(currentRaceId, checkpoint);
+        } catch (error) {
+          set({ error: error.message });
+          throw error;
+        }
+      },
+
+      exportIsolatedBaseStationResults: async () => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) throw new Error('No race to export');
+
+        try {
+          return await StorageService.exportIsolatedBaseStationResults(currentRaceId);
+        } catch (error) {
+          set({ error: error.message });
+          throw error;
+        }
+      },
+
+      // Migration method
+      migrateToIsolatedTracking: async () => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) return;
+
+        set({ isLoading: true, error: null });
+        try {
+          await StorageService.migrateToIsolatedTracking(currentRaceId);
+          
+          // Load all isolated data
+          const checkpoints = get().checkpoints;
+          for (const checkpoint of checkpoints) {
+            await get().loadCheckpointRunners(checkpoint.number);
+            await get().loadCheckpointSegments(checkpoint.number);
+          }
+          await get().loadBaseStationRunners();
+          
+          set({ isLoading: false });
+        } catch (error) {
+          set({ error: error.message, isLoading: false });
+          throw error;
+        }
+      },
+
+      // Legacy checkpoint methods (for backward compatibility)
       markRunnerAtCheckpoint: async (runnerNumber, checkpointNumber = null, callInTime = null, markOffTime = null, status = 'passed') => {
         const { currentRaceId, currentCheckpoint } = get();
         if (!currentRaceId) return;
@@ -381,40 +628,6 @@ const useRaceStore = create(
           const runners = await StorageService.getRunners(currentRaceId);
           
           set({ checkpointResults, runners, isLoading: false });
-        } catch (error) {
-          set({ error: error.message, isLoading: false });
-          throw error;
-        }
-      },
-
-      exportCheckpointResults: async (checkpointNumber = null) => {
-        const { currentRaceId, currentCheckpoint } = get();
-        if (!currentRaceId) throw new Error('No race to export');
-
-        const checkpoint = checkpointNumber || currentCheckpoint;
-        
-        try {
-          return await StorageService.exportCheckpointResults(currentRaceId, checkpoint);
-        } catch (error) {
-          set({ error: error.message });
-          throw error;
-        }
-      },
-
-      importCheckpointResults: async (exportData) => {
-        set({ isLoading: true, error: null });
-        try {
-          const raceId = await StorageService.importCheckpointResults(exportData);
-          
-          // If importing to current race, reload data
-          if (raceId === get().currentRaceId) {
-            const checkpointResults = await StorageService.getCheckpointResults(raceId);
-            const runners = await StorageService.getRunners(raceId);
-            set({ checkpointResults, runners });
-          }
-          
-          set({ isLoading: false });
-          return raceId;
         } catch (error) {
           set({ error: error.message, isLoading: false });
           throw error;

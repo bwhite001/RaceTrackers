@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import RunnerGrid from '../components/Checkpoint/RunnerGrid.jsx';
 import CalloutSheet from '../components/Checkpoint/CalloutSheet.jsx';
+import CheckpointCallInPage from '../components/Checkpoint/CheckpointCallInPage.jsx';
 import RunnerOverview from '../components/Shared/RunnerOverview.jsx';
 import useRaceStore from '../store/useRaceStore.js';
 
@@ -9,7 +10,7 @@ const CheckpointView = () => {
     checkpoints, 
     currentCheckpoint, 
     setCurrentCheckpoint, 
-    exportCheckpointResults,
+    exportIsolatedCheckpointResults,
     raceConfig 
   } = useRaceStore();
   
@@ -19,7 +20,7 @@ const CheckpointView = () => {
   const handleExportCheckpoint = async () => {
     setIsExporting(true);
     try {
-      const exportData = await exportCheckpointResults(currentCheckpoint);
+      const exportData = await exportIsolatedCheckpointResults(currentCheckpoint);
       
       // Download as JSON file
       const dataStr = JSON.stringify(exportData, null, 2);
@@ -29,7 +30,7 @@ const CheckpointView = () => {
       const link = document.createElement('a');
       link.href = url;
       const checkpointName = checkpoints.find(cp => cp.number === currentCheckpoint)?.name || `Checkpoint ${currentCheckpoint}`;
-      link.download = `${raceConfig?.name || 'race'}-${checkpointName.replace(/\s+/g, '-')}-results.json`;
+      link.download = `${raceConfig?.name || 'race'}-${checkpointName.replace(/\s+/g, '-')}-checkpoint-results.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -45,6 +46,7 @@ const CheckpointView = () => {
   const tabs = [
     { id: 'runners', label: 'Runner Tracking', component: RunnerGrid },
     { id: 'callouts', label: 'Callout Sheet', component: CalloutSheet },
+    { id: 'callin', label: 'Call-In Page', component: CheckpointCallInPage },
     { id: 'overview', label: 'Overview', component: RunnerOverview }
   ];
 
@@ -53,7 +55,7 @@ const CheckpointView = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Checkpoint Controls */}
-      {checkpoints && checkpoints.length > 1 && (
+      {checkpoints && checkpoints.length > 0 && (
         <div className="mb-6 card p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -120,7 +122,11 @@ const CheckpointView = () => {
 
       {/* Tab Content */}
       <div className="min-h-[60vh]">
-        <ActiveComponent />
+        {activeTab === 'callin' ? (
+          <CheckpointCallInPage checkpointNumber={currentCheckpoint} />
+        ) : (
+          <ActiveComponent />
+        )}
       </div>
     </div>
   );

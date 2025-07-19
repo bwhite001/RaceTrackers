@@ -5,25 +5,21 @@ class RaceTrackerDB extends Dexie {
   constructor() {
     super('RaceTrackerDB');
 
-    this.version(2).stores({
-      races: '++id, name, date, startTime, minRunner, maxRunner, createdAt',
-      runners: '++id, [raceId+number], raceId, number, status, recordedTime, notes',
-      segments: '++id, raceId, startTime, endTime, called',
-      settings: 'key, value'
-    });
-
-    // Version 3: Add checkpoints and checkpoint results
-    this.version(3).stores({
+    this.version(4).stores({
       races: '++id, name, date, startTime, minRunner, maxRunner, createdAt',
       runners: '++id, [raceId+number], raceId, number, status, recordedTime, notes',
       segments: '++id, raceId, startTime, endTime, called',
       settings: 'key, value',
       checkpoints: '++id, raceId, number, name',
-      checkpoint_results: '++id, [raceId+runnerNumber+checkpointNumber], raceId, runnerNumber, checkpointNumber, callInTime, markOffTime, status, notes'
+      checkpoint_results: '++id, [raceId+runnerNumber+checkpointNumber], raceId, runnerNumber, checkpointNumber, callInTime, markOffTime, status, notes',
+      // New isolated tracking tables
+      checkpoint_runners: '++id, [raceId+checkpointNumber+number], raceId, checkpointNumber, number, status, callInTime, markOffTime, notes',
+      base_station_runners: '++id, [raceId+number], raceId, number, status, callInTime, markOffTime, notes',
+      checkpoint_segments: '++id, [raceId+checkpointNumber], raceId, checkpointNumber, startTime, endTime, called'
     }).upgrade(tx => {
-      // Migration logic for existing races - add default checkpoint
+      // Migration logic for existing data
       return tx.table('races').toCollection().modify(race => {
-        // This will be handled in the application layer
+        // Migration will be handled in application layer
       });
     });
   }
@@ -845,6 +841,298 @@ export class StorageService {
     } catch (error) {
       console.error('Error importing checkpoint results:', error);
       throw new Error('Failed to import checkpoint results');
+    }
+  }
+
+  // New isolated checkpoint and base station methods
+
+  // Checkpoint isolated tracking methods
+  static async getCheckpointRunners(raceId, checkpointNumber) {
+    try {
+      return await db.checkpoint_runners
+        .where(['raceId', 'checkpointNumber'])
+        .equals([raceId, checkpointNumber])
+        .toArray();
+    } catch (error) {
+      console.error('Error getting checkpoint runners:', error);
+      return [];
+    }
+  }
+
+  static async initializeCheckpointRunners(raceId, checkpointNumber) {
+    try {
+      // Get all race runners and create checkpoint-specific entries
+      const raceRunners = await this.getRunners(raceId);
+      
+      const checkpointRunners = raceRunners.map(runner => ({
+        raceId,
+        checkpointNumber,
+        number: runner.number,
+        status: 'not-started',
+        callInTime: null,
+        markOffTime: null,
+        notes: null
+      }));
+
+      await db.checkpoint_runners.bulkAdd(checkpointRunners);
+      return checkpointRunners;
+    } catch (error) {
+      console.error('Error initializing checkpoint runners:', error);
+      throw new Error('Failed to initialize checkpoint runners');
+    }
+  }
+
+  static async updateCheckpointRunner(raceId, checkpointNumber, runnerNumber, updates) {
+    try {
+      const runner = await db.checkpoint_runners
+        .where(['raceId', 'checkpointNumber', 'number'])
+        .equals([raceId, checkpointNumber, runnerNumber])
+        .first();
+      
+      if (!runner) {
+        throw new Error(`Runner ${runnerNumber} not found for checkpoint ${checkpointNumber}`);
+      }
+
+      await db.checkpoint_runners.update(runner.id, updates);
+      return { ...runner, ...updates };
+    } catch (error) {
+      console.error('Error updating checkpoint runner:', error);
+      throw new Error(`Failed to update checkpoint runner ${runnerNumber}`);
+    }
+  }
+
+  static async markCheckpointRunner(raceId, checkpointNumber, runnerNumber, callInTime = null, markOffTime = null, status = 'passed') {
+    const timestamp = markOffTime || callInTime || new Date().toISOString();
+    return this.updateCheckpointRunner(raceId, checkpointNumber, runnerNumber, {
+      status,
+      callInTime: callInTime || timestamp,
+      markOffTime: markOffTime || timestamp
+    });
+  }
+
+  static async bulkMarkCheckpointRunners(raceId, checkpointNumber, runnerNumbers, callInTime = null, markOffTime = null, status = 'passed') {
+    try {
+      const timestamp = markOffTime || callInTime || new Date().toISOString();
+      
+      const updates = runnerNumbers.map(runnerNumber => ({
+        raceId,
+        checkpointNumber,
+        number: runnerNumber,
+        status,
+        callInTime: callInTime || timestamp,
+        markOffTime: markOffTime || timestamp
+      }));
+
+      // Use upsert logic
+      for (const update of updates) {
+        const existing = await db.checkpoint_runners
+          .where(['raceId', 'checkpointNumber', 'number'])
+          .equals([update.raceId, update.checkpointNumber, update.number])
+          .first();
+
+        if (existing) {
+          await db.checkpoint_runners.update(existing.id, update);
+        } else {
+          await db.checkpoint_runners.add(update);
+        }
+      }
+    } catch (error) {
+      console.error('Error bulk marking checkpoint runners:', error);
+      throw new Error('Failed to bulk mark checkpoint runners');
+    }
+  }
+
+  static async getCheckpointSegments(raceId, checkpointNumber) {
+    try {
+      return await db.checkpoint_segments
+        .where(['raceId', 'checkpointNumber'])
+        .equals([raceId, checkpointNumber])
+        .toArray();
+    } catch (error) {
+      console.error('Error getting checkpoint segments:', error);
+      return [];
+    }
+  }
+
+  static async markCheckpointSegmentCalled(raceId, checkpointNumber, startTime, endTime) {
+    try {
+      await db.checkpoint_segments.add({
+        raceId,
+        checkpointNumber,
+        startTime,
+        endTime,
+        called: true
+      });
+    } catch (error) {
+      console.error('Error marking checkpoint segment called:', error);
+      throw new Error('Failed to mark checkpoint segment as called');
+    }
+  }
+
+  // Base station isolated tracking methods
+  static async getBaseStationRunners(raceId) {
+    try {
+      return await db.base_station_runners.where('raceId').equals(raceId).toArray();
+    } catch (error) {
+      console.error('Error getting base station runners:', error);
+      return [];
+    }
+  }
+
+  static async initializeBaseStationRunners(raceId) {
+    try {
+      // Get all race runners and create base station-specific entries
+      const raceRunners = await this.getRunners(raceId);
+      
+      const baseStationRunners = raceRunners.map(runner => ({
+        raceId,
+        number: runner.number,
+        status: 'not-started',
+        callInTime: null,
+        markOffTime: null,
+        notes: null
+      }));
+
+      await db.base_station_runners.bulkAdd(baseStationRunners);
+      return baseStationRunners;
+    } catch (error) {
+      console.error('Error initializing base station runners:', error);
+      throw new Error('Failed to initialize base station runners');
+    }
+  }
+
+  static async updateBaseStationRunner(raceId, runnerNumber, updates) {
+    try {
+      const runner = await db.base_station_runners
+        .where(['raceId', 'number'])
+        .equals([raceId, runnerNumber])
+        .first();
+      
+      if (!runner) {
+        throw new Error(`Runner ${runnerNumber} not found in base station`);
+      }
+
+      await db.base_station_runners.update(runner.id, updates);
+      return { ...runner, ...updates };
+    } catch (error) {
+      console.error('Error updating base station runner:', error);
+      throw new Error(`Failed to update base station runner ${runnerNumber}`);
+    }
+  }
+
+  static async markBaseStationRunner(raceId, runnerNumber, callInTime = null, markOffTime = null, status = 'passed') {
+    const timestamp = markOffTime || callInTime || new Date().toISOString();
+    return this.updateBaseStationRunner(raceId, runnerNumber, {
+      status,
+      callInTime: callInTime || timestamp,
+      markOffTime: markOffTime || timestamp
+    });
+  }
+
+  static async bulkMarkBaseStationRunners(raceId, runnerNumbers, callInTime = null, markOffTime = null, status = 'passed') {
+    try {
+      const timestamp = markOffTime || callInTime || new Date().toISOString();
+      
+      const updates = runnerNumbers.map(runnerNumber => ({
+        raceId,
+        number: runnerNumber,
+        status,
+        callInTime: callInTime || timestamp,
+        markOffTime: markOffTime || timestamp
+      }));
+
+      // Use upsert logic
+      for (const update of updates) {
+        const existing = await db.base_station_runners
+          .where(['raceId', 'number'])
+          .equals([update.raceId, update.number])
+          .first();
+
+        if (existing) {
+          await db.base_station_runners.update(existing.id, update);
+        } else {
+          await db.base_station_runners.add(update);
+        }
+      }
+    } catch (error) {
+      console.error('Error bulk marking base station runners:', error);
+      throw new Error('Failed to bulk mark base station runners');
+    }
+  }
+
+  // Export methods for isolated data
+  static async exportIsolatedCheckpointResults(raceId, checkpointNumber) {
+    try {
+      const race = await this.getRace(raceId);
+      const checkpoints = await this.getCheckpoints(raceId);
+      const checkpointRunners = await this.getCheckpointRunners(raceId, checkpointNumber);
+      
+      const checkpoint = checkpoints.find(cp => cp.number === checkpointNumber);
+      
+      return {
+        raceConfig: {
+          id: race.id,
+          name: race.name,
+          date: race.date,
+          startTime: race.startTime,
+          minRunner: race.minRunner,
+          maxRunner: race.maxRunner
+        },
+        checkpointRunners,
+        checkpointNumber,
+        checkpointName: checkpoint?.name || `Checkpoint ${checkpointNumber}`,
+        exportedAt: new Date().toISOString(),
+        version: '2.0.0',
+        exportType: 'isolated-checkpoint-results'
+      };
+    } catch (error) {
+      console.error('Error exporting isolated checkpoint results:', error);
+      throw new Error('Failed to export isolated checkpoint results');
+    }
+  }
+
+  static async exportIsolatedBaseStationResults(raceId) {
+    try {
+      const race = await this.getRace(raceId);
+      const baseStationRunners = await this.getBaseStationRunners(raceId);
+      
+      return {
+        raceConfig: {
+          id: race.id,
+          name: race.name,
+          date: race.date,
+          startTime: race.startTime,
+          minRunner: race.minRunner,
+          maxRunner: race.maxRunner
+        },
+        baseStationRunners,
+        exportedAt: new Date().toISOString(),
+        version: '2.0.0',
+        exportType: 'isolated-base-station-results'
+      };
+    } catch (error) {
+      console.error('Error exporting isolated base station results:', error);
+      throw new Error('Failed to export isolated base station results');
+    }
+  }
+
+  // Migration methods
+  static async migrateToIsolatedTracking(raceId) {
+    try {
+      const checkpoints = await this.getCheckpoints(raceId);
+      
+      // Initialize isolated tracking for each checkpoint
+      for (const checkpoint of checkpoints) {
+        await this.initializeCheckpointRunners(raceId, checkpoint.number);
+      }
+      
+      // Initialize isolated tracking for base station
+      await this.initializeBaseStationRunners(raceId);
+      
+      return true;
+    } catch (error) {
+      console.error('Error migrating to isolated tracking:', error);
+      throw new Error('Failed to migrate to isolated tracking');
     }
   }
 }
