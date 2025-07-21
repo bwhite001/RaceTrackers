@@ -1,58 +1,52 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import useRaceStore from '../../store/useRaceStore.js';
 import { RUNNER_STATUSES, GROUP_SIZES } from '../../types/index.js';
 import TimeUtils from '../../services/timeUtils.js';
 
-const IsolatedCheckpointRunnerGrid = ({ checkpointNumber }) => {
-  const {
-    getCheckpointRunners,
-    markCheckpointRunner,
-    settings,
-    isLoading,
-    raceConfig
-  } = useRaceStore();
-
+/**
+ * Shared runner grid for checkpoint, base station, or global runners.
+ * Props:
+ * - runners: array of runner objects
+ * - onMarkRunner: function to mark a runner as passed
+ * - isLoading: boolean
+ * - raceConfig: race configuration object
+ * - settings: user settings object
+ * - contextLabel: string (e.g. "Checkpoint 1", "Base Station")
+ */
+const SharedRunnerGrid = ({
+  runners,
+  onMarkRunner,
+  isLoading,
+  raceConfig,
+  settings,
+  contextLabel = ''
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState(settings.runnerViewMode || 'grid');
-  const [groupSize, setGroupSize] = useState(settings.groupSize || 50);
+  const [viewMode, setViewMode] = useState(settings?.runnerViewMode || 'grid');
+  const [groupSize, setGroupSize] = useState(settings?.groupSize || 50);
   const [expandedGroups, setExpandedGroups] = useState(new Set());
-
-  // Load checkpoint runners when checkpoint changes
-  useEffect(() => {
-    if (checkpointNumber) {
-      // This would need to be implemented in the store
-    }
-  }, [checkpointNumber]);
-
-  const checkpointRunners = getCheckpointRunners(checkpointNumber);
 
   // Filter runners based on search term
   const filteredRunners = useMemo(() => {
-    if (!searchTerm) return checkpointRunners;
-    
+    if (!searchTerm) return runners;
     const term = searchTerm.toLowerCase();
-    return checkpointRunners.filter(runner => 
+    return runners.filter(runner =>
       runner.number.toString().includes(term)
     );
-  }, [checkpointRunners, searchTerm]);
+  }, [runners, searchTerm]);
 
   // Group runners for large ranges
   const groupedRunners = useMemo(() => {
     if (!raceConfig || (raceConfig.maxRunner - raceConfig.minRunner) < groupSize) {
       return [{ start: raceConfig?.minRunner || 1, runners: filteredRunners }];
     }
-
     const groups = [];
     const totalRunners = raceConfig.maxRunner - raceConfig.minRunner + 1;
-    
     for (let i = 0; i < totalRunners; i += groupSize) {
       const start = raceConfig.minRunner + i;
       const end = Math.min(start + groupSize - 1, raceConfig.maxRunner);
-      
-      const groupRunners = filteredRunners.filter(runner => 
+      const groupRunners = filteredRunners.filter(runner =>
         runner.number >= start && runner.number <= end
       );
-
       if (groupRunners.length > 0 || !searchTerm) {
         groups.push({
           start,
@@ -62,15 +56,13 @@ const IsolatedCheckpointRunnerGrid = ({ checkpointNumber }) => {
         });
       }
     }
-
     return groups;
   }, [filteredRunners, raceConfig, groupSize, searchTerm]);
 
   const handleRunnerClick = async (runner) => {
     if (runner.status === RUNNER_STATUSES.PASSED) return;
-    
     try {
-      await markCheckpointRunner(runner.number, checkpointNumber);
+      await onMarkRunner(runner.number);
     } catch (error) {
       console.error('Failed to mark runner as passed:', error);
     }
@@ -78,7 +70,6 @@ const IsolatedCheckpointRunnerGrid = ({ checkpointNumber }) => {
 
   const getRunnerButtonClass = (runner) => {
     const baseClass = 'runner-button flex items-center justify-center text-sm font-medium rounded-lg border-2 focus-visible:focus';
-    
     switch (runner.status) {
       case RUNNER_STATUSES.PASSED:
         return `${baseClass} status-passed cursor-default`;
@@ -95,20 +86,17 @@ const IsolatedCheckpointRunnerGrid = ({ checkpointNumber }) => {
     const content = (
       <>
         <span className="font-bold">{runner.number}</span>
-        {runner.status === RUNNER_STATUSES.PASSED && runner.markOffTime && (
+        {runner.status === RUNNER_STATUSES.PASSED && (runner.markOffTime || runner.recordedTime) && (
           <span className="text-xs mt-1 opacity-90">
-            {TimeUtils.formatTime(runner.markOffTime, 'HH:mm')}
+            {TimeUtils.formatTime(runner.markOffTime || runner.recordedTime, 'HH:mm')}
           </span>
         )}
       </>
     );
-
     if (viewMode === 'list') {
       return (
         <div className="flex items-center justify-between w-full">
-          <div className="flex flex-col">
-            {content}
-          </div>
+          <div className="flex flex-col">{content}</div>
           <div className="text-xs opacity-75">
             {runner.status === RUNNER_STATUSES.PASSED && '✓'}
             {runner.status === RUNNER_STATUSES.NON_STARTER && 'NS'}
@@ -117,12 +105,7 @@ const IsolatedCheckpointRunnerGrid = ({ checkpointNumber }) => {
         </div>
       );
     }
-
-    return (
-      <div className="flex flex-col items-center">
-        {content}
-      </div>
-    );
+    return <div className="flex flex-col items-center">{content}</div>;
   };
 
   const toggleGroup = (groupStart) => {
@@ -162,15 +145,12 @@ const IsolatedCheckpointRunnerGrid = ({ checkpointNumber }) => {
             </div>
           </div>
         </div>
-
         {/* View Controls */}
         <div className="flex items-center space-x-4">
           {/* Group Size */}
           {raceConfig && (raceConfig.maxRunner - raceConfig.minRunner) >= 50 && (
             <div className="flex items-center space-x-2">
-              <label className="text-sm text-gray-600 dark:text-gray-300">
-                Group:
-              </label>
+              <label className="text-sm text-gray-600 dark:text-gray-300">Group:</label>
               <select
                 value={groupSize}
                 onChange={(e) => setGroupSize(parseInt(e.target.value))}
@@ -182,14 +162,13 @@ const IsolatedCheckpointRunnerGrid = ({ checkpointNumber }) => {
               </select>
             </div>
           )}
-
           {/* View Mode Toggle */}
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded-md ${
-                viewMode === 'grid' 
-                  ? 'bg-primary-600 text-white' 
+                viewMode === 'grid'
+                  ? 'bg-primary-600 text-white'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
               }`}
               title="Grid View"
@@ -201,8 +180,8 @@ const IsolatedCheckpointRunnerGrid = ({ checkpointNumber }) => {
             <button
               onClick={() => setViewMode('list')}
               className={`p-2 rounded-md ${
-                viewMode === 'list' 
-                  ? 'bg-primary-600 text-white' 
+                viewMode === 'list'
+                  ? 'bg-primary-600 text-white'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
               }`}
               title="List View"
@@ -214,31 +193,28 @@ const IsolatedCheckpointRunnerGrid = ({ checkpointNumber }) => {
           </div>
         </div>
       </div>
-
       {/* Results Count */}
       {searchTerm && (
         <div className="text-sm text-gray-600 dark:text-gray-300">
           Found {filteredRunners.length} runner{filteredRunners.length !== 1 ? 's' : ''}
         </div>
       )}
-
       {/* Runner Groups */}
       <div className="space-y-4">
         {groupedRunners.map((group) => {
           const isExpanded = expandedGroups.has(group.start) || groupedRunners.length === 1;
           const stats = getGroupStats(group.runners);
-
           return (
             <div key={group.start} className="card">
               {/* Group Header (only show for multiple groups) */}
               {groupedRunners.length > 1 && (
-                <div 
+                <div
                   className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                   onClick={() => toggleGroup(group.start)}
                 >
                   <div className="flex items-center space-x-3">
                     <h3 className="font-semibold text-gray-900 dark:text-white">
-                      Runners {group.label}
+                      {contextLabel ? `${contextLabel}: ` : ''}Runners {group.label}
                     </h3>
                     <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
                       <span className="flex items-center">
@@ -249,19 +225,18 @@ const IsolatedCheckpointRunnerGrid = ({ checkpointNumber }) => {
                       <span>{stats.total}</span>
                     </div>
                   </div>
-                  <svg 
+                  <svg
                     className={`w-5 h-5 text-gray-400 transition-transform ${
                       isExpanded ? 'rotate-180' : ''
-                    }`} 
-                    fill="none" 
-                    stroke="currentColor" 
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
               )}
-
               {/* Runner Grid/List */}
               {isExpanded && (
                 <div className="p-4">
@@ -271,8 +246,8 @@ const IsolatedCheckpointRunnerGrid = ({ checkpointNumber }) => {
                     </div>
                   ) : (
                     <div className={
-                      viewMode === 'grid' 
-                        ? 'runner-grid' 
+                      viewMode === 'grid'
+                        ? 'runner-grid'
                         : 'space-y-2'
                     }>
                       {group.runners.map((runner) => (
@@ -298,7 +273,6 @@ const IsolatedCheckpointRunnerGrid = ({ checkpointNumber }) => {
           );
         })}
       </div>
-
       {/* Instructions */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
@@ -315,4 +289,4 @@ const IsolatedCheckpointRunnerGrid = ({ checkpointNumber }) => {
   );
 };
 
-export default IsolatedCheckpointRunnerGrid;
+export default SharedRunnerGrid;
