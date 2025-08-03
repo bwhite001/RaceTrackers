@@ -3,33 +3,28 @@ import { RUNNER_STATUSES, GROUP_SIZES } from "../../types/index.js";
 import TimeUtils from "../../services/timeUtils.js";
 import SearchInput from "./RunnerGrid/SearchInput";
 import ViewModeToggle from "./RunnerGrid/ViewModeToggle";
-import RunnerButton from "./RunnerGrid/RunnerButton";
 
 /**
- * Shared runner grid for checkpoint, base station, or global runners.
+ * Shared runner grid for tracking runner status.
  * Props:
  * - runners: array of runner objects
- * - onMarkRunner: function to mark a runner as passed (legacy)
- * - onCallInRunner: function to call in a runner (new workflow)
- * - onMarkOffRunner: function to mark off a runner (new workflow)
+ * - onMarkRunner: function to mark a runner as passed
+ * - onUnmarkRunner: function to unmark/revert a runner (optional)
+ * - onUpdateTime: function to update runner time (optional)
  * - isLoading: boolean
  * - raceConfig: race configuration object
  * - settings: user settings object
- * - contextLabel: string (e.g. "Checkpoint 1", "Base Station")
- * - workflowMode: 'legacy' | 'checkpoint' | 'basestation' - determines available actions
- * - showMultipleTimes: boolean - whether to show both call-in and mark-off times
+ * - contextLabel: string
  */
 const SharedRunnerGrid = ({
     runners,
     onMarkRunner,
-    onCallInRunner,
-    onMarkOffRunner,
+    onUnmarkRunner,
+    onUpdateTime,
     isLoading,
     raceConfig,
     settings,
     contextLabel = "",
-    workflowMode = "legacy",
-    showMultipleTimes = false,
 }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [viewMode, setViewMode] = useState(
@@ -37,6 +32,9 @@ const SharedRunnerGrid = ({
     );
     const [groupSize, setGroupSize] = useState(settings?.groupSize || 50);
     const [expandedGroups, setExpandedGroups] = useState(new Set());
+    const [editingTime, setEditingTime] = useState(null); // runnerNumber being edited
+    const [editTimeValue, setEditTimeValue] = useState("");
+    const [clickTimeout, setClickTimeout] = useState(null);
 
     // Filter runners based on search term
     const filteredRunners = useMemo(() => {
@@ -57,14 +55,27 @@ const SharedRunnerGrid = ({
                 { start: raceConfig?.minRunner || 1, runners: filteredRunners },
             ];
         }
+        
         const groups = [];
         const totalRunners = raceConfig.maxRunner - raceConfig.minRunner + 1;
+        
         for (let i = 0; i < totalRunners; i += groupSize) {
             const start = raceConfig.minRunner + i;
             const end = Math.min(start + groupSize - 1, raceConfig.maxRunner);
-            const groupRunners = filteredRunners.filter(
-                (runner) => runner.number >= start && runner.number <= end
-            );
+            
+            // Create a Set to track unique runner numbers in this group
+            const seenRunners = new Set();
+            const groupRunners = filteredRunners.filter((runner) => {
+                const inRange = runner.number >= start && runner.number <= end;
+                const notSeen = !seenRunners.has(runner.number);
+                
+                if (inRange && notSeen) {
+                    seenRunners.add(runner.number);
+                    return true;
+                }
+                return false;
+            });
+            
             if (groupRunners.length > 0 || !searchTerm) {
                 groups.push({
                     start,
@@ -77,31 +88,74 @@ const SharedRunnerGrid = ({
         return groups;
     }, [filteredRunners, raceConfig, groupSize, searchTerm]);
 
-    const handleRunnerClick = async (runner, action = "primary") => {
-        try {
-            if (workflowMode === "checkpoint") {
-                if (action === "callin" && onCallInRunner) {
-                    await onCallInRunner(runner.number);
-                } else if (action === "markoff" && onMarkOffRunner) {
-                    await onMarkOffRunner(runner.number);
-                }
-            } else if (workflowMode === "basestation") {
-                // Base station can perform both actions
-                if (action === "callin" && onCallInRunner) {
-                    await onCallInRunner(runner.number);
-                } else if (action === "markoff" && onMarkOffRunner) {
-                    await onMarkOffRunner(runner.number);
-                }
-            } else {
-                // Legacy mode - single click to mark as passed
+    const handleRunnerClick = async (runner) => {
+        // Clear any existing timeout
+        if (clickTimeout) {
+            clearTimeout(clickTimeout);
+            setClickTimeout(null);
+        }
+
+        // Set a timeout for single click
+        const timeout = setTimeout(async () => {
+            try {
+                // Single click behavior - mark runner as passed
                 if (runner.status === RUNNER_STATUSES.PASSED) return;
                 if (onMarkRunner) {
                     await onMarkRunner(runner.number);
                 }
+            } catch (error) {
+                console.error("Failed to update runner:", error);
+            }
+            setClickTimeout(null);
+        }, 250); // Reduced delay for better responsiveness
+
+        setClickTimeout(timeout);
+    };
+
+    const handleRunnerDoubleClick = async (runner) => {
+        // Clear the single click timeout
+        if (clickTimeout) {
+            clearTimeout(clickTimeout);
+            setClickTimeout(null);
+        }
+
+        try {
+            // Double click behavior - unmark/revert runner
+            if (runner.status === RUNNER_STATUSES.PASSED && onUnmarkRunner) {
+                await onUnmarkRunner(runner.number);
             }
         } catch (error) {
-            console.error("Failed to update runner:", error);
+            console.error("Failed to unmark runner:", error);
         }
+    };
+
+    const handleTimeClick = (runner, e) => {
+        e.stopPropagation(); // Prevent runner click
+        if (runner.recordedTime) {
+            setEditingTime(runner.number);
+            setEditTimeValue(TimeUtils.formatTime(runner.recordedTime, "HH:mm"));
+        }
+    };
+
+    const handleTimeSubmit = async (runnerNumber) => {
+        try {
+            if (onUpdateTime && editTimeValue) {
+                // Parse the time and create a timestamp for today
+                const [hours, minutes] = editTimeValue.split(':').map(Number);
+                const now = new Date();
+                const newTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+                await onUpdateTime(runnerNumber, newTime.toISOString());
+            }
+            setEditingTime(null);
+            setEditTimeValue("");
+        } catch (error) {
+            console.error("Failed to update time:", error);
+        }
+    };
+
+    const handleTimeCancel = () => {
+        setEditingTime(null);
+        setEditTimeValue("");
     };
 
     const getRunnerButtonClass = (runner) => {
@@ -113,7 +167,7 @@ const SharedRunnerGrid = ({
             case RUNNER_STATUSES.MARKED_OFF:
                 return `${baseClass} status-marked-off cursor-pointer hover:opacity-80`;
             case RUNNER_STATUSES.PASSED:
-                return `${baseClass} status-passed cursor-default`;
+                return `${baseClass} status-passed cursor-pointer hover:opacity-80`;
             case RUNNER_STATUSES.NON_STARTER:
                 return `${baseClass} status-non-starter cursor-default`;
             case RUNNER_STATUSES.DNF:
@@ -126,63 +180,42 @@ const SharedRunnerGrid = ({
     };
 
     const getRunnerContent = (runner) => {
-        const getStatusIcon = (status) => {
-            switch (status) {
-                case RUNNER_STATUSES.CALLED_IN:
-                    return "📞";
-                case RUNNER_STATUSES.MARKED_OFF:
-                    return "✓";
-                case RUNNER_STATUSES.PASSED:
-                    return "✅";
-                case RUNNER_STATUSES.NON_STARTER:
-                    return "NS";
-                case RUNNER_STATUSES.DNF:
-                    return "DNF";
-                case RUNNER_STATUSES.PENDING:
-                    return "⏳";
-                default:
-                    return "";
-            }
-        };
+        const isEditingThisRunner = editingTime === runner.number;
+        
+        const timeDisplay = runner.recordedTime && (
+            isEditingThisRunner ? (
+                <div className="flex items-center space-x-1 mt-1" onClick={(e) => e.stopPropagation()}>
+                    <input
+                        type="time"
+                        value={editTimeValue}
+                        onChange={(e) => setEditTimeValue(e.target.value)}
+                        className="text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded px-1 py-0.5 w-16"
+                        autoFocus
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                handleTimeSubmit(runner.number);
+                            } else if (e.key === 'Escape') {
+                                handleTimeCancel();
+                            }
+                        }}
+                        onBlur={() => handleTimeSubmit(runner.number)}
+                    />
+                </div>
+            ) : (
+                <span 
+                    className="text-xs mt-1 opacity-90 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 px-1 py-0.5 rounded"
+                    onClick={(e) => handleTimeClick(runner, e)}
+                    title="Click to edit time"
+                >
+                    {TimeUtils.formatTime(runner.recordedTime, "HH:mm")}
+                </span>
+            )
+        );
 
         const content = (
             <>
                 <span className="font-bold">{runner.number}</span>
-                {showMultipleTimes && (
-                    <div className="text-xs mt-1 opacity-90 space-y-0.5">
-                        {runner.callInTime && (
-                            <div>
-                                📞{" "}
-                                {TimeUtils.formatTime(
-                                    runner.callInTime,
-                                    "HH:mm"
-                                )}
-                            </div>
-                        )}
-                        {runner.markOffTime && (
-                            <div>
-                                ✓{" "}
-                                {TimeUtils.formatTime(
-                                    runner.markOffTime,
-                                    "HH:mm"
-                                )}
-                            </div>
-                        )}
-                    </div>
-                )}
-                {!showMultipleTimes &&
-                    (runner.markOffTime ||
-                        runner.recordedTime ||
-                        runner.callInTime) && (
-                        <span className="text-xs mt-1 opacity-90">
-                            {TimeUtils.formatTime(
-                                runner.markOffTime ||
-                                    runner.recordedTime ||
-                                    runner.callInTime,
-                                "HH:mm"
-                            )}
-                        </span>
-                    )}
+                {timeDisplay}
             </>
         );
 
@@ -191,7 +224,7 @@ const SharedRunnerGrid = ({
                 <div className="flex items-center justify-between w-full">
                     <div className="flex flex-col">{content}</div>
                     <div className="text-xs opacity-75">
-                        {getStatusIcon(runner.status)}
+                        {runner.status === RUNNER_STATUSES.PASSED ? "✅" : ""}
                     </div>
                 </div>
             );
@@ -221,10 +254,7 @@ const SharedRunnerGrid = ({
         <div className="space-y-4">
             {/* Controls */}
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                <SearchInput
-                    searchTerm={searchTerm}
-                    onSearchChange={setSearchTerm}
-                />
+                <SearchInput searchTerm={searchTerm} onSearchChange={setSearchTerm} />
                 <div className="flex items-center space-x-4">
                     {/* Group Size */}
                     {raceConfig &&
@@ -327,139 +357,22 @@ const SharedRunnerGrid = ({
                                                     : "space-y-2"
                                             }
                                         >
-                                            {group.runners.map(
-                                                (runner, index) => {
-                                                    if (
-                                                        workflowMode ===
-                                                            "checkpoint" ||
-                                                        workflowMode ===
-                                                            "basestation"
-                                                    ) {
-                                                        // Enhanced workflow with multiple actions
-                                                        return (
-                                                            <div
-                                                                key={`${group.start}-${runner.number}-${index}`}
-                                                                className={` ${
-                                                                    viewMode ===
-                                                                    "grid"
-                                                                        ? "h-16 w-full"
-                                                                        : "h-12 w-full"
-                                                                } relative `}
-                                                            >
-                                                                <div
-                                                                    className={` ${getRunnerButtonClass(
-                                                                        runner
-                                                                    )} h-full w-full ${
-                                                                        runner.status ===
-                                                                        RUNNER_STATUSES.PASSED
-                                                                            ? "cursor-default"
-                                                                            : "cursor-pointer"
-                                                                    } `}
-                                                                >
-                                                                    {getRunnerContent(
-                                                                        runner
-                                                                    )}
-
-                                                                    {/* Action buttons for non-passed runners */}
-                                                                    {runner.status !==
-                                                                        RUNNER_STATUSES.PASSED &&
-                                                                        runner.status !==
-                                                                            RUNNER_STATUSES.NON_STARTER &&
-                                                                        runner.status !==
-                                                                            RUNNER_STATUSES.DNF && (
-                                                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black bg-opacity-50 rounded-lg">
-                                                                                <div className="flex space-x-1">
-                                                                                    {(runner.status ===
-                                                                                        RUNNER_STATUSES.NOT_STARTED ||
-                                                                                        runner.status ===
-                                                                                            RUNNER_STATUSES.PENDING) &&
-                                                                                        onCallInRunner && (
-                                                                                            <button
-                                                                                                onClick={(
-                                                                                                    e
-                                                                                                ) => {
-                                                                                                    e.stopPropagation();
-                                                                                                    handleRunnerClick(
-                                                                                                        runner,
-                                                                                                        "callin"
-                                                                                                    );
-                                                                                                }}
-                                                                                                disabled={
-                                                                                                    isLoading
-                                                                                                }
-                                                                                                className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700
-												disabled:opacity-50"
-                                                                                                title="Call In"
-                                                                                            >
-                                                                                                📞
-                                                                                            </button>
-                                                                                        )}
-                                                                                    {(runner.status ===
-                                                                                        RUNNER_STATUSES.CALLED_IN ||
-                                                                                        runner.status ===
-                                                                                            RUNNER_STATUSES.MARKED_OFF) &&
-                                                                                        onMarkOffRunner && (
-                                                                                            <button
-                                                                                                onClick={(
-                                                                                                    e
-                                                                                                ) => {
-                                                                                                    e.stopPropagation();
-                                                                                                    handleRunnerClick(
-                                                                                                        runner,
-                                                                                                        "markoff"
-                                                                                                    );
-                                                                                                }}
-                                                                                                disabled={
-                                                                                                    isLoading
-                                                                                                }
-                                                                                                className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700
-												disabled:opacity-50"
-                                                                                                title="Mark Off"
-                                                                                            >
-                                                                                                ✓
-                                                                                            </button>
-                                                                                        )}
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    } else {
-                                                        // Legacy single-click workflow
-                                                        return (
-                                                            <button
-                                                                key={`${group.start}-${runner.number}-${index}`}
-                                                                onClick={() =>
-                                                                    handleRunnerClick(
-                                                                        runner
-                                                                    )
-                                                                }
-                                                                disabled={
-                                                                    isLoading ||
-                                                                    runner.status ===
-                                                                        RUNNER_STATUSES.PASSED
-                                                                }
-                                                                className={`
-								${getRunnerButtonClass(runner)}
-								${viewMode === "grid" ? "h-16 w-full" : "h-12 w-full px-4"}
-								disabled:opacity-50
-								`}
-                                                                title={`Runner ${
-                                                                    runner.number
-                                                                } - ${runner.status.replace(
-                                                                    "-",
-                                                                    " "
-                                                                )}`}
-                                                            >
-                                                                {getRunnerContent(
-                                                                    runner
-                                                                )}
-                                                            </button>
-                                                        );
-                                                    }
-                                                }
-                                            )}
+                                            {group.runners.map((runner) => (
+                                                <button
+                                                    key={`runner-${runner.number}-${runner.status}-${group.start}`}
+                                                    onClick={() => handleRunnerClick(runner)}
+                                                    onDoubleClick={() => handleRunnerDoubleClick(runner)}
+                                                    disabled={isLoading}
+                                                    className={`
+                                                        ${getRunnerButtonClass(runner)}
+                                                        ${viewMode === "grid" ? "h-16 w-full" : "h-12 w-full px-4"}
+                                                        disabled:opacity-50
+                                                    `}
+                                                    title={`Runner ${runner.number} - ${runner.status.replace("-", " ")} - Double-click to uncheck`}
+                                                >
+                                                    {getRunnerContent(runner)}
+                                                </button>
+                                            ))}
                                         </div>
                                     )}
                                 </div>
@@ -475,62 +388,12 @@ const SharedRunnerGrid = ({
                     Instructions
                 </h4>
                 <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                    {workflowMode === "checkpoint" && (
-                        <>
-                            <li>
-                                • Hover over runner numbers to see action
-                                buttons
-                            </li>
-                            <li>
-                                • Click 📞 to call in a runner (records call-in
-                                time)
-                            </li>
-                            <li>
-                                • Click ✓ to mark off a runner (records mark-off
-                                time)
-                            </li>
-                            <li>
-                                • Use the search bar to quickly find specific
-                                runners
-                            </li>
-                        </>
-                    )}
-                    {workflowMode === "basestation" && (
-                        <>
-                            <li>• View all runners across all checkpoints</li>
-                            <li>
-                                • Hover over runner numbers to see action
-                                buttons
-                            </li>
-                            <li>
-                                • Click 📞 to call in or ✓ to mark off runners
-                            </li>
-                            <li>
-                                • Use the search bar to quickly find specific
-                                runners
-                            </li>
-                        </>
-                    )}
-                    {workflowMode === "legacy" && (
-                        <>
-                            <li>
-                                • Click on a runner number to mark them as
-                                passed
-                            </li>
-                            <li>
-                                • Use the search bar to quickly find specific
-                                runners
-                            </li>
-                        </>
-                    )}
-                    <li>
-                        • Switch between grid and list view using the toggle
-                        buttons
-                    </li>
-                    <li>
-                        • For large ranges, runners are grouped for easier
-                        navigation
-                    </li>
+                    <li>• Click on a runner number to mark them as passed</li>
+                    <li>• Double-click on a passed runner to uncheck/revert them</li>
+                    <li>• Click on a runner's time to edit it</li>
+                    <li>• Use the search bar to quickly find specific runners</li>
+                    <li>• Switch between grid and list view using the toggle buttons</li>
+                    <li>• For large ranges, runners are grouped for easier navigation</li>
                 </ul>
             </div>
         </div>

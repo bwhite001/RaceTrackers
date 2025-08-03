@@ -14,6 +14,8 @@ const RunnerGrid = () => {
   const {
     getCheckpointRunners,
     markCheckpointRunner,
+    unmarkCheckpointRunner,
+    updateCheckpointRunnerTime,
     loadCheckpointRunners,
     currentCheckpoint,
     isLoading,
@@ -65,6 +67,24 @@ const RunnerGrid = () => {
     }
   };
 
+  const handleUnmarkRunner = async (runnerNumber) => {
+    try {
+      await unmarkCheckpointRunner(runnerNumber, currentCheckpoint);
+    } catch (error) {
+      console.error('Failed to unmark runner:', error);
+      throw error;
+    }
+  };
+
+  const handleUpdateTime = async (runnerNumber, newTime) => {
+    try {
+      await updateCheckpointRunnerTime(runnerNumber, newTime, currentCheckpoint);
+    } catch (error) {
+      console.error('Failed to update runner time:', error);
+      throw error;
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Checkpoint Status */}
@@ -103,8 +123,9 @@ const RunnerGrid = () => {
       {/* Runner Grid */}
       <SharedRunnerGrid
         runners={checkpointRunners}
-        onCallInRunner={handleCallInRunner}
-        onMarkOffRunner={handleMarkOffRunner}
+        onMarkRunner={handleMarkOffRunner}
+        onUnmarkRunner={handleUnmarkRunner}
+        onUpdateTime={handleUpdateTime}
         isLoading={isLoading}
         raceConfig={raceConfig}
         settings={settings}

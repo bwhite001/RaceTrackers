@@ -397,6 +397,59 @@ export const useRaceStore = create(
         }
       },
 
+      unmarkCheckpointRunner: async (runnerNumber, checkpointNumber = null) => {
+        const { currentRaceId, currentCheckpoint } = get();
+        if (!currentRaceId) return;
+
+        const checkpoint = checkpointNumber || currentCheckpoint;
+        set({ isLoading: true, error: null });
+        
+        try {
+          // Reset runner to not-started status
+          await StorageService.markCheckpointRunner(currentRaceId, checkpoint, runnerNumber, null, null, RUNNER_STATUSES.NOT_STARTED);
+          
+          // Reload checkpoint runners
+          await get().loadCheckpointRunners(checkpoint);
+          
+          set({ isLoading: false });
+        } catch (error) {
+          set({ error: error.message, isLoading: false });
+          throw error;
+        }
+      },
+
+      updateCheckpointRunnerTime: async (runnerNumber, newTime, checkpointNumber = null) => {
+        const { currentRaceId, currentCheckpoint } = get();
+        if (!currentRaceId) return;
+
+        const checkpoint = checkpointNumber || currentCheckpoint;
+        set({ isLoading: true, error: null });
+        
+        try {
+          // Get current runner data
+          const runner = get().getCheckpointRunner(runnerNumber, checkpoint);
+          if (runner) {
+            // Update with new time, preserving other data
+            await StorageService.markCheckpointRunner(
+              currentRaceId, 
+              checkpoint, 
+              runnerNumber, 
+              runner.callInTime, 
+              newTime, 
+              RUNNER_STATUSES.PASSED
+            );
+            
+            // Reload checkpoint runners
+            await get().loadCheckpointRunners(checkpoint);
+          }
+          
+          set({ isLoading: false });
+        } catch (error) {
+          set({ error: error.message, isLoading: false });
+          throw error;
+        }
+      },
+
       bulkMarkCheckpointRunners: async (runnerNumbers, checkpointNumber = null, callInTime = null, markOffTime = null, status = 'passed') => {
         const { currentRaceId, currentCheckpoint } = get();
         if (!currentRaceId) return;
