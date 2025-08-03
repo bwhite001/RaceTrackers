@@ -130,6 +130,7 @@ const RunnerGrid = () => {
         raceConfig={raceConfig}
         settings={settings}
         contextLabel={currentCheckpointName}
+        currentCheckpoint={currentCheckpoint}
         workflowMode="checkpoint"
         showMultipleTimes={true}
       />

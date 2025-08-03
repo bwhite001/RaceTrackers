@@ -25,6 +25,7 @@ const SharedRunnerGrid = ({
     raceConfig,
     settings,
     contextLabel = "",
+    currentCheckpoint = 1,
 }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [viewMode, setViewMode] = useState(
@@ -36,11 +37,39 @@ const SharedRunnerGrid = ({
     const [editTimeValue, setEditTimeValue] = useState("");
     const [clickTimeout, setClickTimeout] = useState(null);
 
-    // Filter runners based on search term
+    // Filter and deduplicate runners based on search term
     const filteredRunners = useMemo(() => {
-        if (!searchTerm) return runners;
+        // First, deduplicate runners by runner number
+        const uniqueRunners = runners.reduce((acc, runner) => {
+            const existing = acc.find(r => r.number === runner.number);
+            if (!existing) {
+                acc.push(runner);
+            } else {
+                // If duplicate found, keep the one with more recent data or higher status priority
+                const statusPriority = {
+                    [RUNNER_STATUSES.PASSED]: 4,
+                    [RUNNER_STATUSES.CALLED_IN]: 3,
+                    [RUNNER_STATUSES.MARKED_OFF]: 2,
+                    [RUNNER_STATUSES.PENDING]: 1,
+                    [RUNNER_STATUSES.NOT_STARTED]: 0
+                };
+                
+                const existingPriority = statusPriority[existing.status] || 0;
+                const runnerPriority = statusPriority[runner.status] || 0;
+                
+                if (runnerPriority > existingPriority) {
+                    // Replace with higher priority runner
+                    const index = acc.findIndex(r => r.number === runner.number);
+                    acc[index] = runner;
+                }
+            }
+            return acc;
+        }, []);
+
+        // Then filter by search term
+        if (!searchTerm) return uniqueRunners;
         const term = searchTerm.toLowerCase();
-        return runners.filter((runner) =>
+        return uniqueRunners.filter((runner) =>
             runner.number.toString().includes(term)
         );
     }, [runners, searchTerm]);
@@ -359,7 +388,7 @@ const SharedRunnerGrid = ({
                                         >
                                             {group.runners.map((runner) => (
                                                 <button
-                                                    key={`runner-${runner.number}-${runner.status}-${group.start}`}
+                                                    key={`runner-${runner.number}-checkpoint-${currentCheckpoint || 1}`}
                                                     onClick={() => handleRunnerClick(runner)}
                                                     onDoubleClick={() => handleRunnerDoubleClick(runner)}
                                                     disabled={isLoading}
