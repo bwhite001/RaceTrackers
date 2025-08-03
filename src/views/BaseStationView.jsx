@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import DataEntry from '../components/BaseStation/DataEntry.jsx';
 import BaseStationCallInPage from '../components/BaseStation/BaseStationCallInPage.jsx';
 import RunnerOverview from '../components/Shared/RunnerOverview.jsx';
-import useRaceStore from '../store/useRaceStore.js';
+import { useRaceStore } from '../store/useRaceStore.js';
+import { APP_MODES } from '../types/index.js';
 
 const BaseStationView = () => {
-  const { exportIsolatedBaseStationResults, raceConfig } = useRaceStore();
+  const { exportIsolatedBaseStationResults, raceConfig, setMode } = useRaceStore();
   const [activeTab, setActiveTab] = useState('data-entry');
   const [isExporting, setIsExporting] = useState(false);
 
@@ -44,6 +45,19 @@ const BaseStationView = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Header with Back Button */}
+      <div className="mb-6 flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Basestation Call-In
+        </h1>
+        <button
+          onClick={() => setMode(APP_MODES.RACE_OVERVIEW)}
+          className="btn-secondary"
+        >
+          ← Back to Race Overview
+        </button>
+      </div>
+
       {/* Tab Navigation */}
       <div className="mb-6">
         <div className="flex items-center justify-between">

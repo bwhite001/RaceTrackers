@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
-import useRaceStore from '../../store/useRaceStore.js';
+import React, { useState, useEffect } from 'react';
+import { useRaceStore } from '../../store/useRaceStore.js';
+import SharedRunnerGrid from '../Shared/SharedRunnerGrid.jsx';
 import TimeUtils from '../../services/timeUtils.js';
 import { RUNNER_STATUSES } from '../../types/index.js';
 
 const DataEntry = () => {
   const { 
+    baseStationRunners,
+    loadBaseStationRunners,
+    markBaseStationRunner,
+    bulkMarkBaseStationRunners,
     bulkMarkRunners,
     bulkMarkRunnersAtCheckpoint,
     importCheckpointResults,
@@ -14,6 +19,7 @@ const DataEntry = () => {
     isLoading 
   } = useRaceStore();
 
+  const [activeTab, setActiveTab] = useState('master-view');
   const [commonTime, setCommonTime] = useState('');
   const [runnerInput, setRunnerInput] = useState('');
   const [selectedCheckpoint, setSelectedCheckpoint] = useState(1);
@@ -21,6 +27,11 @@ const DataEntry = () => {
   const [validationErrors, setValidationErrors] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [showImportSection, setShowImportSection] = useState(false);
+
+  // Load base station runners when component mounts
+  useEffect(() => {
+    loadBaseStationRunners();
+  }, [loadBaseStationRunners]);
 
   const handleTimeChange = (e) => {
     setCommonTime(e.target.value);
@@ -178,14 +189,128 @@ const DataEntry = () => {
     }
   };
 
+  const handleCallInRunner = async (runnerNumber) => {
+    try {
+      await markBaseStationRunner(
+        runnerNumber,
+        new Date().toISOString(), // callInTime
+        null, // markOffTime
+        RUNNER_STATUSES.CALLED_IN
+      );
+    } catch (error) {
+      console.error('Failed to call in runner:', error);
+      throw error;
+    }
+  };
+
+  const handleMarkOffRunner = async (runnerNumber) => {
+    try {
+      const runner = baseStationRunners.find(r => r.number === runnerNumber);
+      const callInTime = runner?.callInTime || new Date().toISOString();
+      
+      await markBaseStationRunner(
+        runnerNumber,
+        callInTime, // preserve existing callInTime or use current time
+        new Date().toISOString(), // markOffTime
+        RUNNER_STATUSES.PASSED
+      );
+    } catch (error) {
+      console.error('Failed to mark off runner:', error);
+      throw error;
+    }
+  };
+
+  const tabs = [
+    { id: 'master-view', label: 'Master View', icon: '👁️' },
+    { id: 'bulk-entry', label: 'Bulk Data Entry', icon: '📝' }
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="card p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-          Data Entry
-        </h3>
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-200 dark:border-gray-700">
+        <nav className="-mb-px flex space-x-8">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center space-x-2 ${
+                activeTab === tab.id
+                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600'
+              }`}
+            >
+              <span>{tab.icon}</span>
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Tab Content */}
+      {activeTab === 'master-view' && (
+        <div className="space-y-4">
+          {/* Base Station Status */}
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+            <h3 className="font-medium text-green-900 dark:text-green-100 mb-2">
+              Base Station - Master View
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+              <div className="text-center">
+                <div className="text-lg font-bold text-gray-600 dark:text-gray-300">
+                  {baseStationRunners.filter(r => r.status === RUNNER_STATUSES.NOT_STARTED).length}
+                </div>
+                <div className="text-gray-500 dark:text-gray-400">Not Started</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-blue-600">
+                  {baseStationRunners.filter(r => r.status === RUNNER_STATUSES.CALLED_IN).length}
+                </div>
+                <div className="text-gray-500 dark:text-gray-400">Called In</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-green-600">
+                  {baseStationRunners.filter(r => r.status === RUNNER_STATUSES.PASSED).length}
+                </div>
+                <div className="text-gray-500 dark:text-gray-400">Finished</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-red-600">
+                  {baseStationRunners.filter(r => r.status === RUNNER_STATUSES.DNF).length}
+                </div>
+                <div className="text-gray-500 dark:text-gray-400">DNF</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-gray-800 dark:text-gray-200">
+                  {baseStationRunners.length}
+                </div>
+                <div className="text-gray-500 dark:text-gray-400">Total</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Master Runner Grid */}
+          <SharedRunnerGrid
+            runners={baseStationRunners}
+            onCallInRunner={handleCallInRunner}
+            onMarkOffRunner={handleMarkOffRunner}
+            isLoading={isLoading}
+            raceConfig={raceConfig}
+            settings={{ runnerViewMode: 'grid', groupSize: 50 }}
+            contextLabel="Base Station"
+            workflowMode="basestation"
+            showMultipleTimes={true}
+          />
+        </div>
+      )}
+
+      {activeTab === 'bulk-entry' && (
+        <div className="card p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+            Bulk Data Entry
+          </h3>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
           {/* Checkpoint Selection */}
           {checkpoints && checkpoints.length > 1 && (
             <div>
@@ -327,153 +452,154 @@ const DataEntry = () => {
               `Assign Time to ${previewNumbers.length} Runner${previewNumbers.length !== 1 ? 's' : ''}`
             )}
           </button>
-        </form>
-      </div>
+          </form>
 
-      {/* Import Checkpoint Data Section */}
-      <div className="card p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Import Checkpoint Data
-          </h3>
-          <button
-            type="button"
-            onClick={() => setShowImportSection(!showImportSection)}
-            className="btn-secondary"
-          >
-            {showImportSection ? 'Hide' : 'Show'} Import
-          </button>
-        </div>
-
-        {showImportSection && (
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="importData" className="form-label">
-                Checkpoint Export Data
-              </label>
-              <textarea
-                id="importData"
-                value={importData}
-                onChange={(e) => setImportData(e.target.value)}
-                rows={8}
-                className={`form-input font-mono text-sm ${validationErrors.import ? 'border-red-500' : ''}`}
-                placeholder="Paste checkpoint export JSON data here..."
-              />
-              {validationErrors.import && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {validationErrors.import}
-                </p>
-              )}
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Import checkpoint results from other devices
-              </p>
-            </div>
-
-            <div className="flex space-x-3">
+          {/* Import Checkpoint Data Section */}
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Import Checkpoint Data
+              </h3>
               <button
                 type="button"
-                onClick={handleImportCheckpointData}
-                disabled={isProcessing || !importData.trim()}
-                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => setShowImportSection(!showImportSection)}
+                className="btn-secondary"
               >
-                {isProcessing ? 'Importing...' : 'Import Checkpoint Data'}
+                {showImportSection ? 'Hide' : 'Show'} Import
+              </button>
+            </div>
+
+            {showImportSection && (
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="importData" className="form-label">
+                    Checkpoint Export Data
+                  </label>
+                  <textarea
+                    id="importData"
+                    value={importData}
+                    onChange={(e) => setImportData(e.target.value)}
+                    rows={8}
+                    className={`form-input font-mono text-sm ${validationErrors.import ? 'border-red-500' : ''}`}
+                    placeholder="Paste checkpoint export JSON data here..."
+                  />
+                  {validationErrors.import && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                      {validationErrors.import}
+                    </p>
+                  )}
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Import checkpoint results from other devices
+                  </p>
+                </div>
+
+                <div className="flex space-x-3">
+                  <button
+                    type="button"
+                    onClick={handleImportCheckpointData}
+                    disabled={isProcessing || !importData.trim()}
+                    className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isProcessing ? 'Importing...' : 'Import Checkpoint Data'}
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setImportData('')}
+                    className="btn-secondary"
+                  >
+                    Clear
+                  </button>
+                </div>
+
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                    Import Instructions
+                  </h4>
+                  <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                    <li>• Get checkpoint export data from checkpoint operators</li>
+                    <li>• Paste the JSON data into the text area above</li>
+                    <li>• Click "Import Checkpoint Data" to merge the results</li>
+                    <li>• This will add checkpoint-specific times and call-in data</li>
+                    <li>• Duplicate entries will be updated with new data</li>
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Quick Actions */}
+          <div className="card p-4">
+            <h4 className="font-medium text-gray-900 dark:text-white mb-3">
+              Quick Actions
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setRunnerInput(prev => prev ? `${prev}, ` : '')}
+                className="btn-secondary text-left"
+              >
+                <div>
+                  <div className="font-medium">Continue Entry</div>
+                  <div className="text-xs opacity-75">Add more runners to current input</div>
+                </div>
               </button>
               
               <button
                 type="button"
-                onClick={() => setImportData('')}
-                className="btn-secondary"
+                onClick={() => {
+                  setRunnerInput('');
+                  setValidationErrors({});
+                }}
+                className="btn-secondary text-left"
               >
-                Clear
+                <div>
+                  <div className="font-medium">Clear Runners</div>
+                  <div className="text-xs opacity-75">Start fresh with new runners</div>
+                </div>
               </button>
             </div>
-
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-              <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                Import Instructions
-              </h4>
-              <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                <li>• Get checkpoint export data from checkpoint operators</li>
-                <li>• Paste the JSON data into the text area above</li>
-                <li>• Click "Import Checkpoint Data" to merge the results</li>
-                <li>• This will add checkpoint-specific times and call-in data</li>
-                <li>• Duplicate entries will be updated with new data</li>
-              </ul>
-            </div>
           </div>
-        )}
-      </div>
 
-      {/* Quick Actions */}
-      <div className="card p-4">
-        <h4 className="font-medium text-gray-900 dark:text-white mb-3">
-          Quick Actions
-        </h4>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => setRunnerInput(prev => prev ? `${prev}, ` : '')}
-            className="btn-secondary text-left"
-          >
-            <div>
-              <div className="font-medium">Continue Entry</div>
-              <div className="text-xs opacity-75">Add more runners to current input</div>
+          {/* Recent Entries */}
+          {runners.filter(r => r.status === RUNNER_STATUSES.PASSED).length > 0 && (
+            <div className="card p-4">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-3">
+                Recent Entries
+              </h4>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {runners
+                  .filter(r => r.status === RUNNER_STATUSES.PASSED && r.recordedTime)
+                  .sort((a, b) => new Date(b.recordedTime).getTime() - new Date(a.recordedTime).getTime())
+                  .slice(0, 10)
+                  .map(runner => (
+                    <div key={runner.number} className="flex items-center justify-between text-sm">
+                      <span className="font-medium">Runner {runner.number}</span>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        {TimeUtils.formatTime(runner.recordedTime)}
+                      </span>
+                    </div>
+                  ))}
+              </div>
             </div>
-          </button>
-          
-          <button
-            type="button"
-            onClick={() => {
-              setRunnerInput('');
-              setValidationErrors({});
-            }}
-            className="btn-secondary text-left"
-          >
-            <div>
-              <div className="font-medium">Clear Runners</div>
-              <div className="text-xs opacity-75">Start fresh with new runners</div>
-            </div>
-          </button>
-        </div>
-      </div>
+          )}
 
-      {/* Recent Entries */}
-      {runners.filter(r => r.status === RUNNER_STATUSES.PASSED).length > 0 && (
-        <div className="card p-4">
-          <h4 className="font-medium text-gray-900 dark:text-white mb-3">
-            Recent Entries
-          </h4>
-          <div className="space-y-2 max-h-40 overflow-y-auto">
-            {runners
-              .filter(r => r.status === RUNNER_STATUSES.PASSED && r.recordedTime)
-              .sort((a, b) => new Date(b.recordedTime).getTime() - new Date(a.recordedTime).getTime())
-              .slice(0, 10)
-              .map(runner => (
-                <div key={runner.number} className="flex items-center justify-between text-sm">
-                  <span className="font-medium">Runner {runner.number}</span>
-                  <span className="text-gray-500 dark:text-gray-400">
-                    {TimeUtils.formatTime(runner.recordedTime)}
-                  </span>
-                </div>
-              ))}
+          {/* Instructions */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+              Data Entry Instructions
+            </h4>
+            <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+              <li>• Set the common time first (when the group finished)</li>
+              <li>• Enter runner numbers in any format - individual, ranges, or mixed</li>
+              <li>• Use "Now" button for current time or "Race Start" for race beginning</li>
+              <li>• Preview shows exactly which runners will be updated</li>
+              <li>• All entered runners will be marked as "Passed" with the common time</li>
+              <li>• You can process multiple groups with different times</li>
+            </ul>
           </div>
         </div>
       )}
-
-      {/* Instructions */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-          Data Entry Instructions
-        </h4>
-        <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-          <li>• Set the common time first (when the group finished)</li>
-          <li>• Enter runner numbers in any format - individual, ranges, or mixed</li>
-          <li>• Use "Now" button for current time or "Race Start" for race beginning</li>
-          <li>• Preview shows exactly which runners will be updated</li>
-          <li>• All entered runners will be marked as "Passed" with the common time</li>
-          <li>• You can process multiple groups with different times</li>
-        </ul>
-      </div>
     </div>
   );
 };

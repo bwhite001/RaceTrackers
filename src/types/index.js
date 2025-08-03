@@ -85,16 +85,20 @@
 
 export const RUNNER_STATUSES = {
   NOT_STARTED: 'not-started',
+  CALLED_IN: 'called-in',
+  MARKED_OFF: 'marked-off',
   PASSED: 'passed',
   NON_STARTER: 'non-starter',
-  DNF: 'dnf'
+  DNF: 'dnf',
+  PENDING: 'pending'
 };
 
 export const APP_MODES = {
   SETUP: 'setup',
   RACE_CONFIG: 'race-config',
   CHECKPOINT: 'checkpoint',
-  BASE_STATION: 'base-station'
+  BASE_STATION: 'base-station',
+  RACE_OVERVIEW: 'race-overview'
 };
 
 export const DEFAULT_SETTINGS = {
@@ -102,9 +106,12 @@ export const DEFAULT_SETTINGS = {
   fontSize: 1.0,
   statusColors: {
     'not-started': '#9ca3af',
+    'called-in': '#3b82f6',
+    'marked-off': '#8b5cf6',
     'passed': '#10b981',
     'non-starter': '#ef4444',
-    'dnf': '#f59e0b'
+    'dnf': '#f59e0b',
+    'pending': '#f97316'
   },
   runnerViewMode: 'grid',
   groupSize: 50

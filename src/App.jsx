@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import useRaceStore from './store/useRaceStore.js';
+import { useRaceStore } from './store/useRaceStore.js';
 import { APP_MODES } from './types/index.js';
 
 // Layout Components
@@ -12,6 +12,7 @@ import Homepage from './components/Home/Homepage.jsx';
 import RaceConfig from './components/Setup/RaceConfig.jsx';
 import CheckpointView from './views/CheckpointView.jsx';
 import BaseStationView from './views/BaseStationView.jsx';
+import RaceOverview from './views/RaceOverview.jsx';
 
 // Modal Components
 import SettingsModal from './components/Settings/SettingsModal.jsx';
@@ -97,6 +98,8 @@ function App() {
         return <CheckpointView />;
       case APP_MODES.BASE_STATION:
         return <BaseStationView />;
+      case APP_MODES.RACE_OVERVIEW:
+        return <RaceOverview />;
       case APP_MODES.SETUP:
       default:
         return <Homepage />;

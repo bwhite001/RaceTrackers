@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RaceSetup from '../components/Setup/RaceSetup.jsx';
-import useRaceStore from '../store/useRaceStore.js';
+import { useRaceStore } from '../store/useRaceStore.js';
 import { APP_MODES } from '../types/index.js';
 
 // Mock the race store

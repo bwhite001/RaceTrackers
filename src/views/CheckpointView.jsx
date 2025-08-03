@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import RunnerGrid from '../components/Checkpoint/RunnerGrid.jsx';
 import CalloutSheet from '../components/Checkpoint/CalloutSheet.jsx';
-import CheckpointCallInPage from '../components/Checkpoint/CheckpointCallInPage.jsx';
 import RunnerOverview from '../components/Shared/RunnerOverview.jsx';
-import useRaceStore from '../store/useRaceStore.js';
+import { useRaceStore } from '../store/useRaceStore.js';
+import { APP_MODES } from '../types/index.js';
 
 const CheckpointView = () => {
   const { 
@@ -11,7 +11,8 @@ const CheckpointView = () => {
     currentCheckpoint, 
     setCurrentCheckpoint, 
     exportIsolatedCheckpointResults,
-    raceConfig 
+    raceConfig,
+    setMode
   } = useRaceStore();
   
   const [activeTab, setActiveTab] = useState('runners');
@@ -46,7 +47,6 @@ const CheckpointView = () => {
   const tabs = [
     { id: 'runners', label: 'Runner Tracking', component: RunnerGrid },
     { id: 'callouts', label: 'Callout Sheet', component: CalloutSheet },
-    { id: 'callin', label: 'Call-In Page', component: CheckpointCallInPage },
     { id: 'overview', label: 'Overview', component: RunnerOverview }
   ];
 
@@ -54,6 +54,19 @@ const CheckpointView = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Header with Back Button */}
+      <div className="mb-6 flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Checkpoint Check-In
+        </h1>
+        <button
+          onClick={() => setMode(APP_MODES.RACE_OVERVIEW)}
+          className="btn-secondary"
+        >
+          ← Back to Race Overview
+        </button>
+      </div>
+
       {/* Checkpoint Controls */}
       {checkpoints && checkpoints.length > 0 && (
         <div className="mb-6 card p-4">

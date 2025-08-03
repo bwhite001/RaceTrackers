@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import Header from '../components/Layout/Header.jsx';
-import useRaceStore from '../store/useRaceStore.js';
+import { useRaceStore } from '../store/useRaceStore.js';
 import { APP_MODES } from '../types/index.js';
 
 // Mock the race store
