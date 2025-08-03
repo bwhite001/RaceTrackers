@@ -57,7 +57,7 @@ const RaceOverview = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Race Mode
+            Overview
           </h1>
           <button
             onClick={() => setMode(APP_MODES.SETUP)}
@@ -67,53 +67,6 @@ const RaceOverview = () => {
           </button>
         </div>
 
-        {/* Race Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="card p-4">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-              Race Name
-            </h3>
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">
-              {raceConfig.name}
-            </p>
-          </div>
-          
-          <div className="card p-4">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-              Date
-            </h3>
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">
-              {raceConfig.date}
-            </p>
-          </div>
-          
-          <div className="card p-4">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-              Total Runners
-            </h3>
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">
-              {counts.total}
-            </p>
-          </div>
-          
-          <div className="card p-4">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-              Checked In
-            </h3>
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">
-              {counts.passed}
-            </p>
-          </div>
-        </div>
-
-        {/* Runner Overview */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-            Runner Status Overview
-          </h2>
-          <RunnerOverview runners={runners} />
-        </div>
-
         {/* Checkpoints Section */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
@@ -121,22 +74,28 @@ const RaceOverview = () => {
               Checkpoints
             </h2>
           </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {raceConfig.checkpoints && raceConfig.checkpoints.map((checkpoint) => (
-              <div key={checkpoint.number} className="card p-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {checkpoint.name || `Checkpoint ${checkpoint.number}`}
-                </h3>
+              <div key={checkpoint.number} className="card p-4 flex flex-col items-stretch">
                 <button
                   onClick={() => handleGoToCheckpoint(checkpoint.number)}
-                  className="btn-primary w-full"
+                  className="btn-primary w-full flex items-center justify-center gap-2 text-lg font-semibold"
                 >
-                  Go to Check-In
+                  {/* Check-in Icon */}
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                  </svg>
+                  {checkpoint.name || `Checkpoint ${checkpoint.number}`}
                 </button>
               </div>
             ))}
-            
             {(!raceConfig.checkpoints || raceConfig.checkpoints.length === 0) && (
               <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
                 No checkpoints configured
@@ -146,7 +105,7 @@ const RaceOverview = () => {
         </div>
 
         {/* Basestation Section */}
-        <div>
+        <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
             Basestation
           </h2>
@@ -168,6 +127,14 @@ const RaceOverview = () => {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Runner Overview */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            Runner Status Overview
+          </h2>
+          <RunnerOverview runners={runners} />
         </div>
       </div>
     </div>

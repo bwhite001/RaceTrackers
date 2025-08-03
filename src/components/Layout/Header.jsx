@@ -1,9 +1,10 @@
 import React from 'react';
 import { useRaceStore } from '../../store/useRaceStore.js';
 import { APP_MODES } from '../../types/index.js';
+import BreadcrumbNav from './BreadcrumbNav';
 
 const Header = ({ onSettingsClick, onImportExportClick }) => {
-  const { raceConfig, mode, setMode, getRunnerCounts } = useRaceStore();
+  const { raceConfig, mode, setMode, getRunnerCounts, setCurrentCheckpoint } = useRaceStore();
   const counts = getRunnerCounts();
 
   const getModeTitle = () => {
@@ -15,7 +16,7 @@ const Header = ({ onSettingsClick, onImportExportClick }) => {
       case APP_MODES.BASE_STATION:
         return 'Base Station Mode';
       default:
-        return 'RaceTracker Pro';
+        return raceConfig ? `${raceConfig.name} Overview` : 'Race Overview';
     }
   };
   const getIconBaseUrl = () => {
@@ -26,8 +27,22 @@ const Header = ({ onSettingsClick, onImportExportClick }) => {
     return raceConfig && mode !== APP_MODES.SETUP;
   };
 
-  const handleBackToSetup = () => {
-    setMode(APP_MODES.SETUP);
+  const handleBack = () => {
+    // Handle all modes based on current using switch; default is SETUP
+    switch (mode) {
+      case APP_MODES.CHECKPOINT:
+      case APP_MODES.BASE_STATION:
+        setCurrentCheckpoint(null);
+        setMode(APP_MODES.RACE_OVERVIEW);
+        break;
+      case APP_MODES.RACE_OVERVIEW:
+      case APP_MODES.RACE_CONFIG:
+        setMode(APP_MODES.SETUP);
+        break;
+      default:
+        setMode(APP_MODES.SETUP);
+        break;
+    }
   };
 
   return (
@@ -40,7 +55,7 @@ const Header = ({ onSettingsClick, onImportExportClick }) => {
               {/* Back button - show when in race modes */}
               {canSwitchMode() && (
                 <button
-                  onClick={handleBackToSetup}
+                  onClick={handleBack}
                   className="p-2 mr-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
                   title="Back to Race Setup"
                 >
@@ -52,57 +67,34 @@ const Header = ({ onSettingsClick, onImportExportClick }) => {
               <div className="flex-shrink-0">
                 <img
                   src={getIconBaseUrl() + 'favicon_io/android-chrome-192x192.png'}
-                  alt="WICEN Logo"
+                  alt="WIP Logo"
                   className="h-10 w-10 mr-3"
                 />
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {getModeTitle()}
-                </h1>
-              </div>
               {raceConfig && (
-                <div className="ml-4 flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
-                  <span className="hidden sm:inline">
-                    {raceConfig.name}
-                  </span>
-                  <span className="hidden md:inline">
-                    {raceConfig.date}
-                  </span>
-                  <span className="hidden lg:inline">
-                    Runners: {raceConfig.minRunner}-{raceConfig.maxRunner}
-                  </span>
+                <div>
+                  <div>
+                    <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                      {getModeTitle()}
+                    </h1>
+                  </div>
+                  <div className="ml-4 flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
+                    <span className="hidden md:inline">
+                      {raceConfig.date}
+                    </span>
+                    <span className="hidden lg:inline">
+                      Runners: {raceConfig.minRunner}-{raceConfig.maxRunner}
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Center - Mode switcher */}
-          {canSwitchMode() && (
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setMode(APP_MODES.CHECKPOINT)}
-                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                  mode === APP_MODES.CHECKPOINT
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-              >
-                Checkpoint
-              </button>
-              <button
-                onClick={() => setMode(APP_MODES.BASE_STATION)}
-                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                  mode === APP_MODES.BASE_STATION
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-              >
-                Base Station
-              </button>
-            </div>
-          )}
-
+          {/* Center - Breadcrumbs */}
+          <div className="hidden sm:flex flex-1 justify-center">
+            <BreadcrumbNav />
+          </div>
           {/* Right side - Stats and actions */}
           <div className="flex items-center space-x-4">
             {/* Runner counts */}
