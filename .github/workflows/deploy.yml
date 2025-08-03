@@ -59,9 +59,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+            echo "Building with version: $VERSION"
+          else
+            # For non-tag builds, try to get latest tag or use default
+            VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0-dev")
+            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+            echo "Building with version: $VERSION"
+          fi
+      
       - name: Build for production
         run: |
-          NODE_ENV=production npm run build
+          NODE_ENV=production VITE_APP_VERSION=${{ steps.get_version.outputs.VERSION }} npm run build
       
       - name: Setup Pages
         uses: actions/configure-pages@v4

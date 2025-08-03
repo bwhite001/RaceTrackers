@@ -1,9 +1,31 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { execSync } from 'child_process'
+
+// Get version from git tag or package.json
+const getVersion = () => {
+  try {
+    // Try to get version from git tag first
+    const gitVersion = execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim()
+    return gitVersion
+  } catch (error) {
+    // Fallback to package.json version if no git tags
+    try {
+      const packageJson = JSON.parse(execSync('cat package.json', { encoding: 'utf8' }))
+      return `v${packageJson.version}`
+    } catch (fallbackError) {
+      // Final fallback
+      return 'v0.0.0'
+    }
+  }
+}
 
 export default defineConfig({
   base: process.env.NODE_ENV === 'production' ? '/' : '/',
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.VITE_APP_VERSION || getVersion()),
+  },
   plugins: [
     react(),
     VitePWA({
