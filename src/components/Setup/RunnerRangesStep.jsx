@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 
 const RunnerRangesStep = ({ raceDetails, initialRanges, onBack, onCreate, isLoading }) => {
   const [ranges, setRanges] = useState(initialRanges.length > 0 ? initialRanges : []);
@@ -6,7 +6,15 @@ const RunnerRangesStep = ({ raceDetails, initialRanges, onBack, onCreate, isLoad
   const [validationErrors, setValidationErrors] = useState({});
   const [rangeInput, setRangeInput] = useState('');
 
-  const validateRange = (min, max) => {
+  // Add new state for tracking all individual runner numbers
+  const [allRunnerNumbers, setAllRunnerNumbers] = useState(new Set(
+    initialRanges.flatMap(range => 
+      range.individualNumbers || 
+      Array.from({ length: range.max - range.min + 1 }, (_, i) => range.min + i)
+    )
+  ));
+
+  const validateRange = (min, max, individualNumbers = null) => {
     const errors = {};
     
     if (!min || isNaN(min) || min < 1) {
@@ -40,37 +48,52 @@ const RunnerRangesStep = ({ raceDetails, initialRanges, onBack, onCreate, isLoad
       }
     }
     
+    // Check for duplicate numbers
+    const numbersToCheck = individualNumbers || 
+      Array.from({ length: parseInt(max) - parseInt(min) + 1 }, (_, i) => parseInt(min) + i);
+    
+    const duplicates = numbersToCheck.filter(num => allRunnerNumbers.has(num));
+    if (duplicates.length > 0) {
+      errors.overlap = `Runner number(s) ${duplicates.join(', ')} already exists`;
+    }
+    
     return errors;
   };
 
   const parseRangeInput = (input) => {
-    // Handle ranges like "100-200", "1200-1400"
+    // Handle ranges like "100-200"
     const rangeMatch = input.match(/^(\d+)\s*[-–]\s*(\d+)$/);
     if (rangeMatch) {
       const min = parseInt(rangeMatch[1]);
       const max = parseInt(rangeMatch[2]);
       if (min < max) {
-        return { min: min.toString(), max: max.toString() };
-      }
-    }
-    
-    // Handle individual numbers like "33, 34" or "100, 105, 110"
-    const individualMatch = input.match(/^[\d\s,]+$/);
-    if (individualMatch) {
-      const numbers = input.split(/[,\s]+/)
-        .map(n => n.trim())
-        .filter(n => n && !isNaN(n))
-        .map(n => parseInt(n))
-        .filter(n => n > 0);
-      
-      if (numbers.length > 0) {
-        const min = Math.min(...numbers);
-        const max = Math.max(...numbers);
+        const numbers = Array.from(
+          { length: max - min + 1 }, 
+          (_, i) => min + i
+        );
         return { 
           min: min.toString(), 
           max: max.toString(),
-          isIndividual: true,
-          individualNumbers: numbers.sort((a, b) => a - b)
+          individualNumbers: numbers
+        };
+      }
+    }
+    
+    // Handle individual numbers like "33, 34"
+    const individualMatch = input.match(/^[\d\s,]+$/);
+    if (individualMatch) {
+      const numbers = [...new Set(input.split(/[,\s]+/)
+        .map(n => n.trim())
+        .filter(n => n && !isNaN(n))
+        .map(n => parseInt(n))
+        .filter(n => n > 0)
+        .sort((a, b) => a - b))];
+      
+      if (numbers.length > 0) {
+        return { 
+          min: Math.min(...numbers).toString(),
+          max: Math.max(...numbers).toString(),
+          individualNumbers: numbers
         };
       }
     }
@@ -104,7 +127,13 @@ const RunnerRangesStep = ({ raceDetails, initialRanges, onBack, onCreate, isLoad
   };
 
   const handleAddRange = () => {
-    const errors = validateRange(newRange.min, newRange.max);
+    const numbers = newRange.individualNumbers || 
+      Array.from(
+        { length: parseInt(newRange.max) - parseInt(newRange.min) + 1 }, 
+        (_, i) => parseInt(newRange.min) + i
+      );
+    
+    const errors = validateRange(newRange.min, newRange.max, numbers);
     
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -114,18 +143,15 @@ const RunnerRangesStep = ({ raceDetails, initialRanges, onBack, onCreate, isLoad
     const range = {
       min: parseInt(newRange.min),
       max: parseInt(newRange.max),
-      description: newRange.description.trim() || (
-        newRange.isIndividual 
-          ? `Individual runners: ${newRange.individualNumbers.join(', ')}`
-          : `Runners ${newRange.min}-${newRange.max}`
-      ),
-      count: newRange.isIndividual 
-        ? newRange.individualNumbers.length 
-        : parseInt(newRange.max) - parseInt(newRange.min) + 1,
-      isIndividual: newRange.isIndividual || false,
-      individualNumbers: newRange.individualNumbers || null
+      description: newRange.description.trim() || 
+        `Runners ${newRange.min}-${newRange.max}`,
+      count: numbers.length,
+      individualNumbers: numbers
     };
 
+    // Update all runner numbers
+    setAllRunnerNumbers(prev => new Set([...prev, ...numbers]));
+    
     setRanges(prev => [...prev, range]);
     setNewRange({ min: '', max: '', description: '' });
     setRangeInput('');
@@ -133,6 +159,16 @@ const RunnerRangesStep = ({ raceDetails, initialRanges, onBack, onCreate, isLoad
   };
 
   const handleRemoveRange = (index) => {
+    const rangeToRemove = ranges[index];
+    const numbersToRemove = new Set(rangeToRemove.individualNumbers);
+    
+    // Remove numbers from allRunnerNumbers
+    setAllRunnerNumbers(prev => {
+      const newSet = new Set(prev);
+      numbersToRemove.forEach(num => newSet.delete(num));
+      return newSet;
+    });
+    
     setRanges(prev => prev.filter((_, i) => i !== index));
   };
 
@@ -142,7 +178,94 @@ const RunnerRangesStep = ({ raceDetails, initialRanges, onBack, onCreate, isLoad
       return;
     }
 
+    // Pass the ranges with individual numbers
     onCreate(ranges);
+  };
+
+  const handleCsvUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const text = e.target.result;
+        const rows = text.split('\n')
+          .map(row => row.trim())
+          .filter(row => row) // Remove empty lines
+          .map(row => {
+            const [number, description = ''] = row.split(',').map(cell => cell.trim());
+            return { number: parseInt(number), description };
+          })
+          .filter(row => !isNaN(row.number) && row.number > 0);
+
+        // Group consecutive numbers into ranges
+        const ranges = [];
+        let currentRange = null;
+
+        rows.sort((a, b) => a.number - b.number).forEach((row) => {
+          if (!currentRange) {
+            currentRange = {
+              min: row.number,
+              max: row.number,
+              description: row.description,
+              numbers: [row.number],
+              notes: { [row.number]: row.description }
+            };
+          } else if (row.number === currentRange.max + 1) {
+            currentRange.max = row.number;
+            currentRange.numbers.push(row.number);
+            currentRange.notes[row.number] = row.description;
+          } else {
+            // Finish current range
+            ranges.push({
+              ...currentRange,
+              count: currentRange.numbers.length,
+              individualNumbers: currentRange.numbers,
+              isIndividual: true
+            });
+            // Start new range
+            currentRange = {
+              min: row.number,
+              max: row.number,
+              description: row.description,
+              numbers: [row.number],
+              notes: { [row.number]: row.description }
+            };
+          }
+        });
+
+        // Add last range
+        if (currentRange) {
+          ranges.push({
+            ...currentRange,
+            count: currentRange.numbers.length,
+            individualNumbers: currentRange.numbers,
+            isIndividual: true
+          });
+        }
+
+        // Validate for duplicates with existing ranges
+        const duplicates = ranges
+          .flatMap(range => range.individualNumbers)
+          .filter(num => allRunnerNumbers.has(num));
+
+        if (duplicates.length > 0) {
+          alert(`Duplicate runner numbers found: ${duplicates.join(', ')}`);
+          return;
+        }
+
+        // Add new ranges
+        ranges.forEach(range => {
+          setAllRunnerNumbers(prev => new Set([...prev, ...range.individualNumbers]));
+        });
+        setRanges(prev => [...prev, ...ranges]);
+      } catch (error) {
+        console.error('Error parsing CSV:', error);
+        alert('Error parsing CSV file. Please ensure it\'s properly formatted.');
+      }
+    };
+    reader.readAsText(file);
   };
 
   const getTotalRunners = () => {
@@ -288,6 +411,30 @@ const RunnerRangesStep = ({ raceDetails, initialRanges, onBack, onCreate, isLoad
         >
           Add Range
         </button>
+      </div>
+
+      {/* CSV Import */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+          Import Runners from CSV
+        </h3>
+        <div>
+          <label htmlFor="csvUpload" className="form-label">
+            Upload CSV File
+          </label>
+          <input
+            type="file"
+            id="csvUpload"
+            accept=".csv"
+            onChange={handleCsvUpload}
+            className="form-input"
+          />
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Upload a CSV file with runner numbers and descriptions (optional).<br />
+            Format: number,description<br />
+            Example: 100,Elite Runner
+          </p>
+        </div>
       </div>
 
       {/* Current Ranges */}

@@ -14,7 +14,8 @@ describe('useRaceStore - New Functionality', () => {
       raceConfig: null,
       mode: APP_MODES.SETUP,
       runners: [],
-      calledSegments: [],
+      checkpoints: [],
+      checkpointResults: [],
       currentRaceId: null,
       isLoading: false,
       error: null
@@ -49,11 +50,11 @@ describe('useRaceStore - New Functionality', () => {
         { number: 1, status: RUNNER_STATUSES.NOT_STARTED, recordedTime: null },
         { number: 2, status: RUNNER_STATUSES.PASSED, recordedTime: '2025-07-13T08:15:00Z' }
       ];
-      const mockSegments = [];
+      const mockCheckpoints = [{ id: 1, raceId: '2', number: 1, name: 'Checkpoint 1' }];
       
       StorageService.getRace.mockResolvedValue(mockRace);
       StorageService.getRunners.mockResolvedValue(mockRunners);
-      StorageService.getCalledSegments.mockResolvedValue(mockSegments);
+      StorageService.getCheckpoints.mockResolvedValue(mockCheckpoints);
       
       const { result } = renderHook(() => useRaceStore());
       
@@ -66,7 +67,7 @@ describe('useRaceStore - New Functionality', () => {
       expect(result.current.runners).toEqual(mockRunners);
       expect(StorageService.getRace).toHaveBeenCalledWith('2');
       expect(StorageService.getRunners).toHaveBeenCalledWith('2');
-      expect(StorageService.getCalledSegments).toHaveBeenCalledWith('2');
+      expect(StorageService.getCheckpoints).toHaveBeenCalledWith('2');
     });
 
     it('should handle race switching errors', async () => {
@@ -163,7 +164,7 @@ Runner Number,Status,Recorded Time,Time from Start
           raceConfig: { id: '1', name: 'Test Race' },
           currentRaceId: '1',
           runners: [{ number: 1, status: RUNNER_STATUSES.NOT_STARTED }],
-          calledSegments: ['segment1']
+          checkpoints: [{ id: 1, raceId: '1', number: 1, name: 'Checkpoint 1' }]
         });
       });
       
@@ -175,7 +176,7 @@ Runner Number,Status,Recorded Time,Time from Start
       expect(result.current.raceConfig).toBeNull();
       expect(result.current.currentRaceId).toBeNull();
       expect(result.current.runners).toEqual([]);
-      expect(result.current.calledSegments).toEqual([]);
+      expect(result.current.checkpoints).toEqual([]);
       expect(result.current.mode).toBe(APP_MODES.SETUP);
     });
 
@@ -221,7 +222,7 @@ Runner Number,Status,Recorded Time,Time from Start
       StorageService.importRaceConfig.mockResolvedValue(newRaceId);
       StorageService.getRace.mockResolvedValue({ ...importData.raceConfig, id: newRaceId });
       StorageService.getRunners.mockResolvedValue([]);
-      StorageService.getCalledSegments.mockResolvedValue([]);
+      StorageService.getCheckpoints.mockResolvedValue([]);
       
       const { result } = renderHook(() => useRaceStore());
       

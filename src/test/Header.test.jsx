@@ -9,6 +9,7 @@ vi.mock('../store/useRaceStore.js');
 
 describe('Header Component - Back Navigation', () => {
   const mockSetMode = vi.fn();
+  const mockSetCurrentCheckpoint = vi.fn();
   const mockOnSettingsClick = vi.fn();
   const mockOnImportExportClick = vi.fn();
   const mockGetRunnerCounts = vi.fn(() => ({
@@ -27,6 +28,7 @@ describe('Header Component - Back Navigation', () => {
       mode: APP_MODES.SETUP,
       raceConfig: null,
       setMode: mockSetMode,
+      setCurrentCheckpoint: mockSetCurrentCheckpoint,
       getRunnerCounts: mockGetRunnerCounts
     });
   });
@@ -39,7 +41,7 @@ describe('Header Component - Back Navigation', () => {
       />
     );
 
-    expect(screen.getByText('Race Setup')).toBeInTheDocument();
+    expect(screen.getByText('Setup')).toBeInTheDocument();
     expect(screen.getByTitle('Settings')).toBeInTheDocument();
     expect(screen.queryByTitle('Back to Race Setup')).not.toBeInTheDocument();
   });
@@ -55,6 +57,7 @@ describe('Header Component - Back Navigation', () => {
         maxRunner: 150
       },
       setMode: mockSetMode,
+      setCurrentCheckpoint: mockSetCurrentCheckpoint,
       getRunnerCounts: vi.fn(() => ({
         total: 250,
         notStarted: 200,
@@ -88,6 +91,7 @@ describe('Header Component - Back Navigation', () => {
         maxRunner: 50
       },
       setMode: mockSetMode,
+      setCurrentCheckpoint: mockSetCurrentCheckpoint,
       getRunnerCounts: vi.fn(() => ({
         total: 50,
         notStarted: 30,
@@ -120,6 +124,7 @@ describe('Header Component - Back Navigation', () => {
         maxRunner: 100
       },
       setMode: mockSetMode,
+      setCurrentCheckpoint: mockSetCurrentCheckpoint,
       getRunnerCounts: mockGetRunnerCounts
     });
 
@@ -133,7 +138,8 @@ describe('Header Component - Back Navigation', () => {
     const backButton = screen.getByTitle('Back to Race Setup');
     fireEvent.click(backButton);
 
-    expect(mockSetMode).toHaveBeenCalledWith(APP_MODES.SETUP);
+    expect(mockSetCurrentCheckpoint).toHaveBeenCalledWith(null);
+    expect(mockSetMode).toHaveBeenCalledWith(APP_MODES.RACE_OVERVIEW);
   });
 
   it('should handle settings button click', () => {
@@ -161,6 +167,7 @@ describe('Header Component - Back Navigation', () => {
         maxRunner: 100
       },
       setMode: mockSetMode,
+      setCurrentCheckpoint: mockSetCurrentCheckpoint,
       getRunnerCounts: mockGetRunnerCounts
     });
 
@@ -185,6 +192,7 @@ describe('Header Component - Back Navigation', () => {
         maxRunner: 100
       },
       setMode: mockSetMode,
+      setCurrentCheckpoint: mockSetCurrentCheckpoint,
       getRunnerCounts: mockGetRunnerCounts
     });
 
@@ -206,6 +214,7 @@ describe('Header Component - Back Navigation', () => {
       mode: APP_MODES.SETUP,
       raceConfig: null,
       setMode: mockSetMode,
+      setCurrentCheckpoint: mockSetCurrentCheckpoint,
       getRunnerCounts: mockGetRunnerCounts
     });
 
@@ -233,6 +242,7 @@ describe('Header Component - Back Navigation', () => {
       mode: APP_MODES.CHECKPOINT,
       raceConfig,
       setMode: mockSetMode,
+      setCurrentCheckpoint: mockSetCurrentCheckpoint,
       getRunnerCounts: mockGetRunnerCounts
     });
 

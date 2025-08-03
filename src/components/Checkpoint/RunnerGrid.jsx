@@ -34,21 +34,6 @@ const RunnerGrid = () => {
     }
   }, [currentCheckpoint, loadCheckpointRunners]);
 
-  const handleCallInRunner = async (runnerNumber) => {
-    try {
-      await markCheckpointRunner(
-        runnerNumber,
-        currentCheckpoint,
-        new Date().toISOString(), // callInTime
-        null, // markOffTime
-        RUNNER_STATUSES.CALLED_IN
-      );
-    } catch (error) {
-      console.error('Failed to call in runner:', error);
-      throw error;
-    }
-  };
-
   const handleMarkOffRunner = async (runnerNumber) => {
     try {
       const runner = checkpointRunners.find(r => r.number === runnerNumber);
