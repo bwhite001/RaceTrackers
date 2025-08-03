@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import useRaceStore from '../../store/useRaceStore.js';
+import { useRaceStore } from '../../store/useRaceStore.js';
 import { APP_MODES } from '../../types/index.js';
 import TimeUtils from '../../services/timeUtils.js';
 import RaceDetailsStep from './RaceDetailsStep.jsx';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import useRaceStore from '../../store/useRaceStore.js';
+import { useRaceStore } from '../../store/useRaceStore.js';
 import TimeUtils from '../../services/timeUtils.js';
 import { APP_MODES } from '../../types/index.js';
 import ErrorMessage from '../Layout/ErrorMessage.jsx';

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import useRaceStore from '../store/useRaceStore.js';
+import { useRaceStore } from '../store/useRaceStore.js';
 import StorageService from '../services/storage.js';
 import { APP_MODES, RUNNER_STATUSES } from '../types/index.js';
 

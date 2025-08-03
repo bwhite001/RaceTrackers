@@ -1,5 +1,5 @@
 import React from 'react';
-import useRaceStore from '../../store/useRaceStore.js';
+import { useRaceStore } from '../../store/useRaceStore.js';
 import SharedRunnerGrid from '../Shared/SharedRunnerGrid.jsx';
 
 /**

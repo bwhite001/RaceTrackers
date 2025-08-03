@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import useRaceStore from '../../store/useRaceStore.js';
+import { useRaceStore } from '../../store/useRaceStore.js';
 import { APP_MODES } from '../../types/index.js';
 import LoadingSpinner from '../Layout/LoadingSpinner.jsx';
 

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import RunnerGrid from '../components/Checkpoint/RunnerGrid.jsx';
 import CalloutSheet from '../components/Checkpoint/CalloutSheet.jsx';
-import CheckpointCallInPage from '../components/Checkpoint/CheckpointCallInPage.jsx';
 import RunnerOverview from '../components/Shared/RunnerOverview.jsx';
-import useRaceStore from '../store/useRaceStore.js';
+import { useRaceStore } from '../store/useRaceStore.js';
 
 const CheckpointView = () => {
   const { 
@@ -46,7 +45,6 @@ const CheckpointView = () => {
   const tabs = [
     { id: 'runners', label: 'Runner Tracking', component: RunnerGrid },
     { id: 'callouts', label: 'Callout Sheet', component: CalloutSheet },
-    { id: 'callin', label: 'Call-In Page', component: CheckpointCallInPage },
     { id: 'overview', label: 'Overview', component: RunnerOverview }
   ];
 

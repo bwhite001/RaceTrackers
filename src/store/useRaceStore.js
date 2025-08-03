@@ -4,7 +4,7 @@ import StorageService from '../services/storage.js';
 import TimeUtils from '../services/timeUtils.js';
 import { DEFAULT_SETTINGS, APP_MODES, RUNNER_STATUSES } from '../types/index.js';
 
-const useRaceStore = create(
+export const useRaceStore = create(
   persist(
     (set, get) => ({
       // State
@@ -39,7 +39,7 @@ const useRaceStore = create(
             currentRaceId: raceId,
             runners,
             calledSegments: [],
-            mode: APP_MODES.SETUP,
+            mode: APP_MODES.RACE_OVERVIEW,
             isLoading: false
           });
           
@@ -669,6 +669,8 @@ const useRaceStore = create(
         set({ isLoading: true, error: null });
         try {
           await StorageService.clearAllData();
+          // Also clear the persisted state from localStorage
+          localStorage.removeItem('race-tracker-storage');
           get().resetRace();
           set({ isLoading: false });
         } catch (error) {
@@ -687,5 +689,3 @@ const useRaceStore = create(
     }
   )
 );
-
-export default useRaceStore;

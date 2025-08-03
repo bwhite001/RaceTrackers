@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import DataEntry from '../components/BaseStation/DataEntry.jsx';
 import BaseStationCallInPage from '../components/BaseStation/BaseStationCallInPage.jsx';
 import RunnerOverview from '../components/Shared/RunnerOverview.jsx';
-import useRaceStore from '../store/useRaceStore.js';
+import { useRaceStore } from '../store/useRaceStore.js';
 
 const BaseStationView = () => {
   const { exportIsolatedBaseStationResults, raceConfig } = useRaceStore();

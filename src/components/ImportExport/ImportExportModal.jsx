@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import QRCode from 'qrcode.react';
-import useRaceStore from '../../store/useRaceStore.js';
+import { useRaceStore } from '../../store/useRaceStore.js';
 
 const ImportExportModal = ({ isOpen, onClose }) => {
   const { 

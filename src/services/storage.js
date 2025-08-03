@@ -289,11 +289,20 @@ export class StorageService {
 
   static async clearAllData() {
     try {
-      await db.transaction('rw', db.races, db.runners, db.segments, db.settings, async () => {
+      await db.transaction('rw', [
+        db.races, db.runners, db.segments, db.settings, db.checkpoints,
+        db.checkpoint_results, db.checkpoint_runners, db.base_station_runners,
+        db.checkpoint_segments
+      ], async () => {
         await db.races.clear();
         await db.runners.clear();
         await db.segments.clear();
         await db.settings.clear();
+        await db.checkpoints.clear();
+        await db.checkpoint_results.clear();
+        await db.checkpoint_runners.clear();
+        await db.base_station_runners.clear();
+        await db.checkpoint_segments.clear();
       });
     } catch (error) {
       console.error('Error clearing all data:', error);

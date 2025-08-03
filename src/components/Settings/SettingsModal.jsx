@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import useRaceStore from '../../store/useRaceStore.js';
+import { useRaceStore } from '../../store/useRaceStore.js';
 import { FONT_SIZE_OPTIONS, RUNNER_STATUSES } from '../../types/index.js';
 
 const SettingsModal = ({ isOpen, onClose }) => {
-  const { settings, updateSettings } = useRaceStore();
+  const { settings, updateSettings, clearAllData } = useRaceStore();
   
   const [localSettings, setLocalSettings] = useState(settings);
   const [hasChanges, setHasChanges] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
 
   useEffect(() => {
     setLocalSettings(settings);
@@ -94,6 +96,25 @@ const SettingsModal = ({ isOpen, onClose }) => {
     setHasChanges(true);
   };
 
+  const handleClearDatabase = () => {
+    setShowClearConfirm(true);
+  };
+
+  const confirmClearDatabase = async () => {
+    if (confirmText === 'CLEAR') {
+      try {
+        await clearAllData();
+        setShowClearConfirm(false);
+        setConfirmText('');
+        onClose();
+        // It's a good practice to reload the page to ensure a full reset
+        window.location.reload();
+      } catch (error) {
+        console.error('Failed to clear database:', error);
+      }
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -134,12 +155,12 @@ const SettingsModal = ({ isOpen, onClose }) => {
               </div>
               <button
                 onClick={() => handleSettingChange('darkMode', !localSettings.darkMode)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  localSettings.darkMode ? 'bg-primary-600' : 'bg-gray-200'
+                className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-200 ease-in-out ${
+                  localSettings.darkMode ? 'bg-green-500' : 'bg-gray-300'
                 }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-200 ease-in-out ${
                     localSettings.darkMode ? 'translate-x-6' : 'translate-x-1'
                   }`}
                 />
@@ -148,121 +169,101 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
             {/* Font Size */}
             <div className="py-3">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2">
+              <label htmlFor="font-size" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Font Size
               </label>
-              <div className="grid grid-cols-3 gap-2">
-                {FONT_SIZE_OPTIONS.map(option => (
-                  <button
-                    key={option.value}
-                    onClick={() => handleSettingChange('fontSize', option.value)}
-                    className={`p-2 text-sm rounded-md border transition-colors ${
-                      localSettings.fontSize === option.value
-                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
-                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-200'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                Changes apply immediately for preview
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                Adjust the application-wide font size
               </p>
-            </div>
-          </div>
-
-          {/* Runner Display */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Runner Display
-            </h3>
-
-            {/* View Mode */}
-            <div className="py-3">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2">
-                Default View Mode
-              </label>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => handleSettingChange('runnerViewMode', 'grid')}
-                  className={`flex-1 p-3 rounded-md border transition-colors ${
-                    localSettings.runnerViewMode === 'grid'
-                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
-                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-200'
-                  }`}
-                >
-                  <div className="flex items-center justify-center space-x-2">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
-                    <span className="text-sm">Grid</span>
-                  </div>
-                </button>
-                <button
-                  onClick={() => handleSettingChange('runnerViewMode', 'list')}
-                  className={`flex-1 p-3 rounded-md border transition-colors ${
-                    localSettings.runnerViewMode === 'list'
-                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
-                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-200'
-                  }`}
-                >
-                  <div className="flex items-center justify-center space-x-2">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-sm">List</span>
-                  </div>
-                </button>
+              <div className="flex items-center space-x-4">
+                <input
+                  type="range"
+                  id="font-size"
+                  min="0.8"
+                  max="1.5"
+                  step="0.1"
+                  value={localSettings.fontSize}
+                  onChange={(e) => handleSettingChange('fontSize', parseFloat(e.target.value))}
+                  className="w-full"
+                />
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {Math.round(localSettings.fontSize * 100)}%
+                </span>
               </div>
             </div>
 
-            {/* Group Size */}
+            {/* Status Colors */}
             <div className="py-3">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2">
-                Default Group Size
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Status Colors
               </label>
-              <select
-                value={localSettings.groupSize}
-                onChange={(e) => handleSettingChange('groupSize', parseInt(e.target.value))}
-                className="form-input"
-              >
-                <option value={10}>10 runners</option>
-                <option value={25}>25 runners</option>
-                <option value={50}>50 runners</option>
-                <option value={100}>100 runners</option>
-              </select>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                For large runner ranges, group runners for easier navigation
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                Customize the colors for each runner status
               </p>
-            </div>
-          </div>
-
-          {/* Status Colors */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Status Colors
-            </h3>
-            <div className="space-y-3">
-              {Object.entries(RUNNER_STATUSES).map(([key, status]) => (
-                <div key={status} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div
-                      className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600"
-                      style={{ backgroundColor: localSettings.statusColors[status] }}
-                    />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
+              <div className="grid grid-cols-2 gap-4">
+                {Object.entries(localSettings.statusColors).map(([status, color]) => (
+                  <div key={status} className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-300 capitalize">
                       {status.replace('-', ' ')}
                     </span>
+                    <input
+                      type="color"
+                      value={color}
+                      onChange={(e) => handleStatusColorChange(status, e.target.value)}
+                      className="w-8 h-8 rounded border-none cursor-pointer"
+                    />
                   </div>
-                  <input
-                    type="color"
-                    value={localSettings.statusColors[status]}
-                    onChange={(e) => handleStatusColorChange(status, e.target.value)}
-                    className="w-8 h-8 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
-                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Danger Zone */}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+            <h3 className="text-lg font-medium text-red-600 dark:text-red-500 mb-4">
+              Danger Zone
+            </h3>
+            
+            {/* Clear Database */}
+            <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-semibold text-red-800 dark:text-red-300">
+                    Clear Database
+                  </h4>
+                  <p className="text-xs text-red-600 dark:text-red-400">
+                    This will permanently delete all races, runners, and settings. This action cannot be undone.
+                  </p>
                 </div>
-              ))}
+                <button
+                  onClick={handleClearDatabase}
+                  className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-sm"
+                >
+                  Clear Database
+                </button>
+              </div>
+
+              {showClearConfirm && (
+                <div className="mt-4">
+                  <p className="text-sm text-red-700 dark:text-red-300 mb-2">
+                    To confirm, please type <strong>CLEAR</strong> in the box below.
+                  </p>
+                  <input
+                    type="text"
+                    value={confirmText}
+                    onChange={(e) => setConfirmText(e.target.value)}
+                    className="w-full p-2 border border-red-300 rounded bg-white dark:bg-gray-700 dark:text-white"
+                    placeholder="CLEAR"
+                  />
+                  <button
+                    onClick={confirmClearDatabase}
+                    disabled={confirmText !== 'CLEAR'}
+                    className="mt-2 w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded disabled:bg-red-400 disabled:cursor-not-allowed"
+                  >
+                    Confirm Clear Database
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -271,22 +272,21 @@ const SettingsModal = ({ isOpen, onClose }) => {
         <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={resetToDefaults}
-            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+            className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
           >
             Reset to Defaults
           </button>
-          
-          <div className="flex space-x-3">
+          <div>
             <button
               onClick={handleCancel}
-              className="btn-secondary"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={!hasChanges}
-              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="ml-3 px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               Save Changes
             </button>

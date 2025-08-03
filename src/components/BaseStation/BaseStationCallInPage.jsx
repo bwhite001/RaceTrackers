@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import useRaceStore from '../../store/useRaceStore.js';
+import { useRaceStore } from '../../store/useRaceStore.js';
 import TimeUtils from '../../services/timeUtils.js';
 import { SEGMENT_DURATION_MINUTES } from '../../types/index.js';
 

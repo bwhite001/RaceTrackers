@@ -1,5 +1,5 @@
 import React from 'react';
-import useRaceStore from '../../store/useRaceStore.js';
+import { useRaceStore } from '../../store/useRaceStore.js';
 import { APP_MODES } from '../../types/index.js';
 
 const Header = ({ onSettingsClick, onImportExportClick }) => {

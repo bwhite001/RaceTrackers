@@ -94,7 +94,8 @@ export const APP_MODES = {
   SETUP: 'setup',
   RACE_CONFIG: 'race-config',
   CHECKPOINT: 'checkpoint',
-  BASE_STATION: 'base-station'
+  BASE_STATION: 'base-station',
+  RACE_OVERVIEW: 'race-overview'
 };
 
 export const DEFAULT_SETTINGS = {
