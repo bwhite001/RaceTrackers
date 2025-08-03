@@ -64,8 +64,7 @@ const RaceConfig = () => {
 
       await createRace(raceData);
       
-      // Go back to homepage after successful creation
-      setMode(APP_MODES.SETUP);
+      // The createRace action will handle the redirect to RACE_OVERVIEW
     } catch (err) {
       console.error('Failed to create race:', err);
     }

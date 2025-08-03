@@ -1,11 +1,9 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useRaceStore } from '../store/useRaceStore.js';
 import { APP_MODES } from '../types/index.js';
 import RunnerOverview from '../components/Shared/RunnerOverview.jsx';
 
 const RaceOverview = () => {
-  const navigate = useNavigate();
   const {
     raceConfig,
     runners,
