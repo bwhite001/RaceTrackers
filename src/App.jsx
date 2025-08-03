@@ -4,6 +4,7 @@ import { APP_MODES } from './types/index.js';
 
 // Layout Components
 import Header from './components/Layout/Header.jsx';
+import Footer from './components/Layout/Footer.jsx';
 import LoadingSpinner from './components/Layout/LoadingSpinner.jsx';
 import ErrorMessage from './components/Layout/ErrorMessage.jsx';
 
@@ -107,7 +108,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       {/* Header */}
       <Header 
         onSettingsClick={() => setShowSettings(true)}
@@ -115,7 +116,7 @@ function App() {
       />
 
       {/* Main Content */}
-      <main className="pb-8">
+      <main className="pb-8 flex-1">
         {/* Global Error Message */}
         {error && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
@@ -138,6 +139,9 @@ function App() {
         {/* Current View */}
         {getCurrentView()}
       </main>
+
+      {/* Footer */}
+      <Footer />
 
       {/* Modals */}
       <SettingsModal 
