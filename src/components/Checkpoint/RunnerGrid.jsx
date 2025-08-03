@@ -1,33 +1,118 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRaceStore } from '../../store/useRaceStore.js';
 import SharedRunnerGrid from '../Shared/SharedRunnerGrid.jsx';
+import { RUNNER_STATUSES } from '../../types/index.js';
 
 /**
- * RunnerGrid component displays a grid of runners and allows marking runners as passed.
- *
- * It retrieves runner data and configuration from the race store, and passes them to SharedRunnerGrid.
+ * RunnerGrid component displays a grid of runners for checkpoint tracking.
+ * Uses isolated checkpoint tracking with call-in and mark-off workflow.
  *
  * @component
  * @returns {JSX.Element} The rendered grid of runners.
  */
 const RunnerGrid = () => {
   const {
-    runners,
-    markRunnerPassed,
+    getCheckpointRunners,
+    markCheckpointRunner,
+    loadCheckpointRunners,
+    currentCheckpoint,
     isLoading,
     raceConfig,
-    settings
+    settings,
+    checkpoints
   } = useRaceStore();
 
+  const checkpointRunners = getCheckpointRunners(currentCheckpoint);
+  const currentCheckpointName = checkpoints.find(cp => cp.number === currentCheckpoint)?.name || `Checkpoint ${currentCheckpoint}`;
+
+  // Load checkpoint runners when component mounts or checkpoint changes
+  useEffect(() => {
+    if (currentCheckpoint) {
+      loadCheckpointRunners(currentCheckpoint);
+    }
+  }, [currentCheckpoint, loadCheckpointRunners]);
+
+  const handleCallInRunner = async (runnerNumber) => {
+    try {
+      await markCheckpointRunner(
+        runnerNumber,
+        currentCheckpoint,
+        new Date().toISOString(), // callInTime
+        null, // markOffTime
+        RUNNER_STATUSES.CALLED_IN
+      );
+    } catch (error) {
+      console.error('Failed to call in runner:', error);
+      throw error;
+    }
+  };
+
+  const handleMarkOffRunner = async (runnerNumber) => {
+    try {
+      const runner = checkpointRunners.find(r => r.number === runnerNumber);
+      const callInTime = runner?.callInTime || new Date().toISOString();
+      
+      await markCheckpointRunner(
+        runnerNumber,
+        currentCheckpoint,
+        callInTime, // preserve existing callInTime or use current time
+        new Date().toISOString(), // markOffTime
+        RUNNER_STATUSES.PASSED
+      );
+    } catch (error) {
+      console.error('Failed to mark off runner:', error);
+      throw error;
+    }
+  };
+
   return (
-    <SharedRunnerGrid
-      runners={runners}
-      onMarkRunner={markRunnerPassed}
-      isLoading={isLoading}
-      raceConfig={raceConfig}
-      settings={settings}
-      contextLabel="All Runners"
-    />
+    <div className="space-y-4">
+      {/* Checkpoint Status */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+          {currentCheckpointName} - Runner Tracking
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className="text-center">
+            <div className="text-lg font-bold text-gray-600 dark:text-gray-300">
+              {checkpointRunners.filter(r => r.status === RUNNER_STATUSES.NOT_STARTED).length}
+            </div>
+            <div className="text-gray-500 dark:text-gray-400">Not Started</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-bold text-blue-600">
+              {checkpointRunners.filter(r => r.status === RUNNER_STATUSES.CALLED_IN).length}
+            </div>
+            <div className="text-gray-500 dark:text-gray-400">Called In</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-bold text-green-600">
+              {checkpointRunners.filter(r => r.status === RUNNER_STATUSES.PASSED).length}
+            </div>
+            <div className="text-gray-500 dark:text-gray-400">Passed</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-bold text-gray-800 dark:text-gray-200">
+              {checkpointRunners.length}
+            </div>
+            <div className="text-gray-500 dark:text-gray-400">Total</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Runner Grid */}
+      <SharedRunnerGrid
+        runners={checkpointRunners}
+        onCallInRunner={handleCallInRunner}
+        onMarkOffRunner={handleMarkOffRunner}
+        isLoading={isLoading}
+        raceConfig={raceConfig}
+        settings={settings}
+        contextLabel={currentCheckpointName}
+        workflowMode="checkpoint"
+        showMultipleTimes={true}
+      />
+    </div>
   );
 };
 

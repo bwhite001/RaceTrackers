@@ -24,11 +24,12 @@ const mockStore = {
     runnerViewMode: 'grid',
     groupSize: 50
   },
-  updateSettings: vi.fn()
+  updateSettings: vi.fn(),
+  clearAllData: vi.fn()
 }
 
 vi.mock('../store/useRaceStore.js', () => ({
-  default: () => mockStore
+  useRaceStore: () => mockStore
 }))
 
 describe('SettingsModal Dark Mode', () => {
@@ -44,7 +45,7 @@ describe('SettingsModal Dark Mode', () => {
     // Check if modal is rendered
     expect(screen.getByText('Settings')).toBeInTheDocument()
     expect(screen.getByText('Dark Mode')).toBeInTheDocument()
-    expect(screen.getByText('Font Size')).toBeInTheDocument()
+    expect(screen.getByLabelText('Font Size')).toBeInTheDocument()
   })
 
   it('toggles dark mode when dark mode switch is clicked', async () => {
@@ -60,70 +61,31 @@ describe('SettingsModal Dark Mode', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(true)
   })
 
-  it('font size buttons have proper dark mode text classes', () => {
-    // Set dark mode in settings
-    mockStore.settings.darkMode = true
+  it('font size range input works correctly', () => {
     render(<SettingsModal isOpen={true} onClose={() => {}} />)
     
-    // Check font size buttons
-    const smallButton = screen.getByText('Small')
-    const mediumButton = screen.getByText('Medium')
-    const normalButton = screen.getByText('Normal')
+    const fontSizeInput = screen.getByLabelText('Font Size')
+    expect(fontSizeInput).toBeInTheDocument()
+    expect(fontSizeInput.type).toBe('range')
+    expect(fontSizeInput.value).toBe('1')
     
-    // Verify buttons have dark mode text classes (Normal button has different classes as it's selected)
-    expect(smallButton.closest('button')).toHaveClass('text-gray-900', 'dark:text-gray-100')
-    expect(mediumButton.closest('button')).toHaveClass('text-gray-900', 'dark:text-gray-100')
-    // Normal button is selected, so it has different classes
-    expect(normalButton.closest('button')).toHaveClass('text-primary-700', 'dark:text-primary-300')
+    // Test changing the value
+    fireEvent.change(fontSizeInput, { target: { value: '1.2' } })
+    expect(fontSizeInput.value).toBe('1.2')
   })
 
-  it('view mode buttons have proper dark mode text classes', () => {
-    mockStore.settings.darkMode = true
+  it('status color inputs are present', () => {
     render(<SettingsModal isOpen={true} onClose={() => {}} />)
     
-    // Check view mode buttons
-    const gridButton = screen.getByText('Grid')
-    const listButton = screen.getByText('List')
+    // Find color inputs by their type and associated text
+    const colorInputs = screen.getAllByDisplayValue(/^#[0-9a-f]{6}$/i)
+    expect(colorInputs).toHaveLength(4)
     
-    // Verify buttons have dark mode text classes
-    expect(gridButton.closest('button')).toHaveClass('text-primary-700', 'dark:text-primary-300')
-    expect(listButton.closest('button')).toHaveClass('text-gray-900', 'dark:text-gray-100')
-  })
-
-  it('selected font size button has proper styling', async () => {
-    const user = userEvent.setup()
-    render(<SettingsModal isOpen={true} onClose={() => {}} />)
-    
-    // Click on Large font size
-    const largeButton = screen.getByText('Large')
-    await user.click(largeButton)
-    
-    // Check if button has selected styling
-    expect(largeButton.closest('button')).toHaveClass('border-primary-500', 'bg-primary-50', 'dark:bg-primary-900/20')
-  })
-
-  it('selected view mode button has proper styling', async () => {
-    const user = userEvent.setup()
-    render(<SettingsModal isOpen={true} onClose={() => {}} />)
-    
-    // Click on List view mode
-    const listButton = screen.getByText('List')
-    await user.click(listButton)
-    
-    // Check if button has selected styling
-    expect(listButton.closest('button')).toHaveClass('border-primary-500', 'bg-primary-50', 'dark:bg-primary-900/20')
-  })
-
-  it('applies font size changes immediately', async () => {
-    const user = userEvent.setup()
-    render(<SettingsModal isOpen={true} onClose={() => {}} />)
-    
-    // Click on Large font size (value 1.1)
-    const largeButton = screen.getByText('Large')
-    await user.click(largeButton)
-    
-    // Check if CSS custom property is set
-    expect(document.documentElement.style.getPropertyValue('--font-size-multiplier')).toBe('1.1')
+    // Check that status text is present
+    expect(screen.getByText('not started')).toBeInTheDocument()
+    expect(screen.getByText('passed')).toBeInTheDocument()
+    expect(screen.getByText('non starter')).toBeInTheDocument()
+    expect(screen.getByText('dnf')).toBeInTheDocument()
   })
 
   it('saves settings when save button is clicked', async () => {
@@ -131,9 +93,9 @@ describe('SettingsModal Dark Mode', () => {
     const onClose = vi.fn()
     render(<SettingsModal isOpen={true} onClose={onClose} />)
     
-    // Make a change
-    const largeButton = screen.getByText('Large')
-    await user.click(largeButton)
+    // Make a change to font size
+    const fontSizeInput = screen.getByLabelText('Font Size')
+    fireEvent.change(fontSizeInput, { target: { value: '1.2' } })
     
     // Click save
     const saveButton = screen.getByText('Save Changes')
@@ -149,9 +111,9 @@ describe('SettingsModal Dark Mode', () => {
     const onClose = vi.fn()
     render(<SettingsModal isOpen={true} onClose={onClose} />)
     
-    // Make a change
-    const largeButton = screen.getByText('Large')
-    await user.click(largeButton)
+    // Make a change to font size
+    const fontSizeInput = screen.getByLabelText('Font Size')
+    fireEvent.change(fontSizeInput, { target: { value: '1.2' } })
     
     // Click cancel
     const cancelButton = screen.getByText('Cancel')

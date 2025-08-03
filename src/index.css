@@ -38,23 +38,35 @@ body {
 
 /* Status color utilities */
 .status-not-started {
-  @apply bg-status-not-started text-white;
+  @apply bg-gray-400 text-white;
+}
+
+.status-called-in {
+  @apply bg-blue-500 text-white;
+}
+
+.status-marked-off {
+  @apply bg-purple-500 text-white;
 }
 
 .status-passed {
-  @apply bg-status-passed text-white;
+  @apply bg-green-500 text-white;
 }
 
 .status-non-starter {
-  @apply bg-status-non-starter text-white;
+  @apply bg-red-500 text-white;
 }
 
 .status-dnf {
-  @apply bg-status-dnf text-white;
+  @apply bg-yellow-500 text-white;
+}
+
+.status-pending {
+  @apply bg-orange-500 text-white;
 }
 
 .status-called {
-  @apply bg-status-called text-white;
+  @apply bg-blue-500 text-white;
 }
 
 /* Runner grid animations */
@@ -178,6 +190,14 @@ body {
     @apply border-2 border-gray-900 dark:border-gray-100;
   }
   
+  .status-called-in {
+    @apply border-2 border-gray-900 dark:border-gray-100;
+  }
+  
+  .status-marked-off {
+    @apply border-2 border-gray-900 dark:border-gray-100;
+  }
+  
   .status-passed {
     @apply border-2 border-gray-900 dark:border-gray-100;
   }
@@ -187,6 +207,10 @@ body {
   }
   
   .status-dnf {
+    @apply border-2 border-gray-900 dark:border-gray-100;
+  }
+  
+  .status-pending {
     @apply border-2 border-gray-900 dark:border-gray-100;
   }
 }
