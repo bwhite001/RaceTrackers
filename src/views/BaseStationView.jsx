@@ -441,6 +441,13 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
           isOpen={showDuplicatesDialog}
           onClose={() => setShowDuplicatesDialog(false)}
           duplicates={duplicateEntries}
+          onResolve={async (resolution) => {
+            // Handle duplicate resolution
+            setShowDuplicatesDialog(false);
+            setHasUnsavedChanges(true);
+            // Reload duplicate entries after resolution
+            await loadDuplicateEntries();
+          }}
         />
 
         <DeletedEntriesView
