@@ -137,3 +137,5 @@ const useSettingsStore = create((set, get) => ({
   }
 }));
 
+export default useSettingsStore;
+
