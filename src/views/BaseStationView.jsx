@@ -1,116 +1,165 @@
-import React, { useState } from 'react';
-import DataEntry from '../components/BaseStation/DataEntry.jsx';
-import BaseStationCallInPage from '../components/BaseStation/BaseStationCallInPage.jsx';
-import RunnerOverview from '../components/Shared/RunnerOverview.jsx';
-import { useRaceStore } from '../store/useRaceStore.js';
-import { APP_MODES } from '../types/index.js';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { withOperationExit } from '../shared/components/ExitOperationModal';
+import useNavigationStore, { MODULE_TYPES } from '../shared/store/navigationStore';
+import useBaseOperationsStore from '../modules/base-operations/store/baseOperationsStore';
+import useRaceMaintenanceStore from '../modules/race-maintenance/store/raceMaintenanceStore';
+import useSettingsStore from '../shared/store/settingsStore';
 
-const BaseStationView = () => {
-  const { exportIsolatedBaseStationResults, raceConfig, setMode } = useRaceStore();
-  const [activeTab, setActiveTab] = useState('data-entry');
-  const [isExporting, setIsExporting] = useState(false);
+import BaseStationCallInPage from '../components/BaseStation/BaseStationCallInPage';
+import DataEntry from '../components/BaseStation/DataEntry';
+import IsolatedBaseStationRunnerGrid from '../components/BaseStation/IsolatedBaseStationRunnerGrid';
+import LoadingSpinner from '../components/Layout/LoadingSpinner';
+import ErrorMessage from '../components/Layout/ErrorMessage';
 
-  const handleExportBaseStation = async () => {
-    setIsExporting(true);
-    try {
-      const exportData = await exportIsolatedBaseStationResults();
-      
-      // Download as JSON file
-      const dataStr = JSON.stringify(exportData, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${raceConfig?.name || 'race'}-base-station-results.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Failed to export base station results:', error);
-    } finally {
-      setIsExporting(false);
-    }
-  };
+const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('grid');
+  
+  // Store hooks
+  const { startOperation } = useNavigationStore();
+  const { currentRace, loadCurrentRace } = useRaceMaintenanceStore();
+  const { 
+    runners, 
+    loading, 
+    error,
+    checkpointNumber,
+    initializeBaseStation,
+    loadBaseStationData 
+  } = useBaseOperationsStore();
+  const { updateSetting } = useSettingsStore();
 
-  const tabs = [
-    { id: 'data-entry', label: 'Data Entry', component: DataEntry },
-    { id: 'callin', label: 'Call-In Page', component: BaseStationCallInPage },
-    { id: 'overview', label: 'Race Overview', component: RunnerOverview }
-  ];
+  // Initialize base station operation
+  useEffect(() => {
+    const initializeOperation = async () => {
+      try {
+        // Load current race if not loaded
+        if (!currentRace) {
+          await loadCurrentRace();
+        }
 
-  const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || DataEntry;
+        if (currentRace) {
+          // Start base station operation
+          startOperation(MODULE_TYPES.BASE_STATION);
+          
+          // Save current base station settings
+          await updateSetting('currentBaseStationCheckpoint', 1);
+
+          // Initialize or load base station data
+          const existingRunners = await loadBaseStationData(currentRace.id);
+          if (!existingRunners || existingRunners.length === 0) {
+            await initializeBaseStation(currentRace.id);
+          }
+        } else {
+          // No race found, redirect to home
+          navigate('/', { 
+            replace: true,
+            state: { error: 'No active race found. Please create or select a race first.' }
+          });
+        }
+      } catch (error) {
+        console.error('Error initializing base station:', error);
+      }
+    };
+
+    initializeOperation();
+  }, [currentRace, loadCurrentRace, initializeBaseStation, loadBaseStationData, startOperation, updateSetting, navigate]);
+
+  // Track unsaved changes
+  useEffect(() => {
+    setHasUnsavedChanges(false); // Reset on load
+  }, [setHasUnsavedChanges]);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <ErrorMessage message={error} />;
+  }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Header with Back Button */}
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Basestation Call-In
+    <div className="space-y-6">
+      {/* Base Station Header */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold dark:text-white">
+          Base Station Operations
         </h1>
-        <button
-          onClick={() => setMode(APP_MODES.RACE_OVERVIEW)}
-          className="btn-secondary"
-        >
-          ← Back to Race Overview
-        </button>
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <div className="border-b border-gray-200 dark:border-gray-700">
-            <nav className="-mb-px flex space-x-8">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === tab.id
-                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-          </div>
-          
+        <div className="space-x-4">
           <button
-            onClick={handleExportBaseStation}
-            disabled={isExporting}
-            className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={onExitAttempt}
+            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
           >
-            {isExporting ? (
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 spinner"></div>
-                <span>Exporting...</span>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span>Export Results</span>
-              </div>
-            )}
+            Exit Base Station
           </button>
         </div>
       </div>
 
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-200 dark:border-gray-700">
+        <nav className="flex space-x-4">
+          <TabButton
+            active={activeTab === 'grid'}
+            onClick={() => setActiveTab('grid')}
+          >
+            Runner Grid
+          </TabButton>
+          <TabButton
+            active={activeTab === 'data-entry'}
+            onClick={() => setActiveTab('data-entry')}
+          >
+            Data Entry
+          </TabButton>
+          <TabButton
+            active={activeTab === 'call-in'}
+            onClick={() => setActiveTab('call-in')}
+          >
+            Call-In Page
+          </TabButton>
+        </nav>
+      </div>
+
       {/* Tab Content */}
-      <div className="min-h-[60vh]">
-        {activeTab === 'callin' ? (
-          <BaseStationCallInPage />
-        ) : (
-          <ActiveComponent />
+      <div className="mt-6">
+        {activeTab === 'grid' && (
+          <IsolatedBaseStationRunnerGrid
+            runners={runners}
+            onRunnerUpdate={(number, updates) => {
+              setHasUnsavedChanges(true);
+              // Runner update logic here
+            }}
+          />
+        )}
+        {activeTab === 'data-entry' && (
+          <DataEntry
+            checkpointNumber={checkpointNumber}
+            onDataEntry={() => setHasUnsavedChanges(true)}
+          />
+        )}
+        {activeTab === 'call-in' && (
+          <BaseStationCallInPage
+            checkpointNumber={checkpointNumber}
+            onCallIn={() => setHasUnsavedChanges(true)}
+          />
         )}
       </div>
     </div>
   );
 };
 
-export default BaseStationView;
+// Tab Button Component
+const TabButton = ({ children, active, onClick }) => (
+  <button
+    className={`py-2 px-4 text-sm font-medium border-b-2 ${
+      active
+        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+    }`}
+    onClick={onClick}
+  >
+    {children}
+  </button>
+);
+
+// Wrap with operation exit handling
+export default withOperationExit(BaseStationView);

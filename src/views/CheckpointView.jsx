@@ -1,103 +1,124 @@
-import React, { useState } from 'react';
-import RunnerGrid from '../components/Checkpoint/RunnerGrid.jsx';
-import CalloutSheet from '../components/Checkpoint/CalloutSheet.jsx';
-import RunnerOverview from '../components/Shared/RunnerOverview.jsx';
-import { useRaceStore } from '../store/useRaceStore.js';
-import { APP_MODES } from '../types/index.js';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { withOperationExit } from '../shared/components/ExitOperationModal';
+import useNavigationStore, { MODULE_TYPES } from '../shared/store/navigationStore';
+import useCheckpointStore from '../modules/checkpoint-operations/store/checkpointStore';
+import useSettingsStore from '../shared/store/settingsStore';
+import useRaceMaintenanceStore from '../modules/race-maintenance/store/raceMaintenanceStore';
 
-const CheckpointView = () => {
-  const { 
-    checkpoints, 
-    currentCheckpoint, 
-    setCurrentCheckpoint, 
-    exportIsolatedCheckpointResults,
-    raceConfig,
-    setMode
-  } = useRaceStore();
+import RunnerGrid from '../components/Checkpoint/RunnerGrid';
+import CalloutSheet from '../components/Checkpoint/CalloutSheet';
+import LoadingSpinner from '../components/Layout/LoadingSpinner';
+import ErrorMessage from '../components/Layout/ErrorMessage';
+
+const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
+  const { checkpointId } = useParams();
+  const navigate = useNavigate();
+  const [showCalloutSheet, setShowCalloutSheet] = useState(false);
   
-  const [activeTab, setActiveTab] = useState('runners');
-  const [isExporting, setIsExporting] = useState(false);
+  // Store hooks
+  const { startOperation } = useNavigationStore();
+  const { currentRace, loadCurrentRace } = useRaceMaintenanceStore();
+  const { 
+    runners, 
+    loading, 
+    error,
+    initializeCheckpoint,
+    loadCheckpointData 
+  } = useCheckpointStore();
+  const { updateSetting } = useSettingsStore();
 
-  const handleExportCheckpoint = async () => {
-    setIsExporting(true);
-    try {
-      const exportData = await exportIsolatedCheckpointResults(currentCheckpoint);
-      
-      // Download as JSON file
-      const dataStr = JSON.stringify(exportData, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      const checkpointName = checkpoints.find(cp => cp.number === currentCheckpoint)?.name || `Checkpoint ${currentCheckpoint}`;
-      link.download = `${raceConfig?.name || 'race'}-${checkpointName.replace(/\s+/g, '-')}-checkpoint-results.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Failed to export checkpoint results:', error);
-    } finally {
-      setIsExporting(false);
-    }
-  };
+  // Initialize checkpoint operation
+  useEffect(() => {
+    const initializeOperation = async () => {
+      try {
+        // Load current race if not loaded
+        if (!currentRace) {
+          await loadCurrentRace();
+        }
 
-  const tabs = [
-    { id: 'runners', label: 'Runner Tracking', component: RunnerGrid },
-    { id: 'callouts', label: 'Callout Sheet', component: CalloutSheet },
-    { id: 'overview', label: 'Overview', component: RunnerOverview }
-  ];
+        if (currentRace) {
+          // Start checkpoint operation
+          startOperation(MODULE_TYPES.CHECKPOINT);
+          
+          // Save current checkpoint in settings
+          await updateSetting('currentCheckpoint', parseInt(checkpointId));
 
-  const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || RunnerGrid;
+          // Initialize or load checkpoint data
+          const existingRunners = await loadCheckpointData(currentRace.id, parseInt(checkpointId));
+          if (!existingRunners || existingRunners.length === 0) {
+            await initializeCheckpoint(currentRace.id, parseInt(checkpointId));
+          }
+        } else {
+          // No race found, redirect to home
+          navigate('/', { 
+            replace: true,
+            state: { error: 'No active race found. Please create or select a race first.' }
+          });
+        }
+      } catch (error) {
+        console.error('Error initializing checkpoint:', error);
+      }
+    };
+
+    initializeOperation();
+  }, [checkpointId, currentRace, loadCurrentRace, initializeCheckpoint, loadCheckpointData, startOperation, updateSetting, navigate]);
+
+  // Track unsaved changes
+  useEffect(() => {
+    setHasUnsavedChanges(false); // Reset on load
+  }, [setHasUnsavedChanges]);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <ErrorMessage message={error} />;
+  }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Header with Back Button */}
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Checkpoint Check-In
+    <div className="space-y-6">
+      {/* Checkpoint Header */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold dark:text-white">
+          Checkpoint {checkpointId}
         </h1>
-        <button
-          onClick={() => setMode(APP_MODES.RACE_OVERVIEW)}
-          className="btn-secondary"
-        >
-          ← Back to Race Overview
-        </button>
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="mb-6">
-        <div className="border-b border-gray-200 dark:border-gray-700">
-          <nav className="-mb-px flex space-x-8">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
+        <div className="space-x-4">
+          <button
+            onClick={() => setShowCalloutSheet(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            View Callout Sheet
+          </button>
+          <button
+            onClick={onExitAttempt}
+            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+          >
+            Exit Checkpoint
+          </button>
         </div>
       </div>
 
-      {/* Tab Content */}
-      <div className="min-h-[60vh]">
-        {activeTab === 'callin' ? (
-          <CheckpointCallInPage checkpointNumber={currentCheckpoint} />
-        ) : (
-          <ActiveComponent />
-        )}
-      </div>
+      {/* Runner Grid */}
+      <RunnerGrid 
+        runners={runners}
+        onRunnerUpdate={(number, updates) => {
+          setHasUnsavedChanges(true);
+          // Runner update logic here
+        }}
+      />
+
+      {/* Callout Sheet Modal */}
+      {showCalloutSheet && (
+        <CalloutSheet
+          runners={runners}
+          onClose={() => setShowCalloutSheet(false)}
+        />
+      )}
     </div>
   );
 };
 
-export default CheckpointView;
+// Wrap with operation exit handling
+export default withOperationExit(CheckpointView);
