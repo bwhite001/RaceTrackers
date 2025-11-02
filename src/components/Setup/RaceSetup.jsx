@@ -52,9 +52,13 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
     setCurrentStep(prev => prev - 1);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (runnerRanges) => {
     try {
-      const raceId = await createRace(formData);
+      const completeFormData = {
+        ...formData,
+        runnerRanges: runnerRanges || formData.runnerRanges || []
+      };
+      const raceId = await createRace(completeFormData);
       setHasUnsavedChanges(false);
       navigate(`/race-maintenance/overview?raceId=${raceId}`);
     } catch (error) {
@@ -117,10 +121,11 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
         )}
         {currentStep === 1 && (
           <RunnerRangesStep
-            data={formData}
-            onUpdate={handleFormUpdate}
+            raceDetails={formData}
+            initialRanges={formData.runnerRanges || []}
             onBack={handleBack}
-            onSubmit={handleSubmit}
+            onCreate={handleSubmit}
+            isLoading={loading}
           />
         )}
       </div>

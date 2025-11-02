@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 
-const RunnerRangesStep = ({ raceDetails, initialRanges, onBack, onCreate, isLoading }) => {
+const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCreate, isLoading }) => {
   const [ranges, setRanges] = useState(initialRanges.length > 0 ? initialRanges : []);
   const [newRange, setNewRange] = useState({ min: '', max: '', description: '' });
   const [validationErrors, setValidationErrors] = useState({});
@@ -8,7 +8,7 @@ const RunnerRangesStep = ({ raceDetails, initialRanges, onBack, onCreate, isLoad
 
   // Add new state for tracking all individual runner numbers
   const [allRunnerNumbers, setAllRunnerNumbers] = useState(new Set(
-    initialRanges.flatMap(range => 
+    (initialRanges || []).flatMap(range => 
       range.individualNumbers || 
       Array.from({ length: range.max - range.min + 1 }, (_, i) => range.min + i)
     )
@@ -296,9 +296,9 @@ const RunnerRangesStep = ({ raceDetails, initialRanges, onBack, onCreate, isLoad
           Race Details
         </h3>
         <div className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-          <p><strong>Name:</strong> {raceDetails.name}</p>
-          <p><strong>Date & Time:</strong> {raceDetails.date} at {raceDetails.startTime}</p>
-          <p><strong>Checkpoints:</strong> {raceDetails.numCheckpoints} ({raceDetails.checkpoints.map(cp => cp.name).join(', ')})</p>
+          <p><strong>Name:</strong> {raceDetails?.name || 'N/A'}</p>
+          <p><strong>Date & Time:</strong> {raceDetails?.date || 'N/A'} at {raceDetails?.startTime || 'N/A'}</p>
+          <p><strong>Checkpoints:</strong> {raceDetails?.numCheckpoints || 0} ({raceDetails?.checkpoints?.map(cp => cp.name).join(', ') || 'N/A'})</p>
         </div>
       </div>
 

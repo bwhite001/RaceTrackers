@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { withOperationExit } from '../shared/components/ExitOperationModal';
-import { HotkeysProvider } from '../shared/components/HotkeysProvider';
+import HotkeysProvider from '../shared/components/HotkeysProvider';
 import useNavigationStore, { MODULE_TYPES } from '../shared/store/navigationStore';
 import useBaseOperationsStore from '../modules/base-operations/store/baseOperationsStore';
 import useRaceMaintenanceStore from '../modules/race-maintenance/store/raceMaintenanceStore';
@@ -53,8 +53,10 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     loadBaseStationData,
     withdrawRunner,
     vetOutRunner,
-    getDuplicateEntries,
-    getDeletedEntries
+    duplicateEntries,
+    deletedEntries,
+    loadDuplicateEntries,
+    loadDeletedEntries
   } = useBaseOperationsStore();
   const { updateSetting } = useSettingsStore();
 
@@ -438,13 +440,13 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         <DuplicateEntriesDialog
           isOpen={showDuplicatesDialog}
           onClose={() => setShowDuplicatesDialog(false)}
-          duplicates={getDuplicateEntries()}
+          duplicates={duplicateEntries}
         />
 
         <DeletedEntriesView
           isOpen={showDeletedEntriesView}
           onClose={() => setShowDeletedEntriesView(false)}
-          deletedEntries={getDeletedEntries()}
+          deletedEntries={deletedEntries}
         />
 
         <BackupRestoreDialog
