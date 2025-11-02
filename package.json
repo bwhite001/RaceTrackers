@@ -11,6 +11,11 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "node src/test/e2e/e2e-test-runner.js",
+    "test:e2e:ci": "node src/test/e2e/e2e-test-runner.js --headless",
+    "test:seed": "node -e \"import('./src/test/e2e/test-data-seeder.js').then(m => m.seedCompleteTestDataset())\"",
+    "test:seed:minimal": "node -e \"import('./src/test/e2e/test-data-seeder.js').then(m => m.seedMinimalTestDataset())\"",
+    "test:clear": "node -e \"import('./src/test/e2e/test-data-seeder.js').then(m => m.clearAllTestData())\"",
     "screenshots:base-station": "node capture-base-station-screenshots.js",
     "screenshots:all": "node final-screenshots.js"
   },
