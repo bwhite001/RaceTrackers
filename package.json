@@ -10,7 +10,9 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "screenshots:base-station": "node capture-base-station-screenshots.js",
+    "screenshots:all": "node final-screenshots.js"
   },
   "dependencies": {
     "date-fns": "^2.30.0",
