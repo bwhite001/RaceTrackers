@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 
 const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCreate, isLoading }) => {
   const [ranges, setRanges] = useState(initialRanges.length > 0 ? initialRanges : []);
-  const [newRange, setNewRange] = useState({ min: '', max: '', description: '' });
+  const [newRange, setNewRange] = useState({ min: '100', max: '200', description: '' });
   const [validationErrors, setValidationErrors] = useState({});
   const [rangeInput, setRangeInput] = useState('');
 
@@ -153,7 +153,11 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
     setAllRunnerNumbers(prev => new Set([...prev, ...numbers]));
     
     setRanges(prev => [...prev, range]);
-    setNewRange({ min: '', max: '', description: '' });
+    
+    // Calculate next range starting from the last max + 1
+    const nextMin = parseInt(newRange.max) + 1;
+    const nextMax = nextMin + 100;
+    setNewRange({ min: nextMin.toString(), max: nextMax.toString(), description: '' });
     setRangeInput('');
     setValidationErrors({});
   };

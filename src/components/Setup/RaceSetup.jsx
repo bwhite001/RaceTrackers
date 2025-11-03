@@ -44,7 +44,14 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
     setHasUnsavedChanges(true);
   };
 
-  const handleNext = () => {
+  const handleNext = (stepData) => {
+    // Update form data with step data if provided
+    if (stepData) {
+      setFormData(prev => ({
+        ...prev,
+        ...stepData
+      }));
+    }
     setCurrentStep(prev => prev + 1);
   };
 
