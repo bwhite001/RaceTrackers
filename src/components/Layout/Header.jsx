@@ -1,199 +1,152 @@
-import React from 'react';
-import { useRaceStore } from '../../store/useRaceStore.js';
-import { APP_MODES } from '../../types/index.js';
-import BreadcrumbNav from './BreadcrumbNav';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import useNavigationStore, { MODULE_TYPES, OPERATION_STATUS } from '../../shared/store/navigationStore';
+import useSettingsStore from '../../shared/store/settingsStore';
 
-const Header = ({ onSettingsClick, onImportExportClick }) => {
-  const { raceConfig, mode, setMode, getRunnerCounts, setCurrentCheckpoint } = useRaceStore();
-  const counts = getRunnerCounts();
+const Header = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { currentModule, operationStatus, endOperation } = useNavigationStore();
+  const { settings, toggleDarkMode } = useSettingsStore();
 
-  const getModeTitle = () => {
-    switch (mode) {
-      case APP_MODES.SETUP:
-        return 'Race Setup';
-      case APP_MODES.CHECKPOINT:
-        return 'Checkpoint Mode';
-      case APP_MODES.BASE_STATION:
-        return 'Base Station Mode';
-      default:
-        return raceConfig ? `${raceConfig.name} Overview` : 'Race Overview';
+  const handleHomeClick = (e) => {
+    if (operationStatus === OPERATION_STATUS.IN_PROGRESS) {
+      e.preventDefault();
+      const confirmed = window.confirm(
+        'Are you sure you want to exit the current operation? This may result in loss of unsaved data.'
+      );
+      if (!confirmed) return;
+      
+      // End operation and navigate home
+      endOperation();
     }
-  };
-  const getIconBaseUrl = () => {
-    return '/'
-  }
-
-  const canSwitchMode = () => {
-    return raceConfig && mode !== APP_MODES.SETUP;
+    navigate('/');
   };
 
-  const handleBack = () => {
-    // Handle all modes based on current using switch; default is SETUP
-    switch (mode) {
-      case APP_MODES.CHECKPOINT:
-      case APP_MODES.BASE_STATION:
-        setCurrentCheckpoint(null);
-        setMode(APP_MODES.RACE_OVERVIEW);
-        break;
-      case APP_MODES.RACE_OVERVIEW:
-      case APP_MODES.RACE_CONFIG:
-        setMode(APP_MODES.SETUP);
-        break;
+  const getModuleTitle = () => {
+    switch (currentModule) {
+      case MODULE_TYPES.RACE_MAINTENANCE:
+        return 'Race Maintenance';
+      case MODULE_TYPES.CHECKPOINT:
+        return `Checkpoint Operations (CP ${settings.currentCheckpoint || 1})`;
+      case MODULE_TYPES.BASE_STATION:
+        return 'Base Station Operations';
       default:
-        setMode(APP_MODES.SETUP);
-        break;
+        return 'Race Tracker';
     }
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Left side - Title and race info */}
+    <header className="relative bg-navy-900 text-white shadow-lg">
+      {/* Diagonal Accent Stripe */}
+      <div className="absolute top-0 right-0 w-32 h-full bg-accent-600 transform skew-x-12 translate-x-16 opacity-30"></div>
+      
+      <div className="relative container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
+          {/* Logo/Home Link */}
           <div className="flex items-center space-x-4">
-            <div className="flex items-center">
-              {/* Back button - show when in race modes */}
-              {canSwitchMode() && (
-                <button
-                  onClick={handleBack}
-                  className="p-2 mr-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
-                  title="Back to Race Setup"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-              )}
-              <div className="flex-shrink-0">
-                <img
-                  src={getIconBaseUrl() + 'favicon_io/android-chrome-192x192.png'}
-                  alt="WIP Logo"
-                  className="h-10 w-10 mr-3"
-                />
+            <button
+              onClick={handleHomeClick}
+              className={`flex items-center space-x-3 ${
+                operationStatus === OPERATION_STATUS.IN_PROGRESS
+                  ? 'cursor-help'
+                  : 'hover:opacity-80 transition-opacity'
+              }`}
+            >
+              {/* Logo Icon */}
+              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-navy-900" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                </svg>
               </div>
-              {raceConfig && (
-                <div>
-                  <div>
-                    <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                      {getModeTitle()}
-                    </h1>
-                  </div>
-                  <div className="ml-4 flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
-                    <span className="hidden md:inline">
-                      {raceConfig.date}
-                    </span>
-                    <span className="hidden lg:inline">
-                      Runners: {raceConfig.minRunner}-{raceConfig.maxRunner}
-                    </span>
-                  </div>
+              <div className="hidden md:block">
+                <div className="text-xl font-bold leading-tight">
+                  {getModuleTitle()}
                 </div>
-              )}
-            </div>
+                <div className="text-xs text-navy-200">
+                  Offline Race Management
+                </div>
+              </div>
+            </button>
           </div>
 
-          {/* Center - Breadcrumbs */}
-          <div className="hidden sm:flex flex-1 justify-center">
-            <BreadcrumbNav />
-          </div>
-          {/* Right side - Stats and actions */}
-          <div className="flex items-center space-x-4">
-            {/* Runner counts */}
-            {raceConfig && mode !== APP_MODES.SETUP && (
-              <div className="hidden sm:flex items-center space-x-3 text-sm">
-                <div className="flex items-center space-x-1">
-                  <div className="w-3 h-3 rounded-full bg-status-passed"></div>
-                  <span className="text-gray-600 dark:text-gray-300">
-                    {counts.passed}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <div className="w-3 h-3 rounded-full bg-status-not-started"></div>
-                  <span className="text-gray-600 dark:text-gray-300">
-                    {counts.notStarted}
-                  </span>
-                </div>
-                {counts.nonStarter > 0 && (
-                  <div className="flex items-center space-x-1">
-                    <div className="w-3 h-3 rounded-full bg-status-non-starter"></div>
-                    <span className="text-gray-600 dark:text-gray-300">
-                      {counts.nonStarter}
-                    </span>
-                  </div>
-                )}
-                {counts.dnf > 0 && (
-                  <div className="flex items-center space-x-1">
-                    <div className="w-3 h-3 rounded-full bg-status-dnf"></div>
-                    <span className="text-gray-600 dark:text-gray-300">
-                      {counts.dnf}
-                    </span>
-                  </div>
-                )}
+          {/* Center - Operation Status */}
+          {operationStatus === OPERATION_STATUS.IN_PROGRESS && (
+            <div className="hidden md:flex items-center">
+              <div className="flex items-center space-x-2 px-4 py-2 bg-gold-500 text-navy-900 rounded-lg font-medium">
+                <svg className="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+                <span>Operation in Progress</span>
               </div>
+            </div>
+          )}
+
+          {/* Right Side - Navigation & Actions */}
+          <div className="flex items-center space-x-3">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-lg hover:bg-navy-800 transition-colors"
+              aria-label="Toggle dark mode"
+            >
+              {settings.darkMode ? (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg>
+              )}
+            </button>
+
+            {/* Home Button - Only show if not on home page */}
+            {location.pathname !== '/' && operationStatus !== OPERATION_STATUS.IN_PROGRESS && (
+              <Link
+                to="/"
+                className="hidden md:flex items-center space-x-2 px-4 py-2 bg-navy-800 hover:bg-navy-700 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                </svg>
+                <span>Home</span>
+              </Link>
             )}
 
-            {/* Action buttons */}
-            <div className="flex items-center space-x-2">
-              {raceConfig && (
-                <button
-                  onClick={onImportExportClick}
-                  className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
-                  title="Import/Export"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                </button>
-              )}
-              
-              <button
-                onClick={onSettingsClick}
-                className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
-                title="Settings"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </button>
-            </div>
+            {/* Settings Button */}
+            <button
+              className="p-2 rounded-lg hover:bg-navy-800 transition-colors"
+              aria-label="Settings"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+              </svg>
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Mobile race info */}
-      {raceConfig && (
-        <div className="sm:hidden px-4 pb-3 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
-            <span>{raceConfig.name}</span>
-            <span>{raceConfig.date}</span>
-          </div>
-          <div className="flex justify-between items-center mt-1 text-xs text-gray-500 dark:text-gray-400">
-            <span>Runners: {raceConfig.minRunner}-{raceConfig.maxRunner}</span>
-            <div className="flex items-center space-x-2">
-              <span className="flex items-center">
-                <div className="w-2 h-2 rounded-full bg-status-passed mr-1"></div>
-                {counts.passed}
-              </span>
-              <span className="flex items-center">
-                <div className="w-2 h-2 rounded-full bg-status-not-started mr-1"></div>
-                {counts.notStarted}
-              </span>
-              {counts.nonStarter > 0 && (
-                <span className="flex items-center">
-                  <div className="w-2 h-2 rounded-full bg-status-non-starter mr-1"></div>
-                  {counts.nonStarter}
-                </span>
-              )}
-              {counts.dnf > 0 && (
-                <span className="flex items-center">
-                  <div className="w-2 h-2 rounded-full bg-status-dnf mr-1"></div>
-                  {counts.dnf}
-                </span>
-              )}
+        {/* Mobile Operation Status */}
+        {operationStatus === OPERATION_STATUS.IN_PROGRESS && (
+          <div className="md:hidden mt-3 flex items-center justify-center">
+            <div className="flex items-center space-x-2 px-3 py-1.5 bg-gold-500 text-navy-900 rounded-lg text-sm font-medium">
+              <svg className="w-4 h-4 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+              </svg>
+              <span>Operation Active</span>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Module-specific navigation warning */}
+        {operationStatus === OPERATION_STATUS.IN_PROGRESS && (
+          <div className="mt-3 text-xs text-navy-200 text-center bg-navy-800/50 rounded-lg py-2 px-4">
+            <svg className="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+            </svg>
+            Navigation is restricted during active operations
+          </div>
+        )}
+      </div>
     </header>
   );
 };

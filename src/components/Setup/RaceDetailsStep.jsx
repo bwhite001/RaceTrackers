@@ -1,21 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import TimeUtils from '../../services/timeUtils.js';
 
-const RaceDetailsStep = ({ initialData, onNext, onCancel, isLoading }) => {
+const RaceDetailsStep = ({ data, onUpdate, onNext, isLoading }) => {
   const [formData, setFormData] = useState({
     name: '',
     date: TimeUtils.getTodayDateString(),
     startTime: '06:00',
     numCheckpoints: 1,
     checkpoints: [{ number: 1, name: 'Checkpoint 1' }],
-    ...initialData
+    ...data
   });
 
   const [validationErrors, setValidationErrors] = useState({});
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const updatedData = { ...formData, [name]: value };
+    setFormData(updatedData);
+    
+    // Notify parent of changes
+    if (onUpdate) {
+      onUpdate(updatedData);
+    }
     
     // Clear validation error for this field
     if (validationErrors[name]) {
@@ -36,11 +42,18 @@ const RaceDetailsStep = ({ initialData, onNext, onCancel, isLoading }) => {
       });
     }
     
-    setFormData(prev => ({
-      ...prev,
+    const updatedData = {
+      ...formData,
       numCheckpoints,
       checkpoints
-    }));
+    };
+    
+    setFormData(updatedData);
+    
+    // Notify parent of changes
+    if (onUpdate) {
+      onUpdate(updatedData);
+    }
     
     // Clear validation errors
     if (validationErrors.numCheckpoints) {
@@ -51,7 +64,13 @@ const RaceDetailsStep = ({ initialData, onNext, onCancel, isLoading }) => {
   const handleCheckpointNameChange = (index, name) => {
     const checkpoints = [...formData.checkpoints];
     checkpoints[index] = { ...checkpoints[index], name };
-    setFormData(prev => ({ ...prev, checkpoints }));
+    const updatedData = { ...formData, checkpoints };
+    setFormData(updatedData);
+    
+    // Notify parent of changes
+    if (onUpdate) {
+      onUpdate(updatedData);
+    }
   };
 
   const validateForm = () => {
@@ -231,13 +250,6 @@ const RaceDetailsStep = ({ initialData, onNext, onCancel, isLoading }) => {
 
       {/* Action Buttons */}
       <div className="flex justify-between pt-4">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="btn-secondary"
-        >
-          Cancel
-        </button>
         <button
           type="submit"
           disabled={isLoading}

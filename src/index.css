@@ -4,6 +4,10 @@
 
 :root {
   --font-size-multiplier: 1;
+  --navy-900: #1e3a8a;
+  --navy-800: #363ea4;
+  --accent-600: #dc2626;
+  --gold-500: #f59e0b;
 }
 
 html {
@@ -17,6 +21,20 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition-property: background-color, border-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: ease-in-out;
+}
+
+/* Disable transitions for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Custom scrollbar */
@@ -87,26 +105,30 @@ body {
   @apply animate-spin rounded-full border-4 border-gray-200 border-t-blue-600;
 }
 
-/* Custom button styles */
+/* Custom button styles - Legacy support */
 .btn-primary {
-  @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  @apply bg-navy-900 hover:bg-navy-800 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg;
 }
 
 .btn-secondary {
-  @apply bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  @apply bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 font-medium py-2 px-4 rounded-lg transition-all duration-200;
 }
 
 .btn-danger {
-  @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  @apply bg-accent-600 hover:bg-accent-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg;
+}
+
+.btn-warning {
+  @apply bg-gold-500 hover:bg-gold-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg;
 }
 
 /* Enhanced button variants for better dark mode support */
 .btn-outline {
-  @apply border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  @apply border-2 border-navy-900 dark:border-navy-600 bg-transparent hover:bg-navy-900 dark:hover:bg-navy-800 text-navy-900 dark:text-navy-400 hover:text-white dark:hover:text-white font-medium py-2 px-4 rounded-lg transition-all duration-200;
 }
 
 .btn-ghost {
-  @apply bg-transparent text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  @apply bg-transparent text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 font-medium py-2 px-4 rounded-lg transition-all duration-200;
 }
 
 /* Form styles */
@@ -131,14 +153,30 @@ body {
   @apply bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600;
 }
 
-/* Card styles */
+/* Card styles - Enhanced */
 .card {
-  @apply bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700;
+  @apply bg-white dark:bg-gray-800 rounded-lg shadow-card border border-gray-200 dark:border-gray-700 transition-all duration-200;
 }
 
-/* Status indicators */
+.card-elevated {
+  @apply bg-white dark:bg-gray-800 rounded-lg shadow-elevated transition-all duration-200;
+}
+
+.card-hoverable {
+  @apply hover:shadow-card-hover;
+}
+
+.card-interactive {
+  @apply cursor-pointer hover:shadow-card-hover hover:scale-[1.02] active:scale-[0.98];
+}
+
+/* Status indicators - Enhanced */
 .status-indicator {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-200;
+}
+
+.status-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium shadow-sm;
 }
 
 /* Responsive grid for runner numbers */

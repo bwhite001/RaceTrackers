@@ -1,14 +1,14 @@
 import React, { useState, useMemo, useCallback } from 'react';
 
-const RunnerRangesStep = ({ raceDetails, initialRanges, onBack, onCreate, isLoading }) => {
+const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCreate, isLoading }) => {
   const [ranges, setRanges] = useState(initialRanges.length > 0 ? initialRanges : []);
-  const [newRange, setNewRange] = useState({ min: '', max: '', description: '' });
+  const [newRange, setNewRange] = useState({ min: '100', max: '200', description: '' });
   const [validationErrors, setValidationErrors] = useState({});
   const [rangeInput, setRangeInput] = useState('');
 
   // Add new state for tracking all individual runner numbers
   const [allRunnerNumbers, setAllRunnerNumbers] = useState(new Set(
-    initialRanges.flatMap(range => 
+    (initialRanges || []).flatMap(range => 
       range.individualNumbers || 
       Array.from({ length: range.max - range.min + 1 }, (_, i) => range.min + i)
     )
@@ -153,7 +153,11 @@ const RunnerRangesStep = ({ raceDetails, initialRanges, onBack, onCreate, isLoad
     setAllRunnerNumbers(prev => new Set([...prev, ...numbers]));
     
     setRanges(prev => [...prev, range]);
-    setNewRange({ min: '', max: '', description: '' });
+    
+    // Calculate next range starting from the last max + 1
+    const nextMin = parseInt(newRange.max) + 1;
+    const nextMax = nextMin + 100;
+    setNewRange({ min: nextMin.toString(), max: nextMax.toString(), description: '' });
     setRangeInput('');
     setValidationErrors({});
   };
@@ -296,9 +300,9 @@ const RunnerRangesStep = ({ raceDetails, initialRanges, onBack, onCreate, isLoad
           Race Details
         </h3>
         <div className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-          <p><strong>Name:</strong> {raceDetails.name}</p>
-          <p><strong>Date & Time:</strong> {raceDetails.date} at {raceDetails.startTime}</p>
-          <p><strong>Checkpoints:</strong> {raceDetails.numCheckpoints} ({raceDetails.checkpoints.map(cp => cp.name).join(', ')})</p>
+          <p><strong>Name:</strong> {raceDetails?.name || 'N/A'}</p>
+          <p><strong>Date & Time:</strong> {raceDetails?.date || 'N/A'} at {raceDetails?.startTime || 'N/A'}</p>
+          <p><strong>Checkpoints:</strong> {raceDetails?.numCheckpoints || 0} ({raceDetails?.checkpoints?.map(cp => cp.name).join(', ') || 'N/A'})</p>
         </div>
       </div>
 
