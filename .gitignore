@@ -3,8 +3,6 @@ node_modules
 dist
 .blackboxrules
 TODO.md
-screenshots/SCREENSHOTS_CAPTURE_SUMMARY.md
-screenshots/base-station-guide/CAPTURE_SUMMARY.md
 screenshots/base-station-guide/README.md
 src/test/README.md
 src/test/TROUBLESHOOTING.md
@@ -12,3 +10,5 @@ src/test/base-operations/TEST_PLAN.md
 src/test/e2e/E2E_TEST_PLAN.md
 src/test/e2e/README.md
 src/test/integration/README.md
+**_SUMMARY.md
+**_PLAN.md
