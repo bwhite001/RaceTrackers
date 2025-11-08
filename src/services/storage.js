@@ -1,38 +1,4 @@
-import Dexie from 'dexie';
-
-// Database schema
-class RaceTrackerDB extends Dexie {
-  constructor() {
-    super('RaceTrackerDB');
-
-    // Version 5 (new simplified schema) - wiping all previous versions
-    this.version(5)
-        .stores({
-            races: "++id, name, date, startTime, minRunner, maxRunner, createdAt",
-            runners: "++id, [raceId+number], raceId, number, status, recordedTime, notes",
-            checkpoints: "++id, [raceId+number], raceId, number, name",
-            checkpoint_runners: "++id, [raceId+checkpointNumber+number], raceId, checkpointNumber, number, markOffTime, callInTime, status, notes",
-            base_station_runners: "++id, [raceId+checkpointNumber+number], raceId, checkpointNumber, number, commonTime, status, notes",
-            settings: "key, value"
-        })
-        .upgrade(async (tx) => {
-            // Clean migration - wipe all previous data and start fresh
-            console.log('Migrating to schema version 5 - wiping all previous data...');
-            
-            // Clear all existing data from previous versions
-            await tx.table("races").clear();
-            await tx.table("runners").clear();
-            await tx.table("checkpoints").clear();
-            await tx.table("checkpoint_runners").clear();
-            await tx.table("base_station_runners").clear();
-            await tx.table("settings").clear();
-            
-            console.log('Schema migration to version 5 completed - all previous data cleared');
-        });
-  }
-}
-
-const db = new RaceTrackerDB();
+import db from '../shared/services/database/schema.js';
 
 // Storage service for managing race data
 export class StorageService {
