@@ -1,16 +1,27 @@
+# Dependencies and build outputs
+node_modules/
+dist/
+
+# Editor and IDE files
 .vscode/settings.json
-node_modules
-dist
 .blackboxrules
-TODO.md
+
+# Test documentation (except README files)
+src/test/**/*.md
+!src/test/**/README.md
+
+# Screenshots and documentation
 screenshots/base-station-guide/README.md
-src/test/README.md
-src/test/TROUBLESHOOTING.md
-src/test/base-operations/TEST_PLAN.md
-src/test/e2e/E2E_TEST_PLAN.md
-src/test/e2e/README.md
-src/test/integration/README.md
+screenshots/e2e-tests/**
+
+# Documentation files (except README)
 **_SUMMARY.md
 **_PLAN.md
 **_REPORT.md
 **_PROGRESS.md
+*.md
+!**README.md
+
+# Data files
+TODO.md
+Start List_Mount Glorious 2025.xlsx
