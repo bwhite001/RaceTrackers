@@ -266,27 +266,38 @@ export const useRaceStore = create(
             },
 
             // Import/Export actions
-            exportRaceConfig: async () => {
+            exportRaceConfig: async (raceId = null) => {
                 const { currentRaceId } = get();
-                if (!currentRaceId) throw new Error("No race to export");
+                const targetRaceId = raceId || currentRaceId;
+                if (!targetRaceId) throw new Error("No race to export");
 
                 try {
-                    return await StorageService.exportRaceConfig(currentRaceId);
+                    return await StorageService.exportRaceConfig(targetRaceId);
                 } catch (error) {
                     set({ error: error.message });
                     throw error;
                 }
             },
 
-            exportRaceResults: async (format = "csv") => {
+            exportRaceResults: async (format = "csv", raceId = null) => {
                 const { currentRaceId, raceConfig, runners } = get();
-                if (!currentRaceId) throw new Error("No race to export");
+                const targetRaceId = raceId || currentRaceId;
+                if (!targetRaceId) throw new Error("No race to export");
 
                 try {
+                    // If a specific raceId is provided, we need to load that race's data
+                    let targetRaceConfig = raceConfig;
+                    let targetRunners = runners;
+                    
+                    if (raceId && raceId !== currentRaceId) {
+                        targetRaceConfig = await StorageService.getRace(raceId);
+                        targetRunners = await StorageService.getRunners(raceId);
+                    }
+                    
                     return await StorageService.exportRaceResults(
-                        currentRaceId,
-                        raceConfig,
-                        runners,
+                        targetRaceId,
+                        targetRaceConfig,
+                        targetRunners,
                         format
                     );
                 } catch (error) {
@@ -634,16 +645,18 @@ export const useRaceStore = create(
 
             // New export methods for isolated data
             exportIsolatedCheckpointResults: async (
-                checkpointNumber = null
+                checkpointNumber = null,
+                raceId = null
             ) => {
                 const { currentRaceId, currentCheckpoint } = get();
-                if (!currentRaceId) throw new Error("No race to export");
+                const targetRaceId = raceId || currentRaceId;
+                if (!targetRaceId) throw new Error("No race to export");
 
                 const checkpoint = checkpointNumber || currentCheckpoint;
 
                 try {
                     return await StorageService.exportIsolatedCheckpointResults(
-                        currentRaceId,
+                        targetRaceId,
                         checkpoint
                     );
                 } catch (error) {

@@ -1,12 +1,17 @@
+import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useNavigationStore, { MODULE_TYPES, OPERATION_STATUS } from '../../shared/store/navigationStore';
 import useSettingsStore from '../../shared/store/settingsStore';
+import SettingsModal from '../Settings/SettingsModal';
+import ImportExportModal from '../ImportExport/ImportExportModal';
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentModule, operationStatus, endOperation } = useNavigationStore();
   const { settings, toggleDarkMode } = useSettingsStore();
+  const [showSettings, setShowSettings] = useState(false);
+  const [showImportExport, setShowImportExport] = useState(false);
 
   const handleHomeClick = (e) => {
     if (operationStatus === OPERATION_STATUS.IN_PROGRESS) {
@@ -113,8 +118,22 @@ const Header = () => {
               </Link>
             )}
 
+            {/* Import/Export Button */}
+            <button
+              onClick={() => setShowImportExport(true)}
+              className="p-2 rounded-lg hover:bg-navy-800 transition-colors"
+              aria-label="Import/Export"
+              title="Import/Export Race Configuration"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+              </svg>
+            </button>
+
             {/* Settings Button */}
             <button
+              onClick={() => setShowSettings(true)}
               className="p-2 rounded-lg hover:bg-navy-800 transition-colors"
               aria-label="Settings"
             >
@@ -147,6 +166,16 @@ const Header = () => {
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      <SettingsModal 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)} 
+      />
+      <ImportExportModal 
+        isOpen={showImportExport} 
+        onClose={() => setShowImportExport(false)} 
+      />
     </header>
   );
 };

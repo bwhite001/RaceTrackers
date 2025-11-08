@@ -1,16 +1,28 @@
-# Dependencies
-node_modules
+# Dependencies and build outputs
+node_modules/
+dist/
 
-# Build outputs
-dist
-
-# IDE
+# Editor and IDE files
 .vscode/settings.json
-
-# Project specific
 .blackboxrules
-TODO.md
 
-# Documentation - ignore generated/temporary docs
-**.md
+# Test documentation (except README files)
+src/test/**/*.md
+!src/test/**/README.md
+
+# Screenshots and documentation
+screenshots/base-station-guide/README.md
+screenshots/e2e-tests/**
+
+# Documentation files (except README and AI instructions)
+**_SUMMARY.md
+**_PLAN.md
+**_REPORT.md
+**_PROGRESS.md
+*.md
 !README.md
+!.github/copilot-instructions.md
+
+# Data files
+TODO.md
+Start List_Mount Glorious 2025.xlsx

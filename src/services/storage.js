@@ -1,38 +1,4 @@
-import Dexie from 'dexie';
-
-// Database schema
-class RaceTrackerDB extends Dexie {
-  constructor() {
-    super('RaceTrackerDB');
-
-    // Version 5 (new simplified schema) - wiping all previous versions
-    this.version(5)
-        .stores({
-            races: "++id, name, date, startTime, minRunner, maxRunner, createdAt",
-            runners: "++id, [raceId+number], raceId, number, status, recordedTime, notes",
-            checkpoints: "++id, [raceId+number], raceId, number, name",
-            checkpoint_runners: "++id, [raceId+checkpointNumber+number], raceId, checkpointNumber, number, markOffTime, callInTime, status, notes",
-            base_station_runners: "++id, [raceId+checkpointNumber+number], raceId, checkpointNumber, number, commonTime, status, notes",
-            settings: "key, value"
-        })
-        .upgrade(async (tx) => {
-            // Clean migration - wipe all previous data and start fresh
-            console.log('Migrating to schema version 5 - wiping all previous data...');
-            
-            // Clear all existing data from previous versions
-            await tx.table("races").clear();
-            await tx.table("runners").clear();
-            await tx.table("checkpoints").clear();
-            await tx.table("checkpoint_runners").clear();
-            await tx.table("base_station_runners").clear();
-            await tx.table("settings").clear();
-            
-            console.log('Schema migration to version 5 completed - all previous data cleared');
-        });
-  }
-}
-
-const db = new RaceTrackerDB();
+import db from '../shared/services/database/schema.js';
 
 // Storage service for managing race data
 export class StorageService {
@@ -282,6 +248,8 @@ export class StorageService {
       const race = await this.getRace(raceId);
       const checkpoints = await this.getCheckpoints(raceId);
       const runners = await this.getRunners(raceId);
+      
+      // Get checkpoint runners if they exist (they may not be initialized yet)
       const checkpointRunners = await this.getCheckpointRunners(raceId);
       
       return {
@@ -291,6 +259,7 @@ export class StorageService {
           startTime: race.startTime,
           minRunner: race.minRunner,
           maxRunner: race.maxRunner,
+          runnerRanges: race.runnerRanges || [], // Include runner ranges if available
           checkpoints: checkpoints.map(cp => ({ number: cp.number, name: cp.name }))
         },
         runners: runners.map(runner => ({
@@ -299,14 +268,15 @@ export class StorageService {
           recordedTime: runner.recordedTime,
           notes: runner.notes
         })),
-        checkpointRunners: checkpointRunners.map(runner => ({
+        // Only include checkpoint runners if they exist
+        checkpointRunners: checkpointRunners.length > 0 ? checkpointRunners.map(runner => ({
           checkpointNumber: runner.checkpointNumber,
           number: runner.number,
           markOffTime: runner.markOffTime,
           callInTime: runner.callInTime,
           status: runner.status,
           notes: runner.notes
-        })),
+        })) : [],
         exportedAt: new Date().toISOString(),
         version: '3.0.0',
         exportType: 'full-race-data'

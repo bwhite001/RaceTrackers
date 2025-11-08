@@ -1,15 +1,29 @@
-import React from 'react';
-import { useRaceStore } from '../store/useRaceStore.js';
-import { APP_MODES } from '../types/index.js';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import useRaceMaintenanceStore from '../modules/race-maintenance/store/raceMaintenanceStore';
+import useNavigationStore from '../shared/store/navigationStore';
 import RunnerOverview from '../components/Shared/RunnerOverview.jsx';
 
 const RaceOverview = () => {
+  const navigate = useNavigate();
   const {
-    raceConfig,
-    runners,
-    setMode,
-    setCurrentCheckpoint
-  } = useRaceStore();
+    currentRace: raceConfig,
+    checkpoints,
+    loadCurrentRace,
+    loading
+  } = useRaceMaintenanceStore();
+  
+  const { startOperation, MODULE_TYPES } = useNavigationStore();
+  
+  // Load current race on mount
+  useEffect(() => {
+    if (!raceConfig) {
+      loadCurrentRace();
+    }
+  }, [raceConfig, loadCurrentRace]);
+  
+  // Mock runners for now - in real app this would come from a runners store
+  const runners = [];
 
   // Get runner counts
   const getRunnerCounts = () => {
@@ -25,13 +39,24 @@ const RaceOverview = () => {
   const counts = getRunnerCounts();
 
   const handleGoToCheckpoint = (checkpointNumber) => {
-    setCurrentCheckpoint(checkpointNumber);
-    setMode(APP_MODES.CHECKPOINT);
+    startOperation(MODULE_TYPES.CHECKPOINT);
+    navigate(`/checkpoint/${checkpointNumber}`);
   };
 
   const handleGoToBaseStation = () => {
-    setMode(APP_MODES.BASE_STATION);
+    startOperation(MODULE_TYPES.BASE_STATION);
+    navigate('/base-station');
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="card p-6 text-center">
+          <p className="text-gray-600 dark:text-gray-300">Loading race...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!raceConfig) {
     return (
@@ -41,7 +66,7 @@ const RaceOverview = () => {
             No Race Selected
           </h2>
           <button
-            onClick={() => setMode(APP_MODES.SETUP)}
+            onClick={() => navigate('/')}
             className="btn-primary"
           >
             Go to Homepage
@@ -60,7 +85,7 @@ const RaceOverview = () => {
             Overview
           </h1>
           <button
-            onClick={() => setMode(APP_MODES.SETUP)}
+            onClick={() => navigate('/')}
             className="btn-secondary"
           >
             Back to Home
@@ -75,7 +100,7 @@ const RaceOverview = () => {
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {raceConfig.checkpoints && raceConfig.checkpoints.map((checkpoint) => (
+            {checkpoints && checkpoints.length > 0 && checkpoints.map((checkpoint) => (
               <div key={checkpoint.number} className="card p-4 flex flex-col items-stretch">
                 <button
                   onClick={() => handleGoToCheckpoint(checkpoint.number)}
@@ -96,7 +121,7 @@ const RaceOverview = () => {
                 </button>
               </div>
             ))}
-            {(!raceConfig.checkpoints || raceConfig.checkpoints.length === 0) && (
+            {(!checkpoints || checkpoints.length === 0) && (
               <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
                 No checkpoints configured
               </div>

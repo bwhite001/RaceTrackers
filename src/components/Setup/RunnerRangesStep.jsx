@@ -1,14 +1,23 @@
 import React, { useState, useMemo, useCallback } from 'react';
 
 const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCreate, isLoading }) => {
-  const [ranges, setRanges] = useState(initialRanges.length > 0 ? initialRanges : []);
-  const [newRange, setNewRange] = useState({ min: '100', max: '200', description: '' });
+  // Initialize with default range if no initial ranges provided
+  const defaultRange = initialRanges.length === 0 ? [{
+    min: 100,
+    max: 200,
+    description: 'Runners 100-200',
+    count: 101,
+    individualNumbers: Array.from({ length: 101 }, (_, i) => 100 + i)
+  }] : [];
+  
+  const [ranges, setRanges] = useState(initialRanges.length > 0 ? initialRanges : defaultRange);
+  const [newRange, setNewRange] = useState({ min: '201', max: '300', description: '' });
   const [validationErrors, setValidationErrors] = useState({});
   const [rangeInput, setRangeInput] = useState('');
 
   // Add new state for tracking all individual runner numbers
   const [allRunnerNumbers, setAllRunnerNumbers] = useState(new Set(
-    (initialRanges || []).flatMap(range => 
+    (initialRanges.length > 0 ? initialRanges : defaultRange).flatMap(range => 
       range.individualNumbers || 
       Array.from({ length: range.max - range.min + 1 }, (_, i) => range.min + i)
     )
