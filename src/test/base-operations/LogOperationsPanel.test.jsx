@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
@@ -6,17 +7,17 @@ import useBaseOperationsStore from '../../modules/base-operations/store/baseOper
 import TimeUtils from '../../services/timeUtils';
 
 // Mock the store and TimeUtils
-jest.mock('../../modules/base-operations/store/baseOperationsStore');
-jest.mock('../../services/timeUtils');
+vi.mock('../../modules/base-operations/store/baseOperationsStore');
+vi.mock('../../services/timeUtils');
 
 describe('LogOperationsPanel', () => {
-  const mockLoadLogEntries = jest.fn();
-  const mockLoadDeletedEntries = jest.fn();
-  const mockLoadDuplicateEntries = jest.fn();
-  const mockUpdateLogEntry = jest.fn();
-  const mockDeleteLogEntry = jest.fn();
-  const mockRestoreLogEntry = jest.fn();
-  const mockResolveDuplicate = jest.fn();
+  const mockLoadLogEntries = vi.fn();
+  const mockLoadDeletedEntries = vi.fn();
+  const mockLoadDuplicateEntries = vi.fn();
+  const mockUpdateLogEntry = vi.fn();
+  const mockDeleteLogEntry = vi.fn();
+  const mockRestoreLogEntry = vi.fn();
+  const mockResolveDuplicate = vi.fn();
 
   const mockLogEntries = [
     {
@@ -60,7 +61,7 @@ describe('LogOperationsPanel', () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock store implementation
     useBaseOperationsStore.mockImplementation(() => ({
@@ -137,7 +138,7 @@ describe('LogOperationsPanel', () => {
     render(<LogOperationsPanel />);
 
     // Mock window.confirm
-    const confirmSpy = jest.spyOn(window, 'confirm');
+    const confirmSpy = vi.spyOn(window, 'confirm');
     confirmSpy.mockImplementation(() => true);
 
     // Delete an entry

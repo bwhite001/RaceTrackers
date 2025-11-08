@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
@@ -5,23 +6,23 @@ import HelpDialog from '../../modules/base-operations/components/HelpDialog';
 import { useHotkeys } from '../../shared/components/HotkeysProvider';
 
 // Mock the hotkeys hook
-jest.mock('../../shared/components/HotkeysProvider');
+vi.mock('../../shared/components/HotkeysProvider');
 
 describe('HelpDialog', () => {
-  const mockOnClose = jest.fn();
+  const mockOnClose = vi.fn();
   const mockHotkeys = {
     'alt+a': {
-      handler: jest.fn(),
+      handler: vi.fn(),
       description: 'Add checkpoint',
       category: 'navigation'
     },
     'alt+b': {
-      handler: jest.fn(),
+      handler: vi.fn(),
       description: 'Add number',
       category: 'dataEntry'
     },
     'alt+s': {
-      handler: jest.fn(),
+      handler: vi.fn(),
       description: 'Sort entries',
       category: 'sorting'
     }
@@ -29,7 +30,7 @@ describe('HelpDialog', () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock hotkeys hook implementation
     useHotkeys.mockImplementation(() => ({

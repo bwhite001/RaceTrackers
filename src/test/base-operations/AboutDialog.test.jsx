@@ -1,13 +1,14 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import AboutDialog from '../../modules/base-operations/components/AboutDialog';
 
 describe('AboutDialog', () => {
-  const mockOnClose = jest.fn();
+  const mockOnClose = vi.fn();
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly when open', () => {

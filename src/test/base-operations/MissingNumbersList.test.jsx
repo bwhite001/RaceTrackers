@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
@@ -5,12 +6,12 @@ import MissingNumbersList from '../../modules/base-operations/components/Missing
 import useBaseOperationsStore from '../../modules/base-operations/store/baseOperationsStore';
 
 // Mock the store
-jest.mock('../../modules/base-operations/store/baseOperationsStore');
+vi.mock('../../modules/base-operations/store/baseOperationsStore');
 
 describe('MissingNumbersList', () => {
-  const mockLoadMissingRunners = jest.fn();
-  const mockGenerateMissingNumbersReport = jest.fn();
-  const mockDownloadReport = jest.fn();
+  const mockLoadMissingRunners = vi.fn();
+  const mockGenerateMissingNumbersReport = vi.fn();
+  const mockDownloadReport = vi.fn();
 
   const mockMissingRunners = [
     { number: 101 },
@@ -24,7 +25,7 @@ describe('MissingNumbersList', () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock store implementation
     useBaseOperationsStore.mockImplementation(() => ({
@@ -83,7 +84,7 @@ describe('MissingNumbersList', () => {
   });
 
   it('handles print button click', () => {
-    const mockPrint = jest.fn();
+    const mockPrint = vi.fn();
     window.print = mockPrint;
 
     render(<MissingNumbersList />);
@@ -104,7 +105,7 @@ describe('MissingNumbersList', () => {
   });
 
   it('handles auto-refresh toggle', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     render(<MissingNumbersList />);
 
@@ -113,7 +114,7 @@ describe('MissingNumbersList', () => {
 
     // Fast-forward 30 seconds
     act(() => {
-      jest.advanceTimersByTime(30000);
+      vi.advanceTimersByTime(30000);
     });
 
     expect(mockLoadMissingRunners).toHaveBeenCalledTimes(2); // Once on mount, once after timer
@@ -123,13 +124,13 @@ describe('MissingNumbersList', () => {
 
     // Fast-forward another 30 seconds
     act(() => {
-      jest.advanceTimersByTime(30000);
+      vi.advanceTimersByTime(30000);
     });
 
     // Should not have called loadMissingRunners again
     expect(mockLoadMissingRunners).toHaveBeenCalledTimes(2);
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('shows loading state', () => {
@@ -170,7 +171,7 @@ describe('MissingNumbersList', () => {
   });
 
   it('handles export errors gracefully', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockGenerateMissingNumbersReport.mockRejectedValue(new Error('Export failed'));
 
     render(<MissingNumbersList />);
@@ -184,7 +185,7 @@ describe('MissingNumbersList', () => {
   });
 
   it('cleans up auto-refresh on unmount', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const { unmount } = render(<MissingNumbersList />);
 
@@ -195,13 +196,13 @@ describe('MissingNumbersList', () => {
 
     // Fast-forward 30 seconds
     act(() => {
-      jest.advanceTimersByTime(30000);
+      vi.advanceTimersByTime(30000);
     });
 
     // Should not have called loadMissingRunners after unmount
     expect(mockLoadMissingRunners).toHaveBeenCalledTimes(1); // Only the initial load
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('shows correct total count', () => {
@@ -227,7 +228,7 @@ describe('MissingNumbersList', () => {
   });
 
   it('maintains auto-refresh state across re-renders', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const { rerender } = render(<MissingNumbersList />);
 
@@ -239,12 +240,12 @@ describe('MissingNumbersList', () => {
 
     // Fast-forward 30 seconds
     act(() => {
-      jest.advanceTimersByTime(30000);
+      vi.advanceTimersByTime(30000);
     });
 
     // Should still be auto-refreshing
     expect(mockLoadMissingRunners).toHaveBeenCalledWith(2);
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });

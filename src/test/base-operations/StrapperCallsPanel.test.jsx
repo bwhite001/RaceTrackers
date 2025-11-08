@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
@@ -6,15 +7,15 @@ import useBaseOperationsStore from '../../modules/base-operations/store/baseOper
 import TimeUtils from '../../services/timeUtils';
 
 // Mock the store and TimeUtils
-jest.mock('../../modules/base-operations/store/baseOperationsStore');
-jest.mock('../../services/timeUtils');
+vi.mock('../../modules/base-operations/store/baseOperationsStore');
+vi.mock('../../services/timeUtils');
 
 describe('StrapperCallsPanel', () => {
-  const mockLoadStrapperCalls = jest.fn();
-  const mockAddStrapperCall = jest.fn();
-  const mockUpdateStrapperCall = jest.fn();
-  const mockCompleteStrapperCall = jest.fn();
-  const mockDeleteStrapperCall = jest.fn();
+  const mockLoadStrapperCalls = vi.fn();
+  const mockAddStrapperCall = vi.fn();
+  const mockUpdateStrapperCall = vi.fn();
+  const mockCompleteStrapperCall = vi.fn();
+  const mockDeleteStrapperCall = vi.fn();
 
   const mockStrapperCalls = [
     {
@@ -46,7 +47,7 @@ describe('StrapperCallsPanel', () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock store implementation
     useBaseOperationsStore.mockImplementation(() => ({
@@ -229,7 +230,7 @@ describe('StrapperCallsPanel', () => {
   });
 
   it('handles auto-refresh toggle', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     render(<StrapperCallsPanel />);
 
@@ -238,12 +239,12 @@ describe('StrapperCallsPanel', () => {
 
     // Fast-forward 30 seconds
     act(() => {
-      jest.advanceTimersByTime(30000);
+      vi.advanceTimersByTime(30000);
     });
 
     expect(mockLoadStrapperCalls).toHaveBeenCalledTimes(2); // Once on mount, once after timer
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('maintains filter state across refreshes', async () => {

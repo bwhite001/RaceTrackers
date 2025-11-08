@@ -1,4 +1,5 @@
 import React from 'react';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import HotkeysProvider, { useHotkeys } from '../../shared/components/HotkeysProvider';
@@ -28,7 +29,7 @@ describe('HotkeysProvider', () => {
 
   beforeEach(() => {
     // Clear any previous event listeners
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders children correctly', () => {
@@ -42,7 +43,7 @@ describe('HotkeysProvider', () => {
   });
 
   it('registers and triggers hotkeys correctly', () => {
-    const consoleSpy = jest.spyOn(console, 'log');
+    const consoleSpy = vi.spyOn(console, 'log');
     
     render(
       <HotkeysProvider>
@@ -74,7 +75,7 @@ describe('HotkeysProvider', () => {
   });
 
   it('ignores hotkeys when typing in input fields', () => {
-    const consoleSpy = jest.spyOn(console, 'log');
+    const consoleSpy = vi.spyOn(console, 'log');
     
     render(
       <HotkeysProvider>
@@ -149,7 +150,7 @@ describe('HotkeysProvider', () => {
   });
 
   it('disables hotkeys when enabled prop is false', () => {
-    const consoleSpy = jest.spyOn(console, 'log');
+    const consoleSpy = vi.spyOn(console, 'log');
     
     render(
       <HotkeysProvider enabled={false}>
@@ -186,7 +187,7 @@ describe('HotkeysProvider', () => {
   });
 
   it('handles multiple modifier keys correctly', () => {
-    const handler = jest.fn();
+    const handler = vi.fn();
     
     const MultiModifierTest = () => {
       const { registerHotkey } = useHotkeys();
@@ -218,7 +219,7 @@ describe('HotkeysProvider', () => {
   });
 
   it('allows hotkeys in input fields when explicitly allowed', () => {
-    const handler = jest.fn();
+    const handler = vi.fn();
     
     const AllowInInputTest = () => {
       const { registerHotkey } = useHotkeys();
@@ -252,7 +253,7 @@ describe('HotkeysProvider', () => {
   });
 
   it('unregisters hotkeys correctly', () => {
-    const handler = jest.fn();
+    const handler = vi.fn();
     
     const UnregisterTest = () => {
       const { registerHotkey, unregisterHotkey } = useHotkeys();

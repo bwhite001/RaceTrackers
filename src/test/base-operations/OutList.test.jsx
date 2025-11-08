@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
@@ -6,13 +7,13 @@ import useBaseOperationsStore from '../../modules/base-operations/store/baseOper
 import TimeUtils from '../../services/timeUtils';
 
 // Mock the store and TimeUtils
-jest.mock('../../modules/base-operations/store/baseOperationsStore');
-jest.mock('../../services/timeUtils');
+vi.mock('../../modules/base-operations/store/baseOperationsStore');
+vi.mock('../../services/timeUtils');
 
 describe('OutList', () => {
-  const mockLoadOutList = jest.fn();
-  const mockGenerateOutListReport = jest.fn();
-  const mockDownloadReport = jest.fn();
+  const mockLoadOutList = vi.fn();
+  const mockGenerateOutListReport = vi.fn();
+  const mockDownloadReport = vi.fn();
 
   const mockOutList = [
     {
@@ -46,7 +47,7 @@ describe('OutList', () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock store implementation
     useBaseOperationsStore.mockImplementation(() => ({
@@ -121,7 +122,7 @@ describe('OutList', () => {
   });
 
   it('handles print button click', () => {
-    const mockPrint = jest.fn();
+    const mockPrint = vi.fn();
     window.print = mockPrint;
 
     render(<OutList />);
@@ -193,7 +194,7 @@ describe('OutList', () => {
   });
 
   it('handles export errors gracefully', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockGenerateOutListReport.mockRejectedValue(new Error('Export failed'));
 
     render(<OutList />);

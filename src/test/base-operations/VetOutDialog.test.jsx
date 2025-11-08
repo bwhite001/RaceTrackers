@@ -1,19 +1,20 @@
 import React from 'react';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import VetOutDialog from '../../modules/base-operations/components/VetOutDialog';
 import useBaseOperationsStore from '../../modules/base-operations/store/baseOperationsStore';
 
 // Mock the store
-jest.mock('../../modules/base-operations/store/baseOperationsStore');
+vi.mock('../../modules/base-operations/store/baseOperationsStore');
 
 describe('VetOutDialog', () => {
-  const mockVetOutRunner = jest.fn();
-  const mockOnClose = jest.fn();
+  const mockVetOutRunner = vi.fn();
+  const mockOnClose = vi.fn();
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock store implementation
     useBaseOperationsStore.mockImplementation(() => ({
@@ -72,7 +73,7 @@ describe('VetOutDialog', () => {
   it('handles vet-out submission correctly', async () => {
     // Mock current time
     const mockDate = new Date('2024-01-01T12:00:00');
-    jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
+    vi.spyOn(global, 'Date').mockImplementation(() => mockDate);
 
     render(
       <VetOutDialog
@@ -189,7 +190,7 @@ describe('VetOutDialog', () => {
   it('handles "Now" button for time selection', () => {
     // Mock current time
     const mockDate = new Date('2024-01-01T12:00:00');
-    jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
+    vi.spyOn(global, 'Date').mockImplementation(() => mockDate);
 
     render(
       <VetOutDialog

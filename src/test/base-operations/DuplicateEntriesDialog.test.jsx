@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
@@ -5,11 +6,11 @@ import DuplicateEntriesDialog from '../../modules/base-operations/components/Dup
 import TimeUtils from '../../services/timeUtils';
 
 // Mock TimeUtils
-jest.mock('../../services/timeUtils');
+vi.mock('../../services/timeUtils');
 
 describe('DuplicateEntriesDialog', () => {
-  const mockOnClose = jest.fn();
-  const mockOnResolve = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockOnResolve = vi.fn();
 
   const mockDuplicates = [
     {
@@ -44,7 +45,7 @@ describe('DuplicateEntriesDialog', () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock TimeUtils
     TimeUtils.formatTime.mockImplementation(time => new Date(time).toLocaleString());

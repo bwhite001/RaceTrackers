@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
@@ -6,12 +7,12 @@ import useBaseOperationsStore from '../../modules/base-operations/store/baseOper
 import TimeUtils from '../../services/timeUtils';
 
 // Mock the store and TimeUtils
-jest.mock('../../modules/base-operations/store/baseOperationsStore');
-jest.mock('../../services/timeUtils');
+vi.mock('../../modules/base-operations/store/baseOperationsStore');
+vi.mock('../../services/timeUtils');
 
 describe('DeletedEntriesView', () => {
-  const mockLoadDeletedEntries = jest.fn();
-  const mockRestoreEntry = jest.fn();
+  const mockLoadDeletedEntries = vi.fn();
+  const mockRestoreEntry = vi.fn();
 
   const mockDeletedEntries = [
     {
@@ -58,7 +59,7 @@ describe('DeletedEntriesView', () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock store implementation
     useBaseOperationsStore.mockImplementation(() => ({

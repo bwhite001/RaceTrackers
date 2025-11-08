@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
@@ -5,16 +6,16 @@ import ReportsPanel from '../../modules/base-operations/components/ReportsPanel'
 import useBaseOperationsStore from '../../modules/base-operations/store/baseOperationsStore';
 
 // Mock the store
-jest.mock('../../modules/base-operations/store/baseOperationsStore');
+vi.mock('../../modules/base-operations/store/baseOperationsStore');
 
 describe('ReportsPanel', () => {
-  const mockGenerateReport = jest.fn();
-  const mockDownloadReport = jest.fn();
-  const mockPreviewReport = jest.fn();
+  const mockGenerateReport = vi.fn();
+  const mockDownloadReport = vi.fn();
+  const mockPreviewReport = vi.fn();
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock store implementation
     useBaseOperationsStore.mockImplementation(() => ({

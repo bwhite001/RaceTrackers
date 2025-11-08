@@ -1,20 +1,21 @@
 import React from 'react';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import WithdrawalDialog from '../../modules/base-operations/components/WithdrawalDialog';
 import useBaseOperationsStore from '../../modules/base-operations/store/baseOperationsStore';
 
 // Mock the store
-jest.mock('../../modules/base-operations/store/baseOperationsStore');
+vi.mock('../../modules/base-operations/store/baseOperationsStore');
 
 describe('WithdrawalDialog', () => {
-  const mockWithdrawRunner = jest.fn();
-  const mockReverseWithdrawal = jest.fn();
-  const mockOnClose = jest.fn();
+  const mockWithdrawRunner = vi.fn();
+  const mockReverseWithdrawal = vi.fn();
+  const mockOnClose = vi.fn();
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock store implementation
     useBaseOperationsStore.mockImplementation(() => ({
@@ -72,7 +73,7 @@ describe('WithdrawalDialog', () => {
   it('handles withdrawal submission correctly', async () => {
     // Mock current time
     const mockDate = new Date('2024-01-01T12:00:00');
-    jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
+    vi.spyOn(global, 'Date').mockImplementation(() => mockDate);
 
     render(
       <WithdrawalDialog
@@ -203,7 +204,7 @@ describe('WithdrawalDialog', () => {
   it('handles "Now" button for time selection', () => {
     // Mock current time
     const mockDate = new Date('2024-01-01T12:00:00');
-    jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
+    vi.spyOn(global, 'Date').mockImplementation(() => mockDate);
 
     render(
       <WithdrawalDialog

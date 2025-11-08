@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
@@ -6,16 +7,16 @@ import useBaseOperationsStore from '../../modules/base-operations/store/baseOper
 import TimeUtils from '../../services/timeUtils';
 
 // Mock the store and TimeUtils
-jest.mock('../../modules/base-operations/store/baseOperationsStore');
-jest.mock('../../services/timeUtils');
+vi.mock('../../modules/base-operations/store/baseOperationsStore');
+vi.mock('../../services/timeUtils');
 
 describe('BackupRestoreDialog', () => {
-  const mockCreateBackup = jest.fn();
-  const mockRestoreBackup = jest.fn();
-  const mockVerifyBackup = jest.fn();
-  const mockExportBackup = jest.fn();
-  const mockDeleteBackup = jest.fn();
-  const mockOnClose = jest.fn();
+  const mockCreateBackup = vi.fn();
+  const mockRestoreBackup = vi.fn();
+  const mockVerifyBackup = vi.fn();
+  const mockExportBackup = vi.fn();
+  const mockDeleteBackup = vi.fn();
+  const mockOnClose = vi.fn();
 
   const mockBackups = [
     {
@@ -36,7 +37,7 @@ describe('BackupRestoreDialog', () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock store implementation
     useBaseOperationsStore.mockImplementation(() => ({
@@ -143,7 +144,7 @@ describe('BackupRestoreDialog', () => {
     fireEvent.click(screen.getByText('Pre-race backup'));
 
     // Confirm restore
-    window.confirm = jest.fn(() => true);
+    window.confirm = vi.fn(() => true);
     await act(async () => {
       fireEvent.click(screen.getByText('Restore Selected Backup'));
     });
@@ -168,7 +169,7 @@ describe('BackupRestoreDialog', () => {
     fireEvent.click(screen.getByText('Pre-race backup'));
 
     // Try to restore
-    window.confirm = jest.fn(() => true);
+    window.confirm = vi.fn(() => true);
     await act(async () => {
       fireEvent.click(screen.getByText('Restore Selected Backup'));
     });
@@ -187,7 +188,7 @@ describe('BackupRestoreDialog', () => {
     );
 
     // Mock window.confirm
-    window.confirm = jest.fn(() => true);
+    window.confirm = vi.fn(() => true);
 
     // Delete a backup
     const deleteButtons = screen.getAllByTitle('Delete backup');
@@ -286,7 +287,7 @@ describe('BackupRestoreDialog', () => {
     fireEvent.click(screen.getByText('Pre-race backup'));
 
     // Try to restore
-    window.confirm = jest.fn(() => true);
+    window.confirm = vi.fn(() => true);
     await act(async () => {
       fireEvent.click(screen.getByText('Restore Selected Backup'));
     });
