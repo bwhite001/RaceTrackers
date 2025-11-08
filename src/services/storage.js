@@ -282,6 +282,8 @@ export class StorageService {
       const race = await this.getRace(raceId);
       const checkpoints = await this.getCheckpoints(raceId);
       const runners = await this.getRunners(raceId);
+      
+      // Get checkpoint runners if they exist (they may not be initialized yet)
       const checkpointRunners = await this.getCheckpointRunners(raceId);
       
       return {
@@ -291,6 +293,7 @@ export class StorageService {
           startTime: race.startTime,
           minRunner: race.minRunner,
           maxRunner: race.maxRunner,
+          runnerRanges: race.runnerRanges || [], // Include runner ranges if available
           checkpoints: checkpoints.map(cp => ({ number: cp.number, name: cp.name }))
         },
         runners: runners.map(runner => ({
@@ -299,14 +302,15 @@ export class StorageService {
           recordedTime: runner.recordedTime,
           notes: runner.notes
         })),
-        checkpointRunners: checkpointRunners.map(runner => ({
+        // Only include checkpoint runners if they exist
+        checkpointRunners: checkpointRunners.length > 0 ? checkpointRunners.map(runner => ({
           checkpointNumber: runner.checkpointNumber,
           number: runner.number,
           markOffTime: runner.markOffTime,
           callInTime: runner.callInTime,
           status: runner.status,
           notes: runner.notes
-        })),
+        })) : [],
         exportedAt: new Date().toISOString(),
         version: '3.0.0',
         exportType: 'full-race-data'
