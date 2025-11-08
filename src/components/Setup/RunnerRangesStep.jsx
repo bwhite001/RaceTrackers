@@ -1,4 +1,24 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
+import {
+  FormGroup,
+  FormLabel,
+  FormHelperText,
+  FormErrorMessage,
+  Input,
+  Button,
+  ButtonGroup,
+  Card,
+  CardBody,
+  CardHeader,
+  Badge
+} from '../../design-system/components';
+import { 
+  UsersIcon, 
+  ArrowUpTrayIcon, 
+  TrashIcon, 
+  PlusIcon,
+  DocumentTextIcon
+} from '@heroicons/react/24/outline';
 
 const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCreate, isLoading }) => {
   // Initialize with default range if no initial ranges provided
@@ -14,8 +34,9 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
   const [newRange, setNewRange] = useState({ min: '201', max: '300', description: '' });
   const [validationErrors, setValidationErrors] = useState({});
   const [rangeInput, setRangeInput] = useState('');
+  const [csvFile, setCsvFile] = useState(null);
 
-  // Add new state for tracking all individual runner numbers
+  // Track all individual runner numbers
   const [allRunnerNumbers, setAllRunnerNumbers] = useState(new Set(
     (initialRanges.length > 0 ? initialRanges : defaultRange).flatMap(range => 
       range.individualNumbers || 
@@ -63,126 +84,57 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
     
     const duplicates = numbersToCheck.filter(num => allRunnerNumbers.has(num));
     if (duplicates.length > 0) {
-      errors.overlap = `Runner number(s) ${duplicates.join(', ')} already exists`;
+      errors.duplicates = `Numbers already in use: ${duplicates.join(', ')}`;
     }
-    
-    return errors;
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
-  const parseRangeInput = (input) => {
-    // Handle ranges like "100-200"
-    const rangeMatch = input.match(/^(\d+)\s*[-–]\s*(\d+)$/);
-    if (rangeMatch) {
-      const min = parseInt(rangeMatch[1]);
-      const max = parseInt(rangeMatch[2]);
-      if (min < max) {
-        const numbers = Array.from(
-          { length: max - min + 1 }, 
-          (_, i) => min + i
-        );
-        return { 
-          min: min.toString(), 
-          max: max.toString(),
-          individualNumbers: numbers
-        };
-      }
-    }
-    
-    // Handle individual numbers like "33, 34"
-    const individualMatch = input.match(/^[\d\s,]+$/);
-    if (individualMatch) {
-      const numbers = [...new Set(input.split(/[,\s]+/)
-        .map(n => n.trim())
-        .filter(n => n && !isNaN(n))
-        .map(n => parseInt(n))
-        .filter(n => n > 0)
-        .sort((a, b) => a - b))];
+  const handleAddRange = () => {
+    if (validateRange(newRange.min, newRange.max)) {
+      const min = parseInt(newRange.min);
+      const max = parseInt(newRange.max);
+      const count = max - min + 1;
+      const individualNumbers = Array.from({ length: count }, (_, i) => min + i);
       
-      if (numbers.length > 0) {
-        return { 
-          min: Math.min(...numbers).toString(),
-          max: Math.max(...numbers).toString(),
-          individualNumbers: numbers
-        };
-      }
-    }
-    
-    return null;
-  };
-
-  const handleRangeInputChange = (e) => {
-    const value = e.target.value;
-    setRangeInput(value);
-    
-    const parsed = parseRangeInput(value);
-    if (parsed) {
-      setNewRange(prev => ({
-        ...prev,
-        min: parsed.min,
-        max: parsed.max,
-        isIndividual: parsed.isIndividual || false,
-        individualNumbers: parsed.individualNumbers || null
-      }));
-    }
-  };
-
-  const handleNewRangeChange = (field, value) => {
-    setNewRange(prev => ({ ...prev, [field]: value }));
-    
-    // Clear validation errors
-    if (validationErrors[field] || validationErrors.overlap) {
+      const range = {
+        min,
+        max,
+        description: newRange.description || `Runners ${min}-${max}`,
+        count,
+        individualNumbers
+      };
+      
+      setRanges([...ranges, range]);
+      setAllRunnerNumbers(new Set([...allRunnerNumbers, ...individualNumbers]));
+      setNewRange({ min: (max + 1).toString(), max: (max + 100).toString(), description: '' });
       setValidationErrors({});
     }
   };
 
-  const handleAddRange = () => {
-    const numbers = newRange.individualNumbers || 
-      Array.from(
-        { length: parseInt(newRange.max) - parseInt(newRange.min) + 1 }, 
-        (_, i) => parseInt(newRange.min) + i
-      );
+  const handleRemoveRange = (index) => {
+    const removedRange = ranges[index];
+    const updatedRanges = ranges.filter((_, i) => i !== index);
+    setRanges(updatedRanges);
     
-    const errors = validateRange(newRange.min, newRange.max, numbers);
-    
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
+    // Remove numbers from tracking set
+    const newNumbers = new Set(allRunnerNumbers);
+    removedRange.individualNumbers.forEach(num => newNumbers.delete(num));
+    setAllRunnerNumbers(newNumbers);
+  };
 
-    const range = {
-      min: parseInt(newRange.min),
-      max: parseInt(newRange.max),
-      description: newRange.description.trim() || 
-        `Runners ${newRange.min}-${newRange.max}`,
-      count: numbers.length,
-      individualNumbers: numbers
-    };
-
-    // Update all runner numbers
-    setAllRunnerNumbers(prev => new Set([...prev, ...numbers]));
-    
-    setRanges(prev => [...prev, range]);
-    
-    // Calculate next range starting from the last max + 1
-    const nextMin = parseInt(newRange.max) + 1;
-    const nextMax = nextMin + 100;
-    setNewRange({ min: nextMin.toString(), max: nextMax.toString(), description: '' });
-    setRangeInput('');
+  const handleRangeInputChange = (e) => {
+    setRangeInput(e.target.value);
     setValidationErrors({});
   };
 
-  const handleRemoveRange = (index) => {
-    const rangeToRemove = ranges[index];
-    const numbersToRemove = new Set(rangeToRemove.individualNumbers);
-    
-    // Remove numbers from allRunnerNumbers
-    setAllRunnerNumbers(prev => {
-      const newSet = new Set(prev);
-      numbersToRemove.forEach(num => newSet.delete(num));
-      return newSet;
-    });
-    
-    setRanges(prev => prev.filter((_, i) => i !== index));
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setCsvFile(file);
+      setValidationErrors({});
+    }
   };
 
   const handleCreateRace = () => {
@@ -190,339 +142,208 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
       setValidationErrors({ general: 'At least one runner range is required' });
       return;
     }
-
-    // Pass the ranges with individual numbers
     onCreate(ranges);
   };
 
-  const handleCsvUpload = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+  const getTotalRunners = () => ranges.reduce((total, range) => total + range.count, 0);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const text = e.target.result;
-        const rows = text.split('\n')
-          .map(row => row.trim())
-          .filter(row => row) // Remove empty lines
-          .map(row => {
-            const [number, description = ''] = row.split(',').map(cell => cell.trim());
-            return { number: parseInt(number), description };
-          })
-          .filter(row => !isNaN(row.number) && row.number > 0);
-
-        // Group consecutive numbers into ranges
-        const ranges = [];
-        let currentRange = null;
-
-        rows.sort((a, b) => a.number - b.number).forEach((row) => {
-          if (!currentRange) {
-            currentRange = {
-              min: row.number,
-              max: row.number,
-              description: row.description,
-              numbers: [row.number],
-              notes: { [row.number]: row.description }
-            };
-          } else if (row.number === currentRange.max + 1) {
-            currentRange.max = row.number;
-            currentRange.numbers.push(row.number);
-            currentRange.notes[row.number] = row.description;
-          } else {
-            // Finish current range
-            ranges.push({
-              ...currentRange,
-              count: currentRange.numbers.length,
-              individualNumbers: currentRange.numbers,
-              isIndividual: true
-            });
-            // Start new range
-            currentRange = {
-              min: row.number,
-              max: row.number,
-              description: row.description,
-              numbers: [row.number],
-              notes: { [row.number]: row.description }
-            };
-          }
-        });
-
-        // Add last range
-        if (currentRange) {
-          ranges.push({
-            ...currentRange,
-            count: currentRange.numbers.length,
-            individualNumbers: currentRange.numbers,
-            isIndividual: true
-          });
-        }
-
-        // Validate for duplicates with existing ranges
-        const duplicates = ranges
-          .flatMap(range => range.individualNumbers)
-          .filter(num => allRunnerNumbers.has(num));
-
-        if (duplicates.length > 0) {
-          alert(`Duplicate runner numbers found: ${duplicates.join(', ')}`);
-          return;
-        }
-
-        // Add new ranges
-        ranges.forEach(range => {
-          setAllRunnerNumbers(prev => new Set([...prev, ...range.individualNumbers]));
-        });
-        setRanges(prev => [...prev, ...ranges]);
-      } catch (error) {
-        console.error('Error parsing CSV:', error);
-        alert('Error parsing CSV file. Please ensure it\'s properly formatted.');
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  const getTotalRunners = () => {
-    return ranges.reduce((total, range) => total + range.count, 0);
-  };
-
-  const getRunnerNumbers = () => {
-    const numbers = [];
-    ranges.forEach(range => {
-      if (range.isIndividual && range.individualNumbers) {
-        // Add individual numbers
-        numbers.push(...range.individualNumbers);
-      } else {
-        // Add range numbers
-        for (let i = range.min; i <= range.max; i++) {
-          numbers.push(i);
-        }
-      }
-    });
-    return numbers.sort((a, b) => a - b);
-  };
+  const getRunnerNumbers = () => ranges.flatMap(range => range.individualNumbers);
 
   return (
-    <div className="space-y-6">
-      {/* Race Details Summary */}
-      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-          Race Details
-        </h3>
-        <div className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-          <p><strong>Name:</strong> {raceDetails?.name || 'N/A'}</p>
-          <p><strong>Date & Time:</strong> {raceDetails?.date || 'N/A'} at {raceDetails?.startTime || 'N/A'}</p>
-          <p><strong>Checkpoints:</strong> {raceDetails?.numCheckpoints || 0} ({raceDetails?.checkpoints?.map(cp => cp.name).join(', ') || 'N/A'})</p>
-        </div>
-      </div>
-
-      {/* Add Runner Range */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-          Add Runner Ranges
-        </h3>
-        
-        {/* Quick Range Input */}
-        <div>
-          <label htmlFor="rangeInput" className="form-label">
-            Quick Range Input
-          </label>
-          <input
-            type="text"
-            id="rangeInput"
-            value={rangeInput}
-            onChange={handleRangeInputChange}
-            className="form-input"
-            placeholder="e.g., 100-200, 300-450, or 33, 34, 35"
-          />
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Enter a range like "100-200" or individual numbers like "33, 34, 35" to quickly fill the fields below
-          </p>
-        </div>
-
-        {/* Individual Range Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label htmlFor="minRunner" className="form-label">
-              From Runner Number *
-            </label>
-            <input
-              type="number"
-              id="minRunner"
-              value={newRange.min}
-              onChange={(e) => handleNewRangeChange('min', e.target.value)}
-              className={`form-input ${validationErrors.min ? 'border-red-500' : ''}`}
-              placeholder="100"
-              min="1"
-            />
-            {validationErrors.min && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {validationErrors.min}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="maxRunner" className="form-label">
-              To Runner Number *
-            </label>
-            <input
-              type="number"
-              id="maxRunner"
-              value={newRange.max}
-              onChange={(e) => handleNewRangeChange('max', e.target.value)}
-              className={`form-input ${validationErrors.max ? 'border-red-500' : ''}`}
-              placeholder="200"
-              min="1"
-            />
-            {validationErrors.max && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {validationErrors.max}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="description" className="form-label">
-              Description (Optional)
-            </label>
-            <input
-              type="text"
-              id="description"
-              value={newRange.description}
-              onChange={(e) => handleNewRangeChange('description', e.target.value)}
-              className="form-input"
-              placeholder="e.g., Elite runners"
-            />
-          </div>
-        </div>
-
-        {/* Overlap Error */}
-        {validationErrors.overlap && (
-          <p className="text-sm text-red-600 dark:text-red-400">
-            {validationErrors.overlap}
-          </p>
-        )}
-
-        {/* Range Preview */}
-        {newRange.min && newRange.max && !validationErrors.min && !validationErrors.max && !validationErrors.overlap && (
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              {newRange.isIndividual ? (
-                <>Individual runners: {newRange.individualNumbers.join(', ')} ({newRange.individualNumbers.length} runners)</>
-              ) : (
-                <>Range: {newRange.min}-{newRange.max} ({parseInt(newRange.max) - parseInt(newRange.min) + 1} runners)</>
-              )}
-            </p>
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={handleAddRange}
-          disabled={!newRange.min || !newRange.max || Object.keys(validationErrors).length > 0}
-          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Add Range
-        </button>
-      </div>
-
-      {/* CSV Import */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-          Import Runners from CSV
-        </h3>
-        <div>
-          <label htmlFor="csvUpload" className="form-label">
-            Upload CSV File
-          </label>
-          <input
-            type="file"
-            id="csvUpload"
-            accept=".csv"
-            onChange={handleCsvUpload}
-            className="form-input"
-          />
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Upload a CSV file with runner numbers and descriptions (optional).<br />
-            Format: number,description<br />
-            Example: 100,Elite Runner
-          </p>
-        </div>
-      </div>
-
-      {/* Current Ranges */}
-      {ranges.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-            Configured Runner Ranges
+    <div className="space-y-8">
+      {/* Quick Range Input */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-2 mb-4">
+          <UsersIcon className="w-5 h-5 text-primary-500" />
+          <h3 className="text-lg font-semibold text-navy-900 dark:text-white">
+            Add Runner Numbers
           </h3>
-          
-          <div className="space-y-3">
-            {ranges.map((range, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+          <Badge variant="danger" size="sm">Required</Badge>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <h4 className="text-sm font-medium">Quick Range Input</h4>
+          </CardHeader>
+          <CardBody className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <FormGroup>
+                <FormLabel htmlFor="min">Minimum Number</FormLabel>
+                <Input
+                  id="min"
+                  type="number"
+                  value={newRange.min}
+                  onChange={(e) => setNewRange({ ...newRange, min: e.target.value })}
+                  error={validationErrors.min}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel htmlFor="max">Maximum Number</FormLabel>
+                <Input
+                  id="max"
+                  type="number"
+                  value={newRange.max}
+                  onChange={(e) => setNewRange({ ...newRange, max: e.target.value })}
+                  error={validationErrors.max}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel htmlFor="description">Description (Optional)</FormLabel>
+                <Input
+                  id="description"
+                  type="text"
+                  value={newRange.description}
+                  onChange={(e) => setNewRange({ ...newRange, description: e.target.value })}
+                  placeholder="e.g., Elite Runners"
+                />
+              </FormGroup>
+            </div>
+
+            {(validationErrors.min || validationErrors.max || validationErrors.overlap || validationErrors.duplicates) && (
+              <FormErrorMessage>
+                {validationErrors.min || validationErrors.max || validationErrors.overlap || validationErrors.duplicates}
+              </FormErrorMessage>
+            )}
+
+            <Button
+              variant="primary"
+              onClick={handleAddRange}
+              leftIcon={<PlusIcon className="w-5 h-5" />}
+            >
+              Add Range
+            </Button>
+          </CardBody>
+        </Card>
+
+        {/* CSV Import */}
+        <Card>
+          <CardHeader>
+            <h4 className="text-sm font-medium">Import from CSV</h4>
+          </CardHeader>
+          <CardBody>
+            <div className="flex items-center gap-4">
+              <Button
+                variant="secondary"
+                leftIcon={<ArrowUpTrayIcon className="w-5 h-5" />}
+                onClick={() => document.getElementById('csvInput').click()}
               >
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900 dark:text-white">
-                    {range.description}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">
-                    Runners {range.min}-{range.max} ({range.count} runners)
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveRange(index)}
-                  className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                  title="Remove range"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
-            ))}
+                Upload CSV
+              </Button>
+              <input
+                id="csvInput"
+                type="file"
+                accept=".csv"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              {csvFile && (
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {csvFile.name}
+                </span>
+              )}
+            </div>
+            <FormHelperText>
+              Upload a CSV file with runner numbers in the first column
+            </FormHelperText>
+          </CardBody>
+        </Card>
+      </div>
+
+      {/* Runner Ranges List */}
+      {ranges.length > 0 && (
+        <div className="space-y-6">
+          <div className="flex items-center gap-2 mb-4">
+            <DocumentTextIcon className="w-5 h-5 text-primary-500" />
+            <h3 className="text-lg font-semibold text-navy-900 dark:text-white">
+              Configured Ranges
+            </h3>
+            <Badge variant="success" size="sm">
+              {getTotalRunners()} Runners
+            </Badge>
           </div>
 
-          {/* Total Summary */}
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-green-800 dark:text-green-200 mb-2">
-              Race Configuration Summary
-            </h4>
-            <div className="text-sm text-green-700 dark:text-green-300 space-y-1">
-              <p><strong>Total Runners:</strong> {getTotalRunners()}</p>
-              <p><strong>Runner Ranges:</strong> {ranges.length}</p>
-              <p><strong>Number Range:</strong> {Math.min(...getRunnerNumbers())}-{Math.max(...getRunnerNumbers())}</p>
-            </div>
-          </div>
+          <Card>
+            <CardBody>
+              <div className="space-y-4">
+                {ranges.map((range, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="primary">
+                          {range.min}-{range.max}
+                        </Badge>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          ({range.count} runners)
+                        </span>
+                      </div>
+                      {range.description && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {range.description}
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleRemoveRange(index)}
+                      leftIcon={<TrashIcon className="w-5 h-5" />}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardBody>
+          </Card>
         </div>
       )}
 
-      {/* General Error */}
+      {/* Summary Card */}
+      <Card variant="elevated" className="bg-green-50 dark:bg-green-900/20">
+        <CardBody>
+          <h4 className="text-sm font-medium text-green-800 dark:text-green-200 mb-2">
+            Runner Configuration Summary
+          </h4>
+          <div className="text-sm text-green-700 dark:text-green-300 space-y-1">
+            <p><strong>Total Runners:</strong> {getTotalRunners()}</p>
+            <p><strong>Number Ranges:</strong> {ranges.length}</p>
+            {ranges.length > 0 && (
+              <p>
+                <strong>Number Range:</strong> {Math.min(...getRunnerNumbers())}-{Math.max(...getRunnerNumbers())}
+              </p>
+            )}
+          </div>
+        </CardBody>
+      </Card>
+
+      {/* Error Message */}
       {validationErrors.general && (
-        <p className="text-sm text-red-600 dark:text-red-400">
-          {validationErrors.general}
-        </p>
+        <FormErrorMessage>{validationErrors.general}</FormErrorMessage>
       )}
 
       {/* Action Buttons */}
       <div className="flex justify-between pt-4">
-        <button
-          type="button"
+        <Button
+          variant="ghost"
           onClick={onBack}
-          className="btn-secondary"
+          type="button"
         >
           Back: Race Details
-        </button>
-        <button
-          type="button"
-          onClick={handleCreateRace}
-          disabled={isLoading || ranges.length === 0}
-          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? 'Creating Race...' : 'Create Race'}
-        </button>
+        </Button>
+        <ButtonGroup>
+          <Button
+            variant="primary"
+            onClick={handleCreateRace}
+            loading={isLoading}
+            disabled={ranges.length === 0}
+          >
+            Create Race
+          </Button>
+        </ButtonGroup>
       </div>
     </div>
   );

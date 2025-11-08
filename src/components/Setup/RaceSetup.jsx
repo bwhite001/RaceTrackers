@@ -3,11 +3,25 @@ import { useNavigate } from 'react-router-dom';
 import { withOperationExit } from '../../shared/components/ExitOperationModal';
 import useNavigationStore, { MODULE_TYPES } from '../../shared/store/navigationStore';
 import useRaceMaintenanceStore from '../../modules/race-maintenance/store/raceMaintenanceStore';
+import {
+  Container,
+  Section,
+  Card,
+  CardBody,
+  Button,
+  Badge
+} from '../../design-system/components';
+import StepIndicator from './StepIndicator';
 
 import RaceDetailsStep from './RaceDetailsStep';
 import RunnerRangesStep from './RunnerRangesStep';
 import LoadingSpinner from '../Layout/LoadingSpinner';
 import ErrorMessage from '../Layout/ErrorMessage';
+
+const steps = [
+  { number: 1, label: 'Race Details', description: 'Configure race information and checkpoints' },
+  { number: 2, label: 'Runner Setup', description: 'Set up runner number ranges' }
+];
 
 const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const navigate = useNavigate();
@@ -20,16 +34,13 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
     runnerRanges: []
   });
   
-  // Store hooks
   const { startOperation } = useNavigationStore();
   const { createRace, loading, error } = useRaceMaintenanceStore();
 
-  // Initialize race maintenance operation
   useEffect(() => {
     startOperation(MODULE_TYPES.RACE_MAINTENANCE);
   }, [startOperation]);
 
-  // Track form changes
   useEffect(() => {
     const hasChanges = formData.name || formData.date || formData.startTime || 
                       formData.checkpoints.length > 0 || formData.runnerRanges.length > 0;
@@ -37,7 +48,6 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
   }, [formData, setHasUnsavedChanges]);
 
   const handleNext = (stepData) => {
-    // Update form data with step data if provided
     if (stepData) {
       setFormData(prev => ({
         ...prev,
@@ -74,89 +84,71 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Setup Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold dark:text-white">
-          Race Setup
-        </h1>
-        <div className="space-x-4">
-          <button
-            onClick={onExitAttempt}
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-          >
-            Exit Setup
-          </button>
-        </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Fixed Header */}
+      <div className="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <Container maxWidth="xl">
+          <Section spacing="tight">
+            <div className="flex items-center justify-between py-4">
+              <div>
+                <h1 className="text-2xl font-bold text-navy-900 dark:text-white">
+                  {steps[currentStep].label}
+                </h1>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {steps[currentStep].description}
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <Badge variant="primary">
+                  Step {currentStep + 1} of {steps.length}
+                </Badge>
+                <Button
+                  variant="ghost"
+                  onClick={onExitAttempt}
+                >
+                  Exit Setup
+                </Button>
+              </div>
+            </div>
+          </Section>
+        </Container>
       </div>
 
-      {/* Progress Steps */}
-      <div className="flex justify-center mb-8">
-        <div className="flex items-center">
-          <StepIndicator
-            number={1}
-            title="Race Details"
-            active={currentStep === 0}
-            completed={currentStep > 0}
-          />
-          <StepConnector />
-          <StepIndicator
-            number={2}
-            title="Runner Setup"
-            active={currentStep === 1}
-            completed={currentStep > 1}
-          />
-        </div>
-      </div>
+      {/* Main Content */}
+      <Container maxWidth="xl" className="py-8">
+        {/* Step Indicators */}
+        <Section spacing="normal" className="mb-8">
+          <StepIndicator steps={steps} currentStep={currentStep} />
+        </Section>
 
-      {/* Step Content */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        {currentStep === 0 && (
-          <RaceDetailsStep
-            initialData={formData}
-            onNext={handleNext}
-            onCancel={onExitAttempt}
-            isLoading={loading}
-          />
-        )}
-        {currentStep === 1 && (
-          <RunnerRangesStep
-            raceDetails={formData}
-            initialRanges={formData.runnerRanges || []}
-            onBack={handleBack}
-            onCreate={handleSubmit}
-            isLoading={loading}
-          />
-        )}
-      </div>
+        {/* Form Content */}
+        <Section spacing="normal">
+          <Card variant="elevated" className="overflow-visible">
+            <CardBody className="p-8">
+              {currentStep === 0 && (
+                <RaceDetailsStep
+                  data={formData}
+                  onUpdate={setFormData}
+                  onNext={handleNext}
+                  onCancel={onExitAttempt}
+                  isLoading={loading}
+                />
+              )}
+              {currentStep === 1 && (
+                <RunnerRangesStep
+                  raceDetails={formData}
+                  initialRanges={formData.runnerRanges || []}
+                  onBack={handleBack}
+                  onCreate={handleSubmit}
+                  isLoading={loading}
+                />
+              )}
+            </CardBody>
+          </Card>
+        </Section>
+      </Container>
     </div>
   );
 };
 
-// Step Indicator Component
-const StepIndicator = ({ number, title, active, completed }) => (
-  <div className="flex items-center">
-    <div
-      className={`w-8 h-8 rounded-full flex items-center justify-center ${
-        completed
-          ? 'bg-green-500 text-white'
-          : active
-          ? 'bg-blue-500 text-white'
-          : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-      }`}
-    >
-      {completed ? '✓' : number}
-    </div>
-    <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-      {title}
-    </span>
-  </div>
-);
-
-// Step Connector Component
-const StepConnector = () => (
-  <div className="w-16 h-px bg-gray-300 dark:bg-gray-600 mx-4" />
-);
-
-// Wrap with operation exit handling
 export default withOperationExit(RaceSetup);

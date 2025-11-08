@@ -20,6 +20,7 @@
     "screenshots:all": "node final-screenshots.js"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "date-fns": "^2.30.0",
     "dexie": "^3.2.4",
     "puppeteer": "^24.12.1",

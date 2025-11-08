@@ -1,7 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import {
+  FormGroup,
+  FormLabel,
+  FormHelperText,
+  FormErrorMessage,
+  Input,
+  Select,
+  Button,
+  ButtonGroup,
+  Card,
+  CardBody,
+  Badge
+} from '../../design-system/components';
+import { DocumentIcon, CalendarIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import TimeUtils from '../../services/timeUtils.js';
 
-const RaceDetailsStep = ({ data, onUpdate, onNext, isLoading }) => {
+const RaceDetailsStep = ({ data, onUpdate, onNext, onCancel, isLoading }) => {
   const [formData, setFormData] = useState({
     name: '',
     date: TimeUtils.getTodayDateString(),
@@ -12,27 +26,69 @@ const RaceDetailsStep = ({ data, onUpdate, onNext, isLoading }) => {
   });
 
   const [validationErrors, setValidationErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const validateField = (name, value) => {
+    let error = '';
+    switch (name) {
+      case 'name':
+        if (!value?.trim()) {
+          error = 'Race name is required';
+        } else if (value.trim().length < 5) {
+          error = 'Race name must be at least 5 characters';
+        }
+        break;
+      case 'date':
+        if (!value) {
+          error = 'Race date is required';
+        } else if (!TimeUtils.validateDateString(value)) {
+          error = 'Invalid date format';
+        } else {
+          const raceDate = new Date(value);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          if (raceDate < today) {
+            error = 'Race date cannot be in the past';
+          }
+        }
+        break;
+      case 'startTime':
+        if (!value) {
+          error = 'Start time is required';
+        }
+        break;
+      case 'numCheckpoints':
+        const numCheckpoints = parseInt(value);
+        if (!numCheckpoints || numCheckpoints < 1) {
+          error = 'At least one checkpoint is required';
+        } else if (numCheckpoints > 10) {
+          error = 'Maximum 10 checkpoints allowed';
+        }
+        break;
+      default:
+        break;
+    }
+    return error;
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const updatedData = { ...formData, [name]: value };
     setFormData(updatedData);
     
-    // Notify parent of changes
     if (onUpdate) {
       onUpdate(updatedData);
     }
     
-    // Clear validation error for this field
-    if (validationErrors[name]) {
-      setValidationErrors(prev => ({ ...prev, [name]: '' }));
+    if (submitted) {
+      const error = validateField(name, value);
+      setValidationErrors(prev => ({ ...prev, [name]: error }));
     }
   };
 
   const handleCheckpointCountChange = (e) => {
     const numCheckpoints = parseInt(e.target.value) || 1;
     
-    // Update checkpoints array
     const checkpoints = [];
     for (let i = 1; i <= numCheckpoints; i++) {
       const existingCheckpoint = formData.checkpoints.find(cp => cp.number === i);
@@ -50,14 +106,13 @@ const RaceDetailsStep = ({ data, onUpdate, onNext, isLoading }) => {
     
     setFormData(updatedData);
     
-    // Notify parent of changes
     if (onUpdate) {
       onUpdate(updatedData);
     }
     
-    // Clear validation errors
-    if (validationErrors.numCheckpoints) {
-      setValidationErrors(prev => ({ ...prev, numCheckpoints: '' }));
+    if (submitted) {
+      const error = validateField('numCheckpoints', numCheckpoints);
+      setValidationErrors(prev => ({ ...prev, numCheckpoints: error }));
     }
   };
 
@@ -67,196 +122,194 @@ const RaceDetailsStep = ({ data, onUpdate, onNext, isLoading }) => {
     const updatedData = { ...formData, checkpoints };
     setFormData(updatedData);
     
-    // Notify parent of changes
     if (onUpdate) {
       onUpdate(updatedData);
     }
   };
 
-  const validateForm = () => {
-    const errors = {};
-
-    // Name validation
-    if (!formData.name.trim()) {
-      errors.name = 'Race name is required';
-    }
-
-    // Date validation
-    if (!formData.date) {
-      errors.date = 'Race date is required';
-    } else if (!TimeUtils.validateDateString(formData.date)) {
-      errors.date = 'Invalid date format';
-    }
-
-    // Start time validation
-    if (!formData.startTime) {
-      errors.startTime = 'Start time is required';
-    } else if (!TimeUtils.parseTimeInput(formData.startTime)) {
-      errors.startTime = 'Invalid time format (use HH:MM)';
-    }
-
-    // Checkpoint validation
-    if (formData.numCheckpoints < 1 || formData.numCheckpoints > 10) {
-      errors.numCheckpoints = 'Number of checkpoints must be between 1 and 10';
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
+    setSubmitted(true);
+
+    const errors = {};
+    const fields = ['name', 'date', 'startTime', 'numCheckpoints'];
+    fields.forEach(field => {
+      const error = validateField(field, formData[field]);
+      if (error) {
+        errors[field] = error;
+      }
+    });
+
+    setValidationErrors(errors);
+
+    if (Object.keys(errors).length === 0) {
+      onNext(formData);
       return;
     }
 
-    onNext(formData);
+    const firstErrorField = Object.keys(errors)[0];
+    const element = document.getElementById(firstErrorField);
+    if (element) {
+      element.focus();
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Race Name */}
-      <div>
-        <label htmlFor="name" className="form-label">
-          Race Name *
-        </label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleInputChange}
-          className={`form-input ${validationErrors.name ? 'border-red-500' : ''}`}
-          placeholder="Enter race name (e.g., Annual Marathon 2025)"
-        />
-        {validationErrors.name && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-            {validationErrors.name}
-          </p>
-        )}
-      </div>
-
-      {/* Race Date and Time */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="date" className="form-label">
-            Race Date *
-          </label>
-          <input
-            type="date"
-            id="date"
-            name="date"
-            value={formData.date}
-            onChange={handleInputChange}
-            className={`form-input ${validationErrors.date ? 'border-red-500' : ''}`}
-          />
-          {validationErrors.date && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {validationErrors.date}
-            </p>
-          )}
+    <form onSubmit={handleSubmit} className="space-y-10" noValidate>
+      {/* Basic Race Information */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-2 pb-4 border-b border-gray-200 dark:border-gray-700">
+          <DocumentIcon className="w-5 h-5 text-primary-500" />
+          <h3 className="text-lg font-semibold text-navy-900 dark:text-white">
+            Basic Race Information
+          </h3>
+          <Badge variant="danger" size="sm">Required</Badge>
         </div>
 
-        <div>
-          <label htmlFor="startTime" className="form-label">
-            Start Time *
-          </label>
-          <input
-            type="time"
-            id="startTime"
-            name="startTime"
-            value={formData.startTime}
+        <FormGroup>
+          <FormLabel htmlFor="name" required>Race Name</FormLabel>
+          <Input
+            id="name"
+            name="name"
+            type="text"
+            value={formData.name}
             onChange={handleInputChange}
-            className={`form-input ${validationErrors.startTime ? 'border-red-500' : ''}`}
+            placeholder="Enter race name (e.g., Annual Marathon 2025)"
+            error={!!validationErrors.name}
+            size="lg"
+            leftIcon={<DocumentIcon className="w-5 h-5" />}
           />
-          {validationErrors.startTime && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {validationErrors.startTime}
-            </p>
+          {validationErrors.name && (
+            <FormErrorMessage>{validationErrors.name}</FormErrorMessage>
           )}
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Default is 6:00 AM
-          </p>
+          <FormHelperText>
+            Choose a descriptive name that includes the year
+          </FormHelperText>
+        </FormGroup>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormGroup>
+            <FormLabel htmlFor="date" required>Race Date</FormLabel>
+            <Input
+              id="date"
+              name="date"
+              type="date"
+              value={formData.date}
+              onChange={handleInputChange}
+              error={!!validationErrors.date}
+              leftIcon={<CalendarIcon className="w-5 h-5" />}
+            />
+            {validationErrors.date && (
+              <FormErrorMessage>{validationErrors.date}</FormErrorMessage>
+            )}
+          </FormGroup>
+
+          <FormGroup>
+            <FormLabel htmlFor="startTime" required>Start Time</FormLabel>
+            <Input
+              id="startTime"
+              name="startTime"
+              type="time"
+              value={formData.startTime}
+              onChange={handleInputChange}
+              error={!!validationErrors.startTime}
+              leftIcon={<ClockIcon className="w-5 h-5" />}
+            />
+            {validationErrors.startTime && (
+              <FormErrorMessage>{validationErrors.startTime}</FormErrorMessage>
+            )}
+            <FormHelperText>Default is 6:00 AM</FormHelperText>
+          </FormGroup>
         </div>
       </div>
 
       {/* Checkpoint Configuration */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-          Checkpoint Configuration
-        </h3>
-        
-        <div>
-          <label htmlFor="numCheckpoints" className="form-label">
-            Number of Checkpoints *
-          </label>
-          <select
+      <div className="space-y-6">
+        <div className="flex items-center gap-2 pb-4 border-b border-gray-200 dark:border-gray-700">
+          <MapPinIcon className="w-5 h-5 text-primary-500" />
+          <h3 className="text-lg font-semibold text-navy-900 dark:text-white">
+            Checkpoint Configuration
+          </h3>
+          <Badge variant="danger" size="sm">Required</Badge>
+        </div>
+
+        <FormGroup>
+          <FormLabel htmlFor="numCheckpoints" required>Number of Checkpoints</FormLabel>
+          <Select
             id="numCheckpoints"
+            name="numCheckpoints"
             value={formData.numCheckpoints}
             onChange={handleCheckpointCountChange}
-            className={`form-input ${validationErrors.numCheckpoints ? 'border-red-500' : ''}`}
+            error={!!validationErrors.numCheckpoints}
           >
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
               <option key={num} value={num}>{num}</option>
             ))}
-          </select>
+          </Select>
           {validationErrors.numCheckpoints && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {validationErrors.numCheckpoints}
-            </p>
+            <FormErrorMessage>{validationErrors.numCheckpoints}</FormErrorMessage>
           )}
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <FormHelperText>
             Select the number of checkpoints for this race
-          </p>
-        </div>
+          </FormHelperText>
+        </FormGroup>
 
-        {/* Checkpoint Names */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Checkpoint Names (Optional)
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {formData.checkpoints.map((checkpoint, index) => (
-              <div key={checkpoint.number}>
-                <label htmlFor={`checkpoint-${index}`} className="form-label text-sm">
+              <FormGroup key={checkpoint.number}>
+                <FormLabel htmlFor={`checkpoint-${index}`}>
                   Checkpoint {checkpoint.number}
-                </label>
-                <input
-                  type="text"
+                </FormLabel>
+                <Input
                   id={`checkpoint-${index}`}
                   value={checkpoint.name}
                   onChange={(e) => handleCheckpointNameChange(index, e.target.value)}
-                  className="form-input"
                   placeholder={`Checkpoint ${checkpoint.number}`}
+                  leftIcon={<MapPinIcon className="w-5 h-5" />}
                 />
-              </div>
+              </FormGroup>
             ))}
           </div>
         </div>
       </div>
 
       {/* Race Summary */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
-          Race Summary
-        </h4>
-        <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-          <p><strong>Name:</strong> {formData.name || 'Not specified'}</p>
-          <p><strong>Date & Time:</strong> {formData.date} at {formData.startTime}</p>
-          <p><strong>Checkpoints:</strong> {formData.numCheckpoints} ({formData.checkpoints.map(cp => cp.name).join(', ')})</p>
-        </div>
-      </div>
+      <Card variant="elevated" className="bg-blue-50 dark:bg-blue-900/20">
+        <CardBody>
+          <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
+            Race Summary
+          </h4>
+          <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+            <p><strong>Name:</strong> {formData.name || 'Not specified'}</p>
+            <p><strong>Date & Time:</strong> {formData.date} at {formData.startTime}</p>
+            <p><strong>Checkpoints:</strong> {formData.numCheckpoints} ({formData.checkpoints.map(cp => cp.name).join(', ')})</p>
+          </div>
+        </CardBody>
+      </Card>
 
       {/* Action Buttons */}
-      <div className="flex justify-between pt-4">
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+      <div className="flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+        <Button
+          variant="ghost"
+          onClick={onCancel}
+          type="button"
         >
-          Next: Configure Runners
-        </button>
+          Cancel
+        </Button>
+        <ButtonGroup>
+          <Button
+            variant="primary"
+            type="submit"
+            loading={isLoading}
+          >
+            Next: Runner Setup
+          </Button>
+        </ButtonGroup>
       </div>
     </form>
   );
