@@ -409,17 +409,58 @@ const ImportExportModal = ({ isOpen, onClose }) => {
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
                       QR Code
                     </h3>
-                    <div className="inline-block p-4 bg-white rounded-lg">
-                      <QRCode 
-                        value={JSON.stringify(exportData)} 
-                        size={200}
-                        level="M"
-                        includeMargin={true}
-                      />
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
-                      Scan this QR code with another device to import complete race data including all checkpoints, runners, and timing information
-                    </p>
+                    {(() => {
+                      try {
+                        const dataString = JSON.stringify(exportData);
+                        // QR codes have a maximum capacity. Level M can handle ~1800 characters
+                        // Level L can handle ~2900 characters
+                        if (dataString.length > 2500) {
+                          return (
+                            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                              <svg className="w-12 h-12 text-yellow-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                              </svg>
+                              <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium mb-1">
+                                QR Code Too Large
+                              </p>
+                              <p className="text-xs text-yellow-700 dark:text-yellow-300">
+                                The race configuration is too large to encode in a QR code ({dataString.length} characters).
+                                Please use the Download or Copy options below to share this configuration.
+                              </p>
+                            </div>
+                          );
+                        }
+                        return (
+                          <>
+                            <div className="inline-block p-4 bg-white rounded-lg">
+                              <QRCode 
+                                value={dataString} 
+                                size={200}
+                                level="L"
+                                includeMargin={true}
+                              />
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
+                              Scan this QR code with another device to import complete race data including all checkpoints, runners, and timing information
+                            </p>
+                          </>
+                        );
+                      } catch (error) {
+                        return (
+                          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                            <svg className="w-12 h-12 text-red-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p className="text-sm text-red-800 dark:text-red-200 font-medium mb-1">
+                              QR Code Generation Failed
+                            </p>
+                            <p className="text-xs text-red-700 dark:text-red-300">
+                              Unable to generate QR code. Please use the Download or Copy options below.
+                            </p>
+                          </div>
+                        );
+                      }
+                    })()}
                   </div>
 
                   {/* Action Buttons */}

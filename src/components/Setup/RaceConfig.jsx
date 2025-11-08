@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useRaceStore } from '../../store/useRaceStore.js';
 import { APP_MODES } from '../../types/index.js';
 import TimeUtils from '../../services/timeUtils.js';
@@ -7,6 +8,7 @@ import RunnerRangesStep from './RunnerRangesStep.jsx';
 import ErrorMessage from '../Layout/ErrorMessage.jsx';
 
 const RaceConfig = () => {
+  const navigate = useNavigate();
   const { 
     createRace, 
     setMode, 
@@ -64,7 +66,8 @@ const RaceConfig = () => {
 
       await createRace(raceData);
       
-      // The createRace action will handle the redirect to RACE_OVERVIEW
+      // Navigate to race overview after successful creation
+      navigate('/race-maintenance/overview');
     } catch (err) {
       console.error('Failed to create race:', err);
     }
