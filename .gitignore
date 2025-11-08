@@ -11,8 +11,6 @@ dist
 .blackboxrules
 TODO.md
 
-# Documentation (ignore all .md files except README.md)
-*.md
+# Documentation - ignore generated/temporary docs
+**.md
 !README.md
-
-# Note: .gitignore itself is never ignored by default
