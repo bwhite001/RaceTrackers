@@ -1,14 +1,18 @@
-.vscode/settings.json
+# Dependencies
 node_modules
+
+# Build outputs
 dist
+
+# IDE
+.vscode/settings.json
+
+# Project specific
 .blackboxrules
 TODO.md
-screenshots/SCREENSHOTS_CAPTURE_SUMMARY.md
-screenshots/base-station-guide/CAPTURE_SUMMARY.md
-screenshots/base-station-guide/README.md
-src/test/README.md
-src/test/TROUBLESHOOTING.md
-src/test/base-operations/TEST_PLAN.md
-src/test/e2e/E2E_TEST_PLAN.md
-src/test/e2e/README.md
-src/test/integration/README.md
+
+# Documentation (ignore all .md files except README.md)
+*.md
+!README.md
+
+# Note: .gitignore itself is never ignored by default
