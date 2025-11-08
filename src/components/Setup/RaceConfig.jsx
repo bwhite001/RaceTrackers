@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRaceStore } from '../../store/useRaceStore.js';
+import useRaceMaintenanceStore from '../../modules/race-maintenance/store/raceMaintenanceStore';
+import useNavigationStore from '../../shared/store/navigationStore';
 import { APP_MODES } from '../../types/index.js';
 import TimeUtils from '../../services/timeUtils.js';
 import RaceDetailsStep from './RaceDetailsStep.jsx';
@@ -11,11 +12,14 @@ const RaceConfig = () => {
   const navigate = useNavigate();
   const { 
     createRace, 
-    setMode, 
-    isLoading, 
+    loading: isLoading, 
     error, 
-    clearError 
-  } = useRaceStore();
+    setError 
+  } = useRaceMaintenanceStore();
+  
+  const { endOperation } = useNavigationStore();
+  
+  const clearError = () => setError(null);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [raceDetails, setRaceDetails] = useState({
@@ -66,7 +70,8 @@ const RaceConfig = () => {
 
       await createRace(raceData);
       
-      // Navigate to race overview after successful creation
+      // End the operation and navigate to race overview
+      endOperation();
       navigate('/race-maintenance/overview');
     } catch (err) {
       console.error('Failed to create race:', err);
@@ -74,7 +79,8 @@ const RaceConfig = () => {
   };
 
   const handleCancel = () => {
-    setMode(APP_MODES.SETUP);
+    endOperation();
+    navigate('/');
   };
 
   return (

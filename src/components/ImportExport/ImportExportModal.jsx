@@ -1,18 +1,27 @@
 import React, { useState, useRef } from 'react';
 import QRCode from 'qrcode.react';
+import useRaceMaintenanceStore from '../../modules/race-maintenance/store/raceMaintenanceStore';
 import { useRaceStore } from '../../store/useRaceStore.js';
 
 const ImportExportModal = ({ isOpen, onClose }) => {
+  // Use the new race maintenance store for current race data
+  const { 
+    currentRace: raceConfig,
+    checkpoints,
+    loading: isLoading 
+  } = useRaceMaintenanceStore();
+  
+  // Use the old race store for export/import functions (these still work with the old storage)
   const { 
     exportRaceConfig, 
     exportRaceResults, 
     exportCheckpointResults,
     importRaceConfig, 
-    importCheckpointResults,
-    raceConfig, 
-    checkpoints,
-    isLoading 
+    importCheckpointResults
   } = useRaceStore();
+  
+  // Get the current race ID from the race config
+  const currentRaceId = raceConfig?.id;
   
   const [activeTab, setActiveTab] = useState('export');
   const [exportData, setExportData] = useState(null);
@@ -29,13 +38,19 @@ const ImportExportModal = ({ isOpen, onClose }) => {
     setError('');
     
     try {
+      // Check if we have a race to export
+      if (!currentRaceId) {
+        throw new Error('No race to export');
+      }
+      
       let data;
       if (exportType === 'config') {
-        data = await exportRaceConfig();
+        // Pass the currentRaceId to the export function
+        data = await exportRaceConfig(currentRaceId);
         setExportData(data);
         setSuccess('Race configuration exported successfully!');
       } else if (exportType === 'results') {
-        data = await exportRaceResults('csv');
+        data = await exportRaceResults('csv', currentRaceId);
         // For CSV, trigger download directly
         const blob = new Blob([data.content], { type: data.mimeType });
         const url = URL.createObjectURL(blob);
@@ -48,7 +63,7 @@ const ImportExportModal = ({ isOpen, onClose }) => {
         URL.revokeObjectURL(url);
         setSuccess('Race results exported successfully!');
       } else if (exportType === 'checkpoint') {
-        data = await exportCheckpointResults(selectedCheckpoint);
+        data = await exportCheckpointResults(selectedCheckpoint, currentRaceId);
         setExportData(data);
         setSuccess('Checkpoint results exported successfully!');
       }
