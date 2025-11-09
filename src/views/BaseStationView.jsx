@@ -1,93 +1,69 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { withOperationExit } from '../shared/components/ExitOperationModal';
+import HotkeysProvider from '../shared/components/HotkeysProvider';
+import useNavigationStore, { MODULE_TYPES } from '../shared/store/navigationStore';
 import useBaseOperationsStore from '../modules/base-operations/store/baseOperationsStore';
-import useDeviceDetection from '../shared/hooks/useDeviceDetection';
-import { HotkeysProvider, useHotkeysContext } from '../shared/components/HotkeysProvider';
+import useSettingsStore from '../shared/store/settingsStore';
 import { HOTKEYS } from '../types';
 
 // Components
 import DataEntry from '../components/BaseStation/DataEntry';
 import RaceOverview from '../components/BaseStation/RaceOverview';
 import ReportsPanel from '../components/BaseStation/ReportsPanel';
-import Header from '../components/Layout/Header';
-import StatusStrip from '../components/Layout/StatusStrip';
+import WithdrawalDialog from '../components/BaseStation/WithdrawalDialog';
 import LoadingSpinner from '../components/Layout/LoadingSpinner';
 import ErrorMessage from '../components/Layout/ErrorMessage';
-
-// Tabs configuration
-const TABS = {
-  DATA_ENTRY: 'data-entry',
-  OVERVIEW: 'overview',
-  REPORTS: 'reports'
-};
+import Header from '../components/Layout/Header';
+import StatusStrip from '../components/Layout/StatusStrip';
 
 /**
  * BaseStationView Component
- * Main container for the base station operations interface
+ * Main view for base station operations
  */
-const BaseStationView = () => {
+const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const navigate = useNavigate();
-  const { isDesktop } = useDeviceDetection();
-  const [activeTab, setActiveTab] = useState(TABS.DATA_ENTRY);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  
+  // Store access
+  const { currentRaceId, loading, error, stats } = useBaseOperationsStore();
+  const { darkMode } = useSettingsStore();
 
-  // Get base operations state
-  const {
-    initialize,
-    currentRaceId,
-    loading,
-    error,
-    stats,
-    lastSync
-  } = useBaseOperationsStore();
+  // Local state
+  const [activeTab, setActiveTab] = useState('data-entry');
+  const [showWithdrawalDialog, setShowWithdrawalDialog] = useState(false);
+  const [withdrawalType, setWithdrawalType] = useState('dnf');
 
   // Initialize base station
   useEffect(() => {
-    const setupBaseStation = async () => {
-      try {
-        await initialize();
-      } catch (error) {
-        console.error('Failed to initialize base station:', error);
-      }
-    };
+    if (!currentRaceId) {
+      navigate('/');
+    }
+  }, [currentRaceId, navigate]);
 
-    setupBaseStation();
-  }, [initialize]);
+  // Handle tab change
+  const handleTabChange = useCallback((tab) => {
+    setActiveTab(tab);
+  }, []);
+
+  // Handle withdrawal dialog
+  const handleWithdrawal = useCallback((type) => {
+    setWithdrawalType(type);
+    setShowWithdrawalDialog(true);
+  }, []);
 
   // Define hotkeys
   const hotkeys = {
-    [HOTKEYS.NEW_ENTRY]: () => setActiveTab(TABS.DATA_ENTRY),
-    [HOTKEYS.REPORTS]: () => setActiveTab(TABS.REPORTS),
-    [HOTKEYS.TAB_NEXT]: () => handleTabChange('next'),
-    [HOTKEYS.TAB_PREV]: () => handleTabChange('prev'),
-    [HOTKEYS.ESCAPE]: () => {
-      if (activeTab === TABS.DATA_ENTRY) {
-        setActiveTab(TABS.OVERVIEW);
+    [HOTKEYS.NEW_ENTRY]: () => handleTabChange('data-entry'),
+    [HOTKEYS.REPORTS]: () => handleTabChange('reports'),
+    [HOTKEYS.DROPOUT]: () => handleWithdrawal('dnf'),
+    'shift+d': () => handleWithdrawal('dns'),
+    'escape': () => {
+      if (showWithdrawalDialog) {
+        setShowWithdrawalDialog(false);
+      } else if (activeTab === 'data-entry') {
+        handleTabChange('overview');
       }
     }
-  };
-
-  // Handle tab changes
-  const handleTabChange = (direction) => {
-    const tabValues = Object.values(TABS);
-    const currentIndex = tabValues.indexOf(activeTab);
-    
-    if (direction === 'next') {
-      setActiveTab(tabValues[(currentIndex + 1) % tabValues.length]);
-    } else {
-      setActiveTab(tabValues[(currentIndex - 1 + tabValues.length) % tabValues.length]);
-    }
-  };
-
-  // Handle exit attempt
-  const handleExitAttempt = () => {
-    if (hasUnsavedChanges) {
-      const confirmed = window.confirm(
-        'You have unsaved changes. Are you sure you want to leave?'
-      );
-      if (!confirmed) return;
-    }
-    navigate('/');
   };
 
   if (loading) {
@@ -98,92 +74,51 @@ const BaseStationView = () => {
     return <ErrorMessage message={error} />;
   }
 
-  if (!currentRaceId) {
-    return <ErrorMessage message="No active race selected" />;
-  }
-
   return (
     <HotkeysProvider hotkeys={hotkeys}>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         {/* Header */}
         <Header
           title="Base Station Operations"
-          onExit={handleExitAttempt}
           stats={stats}
-          lastSync={lastSync}
+          onTabChange={handleTabChange}
+          activeTab={activeTab}
         />
 
         {/* Main Content */}
         <main className="container mx-auto px-4 py-6">
-          {/* Tabs */}
-          <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
-            <nav className="flex space-x-4" aria-label="Tabs">
-              <button
-                onClick={() => setActiveTab(TABS.DATA_ENTRY)}
-                className={`px-3 py-2 text-sm font-medium rounded-md ${
-                  activeTab === TABS.DATA_ENTRY
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
-                aria-current={activeTab === TABS.DATA_ENTRY ? 'page' : undefined}
-              >
-                Data Entry
-                {isDesktop && <span className="ml-2 text-xs">({HOTKEYS.NEW_ENTRY})</span>}
-              </button>
-
-              <button
-                onClick={() => setActiveTab(TABS.OVERVIEW)}
-                className={`px-3 py-2 text-sm font-medium rounded-md ${
-                  activeTab === TABS.OVERVIEW
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
-                aria-current={activeTab === TABS.OVERVIEW ? 'page' : undefined}
-              >
-                Overview
-              </button>
-
-              <button
-                onClick={() => setActiveTab(TABS.REPORTS)}
-                className={`px-3 py-2 text-sm font-medium rounded-md ${
-                  activeTab === TABS.REPORTS
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
-                aria-current={activeTab === TABS.REPORTS ? 'page' : undefined}
-              >
-                Reports
-                {isDesktop && <span className="ml-2 text-xs">({HOTKEYS.REPORTS})</span>}
-              </button>
-            </nav>
-          </div>
-
           {/* Tab Content */}
           <div className="space-y-6">
-            {activeTab === TABS.DATA_ENTRY && (
+            {activeTab === 'data-entry' && (
               <DataEntry
+                onWithdrawal={handleWithdrawal}
                 onUnsavedChanges={setHasUnsavedChanges}
               />
             )}
 
-            {activeTab === TABS.OVERVIEW && (
+            {activeTab === 'overview' && (
               <RaceOverview />
             )}
 
-            {activeTab === TABS.REPORTS && (
+            {activeTab === 'reports' && (
               <ReportsPanel />
             )}
           </div>
         </main>
 
         {/* Status Strip */}
-        <StatusStrip
-          stats={stats}
-          lastSync={lastSync}
+        <StatusStrip stats={stats} />
+
+        {/* Withdrawal Dialog */}
+        <WithdrawalDialog
+          isOpen={showWithdrawalDialog}
+          onClose={() => setShowWithdrawalDialog(false)}
+          type={withdrawalType}
         />
       </div>
     </HotkeysProvider>
   );
 };
 
-export default BaseStationView;
+// Wrap with operation exit handling
+export default withOperationExit(BaseStationView);
