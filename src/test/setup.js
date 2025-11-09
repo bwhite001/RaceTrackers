@@ -1,212 +1,134 @@
-import '@testing-library/jest-dom'
-import { vi } from 'vitest'
+import { vi } from 'vitest';
+import '@testing-library/jest-dom';
+import { cleanup } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 
-// Mock IndexedDB for tests with proper implementation
-const mockIDBRequest = {
-  result: null,
-  error: null,
-  onsuccess: null,
-  onerror: null,
-  readyState: 'done',
-  addEventListener: vi.fn(),
-  removeEventListener: vi.fn(),
-  dispatchEvent: vi.fn(),
-}
+// Mock scrollIntoView
+Element.prototype.scrollIntoView = vi.fn();
 
-const mockIDBDatabase = {
-  name: 'test-db',
-  version: 1,
-  objectStoreNames: [],
-  transaction: vi.fn(() => mockIDBTransaction),
-  close: vi.fn(),
-  addEventListener: vi.fn(),
-  removeEventListener: vi.fn(),
-  dispatchEvent: vi.fn(),
-}
-
-const mockIDBTransaction = {
-  objectStore: vi.fn(() => mockIDBObjectStore),
-  abort: vi.fn(),
-  addEventListener: vi.fn(),
-  removeEventListener: vi.fn(),
-  dispatchEvent: vi.fn(),
-  mode: 'readonly',
-  db: mockIDBDatabase,
-  error: null,
-}
-
-const mockIDBObjectStore = {
-  add: vi.fn(() => mockIDBRequest),
-  put: vi.fn(() => mockIDBRequest),
-  get: vi.fn(() => mockIDBRequest),
-  delete: vi.fn(() => mockIDBRequest),
-  clear: vi.fn(() => mockIDBRequest),
-  count: vi.fn(() => mockIDBRequest),
-  getAll: vi.fn(() => mockIDBRequest),
-  getAllKeys: vi.fn(() => mockIDBRequest),
-  index: vi.fn(),
-  createIndex: vi.fn(),
-  deleteIndex: vi.fn(),
-}
-
-global.indexedDB = {
-  open: vi.fn(() => {
-    const request = { ...mockIDBRequest }
-    setTimeout(() => {
-      request.result = mockIDBDatabase
-      if (request.onsuccess) request.onsuccess({ target: request })
-    }, 0)
-    return request
-  }),
-  deleteDatabase: vi.fn(() => mockIDBRequest),
-  databases: vi.fn(() => Promise.resolve([])),
-  cmp: vi.fn(),
-}
-
-// Mock IDBKeyRange
-global.IDBKeyRange = {
-  bound: vi.fn(),
-  only: vi.fn(),
-  lowerBound: vi.fn(),
-  upperBound: vi.fn(),
-}
-
-// Mock localStorage
-const localStorageMock = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
-  length: 0,
-  key: vi.fn(),
-}
-global.localStorage = localStorageMock
-
-// Mock sessionStorage
-global.sessionStorage = { ...localStorageMock }
-
-// Mock matchMedia
+// Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation(query => ({
     matches: false,
     media: query,
     onchange: null,
-    addListener: vi.fn(), // deprecated
-    removeListener: vi.fn(), // deprecated
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
-})
+});
+
+// Mock window.visualViewport
+Object.defineProperty(window, 'visualViewport', {
+  writable: true,
+  value: {
+    width: 1024,
+    height: 768,
+    scale: 1,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  },
+});
+
+// Mock touch detection
+delete window.ontouchstart;
+Object.defineProperty(window, 'ontouchstart', {
+  configurable: true,
+  value: undefined,
+});
+
+// Mock navigator
+const mockNavigator = {
+  maxTouchPoints: 0,
+  userAgent: 'test',
+};
+
+Object.defineProperty(window, 'navigator', {
+  configurable: true,
+  value: mockNavigator,
+  writable: true,
+});
 
 // Mock ResizeObserver
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-}))
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
 
 // Mock IntersectionObserver
-global.IntersectionObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-}))
+global.IntersectionObserver = class IntersectionObserver {
+  constructor() {}
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
 
-// Mock URL.createObjectURL
-global.URL.createObjectURL = vi.fn(() => 'mocked-url')
-global.URL.revokeObjectURL = vi.fn()
+// Mock requestAnimationFrame
+global.requestAnimationFrame = callback => setTimeout(callback, 0);
+global.cancelAnimationFrame = id => clearTimeout(id);
 
-// Mock Blob
-global.Blob = vi.fn().mockImplementation((content, options) => ({
-  size: content ? content.reduce((acc, item) => acc + item.length, 0) : 0,
-  type: options?.type || '',
-  arrayBuffer: vi.fn(() => Promise.resolve(new ArrayBuffer(0))),
-  text: vi.fn(() => Promise.resolve('')),
-  stream: vi.fn(),
-  slice: vi.fn(),
-}))
+// Setup DOM testing environment
+const portalRoot = document.createElement('div');
+portalRoot.setAttribute('id', 'portal-root');
+document.body.appendChild(portalRoot);
 
-// Mock File
-global.File = vi.fn().mockImplementation((bits, name, options) => ({
-  ...new global.Blob(bits, options),
-  name,
-  lastModified: Date.now(),
-  webkitRelativePath: '',
-}))
+// Mock focus trap container
+const createFocusTrapContainer = () => {
+  const container = document.createElement('div');
+  container.setAttribute('data-focus-trap', 'true');
+  document.body.appendChild(container);
+  return container;
+};
 
-// Mock FileReader
-global.FileReader = vi.fn().mockImplementation(() => ({
-  readAsText: vi.fn(function() {
-    setTimeout(() => {
-      this.result = 'mocked file content'
-      if (this.onload) this.onload({ target: this })
-    }, 0)
-  }),
-  readAsDataURL: vi.fn(),
-  readAsArrayBuffer: vi.fn(),
-  readAsBinaryString: vi.fn(),
-  abort: vi.fn(),
-  addEventListener: vi.fn(),
-  removeEventListener: vi.fn(),
-  dispatchEvent: vi.fn(),
-  result: null,
-  error: null,
-  readyState: 0,
-  onload: null,
-  onerror: null,
-  onabort: null,
-  onloadstart: null,
-  onloadend: null,
-  onprogress: null,
-}))
+// Mock live region
+const createLiveRegion = () => {
+  const region = document.createElement('div');
+  region.setAttribute('role', 'status');
+  region.setAttribute('aria-live', 'polite');
+  document.body.appendChild(region);
+  return region;
+};
 
-// Mock window.confirm and window.alert
-global.confirm = vi.fn(() => true)
-global.alert = vi.fn()
+// Make vi.fn() globally available like jest.fn()
+global.jest = {
+  fn: vi.fn,
+  spyOn: vi.spyOn,
+};
 
-// Mock crypto for UUID generation
-Object.defineProperty(global, 'crypto', {
-  value: {
-    randomUUID: vi.fn(() => 'mocked-uuid-' + Math.random().toString(36).substr(2, 9)),
-    getRandomValues: vi.fn((arr) => {
-      for (let i = 0; i < arr.length; i++) {
-        arr[i] = Math.floor(Math.random() * 256)
-      }
-      return arr
-    }),
-  },
-})
-
-// Mock createPortal for React portals
-vi.mock('react-dom', async () => {
-  const actual = await vi.importActual('react-dom')
-  return {
-    ...actual,
-    createPortal: (children) => children,
-  }
-})
-
-// Setup DOM environment
-import { beforeEach, afterEach } from 'vitest'
-
-beforeEach(() => {
-  // Clear document body
-  document.body.innerHTML = ''
-  
-  // Add a div to render into
-  const div = document.createElement('div')
-  div.setAttribute('id', 'root')
-  document.body.appendChild(div)
-  
-  // Add a div for portals (modals, tooltips, etc.)
-  const portalDiv = document.createElement('div')
-  portalDiv.setAttribute('id', 'portal-root')
-  document.body.appendChild(portalDiv)
-})
-
+// Cleanup after each test
 afterEach(() => {
-  // Clean up DOM after each test
-  document.body.innerHTML = ''
-})
+  cleanup(); // Clean up React components
+  vi.clearAllTimers();
+  vi.clearAllMocks();
+  window.matchMedia.mockClear();
+  
+  // Clear any DOM modifications
+  document.body.innerHTML = '';
+  const portal = document.getElementById('portal-root');
+  if (portal) portal.innerHTML = '';
+  
+  // Reset any global overrides
+  Element.prototype.scrollIntoView.mockClear();
+
+  // Reset touch detection
+  delete window.ontouchstart;
+  Object.defineProperty(window, 'ontouchstart', {
+    configurable: true,
+    value: undefined,
+  });
+  Object.defineProperty(window.navigator, 'maxTouchPoints', {
+    configurable: true,
+    value: 0,
+  });
+});
+
+// Export test utilities
+export {
+  createFocusTrapContainer,
+  createLiveRegion,
+  act,
+};

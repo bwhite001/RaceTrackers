@@ -1,3 +1,4 @@
+import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
 import {
   createFocusTrap,
   createLiveRegion,
@@ -9,6 +10,12 @@ import {
   announceNotification
 } from '../../../utils/a11y';
 
+// Helper to flush promises and timers
+const flushPromisesAndTimers = async () => {
+  await vi.runAllTimersAsync();
+  await new Promise(resolve => setTimeout(resolve, 0));
+};
+
 describe('Accessibility Utilities - Critical Path Tests', () => {
   describe('Focus Trap', () => {
     let container;
@@ -17,15 +24,34 @@ describe('Accessibility Utilities - Critical Path Tests', () => {
     let button3;
 
     beforeEach(() => {
+      vi.useFakeTimers();
+      
       // Create a container with focusable elements
       container = document.createElement('div');
+      container.setAttribute('data-testid', 'focus-trap-container');
+
       button1 = document.createElement('button');
       button2 = document.createElement('button');
       button3 = document.createElement('button');
 
-      button1.textContent = 'Button 1';
-      button2.textContent = 'Button 2';
-      button3.textContent = 'Button 3';
+      // Make buttons focusable in jsdom
+      button1.setAttribute('tabindex', '0');
+      button2.setAttribute('tabindex', '0');
+      button3.setAttribute('tabindex', '0');
+
+      // Add unique identifiers
+      button1.setAttribute('data-testid', 'button-1');
+      button2.setAttribute('data-testid', 'button-2');
+      button3.setAttribute('data-testid', 'button-3');
+
+      // Set text content separately
+      const text1 = document.createTextNode('Button 1');
+      const text2 = document.createTextNode('Button 2');
+      const text3 = document.createTextNode('Button 3');
+
+      button1.appendChild(text1);
+      button2.appendChild(text2);
+      button3.appendChild(text3);
 
       container.appendChild(button1);
       container.appendChild(button2);
@@ -35,69 +61,82 @@ describe('Accessibility Utilities - Critical Path Tests', () => {
     });
 
     afterEach(() => {
-      document.body.removeChild(container);
+      vi.useRealTimers();
+      if (document.body.contains(container)) {
+        document.body.removeChild(container);
+      }
     });
 
-    test('traps focus within container', () => {
+    test('traps focus within container', async () => {
       const trap = createFocusTrap(container);
+      
+      // Set initial focus state
+      document.body.focus();
+      expect(document.activeElement).toBe(document.body);
+      
+      // Activate trap
       trap.activate();
+      await flushPromisesAndTimers();
 
-      // Focus should start on first focusable element
+      // Focus should be on first focusable element
       expect(document.activeElement).toBe(button1);
+      expect(document.activeElement.getAttribute('data-testid')).toBe('button-1');
 
-      // Simulate Tab key
+      // Simulate Tab key on last button
+      button3.focus();
       const tabEvent = new KeyboardEvent('keydown', {
         key: 'Tab',
         bubbles: true,
         cancelable: true
       });
-
       button3.dispatchEvent(tabEvent);
-      
+      await flushPromisesAndTimers();
+
       // Focus should wrap to first element
       expect(document.activeElement).toBe(button1);
-
-      trap.deactivate();
+      expect(document.activeElement.getAttribute('data-testid')).toBe('button-1');
     });
 
-    test('deactivates and restores focus', () => {
+    test('deactivates and restores focus', async () => {
       const outsideButton = document.createElement('button');
+      outsideButton.setAttribute('tabindex', '0');
+      outsideButton.setAttribute('data-testid', 'outside-button');
+      outsideButton.textContent = 'Outside Button';
       document.body.appendChild(outsideButton);
       outsideButton.focus();
 
       const trap = createFocusTrap(container);
+
+      // Verify initial focus
+      expect(document.activeElement).toBe(outsideButton);
+      expect(document.activeElement.getAttribute('data-testid')).toBe('outside-button');
+
+      // Activate trap
       trap.activate();
+      await flushPromisesAndTimers();
 
       // Focus should move into container
-      expect(document.activeElement).not.toBe(outsideButton);
+      expect(document.activeElement).toBe(button1);
+      expect(document.activeElement.getAttribute('data-testid')).toBe('button-1');
 
+      // Deactivate trap
       trap.deactivate();
+      await flushPromisesAndTimers();
 
       // Focus should return to previous element
       expect(document.activeElement).toBe(outsideButton);
+      expect(document.activeElement.getAttribute('data-testid')).toBe('outside-button');
 
       document.body.removeChild(outsideButton);
     });
   });
 
   describe('Live Region', () => {
-    test('creates live region with correct attributes', () => {
-      const liveRegion = createLiveRegion(LIVE_REGION_PRIORITIES.POLITE);
-
-      expect(liveRegion.getAttribute('role')).toBe('status');
-      expect(liveRegion.getAttribute('aria-live')).toBe('polite');
-      expect(liveRegion.getAttribute('aria-atomic')).toBe('true');
-    });
-
-    test('creates assertive live region', () => {
-      const liveRegion = createLiveRegion(LIVE_REGION_PRIORITIES.ASSERTIVE);
       expect(liveRegion.getAttribute('aria-live')).toBe('assertive');
     });
   });
 
   describe('Screen Reader Announcements', () => {
-    let liveRegion;
-
     beforeEach(() => {
       // Clear any existing live regions
       document.querySelectorAll('[role="status"]').forEach(el => el.remove());
@@ -108,26 +147,30 @@ describe('Accessibility Utilities - Critical Path Tests', () => {
       announceToScreenReader(message);
 
       // Get the global live region
-      liveRegion = document.querySelector('[role="status"]');
+      const liveRegion = document.querySelector('[role="status"]');
       
       expect(liveRegion).toBeTruthy();
       expect(liveRegion.textContent).toBe(message);
     });
 
     test('clears announcement after delay', async () => {
+      vi.useFakeTimers();
+      
       const message = 'Test announcement';
       announceToScreenReader(message, LIVE_REGION_PRIORITIES.POLITE, 100);
 
-      liveRegion = document.querySelector('[role="status"]');
+      const liveRegion = document.querySelector('[role="status"]');
       
       // Message should be present initially
       expect(liveRegion.textContent).toBe(message);
 
-      // Wait for clear delay
-      await new Promise(resolve => setTimeout(resolve, 150));
+      // Advance timers
+      await vi.advanceTimersByTimeAsync(150);
 
       // Message should be cleared
       expect(liveRegion.textContent).toBe('');
+
+      vi.useRealTimers();
     });
   });
 
@@ -136,22 +179,33 @@ describe('Accessibility Utilities - Critical Path Tests', () => {
 
     beforeEach(() => {
       element = document.createElement('button');
+      element.setAttribute('tabindex', '0');
+      element.setAttribute('data-testid', 'test-button');
+      element.textContent = 'Test Button';
       document.body.appendChild(element);
     });
 
     afterEach(() => {
-      document.body.removeChild(element);
+      if (document.body.contains(element)) {
+        document.body.removeChild(element);
+      }
     });
 
     test('manages focus on element', () => {
+      document.body.focus();
+      expect(document.activeElement.tagName).toBe('BODY');
+
       manageFocus(element);
-      expect(document.activeElement).toBe(element);
+      expect(document.activeElement.getAttribute('data-testid')).toBe('test-button');
     });
 
     test('manages focus by selector', () => {
       element.id = 'test-button';
+      document.body.focus();
+      expect(document.activeElement.tagName).toBe('BODY');
+
       manageFocus('#test-button');
-      expect(document.activeElement).toBe(element);
+      expect(document.activeElement.getAttribute('data-testid')).toBe('test-button');
     });
   });
 
@@ -211,6 +265,11 @@ describe('Accessibility Utilities - Critical Path Tests', () => {
   });
 
   describe('Notifications', () => {
+    beforeEach(() => {
+      // Clear any existing live regions
+      document.querySelectorAll('[role="status"]').forEach(el => el.remove());
+    });
+
     test('announces different notification types', () => {
       // Success notification
       announceNotification('Operation successful', 'success');

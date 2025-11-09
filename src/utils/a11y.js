@@ -1,22 +1,9 @@
 /**
  * Accessibility Utilities
- * 
- * Utilities for managing focus, ARIA live regions, and screen reader announcements
- * Used throughout the application for accessible interactions
  */
 
 /**
  * Create a focus trap for modal dialogs
- * Keeps focus within the specified element
- * 
- * @param {HTMLElement} element - The element to trap focus within
- * @returns {Object} Focus trap controller with activate/deactivate methods
- * 
- * @example
- * const trap = createFocusTrap(modalElement);
- * trap.activate();
- * // ... later
- * trap.deactivate();
  */
 export function createFocusTrap(element) {
   if (!element) {
@@ -40,19 +27,13 @@ export function createFocusTrap(element) {
 
   function getFocusableElements() {
     return Array.from(element.querySelectorAll(focusableSelectors))
-      .filter(el => {
-        // Filter out elements that are not visible
-        return el.offsetParent !== null;
-      });
+      .filter(el => el.offsetParent !== null);
   }
 
   function handleKeyDown(e) {
-    if (!isActive || e.key !== 'Tab') {
-      return;
-    }
+    if (!isActive || e.key !== 'Tab') return;
 
     const focusableElements = getFocusableElements();
-    
     if (focusableElements.length === 0) {
       e.preventDefault();
       return;
@@ -62,13 +43,11 @@ export function createFocusTrap(element) {
     const lastElement = focusableElements[focusableElements.length - 1];
 
     if (e.shiftKey) {
-      // Shift + Tab
       if (document.activeElement === firstElement) {
         e.preventDefault();
         lastElement.focus();
       }
     } else {
-      // Tab
       if (document.activeElement === lastElement) {
         e.preventDefault();
         firstElement.focus();
@@ -76,46 +55,80 @@ export function createFocusTrap(element) {
     }
   }
 
-  function activate() {
-    if (isActive) {
-      return;
-    }
-
-    // Store currently focused element
-    previouslyFocusedElement = document.activeElement;
-
-    // Add event listener
-    document.addEventListener('keydown', handleKeyDown);
-
-    // Focus first focusable element
+  function focusFirstElement() {
     const focusableElements = getFocusableElements();
     if (focusableElements.length > 0) {
-      focusableElements[0].focus();
+      try {
+        // Ensure element is focusable
+        focusableElements[0].setAttribute('tabindex', '0');
+        
+        // Focus the element
+        focusableElements[0].focus();
+
+        // Double-check focus was set
+        if (document.activeElement !== focusableElements[0]) {
+          // Try again with a delay
+          setTimeout(() => {
+            focusableElements[0].focus();
+          }, 0);
+        }
+      } catch (e) {
+        console.warn('Failed to set focus:', e);
+      }
     }
-
-    isActive = true;
-  }
-
-  function deactivate() {
-    if (!isActive) {
-      return;
-    }
-
-    // Remove event listener
-    document.removeEventListener('keydown', handleKeyDown);
-
-    // Restore focus to previously focused element
-    if (previouslyFocusedElement && previouslyFocusedElement.focus) {
-      previouslyFocusedElement.focus();
-    }
-
-    isActive = false;
   }
 
   return {
-    activate,
-    deactivate,
-    isActive: () => isActive
+    activate() {
+      if (isActive) return;
+
+      // Store currently focused element
+      previouslyFocusedElement = document.activeElement;
+
+      // Add event listener
+      document.addEventListener('keydown', handleKeyDown);
+
+      // Focus first focusable element
+      focusFirstElement();
+
+      isActive = true;
+    },
+
+    deactivate() {
+      if (!isActive) return;
+
+      // Remove event listener
+      document.removeEventListener('keydown', handleKeyDown);
+
+      // Restore focus to previously focused element
+      if (previouslyFocusedElement && previouslyFocusedElement.focus) {
+        try {
+          // Ensure element is focusable
+          if (!previouslyFocusedElement.hasAttribute('tabindex')) {
+            previouslyFocusedElement.setAttribute('tabindex', '0');
+          }
+          
+          // Focus the element
+          previouslyFocusedElement.focus();
+
+          // Double-check focus was restored
+          if (document.activeElement !== previouslyFocusedElement) {
+            // Try again with a delay
+            setTimeout(() => {
+              previouslyFocusedElement.focus();
+            }, 0);
+          }
+        } catch (e) {
+          console.warn('Failed to restore focus:', e);
+        }
+      }
+
+      isActive = false;
+    },
+
+    // For testing
+    isActive: () => isActive,
+    getPreviouslyFocusedElement: () => previouslyFocusedElement
   };
 }
 
@@ -128,15 +141,11 @@ export const LIVE_REGION_PRIORITIES = {
   OFF: 'off'
 };
 
+// Global live region singleton
+let globalLiveRegion = null;
+
 /**
- * Create an ARIA live region for screen reader announcements
- * 
- * @param {string} priority - Priority level ('polite', 'assertive', or 'off')
- * @returns {HTMLElement} The live region element
- * 
- * @example
- * const liveRegion = createLiveRegion('polite');
- * document.body.appendChild(liveRegion);
+ * Create an ARIA live region
  */
 export function createLiveRegion(priority = LIVE_REGION_PRIORITIES.POLITE) {
   const liveRegion = document.createElement('div');
@@ -144,68 +153,46 @@ export function createLiveRegion(priority = LIVE_REGION_PRIORITIES.POLITE) {
   liveRegion.setAttribute('role', 'status');
   liveRegion.setAttribute('aria-live', priority);
   liveRegion.setAttribute('aria-atomic', 'true');
-  liveRegion.className = 'sr-only'; // Screen reader only
   
-  // Position off-screen but still accessible to screen readers
-  liveRegion.style.position = 'absolute';
-  liveRegion.style.left = '-10000px';
-  liveRegion.style.width = '1px';
-  liveRegion.style.height = '1px';
-  liveRegion.style.overflow = 'hidden';
+  // Position off-screen but accessible to screen readers
+  Object.assign(liveRegion.style, {
+    position: 'absolute',
+    width: '1px',
+    height: '1px',
+    padding: '0',
+    margin: '-1px',
+    overflow: 'hidden',
+    clip: 'rect(0, 0, 0, 0)',
+    whiteSpace: 'nowrap',
+    border: '0'
+  });
 
+  document.body.appendChild(liveRegion);
   return liveRegion;
 }
 
-/**
- * Global live region manager
- */
-let globalLiveRegion = null;
-
-/**
- * Get or create the global live region
- * 
- * @returns {HTMLElement} The global live region element
- */
 function getGlobalLiveRegion() {
-  if (!globalLiveRegion) {
+  if (!globalLiveRegion || !document.body.contains(globalLiveRegion)) {
     globalLiveRegion = createLiveRegion(LIVE_REGION_PRIORITIES.POLITE);
-    globalLiveRegion.id = 'global-live-region';
-    
-    if (typeof document !== 'undefined') {
-      document.body.appendChild(globalLiveRegion);
-    }
   }
-  
   return globalLiveRegion;
 }
 
 /**
- * Announce a message to screen readers
- * 
- * @param {string} message - The message to announce
- * @param {string} priority - Priority level ('polite' or 'assertive')
- * @param {number} clearDelay - Delay before clearing the message (ms)
- * 
- * @example
- * announceToScreenReader('5 runners saved successfully', 'polite');
- * announceToScreenReader('Error: Invalid runner number', 'assertive');
+ * Announce message to screen readers
  */
 export function announceToScreenReader(message, priority = LIVE_REGION_PRIORITIES.POLITE, clearDelay = 1000) {
-  if (!message || typeof document === 'undefined') {
-    return;
-  }
+  if (!message || typeof document === 'undefined') return;
 
   const liveRegion = getGlobalLiveRegion();
   
-  // Update priority if needed
   if (liveRegion.getAttribute('aria-live') !== priority) {
     liveRegion.setAttribute('aria-live', priority);
   }
 
-  // Set the message
+  // Set message immediately
   liveRegion.textContent = message;
 
-  // Clear after delay
   if (clearDelay > 0) {
     setTimeout(() => {
       if (liveRegion.textContent === message) {
@@ -217,17 +204,6 @@ export function announceToScreenReader(message, priority = LIVE_REGION_PRIORITIE
 
 /**
  * Manage focus for an element
- * Focuses the element and optionally scrolls it into view
- * 
- * @param {HTMLElement|string} elementOrSelector - Element or selector to focus
- * @param {Object} options - Focus options
- * @param {boolean} options.preventScroll - Prevent scrolling (default: false)
- * @param {boolean} options.scrollIntoView - Scroll into view (default: true)
- * @param {string} options.scrollBehavior - Scroll behavior ('auto' or 'smooth')
- * 
- * @example
- * manageFocus('#username-input');
- * manageFocus(buttonElement, { scrollBehavior: 'smooth' });
  */
 export function manageFocus(elementOrSelector, options = {}) {
   const {
@@ -236,102 +212,47 @@ export function manageFocus(elementOrSelector, options = {}) {
     scrollBehavior = 'smooth'
   } = options;
 
-  let element;
-  
-  if (typeof elementOrSelector === 'string') {
-    element = document.querySelector(elementOrSelector);
-  } else {
-    element = elementOrSelector;
-  }
+  const element = typeof elementOrSelector === 'string' 
+    ? document.querySelector(elementOrSelector)
+    : elementOrSelector;
 
   if (!element) {
     console.warn('manageFocus: Element not found', elementOrSelector);
     return;
   }
 
-  // Focus the element
-  element.focus({ preventScroll });
+  try {
+    // Ensure element is focusable
+    if (!element.hasAttribute('tabindex')) {
+      element.setAttribute('tabindex', '0');
+    }
+    
+    // Focus immediately
+    element.focus({ preventScroll });
 
-  // Scroll into view if requested
-  if (scrollIntoView && !preventScroll) {
-    element.scrollIntoView({
-      behavior: scrollBehavior,
-      block: 'nearest',
-      inline: 'nearest'
-    });
+    if (scrollIntoView && !preventScroll) {
+      element.scrollIntoView({
+        behavior: scrollBehavior,
+        block: 'nearest',
+        inline: 'nearest'
+      });
+    }
+  } catch (e) {
+    console.warn('Failed to set focus:', e);
   }
 }
 
 /**
- * Add skip link for keyboard navigation
- * Allows users to skip to main content
- * 
- * @param {string} targetId - ID of the main content element
- * @param {string} label - Label for the skip link
- * 
- * @example
- * addSkipLink('main-content', 'Skip to main content');
- */
-export function addSkipLink(targetId, label = 'Skip to main content') {
-  if (typeof document === 'undefined') {
-    return;
-  }
-
-  // Check if skip link already exists
-  if (document.getElementById('skip-link')) {
-    return;
-  }
-
-  const skipLink = document.createElement('a');
-  skipLink.id = 'skip-link';
-  skipLink.href = `#${targetId}`;
-  skipLink.textContent = label;
-  skipLink.className = 'skip-link';
-
-  // Style the skip link (hidden until focused)
-  skipLink.style.position = 'absolute';
-  skipLink.style.top = '-40px';
-  skipLink.style.left = '0';
-  skipLink.style.background = '#000';
-  skipLink.style.color = '#fff';
-  skipLink.style.padding = '8px';
-  skipLink.style.textDecoration = 'none';
-  skipLink.style.zIndex = '100';
-
-  skipLink.addEventListener('focus', () => {
-    skipLink.style.top = '0';
-  });
-
-  skipLink.addEventListener('blur', () => {
-    skipLink.style.top = '-40px';
-  });
-
-  // Insert at the beginning of body
-  document.body.insertBefore(skipLink, document.body.firstChild);
-}
-
-/**
- * Check if an element is visible to screen readers
- * 
- * @param {HTMLElement} element - Element to check
- * @returns {boolean} Whether the element is visible to screen readers
+ * Check if element is visible to screen readers
  */
 export function isVisibleToScreenReader(element) {
-  if (!element) {
-    return false;
-  }
+  if (!element) return false;
 
-  // Check aria-hidden
-  if (element.getAttribute('aria-hidden') === 'true') {
-    return false;
-  }
+  if (element.getAttribute('aria-hidden') === 'true') return false;
 
-  // Check if element or any parent has aria-hidden
   let parent = element.parentElement;
   while (parent) {
-    if (parent.getAttribute('aria-hidden') === 'true') {
-      return false;
-    }
+    if (parent.getAttribute('aria-hidden') === 'true') return false;
     parent = parent.parentElement;
   }
 
@@ -340,49 +261,25 @@ export function isVisibleToScreenReader(element) {
 
 /**
  * Get accessible name for an element
- * Follows ARIA naming computation
- * 
- * @param {HTMLElement} element - Element to get name for
- * @returns {string} Accessible name
  */
 export function getAccessibleName(element) {
-  if (!element) {
-    return '';
-  }
+  if (!element) return '';
 
   // Check aria-label
   const ariaLabel = element.getAttribute('aria-label');
-  if (ariaLabel) {
-    return ariaLabel;
-  }
+  if (ariaLabel) return ariaLabel;
 
   // Check aria-labelledby
   const ariaLabelledBy = element.getAttribute('aria-labelledby');
   if (ariaLabelledBy) {
     const labelElement = document.getElementById(ariaLabelledBy);
-    if (labelElement) {
-      return labelElement.textContent || '';
-    }
+    if (labelElement) return labelElement.textContent || '';
   }
 
   // Check associated label
   if (element.id) {
     const label = document.querySelector(`label[for="${element.id}"]`);
-    if (label) {
-      return label.textContent || '';
-    }
-  }
-
-  // Check title attribute
-  const title = element.getAttribute('title');
-  if (title) {
-    return title;
-  }
-
-  // Check placeholder (for inputs)
-  const placeholder = element.getAttribute('placeholder');
-  if (placeholder) {
-    return placeholder;
+    if (label) return label.textContent || '';
   }
 
   // Check text content
@@ -390,13 +287,11 @@ export function getAccessibleName(element) {
 }
 
 /**
- * Announce a toast/notification to screen readers
- * 
- * @param {string} message - Message to announce
- * @param {string} type - Type of notification ('success', 'error', 'warning', 'info')
+ * Announce notifications
  */
 export function announceNotification(message, type = 'info') {
   const priority = type === 'error' ? LIVE_REGION_PRIORITIES.ASSERTIVE : LIVE_REGION_PRIORITIES.POLITE;
+  
   const prefix = {
     success: 'Success: ',
     error: 'Error: ',
@@ -407,75 +302,13 @@ export function announceNotification(message, type = 'info') {
   announceToScreenReader(prefix + message, priority);
 }
 
-/**
- * Create a visually hidden element (screen reader only)
- * 
- * @param {string} text - Text content
- * @returns {HTMLElement} Visually hidden element
- */
-export function createScreenReaderOnly(text) {
-  const element = document.createElement('span');
-  element.className = 'sr-only';
-  element.textContent = text;
-  
-  // Apply screen reader only styles
-  element.style.position = 'absolute';
-  element.style.width = '1px';
-  element.style.height = '1px';
-  element.style.padding = '0';
-  element.style.margin = '-1px';
-  element.style.overflow = 'hidden';
-  element.style.clip = 'rect(0, 0, 0, 0)';
-  element.style.whiteSpace = 'nowrap';
-  element.style.border = '0';
-
-  return element;
-}
-
-/**
- * Trap focus within a container when virtual keyboard is open
- * Useful for mobile devices
- * 
- * @param {HTMLElement} container - Container element
- * @param {HTMLElement} inputElement - Input element that triggered keyboard
- */
-export function handleVirtualKeyboardFocus(container, inputElement) {
-  if (!container || !inputElement) {
-    return;
-  }
-
-  // Scroll input into view when keyboard opens
-  const scrollIntoView = () => {
-    setTimeout(() => {
-      inputElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
-    }, 300); // Delay to allow keyboard animation
-  };
-
-  inputElement.addEventListener('focus', scrollIntoView);
-
-  return () => {
-    inputElement.removeEventListener('focus', scrollIntoView);
-  };
-}
-
 export default {
-  // Focus management
   createFocusTrap,
-  manageFocus,
-  
-  // Live regions
   LIVE_REGION_PRIORITIES,
   createLiveRegion,
   announceToScreenReader,
-  announceNotification,
-  
-  // Utilities
-  addSkipLink,
+  manageFocus,
   isVisibleToScreenReader,
   getAccessibleName,
-  createScreenReaderOnly,
-  handleVirtualKeyboardFocus
+  announceNotification
 };
