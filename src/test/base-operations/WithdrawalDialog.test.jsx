@@ -1,308 +1,197 @@
 import React from 'react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, fireEvent, screen, waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
-import WithdrawalDialog from '../../modules/base-operations/components/WithdrawalDialog';
+import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import WithdrawalDialog from '../../components/BaseStation/WithdrawalDialog';
 import useBaseOperationsStore from '../../modules/base-operations/store/baseOperationsStore';
+import { RUNNER_STATUSES } from '../../types';
 
 // Mock the store
 vi.mock('../../modules/base-operations/store/baseOperationsStore');
 
 describe('WithdrawalDialog', () => {
-  const mockWithdrawRunner = vi.fn();
-  const mockReverseWithdrawal = vi.fn();
-  const mockOnClose = vi.fn();
+  const mockStore = {
+    bulkMarkRunners: vi.fn(),
+    loading: false,
+    error: null
+  };
+
+  const defaultProps = {
+    isOpen: true,
+    onClose: vi.fn(),
+    type: 'dnf'
+  };
 
   beforeEach(() => {
-    // Reset mocks
     vi.clearAllMocks();
-
-    // Mock store implementation
-    useBaseOperationsStore.mockImplementation(() => ({
-      withdrawRunner: mockWithdrawRunner,
-      reverseWithdrawal: mockReverseWithdrawal,
-      loading: false
-    }));
+    useBaseOperationsStore.mockImplementation(() => mockStore);
   });
 
-  it('renders correctly when open', () => {
-    render(
-      <WithdrawalDialog
-        isOpen={true}
-        onClose={mockOnClose}
-        runnerNumber="123"
-      />
-    );
+  test('renders dialog when open', () => {
+    render(<WithdrawalDialog {...defaultProps} />);
 
-    expect(screen.getByText('Withdraw Runner')).toBeInTheDocument();
-    expect(screen.getByLabelText(/Runner Number/i)).toHaveValue('123');
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('Mark Runners as DNF')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Runner Numbers/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Reason/i)).toBeInTheDocument();
   });
 
-  it('does not render when closed', () => {
-    render(
-      <WithdrawalDialog
-        isOpen={false}
-        onClose={mockOnClose}
-        runnerNumber="123"
-      />
-    );
-
-    expect(screen.queryByText('Withdraw Runner')).not.toBeInTheDocument();
+  test('does not render when closed', () => {
+    render(<WithdrawalDialog {...defaultProps} isOpen={false} />);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('validates required fields', async () => {
-    render(
-      <WithdrawalDialog
-        isOpen={true}
-        onClose={mockOnClose}
-      />
-    );
-
-    // Try to submit without required fields
-    fireEvent.click(screen.getByText('Withdraw Runner'));
-
-    // Check for validation messages
-    expect(await screen.findByText('Runner number is required')).toBeInTheDocument();
-    expect(await screen.findByText('Withdrawal time is required')).toBeInTheDocument();
-    expect(await screen.findByText('Reason is required')).toBeInTheDocument();
-
-    // No withdrawal should be attempted
-    expect(mockWithdrawRunner).not.toHaveBeenCalled();
-  });
-
-  it('handles withdrawal submission correctly', async () => {
-    // Mock current time
-    const mockDate = new Date('2024-01-01T12:00:00');
-    vi.spyOn(global, 'Date').mockImplementation(() => mockDate);
-
-    render(
-      <WithdrawalDialog
-        isOpen={true}
-        onClose={mockOnClose}
-        runnerNumber="123"
-      />
-    );
-
-    // Fill in required fields
-    fireEvent.change(screen.getByLabelText(/Runner Number/i), {
-      target: { value: '123' }
-    });
-
-    fireEvent.change(screen.getByLabelText(/Checkpoint/i), {
-      target: { value: '2' }
-    });
-
-    const withdrawalTime = screen.getByLabelText(/Withdrawal Time/i);
-    fireEvent.change(withdrawalTime, {
-      target: { value: '2024-01-01T12:00' }
-    });
-
-    fireEvent.change(screen.getByLabelText(/Reason/i), {
-      target: { value: 'Personal Emergency' }
-    });
-
-    fireEvent.change(screen.getByLabelText(/Comments/i), {
-      target: { value: 'Test comment' }
-    });
-
-    // Submit form
-    await act(async () => {
-      fireEvent.click(screen.getByText('Withdraw Runner'));
-    });
-
-    // Verify withdrawal was called with correct params
-    expect(mockWithdrawRunner).toHaveBeenCalledWith(
-      123,
-      'Personal Emergency',
-      'Test comment',
-      2,
-      '2024-01-01T12:00:00.000Z'
-    );
-
-    // Dialog should close on success
-    expect(mockOnClose).toHaveBeenCalled();
-  });
-
-  it('handles withdrawal reversal correctly', async () => {
-    render(
-      <WithdrawalDialog
-        isOpen={true}
-        onClose={mockOnClose}
-        runnerNumber="123*"
-      />
-    );
-
-    // Should detect reversal mode from * suffix
-    expect(screen.getByText(/Reversal Mode/i)).toBeInTheDocument();
-
-    // Submit reversal
-    await act(async () => {
-      fireEvent.click(screen.getByText('Reverse Withdrawal'));
-    });
-
-    // Verify reversal was called
-    expect(mockReverseWithdrawal).toHaveBeenCalledWith(123);
-    expect(mockOnClose).toHaveBeenCalled();
-  });
-
-  it('handles errors during submission', async () => {
-    // Mock withdrawal to fail
-    const error = new Error('Failed to withdraw runner');
-    mockWithdrawRunner.mockRejectedValue(error);
-
-    render(
-      <WithdrawalDialog
-        isOpen={true}
-        onClose={mockOnClose}
-        runnerNumber="123"
-      />
-    );
-
-    // Fill required fields
-    fireEvent.change(screen.getByLabelText(/Runner Number/i), {
-      target: { value: '123' }
-    });
-
-    const withdrawalTime = screen.getByLabelText(/Withdrawal Time/i);
-    fireEvent.change(withdrawalTime, {
-      target: { value: '2024-01-01T12:00' }
-    });
-
-    // Submit form
-    await act(async () => {
-      fireEvent.click(screen.getByText('Withdraw Runner'));
-    });
-
-    // Error should be displayed
-    expect(await screen.findByText('Failed to withdraw runner')).toBeInTheDocument();
+  test('handles runner number input and shows preview', async () => {
+    render(<WithdrawalDialog {...defaultProps} />);
     
-    // Dialog should stay open
-    expect(mockOnClose).not.toHaveBeenCalled();
+    const input = screen.getByLabelText(/Runner Numbers/i);
+    await userEvent.type(input, '1, 2, 3-5');
+
+    // Check preview
+    expect(screen.getByText('Preview (5 runners)')).toBeInTheDocument();
+    expect(screen.getByText('1, 2, 3, 4, 5')).toBeInTheDocument();
   });
 
-  it('validates runner number format', async () => {
-    render(
-      <WithdrawalDialog
-        isOpen={true}
-        onClose={mockOnClose}
-      />
-    );
+  test('validates form before submission', async () => {
+    render(<WithdrawalDialog {...defaultProps} />);
+    
+    // Try to submit without data
+    const submitButton = screen.getByText(/Mark as DNF/i);
+    fireEvent.click(submitButton);
 
-    // Try invalid runner numbers
-    const runnerInput = screen.getByLabelText(/Runner Number/i);
-
-    fireEvent.change(runnerInput, { target: { value: 'abc' } });
-    expect(await screen.findByText('Invalid runner number')).toBeInTheDocument();
-
-    fireEvent.change(runnerInput, { target: { value: '-1' } });
-    expect(await screen.findByText('Invalid runner number')).toBeInTheDocument();
-
-    fireEvent.change(runnerInput, { target: { value: '0' } });
-    expect(await screen.findByText('Invalid runner number')).toBeInTheDocument();
+    // Check validation messages
+    expect(screen.getByText('At least one valid runner number is required')).toBeInTheDocument();
+    expect(screen.getByText('DNF reason is required')).toBeInTheDocument();
   });
 
-  it('handles "Now" button for time selection', () => {
-    // Mock current time
-    const mockDate = new Date('2024-01-01T12:00:00');
-    vi.spyOn(global, 'Date').mockImplementation(() => mockDate);
+  test('handles successful form submission', async () => {
+    const onClose = vi.fn();
+    render(<WithdrawalDialog {...defaultProps} onClose={onClose} />);
+    
+    // Fill form
+    await userEvent.type(screen.getByLabelText(/Runner Numbers/i), '1, 2, 3');
+    await userEvent.type(screen.getByLabelText(/Reason/i), 'Test reason');
 
-    render(
-      <WithdrawalDialog
-        isOpen={true}
-        onClose={mockOnClose}
-      />
-    );
+    // Submit form
+    fireEvent.click(screen.getByText(/Mark as DNF/i));
 
-    // Click "Now" button
-    fireEvent.click(screen.getByText('Now'));
+    // Check store interaction
+    await waitFor(() => {
+      expect(mockStore.bulkMarkRunners).toHaveBeenCalledWith(
+        [1, 2, 3],
+        {
+          status: RUNNER_STATUSES.DNF,
+          reason: 'Test reason',
+          timestamp: expect.any(String)
+        }
+      );
+    });
 
-    // Time input should be set to current time
-    const timeInput = screen.getByLabelText(/Withdrawal Time/i);
-    expect(timeInput.value).toBe('2024-01-01T12:00');
+    // Dialog should close
+    expect(onClose).toHaveBeenCalled();
   });
 
-  it('disables form submission while loading', () => {
-    // Mock loading state
+  test('handles form submission errors', async () => {
+    const error = new Error('Test error');
+    mockStore.bulkMarkRunners.mockRejectedValue(error);
+
+    render(<WithdrawalDialog {...defaultProps} />);
+    
+    // Fill and submit form
+    await userEvent.type(screen.getByLabelText(/Runner Numbers/i), '1, 2, 3');
+    await userEvent.type(screen.getByLabelText(/Reason/i), 'Test reason');
+    fireEvent.click(screen.getByText(/Mark as DNF/i));
+
+    // Check error message
+    await waitFor(() => {
+      expect(screen.getByText('Test error')).toBeInTheDocument();
+    });
+  });
+
+  test('handles clear button', async () => {
+    render(<WithdrawalDialog {...defaultProps} />);
+    
+    // Fill form
+    await userEvent.type(screen.getByLabelText(/Runner Numbers/i), '1, 2, 3');
+    await userEvent.type(screen.getByLabelText(/Reason/i), 'Test reason');
+
+    // Clear form
+    fireEvent.click(screen.getByText('Clear'));
+
+    // Check form is cleared
+    expect(screen.getByLabelText(/Runner Numbers/i)).toHaveValue('');
+    expect(screen.getByLabelText(/Reason/i)).toHaveValue('');
+  });
+
+  test('handles escape key', () => {
+    const onClose = vi.fn();
+    render(<WithdrawalDialog {...defaultProps} onClose={onClose} />);
+
+    // Press escape
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  test('disables submit button while loading', () => {
     useBaseOperationsStore.mockImplementation(() => ({
-      withdrawRunner: mockWithdrawRunner,
-      reverseWithdrawal: mockReverseWithdrawal,
+      ...mockStore,
       loading: true
     }));
 
-    render(
-      <WithdrawalDialog
-        isOpen={true}
-        onClose={mockOnClose}
-        runnerNumber="123"
-      />
-    );
-
-    // Submit button should be disabled
-    expect(screen.getByText('Withdraw Runner')).toBeDisabled();
+    render(<WithdrawalDialog {...defaultProps} />);
+    
+    const submitButton = screen.getByText('Saving...');
+    expect(submitButton).toBeDisabled();
   });
 
-  it('shows processing state during submission', async () => {
-    // Mock withdrawal to take some time
-    mockWithdrawRunner.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
-
-    render(
-      <WithdrawalDialog
-        isOpen={true}
-        onClose={mockOnClose}
-        runnerNumber="123"
-      />
-    );
-
-    // Fill required fields
-    fireEvent.change(screen.getByLabelText(/Runner Number/i), {
-      target: { value: '123' }
-    });
-
-    const withdrawalTime = screen.getByLabelText(/Withdrawal Time/i);
-    fireEvent.change(withdrawalTime, {
-      target: { value: '2024-01-01T12:00' }
-    });
-
-    // Submit form
-    fireEvent.click(screen.getByText('Withdraw Runner'));
-
-    // Should show processing state
-    expect(await screen.findByText('Processing...')).toBeInTheDocument();
-
-    // Wait for completion
-    await waitFor(() => {
-      expect(screen.queryByText('Processing...')).not.toBeInTheDocument();
-    });
+  test('supports DNS type', () => {
+    render(<WithdrawalDialog {...defaultProps} type="dns" />);
+    
+    expect(screen.getByText('Mark Runners as DNS')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Enter DNS reason')).toBeInTheDocument();
   });
 
-  it('preserves form state between submissions', async () => {
-    render(
-      <WithdrawalDialog
-        isOpen={true}
-        onClose={mockOnClose}
-        runnerNumber="123"
-      />
-    );
+  test('is accessible', () => {
+    render(<WithdrawalDialog {...defaultProps} />);
 
-    // Fill in form
-    fireEvent.change(screen.getByLabelText(/Runner Number/i), {
-      target: { value: '123' }
-    });
+    // Check dialog accessibility
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveAttribute('aria-labelledby');
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
 
-    fireEvent.change(screen.getByLabelText(/Checkpoint/i), {
-      target: { value: '2' }
-    });
+    // Check form labels
+    expect(screen.getByLabelText(/Runner Numbers/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Reason/i)).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText(/Comments/i), {
-      target: { value: 'Test comment' }
-    });
+    // Check button accessibility
+    expect(screen.getByRole('button', { name: /Mark as DNF/i })).toHaveAttribute('type', 'submit');
+    expect(screen.getByRole('button', { name: 'Cancel' })).toHaveAttribute('type', 'button');
+    expect(screen.getByRole('button', { name: 'Clear' })).toHaveAttribute('type', 'button');
+  });
 
-    // Submit with missing required fields
-    fireEvent.click(screen.getByText('Withdraw Runner'));
+  test('focuses runner input on open', () => {
+    render(<WithdrawalDialog {...defaultProps} />);
+    expect(screen.getByLabelText(/Runner Numbers/i)).toHaveFocus();
+  });
 
-    // Form should retain entered values after failed submission
-    expect(screen.getByLabelText(/Runner Number/i)).toHaveValue('123');
-    expect(screen.getByLabelText(/Checkpoint/i)).toHaveValue('2');
-    expect(screen.getByLabelText(/Comments/i)).toHaveValue('Test comment');
+  test('maintains focus trap', async () => {
+    render(<WithdrawalDialog {...defaultProps} />);
+
+    const firstFocusable = screen.getByLabelText(/Runner Numbers/i);
+    const lastFocusable = screen.getByRole('button', { name: /Mark as DNF/i });
+
+    // Focus last element and press Tab
+    lastFocusable.focus();
+    fireEvent.keyDown(lastFocusable, { key: 'Tab' });
+
+    // Focus should move to first element
+    expect(firstFocusable).toHaveFocus();
+
+    // Focus first element and press Shift+Tab
+    firstFocusable.focus();
+    fireEvent.keyDown(firstFocusable, { key: 'Tab', shiftKey: true });
+
+    // Focus should move to last element
+    expect(lastFocusable).toHaveFocus();
   });
 });
