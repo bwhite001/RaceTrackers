@@ -132,6 +132,16 @@ describe('Accessibility Utilities - Critical Path Tests', () => {
   });
 
   describe('Live Region', () => {
+    test('creates live region with correct attributes', () => {
+      const liveRegion = createLiveRegion(LIVE_REGION_PRIORITIES.POLITE);
+
+      expect(liveRegion.getAttribute('role')).toBe('status');
+      expect(liveRegion.getAttribute('aria-live')).toBe('polite');
+      expect(liveRegion.getAttribute('aria-atomic')).toBe('true');
+    });
+
+    test('creates assertive live region', () => {
+      const liveRegion = createLiveRegion(LIVE_REGION_PRIORITIES.ASSERTIVE);
       expect(liveRegion.getAttribute('aria-live')).toBe('assertive');
     });
   });
@@ -191,20 +201,26 @@ describe('Accessibility Utilities - Critical Path Tests', () => {
       }
     });
 
-    test('manages focus on element', () => {
+    test('manages focus on element', async () => {
       document.body.focus();
-      expect(document.activeElement.tagName).toBe('BODY');
+      expect(document.activeElement).toBe(document.body);
 
       manageFocus(element);
+      await flushPromisesAndTimers();
+
+      expect(document.activeElement).toBe(element);
       expect(document.activeElement.getAttribute('data-testid')).toBe('test-button');
     });
 
-    test('manages focus by selector', () => {
+    test('manages focus by selector', async () => {
       element.id = 'test-button';
       document.body.focus();
-      expect(document.activeElement.tagName).toBe('BODY');
+      expect(document.activeElement).toBe(document.body);
 
       manageFocus('#test-button');
+      await flushPromisesAndTimers();
+
+      expect(document.activeElement).toBe(element);
       expect(document.activeElement.getAttribute('data-testid')).toBe('test-button');
     });
   });

@@ -10,8 +10,15 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       exclude: [
         'node_modules/',
-        'src/test/',
+        'src/test/setup.js',
       ],
     },
-  },
+    deps: {
+      inline: [
+        '@testing-library/react',
+        '@testing-library/user-event',
+        '@testing-library/jest-dom'
+      ]
+    }
+  }
 });

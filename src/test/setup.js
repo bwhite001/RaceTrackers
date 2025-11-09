@@ -1,134 +1,145 @@
-import { vi } from 'vitest';
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
 
-// Mock scrollIntoView
-Element.prototype.scrollIntoView = vi.fn();
+// Mock IntersectionObserver
+class IntersectionObserver {
+  constructor(callback, options) {
+    this.callback = callback;
+    this.options = options;
+  }
 
-// Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-});
+  observe() {
+    // Implementation
+  }
 
-// Mock window.visualViewport
-Object.defineProperty(window, 'visualViewport', {
-  writable: true,
-  value: {
-    width: 1024,
-    height: 768,
-    scale: 1,
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
+  unobserve() {
+    // Implementation
+  }
+
+  disconnect() {
+    // Implementation
+  }
+}
+
+// Mock ResizeObserver
+class ResizeObserver {
+  constructor(callback) {
+    this.callback = callback;
+  }
+
+  observe() {
+    // Implementation
+  }
+
+  unobserve() {
+    // Implementation
+  }
+
+  disconnect() {
+    // Implementation
+  }
+}
+
+// Setup globals
+global.IntersectionObserver = IntersectionObserver;
+global.ResizeObserver = ResizeObserver;
+
+// Mock window properties and methods commonly used in focus management
+Object.defineProperties(window, {
+  scrollTo: { value: vi.fn() },
+  scrollBy: { value: vi.fn() },
+  getComputedStyle: {
+    value: (element) => ({
+      getPropertyValue: (prop) => {
+        return '';
+      },
+    }),
   },
 });
 
-// Mock touch detection
-delete window.ontouchstart;
-Object.defineProperty(window, 'ontouchstart', {
-  configurable: true,
-  value: undefined,
+// Setup jsdom focus handling
+Object.defineProperties(HTMLElement.prototype, {
+  offsetParent: {
+    get() {
+      return this.parentNode;
+    },
+  },
+  offsetTop: {
+    get() {
+      return parseFloat(this.style.top) || 0;
+    },
+  },
+  offsetLeft: {
+    get() {
+      return parseFloat(this.style.left) || 0;
+    },
+  },
+  offsetWidth: {
+    get() {
+      return parseFloat(this.style.width) || 0;
+    },
+  },
+  offsetHeight: {
+    get() {
+      return parseFloat(this.style.height) || 0;
+    },
+  },
 });
-
-// Mock navigator
-const mockNavigator = {
-  maxTouchPoints: 0,
-  userAgent: 'test',
-};
-
-Object.defineProperty(window, 'navigator', {
-  configurable: true,
-  value: mockNavigator,
-  writable: true,
-});
-
-// Mock ResizeObserver
-global.ResizeObserver = class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-};
-
-// Mock IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-};
-
-// Mock requestAnimationFrame
-global.requestAnimationFrame = callback => setTimeout(callback, 0);
-global.cancelAnimationFrame = id => clearTimeout(id);
-
-// Setup DOM testing environment
-const portalRoot = document.createElement('div');
-portalRoot.setAttribute('id', 'portal-root');
-document.body.appendChild(portalRoot);
-
-// Mock focus trap container
-const createFocusTrapContainer = () => {
-  const container = document.createElement('div');
-  container.setAttribute('data-focus-trap', 'true');
-  document.body.appendChild(container);
-  return container;
-};
-
-// Mock live region
-const createLiveRegion = () => {
-  const region = document.createElement('div');
-  region.setAttribute('role', 'status');
-  region.setAttribute('aria-live', 'polite');
-  document.body.appendChild(region);
-  return region;
-};
-
-// Make vi.fn() globally available like jest.fn()
-global.jest = {
-  fn: vi.fn,
-  spyOn: vi.spyOn,
-};
 
 // Cleanup after each test
 afterEach(() => {
-  cleanup(); // Clean up React components
-  vi.clearAllTimers();
-  vi.clearAllMocks();
-  window.matchMedia.mockClear();
-  
-  // Clear any DOM modifications
+  cleanup();
   document.body.innerHTML = '';
-  const portal = document.getElementById('portal-root');
-  if (portal) portal.innerHTML = '';
-  
-  // Reset any global overrides
-  Element.prototype.scrollIntoView.mockClear();
-
-  // Reset touch detection
-  delete window.ontouchstart;
-  Object.defineProperty(window, 'ontouchstart', {
-    configurable: true,
-    value: undefined,
-  });
-  Object.defineProperty(window.navigator, 'maxTouchPoints', {
-    configurable: true,
-    value: 0,
-  });
 });
 
-// Export test utilities
-export {
-  createFocusTrapContainer,
-  createLiveRegion,
-  act,
-};
+// Console error/warning handling
+const originalError = console.error;
+const originalWarn = console.warn;
+
+beforeAll(() => {
+  console.error = (...args) => {
+    if (
+      typeof args[0] === 'string' &&
+      (args[0].includes('Not implemented') || args[0].includes('test was not wrapped'))
+    ) {
+      return;
+    }
+    originalError.call(console, ...args);
+  };
+
+  console.warn = (...args) => {
+    if (
+      typeof args[0] === 'string' &&
+      (args[0].includes('Not implemented') || args[0].includes('test was not wrapped'))
+    ) {
+      return;
+    }
+    originalWarn.call(console, ...args);
+  };
+});
+
+afterAll(() => {
+  console.error = originalError;
+  console.warn = originalWarn;
+});
+
+// Add custom matchers
+expect.extend({
+  toHaveFocus(received) {
+    const pass = received === document.activeElement;
+    if (pass) {
+      return {
+        message: () =>
+          `expected ${received} not to have focus`,
+        pass: true,
+      };
+    } else {
+      return {
+        message: () =>
+          `expected ${received} to have focus`,
+        pass: false,
+      };
+    }
+  },
+});
