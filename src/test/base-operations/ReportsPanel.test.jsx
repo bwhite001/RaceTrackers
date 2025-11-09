@@ -1,248 +1,212 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import React from 'react';
-import { render, fireEvent, screen, waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
-import ReportsPanel from '../../modules/base-operations/components/ReportsPanel';
+import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import ReportsPanel from '../../components/BaseStation/ReportsPanel';
 import useBaseOperationsStore from '../../modules/base-operations/store/baseOperationsStore';
+import { HOTKEYS } from '../../types';
 
 // Mock the store
 vi.mock('../../modules/base-operations/store/baseOperationsStore');
 
+// Mock device detection hook
+vi.mock('../../shared/hooks/useDeviceDetection', () => ({
+  default: () => ({
+    isDesktop: true
+  })
+}));
+
 describe('ReportsPanel', () => {
-  const mockGenerateReport = vi.fn();
-  const mockDownloadReport = vi.fn();
-  const mockPreviewReport = vi.fn();
+  const mockStore = {
+    generateMissingNumbersReport: vi.fn(),
+    generateOutListReport: vi.fn(),
+    generateCheckpointLogReport: vi.fn(),
+    exportBaseStationData: vi.fn(),
+    loading: false,
+    error: null
+  };
 
   beforeEach(() => {
-    // Reset mocks
     vi.clearAllMocks();
-
-    // Mock store implementation
-    useBaseOperationsStore.mockImplementation(() => ({
-      generateReport: mockGenerateReport,
-      downloadReport: mockDownloadReport,
-      previewReport: mockPreviewReport,
-      loading: false
-    }));
+    useBaseOperationsStore.mockImplementation(() => mockStore);
   });
 
-  it('renders correctly', () => {
+  test('renders all report types', () => {
     render(<ReportsPanel />);
 
-    expect(screen.getByText('Generate Reports')).toBeInTheDocument();
-    expect(screen.getByText(/Create and export race reports/i)).toBeInTheDocument();
-  });
-
-  it('shows all report types', () => {
-    render(<ReportsPanel />);
-
+    // Check report titles
     expect(screen.getByText('Missing Numbers Report')).toBeInTheDocument();
-    expect(screen.getByText('Out List Report')).toBeInTheDocument();
-    expect(screen.getByText('Checkpoint Log Report')).toBeInTheDocument();
-    expect(screen.getByText('Race Summary Report')).toBeInTheDocument();
+    expect(screen.getByText('Out List')).toBeInTheDocument();
+    expect(screen.getByText('Checkpoint Log')).toBeInTheDocument();
+    expect(screen.getByText('Export All Data')).toBeInTheDocument();
+
+    // Check descriptions
+    expect(screen.getByText(/List of expected runners who have not checked in/i)).toBeInTheDocument();
+    expect(screen.getByText(/List of runners currently on the course/i)).toBeInTheDocument();
+    expect(screen.getByText(/Detailed log of all checkpoint activity/i)).toBeInTheDocument();
+    expect(screen.getByText(/Export complete race data in CSV format/i)).toBeInTheDocument();
   });
 
-  it('shows all export formats', () => {
+  test('handles missing numbers report generation', async () => {
     render(<ReportsPanel />);
 
-    expect(screen.getByText('CSV')).toBeInTheDocument();
-    expect(screen.getByText('Excel')).toBeInTheDocument();
-    expect(screen.getByText('HTML')).toBeInTheDocument();
-  });
+    const buttons = screen.getAllByText('Generate Report');
+    const missingButton = buttons[0]; // First report is Missing Numbers
 
-  it('handles report type selection', () => {
-    render(<ReportsPanel />);
+    fireEvent.click(missingButton);
 
-    // Select missing numbers report
-    fireEvent.click(screen.getByText('Missing Numbers Report'));
-    expect(screen.getByText(/List of runners who haven't checked in/i)).toBeInTheDocument();
-  });
+    expect(mockStore.generateMissingNumbersReport).toHaveBeenCalled();
+    expect(missingButton).toBeDisabled();
+    expect(screen.getByText('Generating...')).toBeInTheDocument();
 
-  it('handles export format selection', () => {
-    render(<ReportsPanel />);
-
-    // Select Excel format
-    fireEvent.click(screen.getByText('Excel'));
-    expect(screen.getByText(/Microsoft Excel format with formatting/i)).toBeInTheDocument();
-  });
-
-  it('generates report with selected options', async () => {
-    render(<ReportsPanel />);
-
-    // Select report type and format
-    fireEvent.click(screen.getByText('Missing Numbers Report'));
-    fireEvent.click(screen.getByText('Excel'));
-
-    // Fill in options
-    fireEvent.change(screen.getByLabelText(/Checkpoint/i), {
-      target: { value: '2' }
-    });
-
-    fireEvent.change(screen.getByLabelText(/Time Range/i), {
-      target: { value: '3h' }
-    });
-
-    // Generate report
-    await act(async () => {
-      fireEvent.click(screen.getByText('Generate Report'));
-    });
-
-    expect(mockGenerateReport).toHaveBeenCalledWith('missing', {
-      format: 'excel',
-      checkpoint: 2,
-      timeRange: '3h',
-      includeNotes: true
-    });
-  });
-
-  it('handles preview mode', async () => {
-    render(<ReportsPanel />);
-
-    // Enable preview
-    fireEvent.click(screen.getByLabelText(/Show preview before download/i));
-
-    // Select report and generate
-    fireEvent.click(screen.getByText('Missing Numbers Report'));
-    await act(async () => {
-      fireEvent.click(screen.getByText('Generate Report'));
-    });
-
-    expect(mockPreviewReport).toHaveBeenCalled();
-  });
-
-  it('shows loading state during generation', async () => {
-    // Mock generate to take some time
-    mockGenerateReport.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
-
-    render(<ReportsPanel />);
-
-    // Start report generation
-    fireEvent.click(screen.getByText('Generate Report'));
-
-    // Should show loading state
-    expect(await screen.findByText('Generating...')).toBeInTheDocument();
-
-    // Wait for completion
     await waitFor(() => {
       expect(screen.queryByText('Generating...')).not.toBeInTheDocument();
     });
   });
 
-  it('handles generation errors', async () => {
-    mockGenerateReport.mockRejectedValue(new Error('Generation failed'));
-
+  test('handles out list report generation', async () => {
     render(<ReportsPanel />);
 
-    // Try to generate report
-    await act(async () => {
-      fireEvent.click(screen.getByText('Generate Report'));
-    });
+    const buttons = screen.getAllByText('Generate Report');
+    const outListButton = buttons[1]; // Second report is Out List
 
-    expect(screen.getByText('Generation failed')).toBeInTheDocument();
+    fireEvent.click(outListButton);
+
+    expect(mockStore.generateOutListReport).toHaveBeenCalled();
+    expect(outListButton).toBeDisabled();
   });
 
-  it('validates required options', async () => {
+  test('handles checkpoint log report generation', async () => {
     render(<ReportsPanel />);
 
-    // Try to generate without selecting report type
-    await act(async () => {
-      fireEvent.click(screen.getByText('Generate Report'));
-    });
+    const buttons = screen.getAllByText('Generate Report');
+    const checkpointButton = buttons[2]; // Third report is Checkpoint Log
 
-    expect(screen.getByText('Please select a report type')).toBeInTheDocument();
-    expect(mockGenerateReport).not.toHaveBeenCalled();
+    fireEvent.click(checkpointButton);
+
+    expect(mockStore.generateCheckpointLogReport).toHaveBeenCalled();
+    expect(checkpointButton).toBeDisabled();
   });
 
-  it('shows report-specific options', () => {
+  test('handles data export', async () => {
     render(<ReportsPanel />);
 
-    // Select checkpoint log report
-    fireEvent.click(screen.getByText('Checkpoint Log Report'));
+    const buttons = screen.getAllByText('Generate Report');
+    const exportButton = buttons[3]; // Fourth report is Export All Data
 
-    // Should show checkpoint selection
-    expect(screen.getByLabelText(/Checkpoint/i)).toBeInTheDocument();
+    fireEvent.click(exportButton);
 
-    // Select out list report
-    fireEvent.click(screen.getByText('Out List Report'));
-
-    // Should show status filters
-    expect(screen.getByLabelText(/Include Status/i)).toBeInTheDocument();
+    expect(mockStore.exportBaseStationData).toHaveBeenCalled();
+    expect(exportButton).toBeDisabled();
   });
 
-  it('maintains options across report type changes', () => {
-    render(<ReportsPanel />);
-
-    // Set some options
-    fireEvent.change(screen.getByLabelText(/Time Range/i), {
-      target: { value: '3h' }
-    });
-
-    // Change report type
-    fireEvent.click(screen.getByText('Out List Report'));
-    fireEvent.click(screen.getByText('Missing Numbers Report'));
-
-    // Options should be preserved
-    expect(screen.getByLabelText(/Time Range/i)).toHaveValue('3h');
-  });
-
-  it('shows appropriate icons for report types', () => {
-    render(<ReportsPanel />);
-
-    // Check for report type icons
-    expect(screen.getAllByRole('img', { hidden: true })).toHaveLength(4); // One icon per report type
-  });
-
-  it('handles batch export', async () => {
-    render(<ReportsPanel />);
-
-    // Enable batch export
-    fireEvent.click(screen.getByLabelText(/Export all report types/i));
-
-    // Generate reports
-    await act(async () => {
-      fireEvent.click(screen.getByText('Generate Reports'));
-    });
-
-    // Should have called generate for each report type
-    expect(mockGenerateReport).toHaveBeenCalledTimes(4);
-  });
-
-  it('shows export format descriptions', () => {
-    render(<ReportsPanel />);
-
-    expect(screen.getByText(/Comma-separated values, best for spreadsheets/i)).toBeInTheDocument();
-    expect(screen.getByText(/Microsoft Excel format with formatting/i)).toBeInTheDocument();
-    expect(screen.getByText(/Web page format with styling/i)).toBeInTheDocument();
-  });
-
-  it('disables generation during loading', () => {
+  test('displays loading state during report generation', async () => {
+    // Mock loading state
     useBaseOperationsStore.mockImplementation(() => ({
-      generateReport: mockGenerateReport,
+      ...mockStore,
       loading: true
     }));
 
     render(<ReportsPanel />);
 
-    expect(screen.getByText('Generate Report')).toBeDisabled();
+    const buttons = screen.getAllByRole('button');
+    buttons.forEach(button => {
+      expect(button).toBeDisabled();
+    });
   });
 
-  it('remembers last used options', () => {
-    const { unmount } = render(<ReportsPanel />);
+  test('displays error message when report generation fails', async () => {
+    const error = 'Failed to generate report';
+    useBaseOperationsStore.mockImplementation(() => ({
+      ...mockStore,
+      error
+    }));
 
-    // Set options
-    fireEvent.click(screen.getByText('Missing Numbers Report'));
-    fireEvent.click(screen.getByText('Excel'));
-    fireEvent.change(screen.getByLabelText(/Time Range/i), {
-      target: { value: '3h' }
-    });
-
-    // Unmount and remount
-    unmount();
     render(<ReportsPanel />);
 
-    // Options should be restored
-    expect(screen.getByText('Missing Numbers Report')).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('Excel')).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByLabelText(/Time Range/i)).toHaveValue('3h');
+    expect(screen.getByText(error)).toBeInTheDocument();
+  });
+
+  test('handles multiple report generations', async () => {
+    render(<ReportsPanel />);
+
+    const buttons = screen.getAllByText('Generate Report');
+
+    // Generate missing numbers report
+    fireEvent.click(buttons[0]);
+    expect(mockStore.generateMissingNumbersReport).toHaveBeenCalled();
+
+    // Generate out list report
+    fireEvent.click(buttons[1]);
+    expect(mockStore.generateOutListReport).toHaveBeenCalled();
+
+    // Each button should be disabled only when its report is being generated
+    expect(buttons[0]).toBeEnabled();
+    expect(buttons[1]).toBeEnabled();
+  });
+
+  test('displays keyboard shortcut on desktop', () => {
+    render(<ReportsPanel />);
+
+    expect(screen.getByText(`Press ${HOTKEYS.REPORTS} to quickly access the reports panel`)).toBeInTheDocument();
+  });
+
+  test('hides keyboard shortcut on mobile', () => {
+    // Mock mobile device
+    vi.mock('../../shared/hooks/useDeviceDetection', () => ({
+      default: () => ({
+        isDesktop: false
+      })
+    }));
+
+    render(<ReportsPanel />);
+
+    expect(screen.queryByText(`Press ${HOTKEYS.REPORTS} to quickly access the reports panel`)).not.toBeInTheDocument();
+  });
+
+  test('is accessible', () => {
+    render(<ReportsPanel />);
+
+    // Check headings hierarchy
+    expect(screen.getByRole('heading', { name: 'Reports & Exports' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'About Reports' })).toBeInTheDocument();
+
+    // Check buttons
+    const buttons = screen.getAllByRole('button');
+    buttons.forEach(button => {
+      expect(button).toHaveAttribute('aria-label');
+    });
+
+    // Check loading states
+    const loadingButtons = screen.queryAllByText('Generating...');
+    loadingButtons.forEach(button => {
+      expect(button.closest('button')).toHaveAttribute('disabled');
+    });
+  });
+
+  test('memoizes correctly', () => {
+    const { rerender } = render(<ReportsPanel />);
+    
+    // First render
+    const firstRender = screen.getAllByRole('button')[0].innerHTML;
+
+    // Rerender with same props
+    rerender(<ReportsPanel />);
+    const secondRender = screen.getAllByRole('button')[0].innerHTML;
+
+    // Should be exactly the same DOM
+    expect(firstRender).toBe(secondRender);
+
+    // Update store data
+    useBaseOperationsStore.mockImplementation(() => ({
+      ...mockStore,
+      loading: true
+    }));
+
+    // Rerender with different data
+    rerender(<ReportsPanel />);
+    const thirdRender = screen.getAllByRole('button')[0].innerHTML;
+
+    // Should be different DOM
+    expect(thirdRender).not.toBe(secondRender);
   });
 });

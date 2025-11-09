@@ -1,207 +1,222 @@
-import { renderHook, act } from '@testing-library/react-hooks';
-import {
-  useHotkeys,
-  useHotkeyScope,
-  HOTKEY_SCOPES,
-  setHotkeyDebugMode
-} from '../../../shared/hooks/useHotkeys';
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
+import useHotkeys, { HOTKEY_COMBINATIONS } from '../../../shared/hooks/useHotkeys';
 
-describe('Hotkeys System - Critical Path Tests', () => {
-  // Mock keyboard events
-  const createKeyboardEvent = (key, modifiers = {}) => {
-    return new KeyboardEvent('keydown', {
-      key,
-      bubbles: true,
-      cancelable: true,
-      ...modifiers
-    });
-  };
+describe('useHotkeys Hook', () => {
+  let addEventListenerSpy;
+  let removeEventListenerSpy;
 
   beforeEach(() => {
-    // Reset any previous hotkey registrations
-    setHotkeyDebugMode(false);
+    addEventListenerSpy = vi.spyOn(document, 'addEventListener');
+    removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
   });
 
-  describe('useHotkeys hook', () => {
-    test('registers and triggers simple hotkey', () => {
-      const handler = jest.fn();
-      
-      renderHook(() => useHotkeys({
-        'n': handler
-      }));
-
-      // Simulate 'n' key press
-      act(() => {
-        window.dispatchEvent(createKeyboardEvent('n'));
-      });
-
-      expect(handler).toHaveBeenCalledTimes(1);
-    });
-
-    test('handles modifier keys correctly', () => {
-      const handler = jest.fn();
-      
-      renderHook(() => useHotkeys({
-        'ctrl+enter': handler
-      }));
-
-      // Simulate Ctrl+Enter
-      act(() => {
-        window.dispatchEvent(createKeyboardEvent('Enter', { ctrlKey: true }));
-      });
-
-      expect(handler).toHaveBeenCalledTimes(1);
-    });
-
-    test('respects scope priority', () => {
-      const globalHandler = jest.fn();
-      const dialogHandler = jest.fn();
-
-      // Register global hotkey
-      renderHook(() => useHotkeys({
-        'escape': globalHandler
-      }, HOTKEY_SCOPES.GLOBAL));
-
-      // Register dialog hotkey (higher priority)
-      renderHook(() => useHotkeys({
-        'escape': dialogHandler
-      }, HOTKEY_SCOPES.DIALOG));
-
-      // Simulate Escape key
-      act(() => {
-        window.dispatchEvent(createKeyboardEvent('Escape'));
-      });
-
-      // Dialog handler should be called, not global
-      expect(dialogHandler).toHaveBeenCalledTimes(1);
-      expect(globalHandler).not.toHaveBeenCalled();
-    });
-
-    test('ignores hotkeys in input fields by default', () => {
-      const handler = jest.fn();
-      
-      renderHook(() => useHotkeys({
-        'a': handler
-      }));
-
-      // Create an input element
-      const input = document.createElement('input');
-      document.body.appendChild(input);
-      input.focus();
-
-      // Simulate 'a' key in input
-      act(() => {
-        input.dispatchEvent(createKeyboardEvent('a'));
-      });
-
-      expect(handler).not.toHaveBeenCalled();
-
-      // Cleanup
-      document.body.removeChild(input);
-    });
-
-    test('allows hotkeys in input fields when enabled', () => {
-      const handler = jest.fn();
-      
-      renderHook(() => useHotkeys({
-        'ctrl+s': handler
-      }, HOTKEY_SCOPES.GLOBAL, { enableInInput: true }));
-
-      // Create an input element
-      const input = document.createElement('input');
-      document.body.appendChild(input);
-      input.focus();
-
-      // Simulate Ctrl+S in input
-      act(() => {
-        input.dispatchEvent(createKeyboardEvent('s', { ctrlKey: true }));
-      });
-
-      expect(handler).toHaveBeenCalledTimes(1);
-
-      // Cleanup
-      document.body.removeChild(input);
-    });
+  afterEach(() => {
+    vi.clearAllMocks();
   });
 
-  describe('useHotkeyScope hook', () => {
-    test('enables and disables scope', () => {
-      const handler = jest.fn();
-      const scopeId = HOTKEY_SCOPES.DIALOG;
-
-      // Register hotkey in dialog scope
-      renderHook(() => useHotkeys({
-        'escape': handler
-      }, scopeId));
-
-      // Initially scope is disabled
-      const { rerender } = renderHook(
-        ({ enabled }) => useHotkeyScope(scopeId, enabled),
-        { initialProps: { enabled: false } }
-      );
-
-      // Simulate Escape key (should not trigger)
-      act(() => {
-        window.dispatchEvent(createKeyboardEvent('Escape'));
-      });
-      expect(handler).not.toHaveBeenCalled();
-
-      // Enable scope
-      rerender({ enabled: true });
-
-      // Simulate Escape key (should trigger)
-      act(() => {
-        window.dispatchEvent(createKeyboardEvent('Escape'));
-      });
-      expect(handler).toHaveBeenCalledTimes(1);
-    });
+  test('registers event listener when enabled', () => {
+    renderHook(() => useHotkeys({}, { enabled: true }));
+    expect(addEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
   });
 
-  describe('Hotkey conflict resolution', () => {
-    test('higher priority scope overrides lower priority', () => {
-      const globalHandler = jest.fn();
-      const viewHandler = jest.fn();
-      const dialogHandler = jest.fn();
-
-      // Register handlers at different scopes
-      renderHook(() => useHotkeys({ 'x': globalHandler }, HOTKEY_SCOPES.GLOBAL));
-      renderHook(() => useHotkeys({ 'x': viewHandler }, HOTKEY_SCOPES.VIEW));
-      renderHook(() => useHotkeys({ 'x': dialogHandler }, HOTKEY_SCOPES.DIALOG));
-
-      // Enable all scopes
-      renderHook(() => useHotkeyScope(HOTKEY_SCOPES.GLOBAL, true));
-      renderHook(() => useHotkeyScope(HOTKEY_SCOPES.VIEW, true));
-      renderHook(() => useHotkeyScope(HOTKEY_SCOPES.DIALOG, true));
-
-      // Simulate 'x' key
-      act(() => {
-        window.dispatchEvent(createKeyboardEvent('x'));
-      });
-
-      // Only highest priority (dialog) should be called
-      expect(dialogHandler).toHaveBeenCalledTimes(1);
-      expect(viewHandler).not.toHaveBeenCalled();
-      expect(globalHandler).not.toHaveBeenCalled();
-    });
+  test('does not register event listener when disabled', () => {
+    renderHook(() => useHotkeys({}, { enabled: false }));
+    expect(addEventListenerSpy).not.toHaveBeenCalled();
   });
 
-  describe('Cleanup behavior', () => {
-    test('removes hotkeys when component unmounts', () => {
-      const handler = jest.fn();
-      
-      const { unmount } = renderHook(() => useHotkeys({
-        'x': handler
+  test('removes event listener on cleanup', () => {
+    const { unmount } = renderHook(() => useHotkeys({}, { enabled: true }));
+    unmount();
+    expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+  });
+
+  test('handles single key hotkeys', () => {
+    const handler = vi.fn();
+    const { result } = renderHook(() => useHotkeys({
+      'n': handler
+    }));
+
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'n' }));
+    });
+
+    expect(handler).toHaveBeenCalled();
+  });
+
+  test('handles combination hotkeys', () => {
+    const handler = vi.fn();
+    const { result } = renderHook(() => useHotkeys({
+      'ctrl+s': handler
+    }));
+
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', {
+        key: 's',
+        ctrlKey: true
       }));
+    });
 
-      // Unmount the hook
-      unmount();
+    expect(handler).toHaveBeenCalled();
+  });
 
-      // Simulate 'x' key
-      act(() => {
-        window.dispatchEvent(createKeyboardEvent('x'));
-      });
+  test('respects allowedKeys option', () => {
+    const handler1 = vi.fn();
+    const handler2 = vi.fn();
+    
+    const { result } = renderHook(() => useHotkeys({
+      'n': handler1,
+      'r': handler2
+    }, {
+      allowedKeys: ['n']
+    }));
 
-      expect(handler).not.toHaveBeenCalled();
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'n' }));
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'r' }));
+    });
+
+    expect(handler1).toHaveBeenCalled();
+    expect(handler2).not.toHaveBeenCalled();
+  });
+
+  test('ignores hotkeys in form elements by default', () => {
+    const handler = vi.fn();
+    const { result } = renderHook(() => useHotkeys({
+      'n': handler
+    }));
+
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    input.focus();
+
+    act(() => {
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'n', bubbles: true }));
+    });
+
+    expect(handler).not.toHaveBeenCalled();
+    document.body.removeChild(input);
+  });
+
+  test('allows hotkeys in form elements when enableInForms is true', () => {
+    const handler = vi.fn();
+    const { result } = renderHook(() => useHotkeys({
+      'n': handler
+    }, {
+      enableInForms: true
+    }));
+
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    input.focus();
+
+    act(() => {
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'n', bubbles: true }));
+    });
+
+    expect(handler).toHaveBeenCalled();
+    document.body.removeChild(input);
+  });
+
+  test('prevents default behavior when preventDefault is true', () => {
+    const handler = vi.fn();
+    const { result } = renderHook(() => useHotkeys({
+      'n': handler
+    }, {
+      preventDefault: true
+    }));
+
+    const event = new KeyboardEvent('keydown', { key: 'n', bubbles: true });
+    const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+
+    act(() => {
+      document.dispatchEvent(event);
+    });
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+  });
+
+  test('stops propagation when stopPropagation is true', () => {
+    const handler = vi.fn();
+    const { result } = renderHook(() => useHotkeys({
+      'n': handler
+    }, {
+      stopPropagation: true
+    }));
+
+    const event = new KeyboardEvent('keydown', { key: 'n', bubbles: true });
+    const stopPropagationSpy = vi.spyOn(event, 'stopPropagation');
+
+    act(() => {
+      document.dispatchEvent(event);
+    });
+
+    expect(stopPropagationSpy).toHaveBeenCalled();
+  });
+
+  test('respects custom filter function', () => {
+    const handler = vi.fn();
+    const filter = (event) => event.target.tagName !== 'BUTTON';
+    
+    const { result } = renderHook(() => useHotkeys({
+      'n': handler
+    }, {
+      filter
+    }));
+
+    const button = document.createElement('button');
+    document.body.appendChild(button);
+    button.focus();
+
+    act(() => {
+      button.dispatchEvent(new KeyboardEvent('keydown', { key: 'n', bubbles: true }));
+    });
+
+    expect(handler).not.toHaveBeenCalled();
+    document.body.removeChild(button);
+  });
+
+  test('trigger method calls handler directly', () => {
+    const handler = vi.fn();
+    const { result } = renderHook(() => useHotkeys({
+      'n': handler
+    }));
+
+    act(() => {
+      result.current.trigger('n');
+    });
+
+    expect(handler).toHaveBeenCalled();
+  });
+
+  test('trigger method respects enabled state', () => {
+    const handler = vi.fn();
+    const { result } = renderHook(() => useHotkeys({
+      'n': handler
+    }, {
+      enabled: false
+    }));
+
+    act(() => {
+      result.current.trigger('n');
+    });
+
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  test('HOTKEY_COMBINATIONS match defined constants', () => {
+    expect(HOTKEY_COMBINATIONS).toMatchObject({
+      newEntry: expect.any(String),
+      reports: expect.any(String),
+      dropout: expect.any(String),
+      help: expect.any(String),
+      escape: expect.any(String),
+      tabNext: expect.any(String),
+      tabPrev: expect.any(String),
+      save: expect.any(String),
+      undo: expect.any(String),
+      search: expect.any(String),
+      now: expect.any(String)
     });
   });
 });

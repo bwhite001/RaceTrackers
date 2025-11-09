@@ -1,86 +1,159 @@
+import { describe, test, expect } from 'vitest';
 import {
-  normalizeRunnerNumber,
-  parseRunnerRange,
-  parseRunnerInput,
-  validateRunnerNumber,
-  deduplicateNumbers,
+  parseRunnerNumbers,
+  isValidRunnerNumber,
   formatRunnerNumber,
-  groupNumbersIntoRanges
+  findNumberGaps,
+  groupIntoRanges,
+  formatRange
 } from '../../../utils/runnerNumberUtils';
 
-describe('Runner Number Utilities - Critical Path Tests', () => {
-  describe('normalizeRunnerNumber', () => {
-    test('removes leading zeros', () => {
-      expect(normalizeRunnerNumber('001')).toBe(1);
-      expect(normalizeRunnerNumber('01')).toBe(1);
-      expect(normalizeRunnerNumber('1')).toBe(1);
+describe('Runner Number Utilities', () => {
+  describe('parseRunnerNumbers', () => {
+    test('handles empty input', () => {
+      expect(parseRunnerNumbers('')).toEqual([]);
+      expect(parseRunnerNumbers(null)).toEqual([]);
+      expect(parseRunnerNumbers(undefined)).toEqual([]);
+    });
+
+    test('parses single numbers', () => {
+      expect(parseRunnerNumbers('1')).toEqual([1]);
+      expect(parseRunnerNumbers('42')).toEqual([42]);
+    });
+
+    test('parses comma-separated numbers', () => {
+      expect(parseRunnerNumbers('1,2,3')).toEqual([1, 2, 3]);
+      expect(parseRunnerNumbers('42,43,44')).toEqual([42, 43, 44]);
+    });
+
+    test('parses space-separated numbers', () => {
+      expect(parseRunnerNumbers('1 2 3')).toEqual([1, 2, 3]);
+      expect(parseRunnerNumbers('42 43 44')).toEqual([42, 43, 44]);
+    });
+
+    test('parses ranges', () => {
+      expect(parseRunnerNumbers('1-5')).toEqual([1, 2, 3, 4, 5]);
+      expect(parseRunnerNumbers('42-45')).toEqual([42, 43, 44, 45]);
+    });
+
+    test('parses mixed formats', () => {
+      expect(parseRunnerNumbers('1,2,3-5 6,7-10')).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
 
     test('handles invalid input', () => {
-      expect(normalizeRunnerNumber('')).toBeNull();
-      expect(normalizeRunnerNumber('abc')).toBeNull();
-      expect(normalizeRunnerNumber('-1')).toBeNull();
+      expect(parseRunnerNumbers('abc')).toEqual([]);
+      expect(parseRunnerNumbers('1,abc,3')).toEqual([1, 3]);
+    });
+
+    test('respects maxRange option', () => {
+      expect(parseRunnerNumbers('1-5', { maxRange: 3 })).toEqual([]);
+      expect(parseRunnerNumbers('1-3', { maxRange: 3 })).toEqual([1, 2, 3]);
+    });
+
+    test('respects maxNumber option', () => {
+      expect(parseRunnerNumbers('1,2,999,1000,1001', { maxNumber: 1000 }))
+        .toEqual([1, 2, 999, 1000]);
+    });
+
+    test('removes duplicates and sorts', () => {
+      expect(parseRunnerNumbers('3,1,2,1,2,3')).toEqual([1, 2, 3]);
     });
   });
 
-  describe('parseRunnerRange', () => {
-    test('parses valid ranges', () => {
-      expect(parseRunnerRange('100-105')).toEqual([100, 101, 102, 103, 104, 105]);
-      expect(parseRunnerRange('1-3')).toEqual([1, 2, 3]);
+  describe('isValidRunnerNumber', () => {
+    test('validates single numbers', () => {
+      expect(isValidRunnerNumber(1)).toBe(true);
+      expect(isValidRunnerNumber('42')).toBe(true);
+      expect(isValidRunnerNumber(0)).toBe(false);
+      expect(isValidRunnerNumber(-1)).toBe(false);
+      expect(isValidRunnerNumber('abc')).toBe(false);
     });
 
-    test('handles invalid ranges', () => {
-      expect(parseRunnerRange('105-100')).toBeNull(); // End < Start
-      expect(parseRunnerRange('abc-def')).toBeNull(); // Invalid numbers
-      expect(parseRunnerRange('100-200')).toBeNull(); // Exceeds maxRangeSize
-    });
-  });
-
-  describe('parseRunnerInput', () => {
-    test('handles mixed input formats', () => {
-      const input = '001, 1, 100-102, 01, 200';
-      const expected = [1, 100, 101, 102, 200];
-      expect(parseRunnerInput(input)).toEqual(expected);
-    });
-
-    test('handles newlines and spaces', () => {
-      const input = '100\n101 102\n103';
-      const expected = [100, 101, 102, 103];
-      expect(parseRunnerInput(input)).toEqual(expected);
-    });
-
-    test('deduplicates by default', () => {
-      const input = '1,1,1,2,2,3';
-      const expected = [1, 2, 3];
-      expect(parseRunnerInput(input)).toEqual(expected);
+    test('respects maxNumber option', () => {
+      expect(isValidRunnerNumber(1000, { maxNumber: 999 })).toBe(false);
+      expect(isValidRunnerNumber(999, { maxNumber: 999 })).toBe(true);
     });
   });
 
-  describe('validateRunnerNumber', () => {
-    const raceConfig = {
-      runnerRanges: [
-        { min: 100, max: 200 },
-        { min: 500, max: 550 }
-      ]
-    };
-
-    test('validates numbers within range', () => {
-      expect(validateRunnerNumber(150, raceConfig)).toEqual({ valid: true, reason: null });
-      expect(validateRunnerNumber(525, raceConfig)).toEqual({ valid: true, reason: null });
+  describe('formatRunnerNumber', () => {
+    test('formats numbers without padding', () => {
+      expect(formatRunnerNumber(1)).toBe('1');
+      expect(formatRunnerNumber(42)).toBe('42');
     });
 
-    test('invalidates numbers outside range', () => {
-      const result = validateRunnerNumber(300, raceConfig);
-      expect(result.valid).toBe(false);
-      expect(result.reason).toContain('Not in race');
+    test('formats numbers with padding', () => {
+      expect(formatRunnerNumber(1, { minLength: 3 })).toBe('001');
+      expect(formatRunnerNumber(42, { minLength: 3 })).toBe('042');
+    });
+
+    test('handles invalid input', () => {
+      expect(formatRunnerNumber('abc')).toBe('');
+      expect(formatRunnerNumber(null)).toBe('');
     });
   });
 
-  describe('groupNumbersIntoRanges', () => {
+  describe('findNumberGaps', () => {
+    test('finds gaps in sequence', () => {
+      expect(findNumberGaps([1, 2, 4, 5, 7])).toEqual([
+        { start: 3, end: 3 },
+        { start: 6, end: 6 }
+      ]);
+    });
+
+    test('handles no gaps', () => {
+      expect(findNumberGaps([1, 2, 3])).toEqual([]);
+    });
+
+    test('handles empty input', () => {
+      expect(findNumberGaps([])).toEqual([]);
+    });
+
+    test('handles unsorted input', () => {
+      expect(findNumberGaps([5, 1, 3])).toEqual([
+        { start: 2, end: 2 },
+        { start: 4, end: 4 }
+      ]);
+    });
+  });
+
+  describe('groupIntoRanges', () => {
     test('groups consecutive numbers', () => {
-      const numbers = [1, 2, 3, 5, 7, 8, 9];
-      const expected = ['1-3', '5', '7-9'];
-      expect(groupNumbersIntoRanges(numbers)).toEqual(expected);
+      expect(groupIntoRanges([1, 2, 3, 5, 6, 8])).toEqual([
+        { start: 1, end: 3 },
+        { start: 5, end: 6 },
+        { start: 8, end: 8 }
+      ]);
+    });
+
+    test('handles single number', () => {
+      expect(groupIntoRanges([1])).toEqual([
+        { start: 1, end: 1 }
+      ]);
+    });
+
+    test('handles empty input', () => {
+      expect(groupIntoRanges([])).toEqual([]);
+    });
+
+    test('handles unsorted input', () => {
+      expect(groupIntoRanges([3, 1, 2, 6, 5])).toEqual([
+        { start: 1, end: 3 },
+        { start: 5, end: 6 }
+      ]);
+    });
+  });
+
+  describe('formatRange', () => {
+    test('formats single number range', () => {
+      expect(formatRange({ start: 1, end: 1 })).toBe('1');
+    });
+
+    test('formats number range', () => {
+      expect(formatRange({ start: 1, end: 5 })).toBe('1-5');
+    });
+
+    test('formats with padding', () => {
+      expect(formatRange({ start: 1, end: 5 }, { minLength: 3 })).toBe('001-005');
     });
   });
 });

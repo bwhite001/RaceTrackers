@@ -1,330 +1,124 @@
-/**
- * Device Detection Hook
- */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 /**
- * Breakpoints (matches Tailwind defaults)
+ * Device type breakpoints (in pixels)
  */
 export const BREAKPOINTS = {
-  mobile: 640,    // < 640px
-  tablet: 1024,   // 640px - 1024px
-  desktop: 1024   // > 1024px
+  MOBILE: 640,    // Matches Tailwind's 'sm'
+  TABLET: 768,    // Matches Tailwind's 'md'
+  DESKTOP: 1024,  // Matches Tailwind's 'lg'
+  WIDE: 1280     // Matches Tailwind's 'xl'
 };
 
 /**
- * Device types
+ * Device orientation types
  */
-export const DEVICE_TYPES = {
-  MOBILE: 'mobile',
-  TABLET: 'tablet',
-  DESKTOP: 'desktop'
+export const ORIENTATIONS = {
+  PORTRAIT: 'portrait',
+  LANDSCAPE: 'landscape'
 };
 
 /**
- * Check if device has touch capability
+ * Custom hook for device detection and responsive design
+ * @param {Object} options - Configuration options
+ * @param {Object} options.customBreakpoints - Custom breakpoint values
+ * @param {boolean} options.watchOrientation - Whether to watch for orientation changes
+ * @returns {Object} Device information and utility functions
  */
-export function isTouchDevice() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
+const useDeviceDetection = (options = {}) => {
+  const {
+    customBreakpoints = BREAKPOINTS,
+    watchOrientation = true
+  } = options;
 
-  // Check if we're in a test environment
-  if (process.env.NODE_ENV === 'test') {
-    // Return false by default in test environment
-    return window.navigator?.maxTouchPoints > 0 || false;
-  }
-
-  return (
-    ('ontouchstart' in window) ||
-    (navigator.maxTouchPoints > 0) ||
-    (navigator.msMaxTouchPoints > 0)
+  // State for device characteristics
+  const [width, setWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0);
+  const [height, setHeight] = useState(typeof window !== 'undefined' ? window.innerHeight : 0);
+  const [orientation, setOrientation] = useState(
+    typeof window !== 'undefined' 
+      ? window.innerHeight > window.innerWidth 
+        ? ORIENTATIONS.PORTRAIT 
+        : ORIENTATIONS.LANDSCAPE
+      : ORIENTATIONS.LANDSCAPE
   );
-}
 
-/**
- * Get current device type based on screen width
- */
-export function getDeviceType(width = null) {
-  const w = width ?? (typeof window !== 'undefined' ? window.innerWidth : BREAKPOINTS.desktop);
-  
-  if (w < BREAKPOINTS.mobile) {
-    return DEVICE_TYPES.MOBILE;
-  } else if (w < BREAKPOINTS.desktop) {
-    return DEVICE_TYPES.TABLET;
-  } else {
-    return DEVICE_TYPES.DESKTOP;
-  }
-}
+  // Determine device type based on width
+  const getDeviceType = useCallback((w = width) => {
+    if (w < customBreakpoints.MOBILE) return 'mobile';
+    if (w < customBreakpoints.TABLET) return 'tablet';
+    if (w < customBreakpoints.DESKTOP) return 'desktop';
+    if (w < customBreakpoints.WIDE) return 'wide';
+    return 'ultra-wide';
+  }, [customBreakpoints, width]);
 
-/**
- * Get current orientation
- */
-export function getOrientation() {
-  if (typeof window === 'undefined') {
-    return 'portrait';
-  }
+  // Handle window resize
+  const handleResize = useCallback(() => {
+    if (typeof window === 'undefined') return;
 
-  return window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
-}
+    const newWidth = window.innerWidth;
+    const newHeight = window.innerHeight;
+    
+    setWidth(newWidth);
+    setHeight(newHeight);
 
-/**
- * Check if device is iOS
- */
-export function isIOS() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
+    if (watchOrientation) {
+      setOrientation(
+        newHeight > newWidth ? ORIENTATIONS.PORTRAIT : ORIENTATIONS.LANDSCAPE
+      );
+    }
+  }, [watchOrientation]);
 
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-}
+  // Set up resize listener
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
 
-/**
- * Check if device is Android
- */
-export function isAndroid() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial check
 
-  return /Android/.test(navigator.userAgent);
-}
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [handleResize]);
 
-/**
- * Check if device is mobile (phone)
- */
-export function isMobile(width = null) {
-  const w = width ?? (typeof window !== 'undefined' ? window.innerWidth : BREAKPOINTS.desktop);
-  return w < BREAKPOINTS.mobile;
-}
+  // Utility functions for breakpoint checks
+  const isBreakpoint = useCallback((breakpoint) => {
+    return width >= customBreakpoints[breakpoint];
+  }, [width, customBreakpoints]);
 
-/**
- * Check if device is tablet
- */
-export function isTablet(width = null) {
-  const w = width ?? (typeof window !== 'undefined' ? window.innerWidth : BREAKPOINTS.desktop);
-  return w >= BREAKPOINTS.mobile && w < BREAKPOINTS.desktop;
-}
+  const isMobile = useCallback(() => width < customBreakpoints.MOBILE, [width, customBreakpoints]);
+  const isTablet = useCallback(() => width >= customBreakpoints.MOBILE && width < customBreakpoints.TABLET, [width, customBreakpoints]);
+  const isDesktop = useCallback(() => width >= customBreakpoints.DESKTOP, [width, customBreakpoints]);
 
-/**
- * Check if device is desktop
- */
-export function isDesktop(width = null) {
-  const w = width ?? (typeof window !== 'undefined' ? window.innerWidth : BREAKPOINTS.desktop);
-  return w >= BREAKPOINTS.desktop;
-}
-
-/**
- * Check if device is in portrait orientation
- */
-export function isPortrait() {
-  if (typeof window === 'undefined') {
-    return true;
-  }
-
-  return window.innerHeight > window.innerWidth;
-}
-
-/**
- * Check if device is in landscape orientation
- */
-export function isLandscape() {
-  return !isPortrait();
-}
-
-/**
- * Get viewport dimensions
- */
-export function getViewportDimensions() {
-  if (typeof window === 'undefined') {
-    return { width: BREAKPOINTS.desktop, height: 768 };
-  }
+  // Touch capability detection
+  const hasTouch = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
   return {
-    width: window.innerWidth,
-    height: window.innerHeight
+    // Device characteristics
+    width,
+    height,
+    orientation,
+    deviceType: getDeviceType(),
+    hasTouch,
+
+    // Breakpoint utilities
+    isBreakpoint,
+    isMobile,
+    isTablet,
+    isDesktop,
+
+    // Raw breakpoint values
+    breakpoints: customBreakpoints,
+
+    // Orientation checks
+    isPortrait: orientation === ORIENTATIONS.PORTRAIT,
+    isLandscape: orientation === ORIENTATIONS.LANDSCAPE,
+
+    // Utility for responsive values
+    responsive: (config) => {
+      const deviceType = getDeviceType();
+      return config[deviceType] || config.default;
+    }
   };
-}
-
-/**
- * Check if virtual keyboard is likely open (iOS/Android)
- */
-export function isVirtualKeyboardOpen() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  if (window.visualViewport) {
-    return window.visualViewport.height < window.innerHeight * 0.75;
-  }
-
-  return false;
-}
-
-/**
- * React Hook: useDeviceDetection
- */
-export function useDeviceDetection() {
-  const [deviceState, setDeviceState] = useState(() => {
-    if (typeof window === 'undefined') {
-      return {
-        width: BREAKPOINTS.desktop,
-        height: 768,
-        deviceType: DEVICE_TYPES.DESKTOP,
-        isMobile: false,
-        isTablet: false,
-        isDesktop: true,
-        isTouch: false,
-        isIOS: false,
-        isAndroid: false,
-        orientation: 'landscape',
-        isPortrait: false,
-        isLandscape: true,
-        isKeyboardOpen: false
-      };
-    }
-
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const deviceType = getDeviceType(width);
-    const orientation = getOrientation();
-
-    return {
-      width,
-      height,
-      deviceType,
-      isMobile: deviceType === DEVICE_TYPES.MOBILE,
-      isTablet: deviceType === DEVICE_TYPES.TABLET,
-      isDesktop: deviceType === DEVICE_TYPES.DESKTOP,
-      isTouch: isTouchDevice(),
-      isIOS: isIOS(),
-      isAndroid: isAndroid(),
-      orientation,
-      isPortrait: orientation === 'portrait',
-      isLandscape: orientation === 'landscape',
-      isKeyboardOpen: isVirtualKeyboardOpen()
-    };
-  });
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const updateDeviceState = () => {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const deviceType = getDeviceType(width);
-      const orientation = getOrientation();
-
-      setDeviceState({
-        width,
-        height,
-        deviceType,
-        isMobile: deviceType === DEVICE_TYPES.MOBILE,
-        isTablet: deviceType === DEVICE_TYPES.TABLET,
-        isDesktop: deviceType === DEVICE_TYPES.DESKTOP,
-        isTouch: isTouchDevice(),
-        isIOS: isIOS(),
-        isAndroid: isAndroid(),
-        orientation,
-        isPortrait: orientation === 'portrait',
-        isLandscape: orientation === 'landscape',
-        isKeyboardOpen: isVirtualKeyboardOpen()
-      });
-    };
-
-    window.addEventListener('resize', updateDeviceState);
-    window.addEventListener('orientationchange', updateDeviceState);
-    
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', updateDeviceState);
-    }
-
-    return () => {
-      window.removeEventListener('resize', updateDeviceState);
-      window.removeEventListener('orientationchange', updateDeviceState);
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', updateDeviceState);
-      }
-    };
-  }, []);
-
-  return deviceState;
-}
-
-/**
- * React Hook: useMediaQuery
- */
-export function useMediaQuery(query) {
-  const [matches, setMatches] = useState(() => {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-    return window.matchMedia(query).matches;
-  });
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const mediaQuery = window.matchMedia(query);
-    const handler = (e) => setMatches(e.matches);
-
-    setMatches(mediaQuery.matches);
-    mediaQuery.addEventListener('change', handler);
-
-    return () => {
-      mediaQuery.removeEventListener('change', handler);
-    };
-  }, [query]);
-
-  return matches;
-}
-
-/**
- * React Hook: useBreakpoint
- */
-export function useBreakpoint() {
-  const { deviceType } = useDeviceDetection();
-  return deviceType;
-}
-
-/**
- * React Hook: useOrientation
- */
-export function useOrientation() {
-  const { orientation } = useDeviceDetection();
-  return orientation;
-}
-
-/**
- * React Hook: useViewportSize
- */
-export function useViewportSize() {
-  const { width, height } = useDeviceDetection();
-  return { width, height };
-}
-
-export default {
-  BREAKPOINTS,
-  DEVICE_TYPES,
-  isTouchDevice,
-  getDeviceType,
-  getOrientation,
-  isIOS,
-  isAndroid,
-  isMobile,
-  isTablet,
-  isDesktop,
-  isPortrait,
-  isLandscape,
-  getViewportDimensions,
-  isVirtualKeyboardOpen,
-  useDeviceDetection,
-  useMediaQuery,
-  useBreakpoint,
-  useOrientation,
-  useViewportSize
 };
+
+export default useDeviceDetection;

@@ -1,301 +1,168 @@
 import React from 'react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, fireEvent, screen } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
-import HotkeysProvider, { useHotkeys } from '../../shared/components/HotkeysProvider';
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
+import { render, screen, fireEvent, renderHook } from '@testing-library/react';
+import HotkeysProvider, { useHotkeysContext } from '../../shared/components/HotkeysProvider';
+import { HOTKEY_COMBINATIONS } from '../../shared/hooks/useHotkeys';
 
 describe('HotkeysProvider', () => {
-  // Test component that uses hotkeys
-  const TestComponent = () => {
-    const { registerHotkey, showHelp } = useHotkeys();
-
-    React.useEffect(() => {
-      registerHotkey('alt+a', () => {
-        console.log('Alt+A pressed');
-      }, 'Test action', 'test');
-
-      registerHotkey('ctrl+s', () => {
-        console.log('Ctrl+S pressed');
-      }, 'Save action', 'test');
-    }, [registerHotkey]);
-
+  const TestComponent = ({ onHotkeyPress }) => {
+    const { isEnabled, trigger, combinations } = useHotkeysContext();
     return (
       <div>
-        <button onClick={showHelp}>Show Help</button>
-        <input type="text" placeholder="Test input" />
+        <button onClick={() => trigger('n')}>Trigger 'n'</button>
+        <div data-testid="enabled-status">{isEnabled.toString()}</div>
+        <div data-testid="combinations">{JSON.stringify(combinations)}</div>
       </div>
     );
   };
 
   beforeEach(() => {
-    // Clear any previous event listeners
     vi.clearAllMocks();
   });
 
-  it('renders children correctly', () => {
-    render(
-      <HotkeysProvider>
-        <div data-testid="test-child">Test Child</div>
-      </HotkeysProvider>
-    );
-
-    expect(screen.getByTestId('test-child')).toBeInTheDocument();
-  });
-
-  it('registers and triggers hotkeys correctly', () => {
-    const consoleSpy = vi.spyOn(console, 'log');
-    
+  test('provides hotkey context to children', () => {
     render(
       <HotkeysProvider>
         <TestComponent />
       </HotkeysProvider>
     );
 
-    // Simulate Alt+A hotkey
-    act(() => {
-      fireEvent.keyDown(document, {
-        key: 'a',
-        code: 'KeyA',
-        altKey: true
-      });
-    });
-
-    expect(consoleSpy).toHaveBeenCalledWith('Alt+A pressed');
-
-    // Simulate Ctrl+S hotkey
-    act(() => {
-      fireEvent.keyDown(document, {
-        key: 's',
-        code: 'KeyS',
-        ctrlKey: true
-      });
-    });
-
-    expect(consoleSpy).toHaveBeenCalledWith('Ctrl+S pressed');
-  });
-
-  it('ignores hotkeys when typing in input fields', () => {
-    const consoleSpy = vi.spyOn(console, 'log');
-    
-    render(
-      <HotkeysProvider>
-        <TestComponent />
-      </HotkeysProvider>
+    expect(screen.getByTestId('enabled-status')).toHaveTextContent('true');
+    expect(screen.getByTestId('combinations')).toHaveTextContent(
+      JSON.stringify(HOTKEY_COMBINATIONS)
     );
-
-    const input = screen.getByPlaceholderText('Test input');
-    input.focus();
-
-    // Simulate Alt+A hotkey while input is focused
-    act(() => {
-      fireEvent.keyDown(input, {
-        key: 'a',
-        code: 'KeyA',
-        altKey: true
-      });
-    });
-
-    expect(consoleSpy).not.toHaveBeenCalled();
   });
 
-  it('shows help modal when Alt+H is pressed', () => {
-    render(
-      <HotkeysProvider>
-        <TestComponent />
-      </HotkeysProvider>
-    );
-
-    // Simulate Alt+H hotkey
-    act(() => {
-      fireEvent.keyDown(document, {
-        key: 'h',
-        code: 'KeyH',
-        altKey: true
-      });
-    });
-
-    // Help modal should be visible
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText('Keyboard Shortcuts')).toBeInTheDocument();
-  });
-
-  it('closes help modal with Escape key', () => {
-    render(
-      <HotkeysProvider>
-        <TestComponent />
-      </HotkeysProvider>
-    );
-
-    // Show help modal
-    act(() => {
-      fireEvent.keyDown(document, {
-        key: 'h',
-        code: 'KeyH',
-        altKey: true
-      });
-    });
-
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-
-    // Press Escape
-    act(() => {
-      fireEvent.keyDown(document, {
-        key: 'Escape',
-        code: 'Escape'
-      });
-    });
-
-    // Help modal should be closed
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-  });
-
-  it('disables hotkeys when enabled prop is false', () => {
-    const consoleSpy = vi.spyOn(console, 'log');
-    
-    render(
-      <HotkeysProvider enabled={false}>
-        <TestComponent />
-      </HotkeysProvider>
-    );
-
-    // Simulate Alt+A hotkey
-    act(() => {
-      fireEvent.keyDown(document, {
-        key: 'a',
-        code: 'KeyA',
-        altKey: true
-      });
-    });
-
-    expect(consoleSpy).not.toHaveBeenCalled();
-  });
-
-  it('groups hotkeys by category in help modal', () => {
-    render(
-      <HotkeysProvider>
-        <TestComponent />
-      </HotkeysProvider>
-    );
-
-    // Show help modal
-    fireEvent.click(screen.getByText('Show Help'));
-
-    // Check for category and hotkey
-    expect(screen.getByText('Test')).toBeInTheDocument();
-    expect(screen.getByText('Test action')).toBeInTheDocument();
-    expect(screen.getByText('Save action')).toBeInTheDocument();
-  });
-
-  it('handles multiple modifier keys correctly', () => {
+  test('handles hotkey events', () => {
     const handler = vi.fn();
-    
-    const MultiModifierTest = () => {
-      const { registerHotkey } = useHotkeys();
-
-      React.useEffect(() => {
-        registerHotkey('ctrl+shift+a', handler, 'Multi-modifier test', 'test');
-      }, [registerHotkey]);
-
-      return <div>Test</div>;
-    };
-
     render(
-      <HotkeysProvider>
-        <MultiModifierTest />
+      <HotkeysProvider hotkeys={{ 'n': handler }}>
+        <TestComponent />
       </HotkeysProvider>
     );
 
-    // Simulate Ctrl+Shift+A
-    act(() => {
-      fireEvent.keyDown(document, {
-        key: 'a',
-        code: 'KeyA',
-        ctrlKey: true,
-        shiftKey: true
-      });
-    });
-
+    fireEvent.keyDown(document, { key: 'n' });
     expect(handler).toHaveBeenCalled();
   });
 
-  it('allows hotkeys in input fields when explicitly allowed', () => {
+  test('respects enabled prop', () => {
     const handler = vi.fn();
-    
-    const AllowInInputTest = () => {
-      const { registerHotkey } = useHotkeys();
-
-      React.useEffect(() => {
-        registerHotkey('ctrl+a', handler, 'Allow in input test', 'test', true);
-      }, [registerHotkey]);
-
-      return <input type="text" placeholder="Test input" />;
-    };
-
     render(
-      <HotkeysProvider>
-        <AllowInInputTest />
+      <HotkeysProvider hotkeys={{ 'n': handler }} enabled={false}>
+        <TestComponent />
       </HotkeysProvider>
     );
 
-    const input = screen.getByPlaceholderText('Test input');
-    input.focus();
-
-    // Simulate Ctrl+A in input
-    act(() => {
-      fireEvent.keyDown(input, {
-        key: 'a',
-        code: 'KeyA',
-        ctrlKey: true
-      });
-    });
-
-    expect(handler).toHaveBeenCalled();
-  });
-
-  it('unregisters hotkeys correctly', () => {
-    const handler = vi.fn();
-    
-    const UnregisterTest = () => {
-      const { registerHotkey, unregisterHotkey } = useHotkeys();
-
-      React.useEffect(() => {
-        registerHotkey('alt+x', handler, 'Test unregister', 'test');
-        return () => unregisterHotkey('alt+x');
-      }, [registerHotkey, unregisterHotkey]);
-
-      return <div>Test</div>;
-    };
-
-    const { unmount } = render(
-      <HotkeysProvider>
-        <UnregisterTest />
-      </HotkeysProvider>
-    );
-
-    // Simulate Alt+X before unmount
-    act(() => {
-      fireEvent.keyDown(document, {
-        key: 'x',
-        code: 'KeyX',
-        altKey: true
-      });
-    });
-
-    expect(handler).toHaveBeenCalled();
-    handler.mockClear();
-
-    // Unmount component
-    unmount();
-
-    // Simulate Alt+X after unmount
-    act(() => {
-      fireEvent.keyDown(document, {
-        key: 'x',
-        code: 'KeyX',
-        altKey: true
-      });
-    });
-
+    fireEvent.keyDown(document, { key: 'n' });
     expect(handler).not.toHaveBeenCalled();
+    expect(screen.getByTestId('enabled-status')).toHaveTextContent('false');
+  });
+
+  test('handles form elements correctly', () => {
+    const handler = vi.fn();
+    render(
+      <HotkeysProvider hotkeys={{ 'n': handler }} enableInForms={false}>
+        <input type="text" data-testid="input" />
+      </HotkeysProvider>
+    );
+
+    const input = screen.getByTestId('input');
+    input.focus();
+    fireEvent.keyDown(input, { key: 'n', bubbles: true });
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  test('allows hotkeys in forms when enableInForms is true', () => {
+    const handler = vi.fn();
+    render(
+      <HotkeysProvider hotkeys={{ 'n': handler }} enableInForms={true}>
+        <input type="text" data-testid="input" />
+      </HotkeysProvider>
+    );
+
+    const input = screen.getByTestId('input');
+    input.focus();
+    fireEvent.keyDown(input, { key: 'n', bubbles: true });
+    expect(handler).toHaveBeenCalled();
+  });
+
+  test('respects custom filter', () => {
+    const handler = vi.fn();
+    const filter = (event) => event.target.tagName !== 'BUTTON';
+    
+    render(
+      <HotkeysProvider hotkeys={{ 'n': handler }} filter={filter}>
+        <button data-testid="button">Test Button</button>
+      </HotkeysProvider>
+    );
+
+    const button = screen.getByTestId('button');
+    button.focus();
+    fireEvent.keyDown(button, { key: 'n', bubbles: true });
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  test('trigger method works through context', () => {
+    const handler = vi.fn();
+    render(
+      <HotkeysProvider hotkeys={{ 'n': handler }}>
+        <TestComponent />
+      </HotkeysProvider>
+    );
+
+    fireEvent.click(screen.getByText("Trigger 'n'"));
+    expect(handler).toHaveBeenCalled();
+  });
+
+  test('throws error when useHotkeysContext is used outside provider', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    
+    expect(() => {
+      render(<TestComponent />);
+    }).toThrow('useHotkeysContext must be used within a HotkeysProvider');
+
+    consoleError.mockRestore();
+  });
+
+  test('handles combination hotkeys', () => {
+    const handler = vi.fn();
+    render(
+      <HotkeysProvider hotkeys={{ 'ctrl+s': handler }}>
+        <TestComponent />
+      </HotkeysProvider>
+    );
+
+    fireEvent.keyDown(document, { key: 's', ctrlKey: true });
+    expect(handler).toHaveBeenCalled();
+  });
+
+  test('prevents default behavior when preventDefault is true', () => {
+    const handler = vi.fn();
+    render(
+      <HotkeysProvider hotkeys={{ 'n': handler }} preventDefault={true}>
+        <TestComponent />
+      </HotkeysProvider>
+    );
+
+    const event = new KeyboardEvent('keydown', { key: 'n', bubbles: true });
+    const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+    document.dispatchEvent(event);
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+  });
+
+  test('stops propagation when stopPropagation is true', () => {
+    const handler = vi.fn();
+    render(
+      <HotkeysProvider hotkeys={{ 'n': handler }} stopPropagation={true}>
+        <TestComponent />
+      </HotkeysProvider>
+    );
+
+    const event = new KeyboardEvent('keydown', { key: 'n', bubbles: true });
+    const stopPropagationSpy = vi.spyOn(event, 'stopPropagation');
+    document.dispatchEvent(event);
+
+    expect(stopPropagationSpy).toHaveBeenCalled();
   });
 });

@@ -1,183 +1,152 @@
-import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import useNavigationStore, { MODULE_TYPES, OPERATION_STATUS } from '../../shared/store/navigationStore';
-import useSettingsStore from '../../shared/store/settingsStore';
-import SettingsModal from '../Settings/SettingsModal';
-import ImportExportModal from '../ImportExport/ImportExportModal';
+import React, { memo } from 'react';
+import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
+import useDeviceDetection from '../../shared/hooks/useDeviceDetection';
+import { HOTKEYS } from '../../types';
 
-const Header = () => {
+/**
+ * Header Component
+ * Displays race information and navigation controls at the top of the base station view
+ */
+const Header = memo(({ 
+  title, 
+  onExit, 
+  stats, 
+  lastSync,
+  onOpenSettings,
+  onOpenHelp 
+}) => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { currentModule, operationStatus, endOperation } = useNavigationStore();
-  const { settings, toggleDarkMode } = useSettingsStore();
-  const [showSettings, setShowSettings] = useState(false);
-  const [showImportExport, setShowImportExport] = useState(false);
+  const { isDesktop } = useDeviceDetection();
 
-  const handleHomeClick = (e) => {
-    if (operationStatus === OPERATION_STATUS.IN_PROGRESS) {
-      e.preventDefault();
-      const confirmed = window.confirm(
-        'Are you sure you want to exit the current operation? This may result in loss of unsaved data.'
-      );
-      if (!confirmed) return;
-      
-      // End operation and navigate home
-      endOperation();
-    }
-    navigate('/');
-  };
-
-  const getModuleTitle = () => {
-    switch (currentModule) {
-      case MODULE_TYPES.RACE_MAINTENANCE:
-        return 'Race Maintenance';
-      case MODULE_TYPES.CHECKPOINT:
-        return `Checkpoint Operations (CP ${settings.currentCheckpoint || 1})`;
-      case MODULE_TYPES.BASE_STATION:
-        return 'Base Station Operations';
-      default:
-        return 'Race Tracker';
+  const handleExit = () => {
+    if (onExit) {
+      onExit();
+    } else {
+      navigate('/');
     }
   };
 
   return (
-    <header className="relative bg-navy-900 text-white shadow-lg">
-      {/* Diagonal Accent Stripe */}
-      <div className="absolute top-0 right-0 w-32 h-full bg-accent-600 transform skew-x-12 translate-x-16 opacity-30"></div>
-      
-      <div className="relative container mx-auto px-4 py-4">
+    <header className="bg-white dark:bg-gray-800 shadow-sm">
+      <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo/Home Link */}
+          {/* Left Section - Title and Stats */}
           <div className="flex items-center space-x-4">
-            <button
-              onClick={handleHomeClick}
-              className={`flex items-center space-x-3 ${
-                operationStatus === OPERATION_STATUS.IN_PROGRESS
-                  ? 'cursor-help'
-                  : 'hover:opacity-80 transition-opacity'
-              }`}
-            >
-              {/* Logo Icon */}
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-navy-900" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                </svg>
-              </div>
-              <div className="hidden md:block">
-                <div className="text-xl font-bold leading-tight">
-                  {getModuleTitle()}
-                </div>
-                <div className="text-xs text-navy-200">
-                  Offline Race Management
-                </div>
-              </div>
-            </button>
-          </div>
+            {/* Title */}
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+              {title}
+            </h1>
 
-          {/* Center - Operation Status */}
-          {operationStatus === OPERATION_STATUS.IN_PROGRESS && (
-            <div className="hidden md:flex items-center">
-              <div className="flex items-center space-x-2 px-4 py-2 bg-gold-500 text-navy-900 rounded-lg font-medium">
-                <svg className="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                </svg>
-                <span>Operation in Progress</span>
+            {/* Quick Stats */}
+            <div className="hidden sm:flex items-center space-x-4 text-sm">
+              <div className="px-2 py-1 bg-green-100 dark:bg-green-900 rounded">
+                <span className="font-medium text-green-800 dark:text-green-200">
+                  Finished: {stats.finished}
+                </span>
+              </div>
+              <div className="px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded">
+                <span className="font-medium text-blue-800 dark:text-blue-200">
+                  Active: {stats.active}
+                </span>
               </div>
             </div>
-          )}
+          </div>
 
-          {/* Right Side - Navigation & Actions */}
-          <div className="flex items-center space-x-3">
-            {/* Theme Toggle */}
+          {/* Right Section - Actions */}
+          <div className="flex items-center space-x-2">
+            {/* Help Button */}
             <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-lg hover:bg-navy-800 transition-colors"
-              aria-label="Toggle dark mode"
+              onClick={onOpenHelp}
+              className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+              aria-label="Help"
             >
-              {settings.darkMode ? (
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                </svg>
-              )}
-            </button>
-
-            {/* Home Button - Only show if not on home page */}
-            {location.pathname !== '/' && operationStatus !== OPERATION_STATUS.IN_PROGRESS && (
-              <Link
-                to="/"
-                className="hidden md:flex items-center space-x-2 px-4 py-2 bg-navy-800 hover:bg-navy-700 rounded-lg transition-colors"
+              <svg 
+                className="w-5 h-5" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                </svg>
-                <span>Home</span>
-              </Link>
-            )}
-
-            {/* Import/Export Button */}
-            <button
-              onClick={() => setShowImportExport(true)}
-              className="p-2 rounded-lg hover:bg-navy-800 transition-colors"
-              aria-label="Import/Export"
-              title="Import/Export Race Configuration"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                />
               </svg>
+              {isDesktop && (
+                <span className="ml-1 text-xs">({HOTKEYS.HELP})</span>
+              )}
             </button>
 
             {/* Settings Button */}
             <button
-              onClick={() => setShowSettings(true)}
-              className="p-2 rounded-lg hover:bg-navy-800 transition-colors"
+              onClick={onOpenSettings}
+              className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
               aria-label="Settings"
             >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+              <svg 
+                className="w-5 h-5" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
+                />
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
+                />
               </svg>
+            </button>
+
+            {/* Exit Button */}
+            <button
+              onClick={handleExit}
+              className="ml-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md text-sm font-medium transition-colors"
+              aria-label="Exit Base Station"
+            >
+              Exit
+              {isDesktop && (
+                <span className="ml-1 text-xs">({HOTKEYS.ESCAPE})</span>
+              )}
             </button>
           </div>
         </div>
 
-        {/* Mobile Operation Status */}
-        {operationStatus === OPERATION_STATUS.IN_PROGRESS && (
-          <div className="md:hidden mt-3 flex items-center justify-center">
-            <div className="flex items-center space-x-2 px-3 py-1.5 bg-gold-500 text-navy-900 rounded-lg text-sm font-medium">
-              <svg className="w-4 h-4 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-              </svg>
-              <span>Operation Active</span>
-            </div>
-          </div>
-        )}
-
-        {/* Module-specific navigation warning */}
-        {operationStatus === OPERATION_STATUS.IN_PROGRESS && (
-          <div className="mt-3 text-xs text-navy-200 text-center bg-navy-800/50 rounded-lg py-2 px-4">
-            <svg className="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-            </svg>
-            Navigation is restricted during active operations
-          </div>
-        )}
+        {/* Last Sync Info - Mobile Only */}
+        <div className="mt-2 sm:hidden text-xs text-gray-500 dark:text-gray-400">
+          Last update: {lastSync ? new Date(lastSync).toLocaleTimeString() : 'Never'}
+        </div>
       </div>
-
-      {/* Modals */}
-      <SettingsModal 
-        isOpen={showSettings} 
-        onClose={() => setShowSettings(false)} 
-      />
-      <ImportExportModal 
-        isOpen={showImportExport} 
-        onClose={() => setShowImportExport(false)} 
-      />
     </header>
   );
+});
+
+Header.propTypes = {
+  title: PropTypes.string.isRequired,
+  onExit: PropTypes.func,
+  stats: PropTypes.shape({
+    finished: PropTypes.number.isRequired,
+    active: PropTypes.number.isRequired
+  }).isRequired,
+  lastSync: PropTypes.string,
+  onOpenSettings: PropTypes.func.isRequired,
+  onOpenHelp: PropTypes.func.isRequired
 };
+
+Header.defaultProps = {
+  lastSync: null,
+  onExit: null
+};
+
+// Add display name for debugging
+Header.displayName = 'Header';
 
 export default Header;
