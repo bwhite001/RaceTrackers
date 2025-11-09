@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useRaceMaintenanceStore from '../modules/race-maintenance/store/raceMaintenanceStore';
 import useNavigationStore from '../shared/store/navigationStore';
+import { useRaceStore } from '../store/useRaceStore.js';
 import RunnerOverview from '../components/Shared/RunnerOverview.jsx';
 
 const RaceOverview = () => {
@@ -15,26 +16,15 @@ const RaceOverview = () => {
   
   const { startOperation, MODULE_TYPES } = useNavigationStore();
   
+  // Get runners from the race store
+  const { runners, getRunnerCounts } = useRaceStore();
+  
   // Load current race on mount
   useEffect(() => {
     if (!raceConfig) {
       loadCurrentRace();
     }
   }, [raceConfig, loadCurrentRace]);
-  
-  // Mock runners for now - in real app this would come from a runners store
-  const runners = [];
-
-  // Get runner counts
-  const getRunnerCounts = () => {
-    return {
-      total: runners.length,
-      notStarted: runners.filter(r => r.status === 'not-started').length,
-      passed: runners.filter(r => r.status === 'passed').length,
-      nonStarter: runners.filter(r => r.status === 'non-starter').length,
-      dnf: runners.filter(r => r.status === 'dnf').length
-    };
-  };
 
   const counts = getRunnerCounts();
 
@@ -159,7 +149,7 @@ const RaceOverview = () => {
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
             Runner Status Overview
           </h2>
-          <RunnerOverview runners={runners} />
+          <RunnerOverview />
         </div>
       </div>
     </div>
