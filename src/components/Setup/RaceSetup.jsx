@@ -6,22 +6,18 @@ import useRaceMaintenanceStore from '../../modules/race-maintenance/store/raceMa
 import {
   Container,
   Section,
-  Card,
-  CardBody,
   Button,
-  Badge
+  Badge,
+  Card,
+  CardBody
 } from '../../design-system/components';
-import StepIndicator from './StepIndicator';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 import RaceDetailsStep from './RaceDetailsStep';
 import RunnerRangesStep from './RunnerRangesStep';
 import LoadingSpinner from '../Layout/LoadingSpinner';
 import ErrorMessage from '../Layout/ErrorMessage';
-
-const steps = [
-  { number: 1, label: 'Race Details', description: 'Configure race information and checkpoints' },
-  { number: 2, label: 'Runner Setup', description: 'Set up runner number ranges' }
-];
+import StepIndicator from './StepIndicator';
 
 const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const navigate = useNavigate();
@@ -34,13 +30,16 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
     runnerRanges: []
   });
   
+  // Store hooks
   const { startOperation } = useNavigationStore();
   const { createRace, loading, error } = useRaceMaintenanceStore();
 
+  // Initialize race maintenance operation
   useEffect(() => {
     startOperation(MODULE_TYPES.RACE_MAINTENANCE);
   }, [startOperation]);
 
+  // Track form changes
   useEffect(() => {
     const hasChanges = formData.name || formData.date || formData.startTime || 
                       formData.checkpoints.length > 0 || formData.runnerRanges.length > 0;
@@ -48,6 +47,7 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
   }, [formData, setHasUnsavedChanges]);
 
   const handleNext = (stepData) => {
+    // Update form data with step data if provided
     if (stepData) {
       setFormData(prev => ({
         ...prev,
@@ -76,78 +76,97 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
   };
 
   if (loading) {
-    return <LoadingSpinner />;
+    return (
+      <Container maxWidth="xl" padding="normal">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <LoadingSpinner />
+        </div>
+      </Container>
+    );
   }
 
   if (error) {
-    return <ErrorMessage message={error} />;
+    return (
+      <Container maxWidth="xl" padding="normal">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <ErrorMessage message={error} />
+        </div>
+      </Container>
+    );
   }
 
+  const steps = [
+    {
+      number: 1,
+      label: 'Race Details',
+      description: 'Configure race information and checkpoints'
+    },
+    {
+      number: 2,
+      label: 'Runner Setup',
+      description: 'Set up runner number ranges'
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Fixed Header */}
-      <div className="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-        <Container maxWidth="xl">
-          <Section spacing="tight">
-            <div className="flex items-center justify-between py-4">
-              <div>
-                <h1 className="text-2xl font-bold text-navy-900 dark:text-white">
-                  {steps[currentStep].label}
-                </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  {steps[currentStep].description}
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                <Badge variant="primary">
-                  Step {currentStep + 1} of {steps.length}
-                </Badge>
-                <Button
-                  variant="ghost"
-                  onClick={onExitAttempt}
-                >
-                  Exit Setup
-                </Button>
-              </div>
+    <Container maxWidth="xl" padding="normal">
+      {/* Header Section */}
+      <Section spacing="tight" border="bottom">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              onClick={onExitAttempt}
+              leftIcon={<ArrowLeftIcon className="w-5 h-5" />}
+            >
+              Exit Setup
+            </Button>
+            <div className="h-6 w-px bg-gray-300 dark:bg-gray-600" />
+            <div>
+              <h1 className="text-2xl font-bold text-navy-900 dark:text-white">
+                Race Setup
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {currentStep === 0 ? 'Configure race details' : 'Set up runner numbers'}
+              </p>
             </div>
-          </Section>
-        </Container>
-      </div>
+          </div>
+          <Badge variant="primary" size="lg">
+            Step {currentStep + 1} of 2
+          </Badge>
+        </div>
+      </Section>
+
+      {/* Step Indicator */}
+      <Section spacing="normal">
+        <StepIndicator steps={steps} currentStep={currentStep} />
+      </Section>
 
       {/* Main Content */}
-      <Container maxWidth="xl" className="py-8">
-        {/* Step Indicators */}
-        <Section spacing="normal" className="mb-8">
-          <StepIndicator steps={steps} currentStep={currentStep} />
-        </Section>
-
-        {/* Form Content */}
-        <Section spacing="normal">
-          <Card variant="elevated" className="overflow-visible">
-            <CardBody className="p-8">
-              {currentStep === 0 && (
-                <RaceDetailsStep
-                  data={formData}
-                  onUpdate={setFormData}
-                  onNext={handleNext}
-                  onCancel={onExitAttempt}
-                  isLoading={loading}
-                />
-              )}
-              {currentStep === 1 && (
-                <RunnerRangesStep
-                  raceDetails={formData}
-                  initialRanges={formData.runnerRanges || []}
-                  onBack={handleBack}
-                  onCreate={handleSubmit}
-                  isLoading={loading}
-                />
-              )}
-            </CardBody>
-          </Card>
-        </Section>
-      </Container>
-    </div>
+      <Section spacing="normal">
+        <Card>
+          <CardBody>
+            {currentStep === 0 && (
+              <RaceDetailsStep
+                data={formData}
+                onNext={handleNext}
+                onCancel={onExitAttempt}
+                isLoading={loading}
+              />
+            )}
+            {currentStep === 1 && (
+              <RunnerRangesStep
+                raceDetails={formData}
+                initialRanges={formData.runnerRanges || []}
+                onBack={handleBack}
+                onCreate={handleSubmit}
+                isLoading={loading}
+              />
+            )}
+          </CardBody>
+        </Card>
+      </Section>
+    </Container>
   );
 };
 

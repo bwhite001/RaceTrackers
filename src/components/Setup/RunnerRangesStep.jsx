@@ -1,24 +1,18 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   FormGroup,
   FormLabel,
   FormHelperText,
   FormErrorMessage,
+  FormSection,
   Input,
   Button,
   ButtonGroup,
   Card,
   CardBody,
-  CardHeader,
   Badge
 } from '../../design-system/components';
-import { 
-  UsersIcon, 
-  ArrowUpTrayIcon, 
-  TrashIcon, 
-  PlusIcon,
-  DocumentTextIcon
-} from '@heroicons/react/24/outline';
+import { DocumentIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCreate, isLoading }) => {
   // Initialize with default range if no initial ranges provided
@@ -34,9 +28,8 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
   const [newRange, setNewRange] = useState({ min: '201', max: '300', description: '' });
   const [validationErrors, setValidationErrors] = useState({});
   const [rangeInput, setRangeInput] = useState('');
-  const [csvFile, setCsvFile] = useState(null);
 
-  // Track all individual runner numbers
+  // Add new state for tracking all individual runner numbers
   const [allRunnerNumbers, setAllRunnerNumbers] = useState(new Set(
     (initialRanges.length > 0 ? initialRanges : defaultRange).flatMap(range => 
       range.individualNumbers || 
@@ -86,13 +79,15 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
     if (duplicates.length > 0) {
       errors.duplicates = `Numbers already in use: ${duplicates.join(', ')}`;
     }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
+    
+    return errors;
   };
 
   const handleAddRange = () => {
-    if (validateRange(newRange.min, newRange.max)) {
+    const errors = validateRange(newRange.min, newRange.max);
+    setValidationErrors(errors);
+    
+    if (Object.keys(errors).length === 0) {
       const min = parseInt(newRange.min);
       const max = parseInt(newRange.max);
       const count = max - min + 1;
@@ -107,9 +102,11 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
       };
       
       setRanges([...ranges, range]);
-      setAllRunnerNumbers(new Set([...allRunnerNumbers, ...individualNumbers]));
       setNewRange({ min: (max + 1).toString(), max: (max + 100).toString(), description: '' });
-      setValidationErrors({});
+      
+      // Update all runner numbers
+      const newNumbers = new Set([...allRunnerNumbers, ...individualNumbers]);
+      setAllRunnerNumbers(newNumbers);
     }
   };
 
@@ -118,23 +115,10 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
     const updatedRanges = ranges.filter((_, i) => i !== index);
     setRanges(updatedRanges);
     
-    // Remove numbers from tracking set
+    // Update all runner numbers
     const newNumbers = new Set(allRunnerNumbers);
     removedRange.individualNumbers.forEach(num => newNumbers.delete(num));
     setAllRunnerNumbers(newNumbers);
-  };
-
-  const handleRangeInputChange = (e) => {
-    setRangeInput(e.target.value);
-    setValidationErrors({});
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setCsvFile(file);
-      setValidationErrors({});
-    }
   };
 
   const handleCreateRace = () => {
@@ -145,192 +129,155 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
     onCreate(ranges);
   };
 
-  const getTotalRunners = () => ranges.reduce((total, range) => total + range.count, 0);
+  const getTotalRunners = () => {
+    return ranges.reduce((total, range) => total + range.count, 0);
+  };
 
-  const getRunnerNumbers = () => ranges.flatMap(range => range.individualNumbers);
+  const getRunnerNumbers = () => {
+    return ranges.flatMap(range => range.individualNumbers);
+  };
 
   return (
-    <div className="space-y-8">
-      {/* Quick Range Input */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-2 mb-4">
-          <UsersIcon className="w-5 h-5 text-primary-500" />
-          <h3 className="text-lg font-semibold text-navy-900 dark:text-white">
-            Add Runner Numbers
-          </h3>
-          <Badge variant="danger" size="sm">Required</Badge>
+    <div className="space-y-6">
+      {/* Add New Range */}
+      <FormSection
+        icon={DocumentIcon}
+        title="Add Runner Range"
+        description="Define number ranges for race participants"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormGroup>
+            <FormLabel htmlFor="min" required>Start Number</FormLabel>
+            <Input
+              id="min"
+              type="number"
+              value={newRange.min}
+              onChange={(e) => setNewRange({ ...newRange, min: e.target.value })}
+              error={!!validationErrors.min}
+              min={1}
+            />
+            {validationErrors.min && (
+              <FormErrorMessage>{validationErrors.min}</FormErrorMessage>
+            )}
+          </FormGroup>
+
+          <FormGroup>
+            <FormLabel htmlFor="max" required>End Number</FormLabel>
+            <Input
+              id="max"
+              type="number"
+              value={newRange.max}
+              onChange={(e) => setNewRange({ ...newRange, max: e.target.value })}
+              error={!!validationErrors.max}
+              min={1}
+            />
+            {validationErrors.max && (
+              <FormErrorMessage>{validationErrors.max}</FormErrorMessage>
+            )}
+          </FormGroup>
+
+          <FormGroup>
+            <FormLabel htmlFor="description">Description</FormLabel>
+            <Input
+              id="description"
+              value={newRange.description}
+              onChange={(e) => setNewRange({ ...newRange, description: e.target.value })}
+              placeholder="Optional description"
+            />
+          </FormGroup>
         </div>
 
-        <Card>
-          <CardHeader>
-            <h4 className="text-sm font-medium">Quick Range Input</h4>
-          </CardHeader>
-          <CardBody className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormGroup>
-                <FormLabel htmlFor="min">Minimum Number</FormLabel>
-                <Input
-                  id="min"
-                  type="number"
-                  value={newRange.min}
-                  onChange={(e) => setNewRange({ ...newRange, min: e.target.value })}
-                  error={validationErrors.min}
-                />
-              </FormGroup>
-
-              <FormGroup>
-                <FormLabel htmlFor="max">Maximum Number</FormLabel>
-                <Input
-                  id="max"
-                  type="number"
-                  value={newRange.max}
-                  onChange={(e) => setNewRange({ ...newRange, max: e.target.value })}
-                  error={validationErrors.max}
-                />
-              </FormGroup>
-
-              <FormGroup>
-                <FormLabel htmlFor="description">Description (Optional)</FormLabel>
-                <Input
-                  id="description"
-                  type="text"
-                  value={newRange.description}
-                  onChange={(e) => setNewRange({ ...newRange, description: e.target.value })}
-                  placeholder="e.g., Elite Runners"
-                />
-              </FormGroup>
-            </div>
-
-            {(validationErrors.min || validationErrors.max || validationErrors.overlap || validationErrors.duplicates) && (
-              <FormErrorMessage>
-                {validationErrors.min || validationErrors.max || validationErrors.overlap || validationErrors.duplicates}
-              </FormErrorMessage>
-            )}
-
-            <Button
-              variant="primary"
-              onClick={handleAddRange}
-              leftIcon={<PlusIcon className="w-5 h-5" />}
-            >
-              Add Range
-            </Button>
-          </CardBody>
-        </Card>
-
-        {/* CSV Import */}
-        <Card>
-          <CardHeader>
-            <h4 className="text-sm font-medium">Import from CSV</h4>
-          </CardHeader>
-          <CardBody>
-            <div className="flex items-center gap-4">
-              <Button
-                variant="secondary"
-                leftIcon={<ArrowUpTrayIcon className="w-5 h-5" />}
-                onClick={() => document.getElementById('csvInput').click()}
-              >
-                Upload CSV
-              </Button>
-              <input
-                id="csvInput"
-                type="file"
-                accept=".csv"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-              {csvFile && (
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {csvFile.name}
-                </span>
-              )}
-            </div>
-            <FormHelperText>
-              Upload a CSV file with runner numbers in the first column
-            </FormHelperText>
-          </CardBody>
-        </Card>
-      </div>
-
-      {/* Runner Ranges List */}
-      {ranges.length > 0 && (
-        <div className="space-y-6">
-          <div className="flex items-center gap-2 mb-4">
-            <DocumentTextIcon className="w-5 h-5 text-primary-500" />
-            <h3 className="text-lg font-semibold text-navy-900 dark:text-white">
-              Configured Ranges
-            </h3>
-            <Badge variant="success" size="sm">
-              {getTotalRunners()} Runners
-            </Badge>
+        {(validationErrors.overlap || validationErrors.duplicates) && (
+          <div className="mt-2">
+            <FormErrorMessage>
+              {validationErrors.overlap || validationErrors.duplicates}
+            </FormErrorMessage>
           </div>
+        )}
 
-          <Card>
-            <CardBody>
-              <div className="space-y-4">
-                {ranges.map((range, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="primary">
-                          {range.min}-{range.max}
-                        </Badge>
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          ({range.count} runners)
-                        </span>
+        <div className="mt-4">
+          <Button
+            variant="secondary"
+            onClick={handleAddRange}
+            leftIcon={<PlusIcon className="w-5 h-5" />}
+          >
+            Add Range
+          </Button>
+        </div>
+      </FormSection>
+
+      {/* Configured Ranges */}
+      {ranges.length > 0 && (
+        <FormSection
+          icon={DocumentIcon}
+          title="Configured Ranges"
+          description="Review and manage runner number ranges"
+        >
+          <div className="space-y-3">
+            {ranges.map((range, index) => (
+              <Card key={index} variant="outline">
+                <CardBody>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Badge variant="primary" size="lg">
+                        {range.min}-{range.max}
+                      </Badge>
+                      <div className="text-sm text-gray-600 dark:text-gray-300">
+                        {range.description}
                       </div>
-                      {range.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                          {range.description}
-                        </p>
-                      )}
+                      <Badge variant="secondary">
+                        {range.count} runners
+                      </Badge>
                     </div>
                     <Button
                       variant="ghost"
                       onClick={() => handleRemoveRange(index)}
                       leftIcon={<TrashIcon className="w-5 h-5" />}
-                    >
-                      Remove
-                    </Button>
+                      aria-label="Remove range"
+                    />
                   </div>
-                ))}
-              </div>
-            </CardBody>
-          </Card>
-        </div>
+                </CardBody>
+              </Card>
+            ))}
+          </div>
+        </FormSection>
       )}
 
       {/* Summary Card */}
-      <Card variant="elevated" className="bg-green-50 dark:bg-green-900/20">
+      <Card variant="elevated" className="bg-blue-50 dark:bg-blue-900/20">
         <CardBody>
-          <h4 className="text-sm font-medium text-green-800 dark:text-green-200 mb-2">
-            Runner Configuration Summary
-          </h4>
-          <div className="text-sm text-green-700 dark:text-green-300 space-y-1">
-            <p><strong>Total Runners:</strong> {getTotalRunners()}</p>
-            <p><strong>Number Ranges:</strong> {ranges.length}</p>
+          <div className="flex items-center gap-2 mb-4">
+            <DocumentIcon className="w-5 h-5 text-blue-500" />
+            <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+              Runner Configuration Summary
+            </h4>
+          </div>
+          <div className="text-sm text-blue-700 dark:text-blue-300 space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Total Runners:</span>
+              <Badge variant="primary">{getTotalRunners()}</Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Number Ranges:</span>
+              <Badge variant="secondary">{ranges.length}</Badge>
+            </div>
             {ranges.length > 0 && (
-              <p>
-                <strong>Number Range:</strong> {Math.min(...getRunnerNumbers())}-{Math.max(...getRunnerNumbers())}
-              </p>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Full Range:</span>
+                <Badge variant="default">
+                  {Math.min(...getRunnerNumbers())}-{Math.max(...getRunnerNumbers())}
+                </Badge>
+              </div>
             )}
           </div>
         </CardBody>
       </Card>
 
-      {/* Error Message */}
-      {validationErrors.general && (
-        <FormErrorMessage>{validationErrors.general}</FormErrorMessage>
-      )}
-
       {/* Action Buttons */}
-      <div className="flex justify-between pt-4">
+      <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
         <Button
           variant="ghost"
           onClick={onBack}
-          type="button"
         >
           Back: Race Details
         </Button>
@@ -345,6 +292,10 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
           </Button>
         </ButtonGroup>
       </div>
+
+      {validationErrors.general && (
+        <FormErrorMessage>{validationErrors.general}</FormErrorMessage>
+      )}
     </div>
   );
 };

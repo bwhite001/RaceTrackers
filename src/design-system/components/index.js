@@ -1,40 +1,32 @@
-/**
- * Design System Component Exports
- * Central export point for all design system components
- */
-
-// Button Components
-export { Button, ButtonGroup } from './Button';
-
-// Card Components
-export { Card, CardHeader, CardBody, CardFooter } from './Card';
-
-// Badge Component
-export { Badge } from './Badge';
-
-// Tabs Components
-export { Tabs, TabList, Tab, TabPanels, TabPanel } from './Tabs';
-
-// Modal Components
-export { Modal, ModalHeader, ModalBody, ModalFooter } from './Modal';
-
 // Form Components
 export {
   FormGroup,
   FormLabel,
   FormHelperText,
   FormErrorMessage,
+  FormSection,
   Input,
   Select,
   Checkbox,
   Radio,
-  Textarea,
+  Textarea
 } from './Form';
 
 // Layout Components
 export { Container } from './Container';
 export { Section } from './Section';
 
-// Re-export utilities
-export { cn, conditionalClass, mergeClasses } from '../utils/classNames';
-export { getVariant, getSize, combineVariants } from '../utils/variants';
+// Card Components
+export { Card, CardHeader, CardBody, CardFooter } from './Card';
+
+// Button Components
+export { Button, ButtonGroup } from './Button';
+
+// Badge Component
+export { Badge } from './Badge';
+
+// Modal Components
+export { Modal, ModalHeader, ModalBody, ModalFooter } from './Modal';
+
+// Tabs Components
+export { Tabs, TabList, Tab, TabPanels, TabPanel } from './Tabs';
