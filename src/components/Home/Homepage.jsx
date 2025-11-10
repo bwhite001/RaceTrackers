@@ -7,7 +7,7 @@ import { Card, CardHeader, CardBody, Button } from '../../design-system/componen
 
 const Homepage = () => {
   const navigate = useNavigate();
-  const { currentModule, operationStatus, startOperation, canNavigateTo } = useNavigationStore();
+  const { currentModule, operationStatus, startOperation, endOperation, canNavigateTo } = useNavigationStore();
   const { settings } = useSettingsStore();
   const { currentRace, loadCurrentRace } = useRaceMaintenanceStore();
 
@@ -21,8 +21,13 @@ const Homepage = () => {
   const handleModuleSelect = async (moduleType, path) => {
     // Check if navigation is allowed
     if (!canNavigateTo(moduleType)) {
-      alert('Cannot switch modules during active operation');
-      return;
+      const confirmed = window.confirm(
+        'You are currently in an active operation. Do you want to exit and switch modules? Any unsaved changes may be lost.'
+      );
+      if (!confirmed) return;
+      
+      // Force exit the current operation
+      endOperation();
     }
 
     // If operation is in progress, confirm before switching
@@ -31,11 +36,21 @@ const Homepage = () => {
         'Are you sure you want to exit the current operation? This may result in loss of unsaved data.'
       );
       if (!confirmed) return;
+      endOperation();
     }
 
     // Start operation for the selected module
     startOperation(moduleType);
     navigate(path);
+  };
+
+  const handleExitOperation = () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to exit the current operation? Any unsaved changes may be lost.'
+    );
+    if (confirmed) {
+      endOperation();
+    }
   };
 
   return (
@@ -70,20 +85,29 @@ const Homepage = () => {
       {/* Current Operation Status */}
       {operationStatus === OPERATION_STATUS.IN_PROGRESS && (
         <Card variant="elevated" className="mb-8 border-l-4 border-gold-500">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <svg className="w-6 h-6 text-gold-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg className="w-6 h-6 text-gold-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Active Operation in Progress
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {currentModule.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </p>
+              </div>
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
-                Active Operation in Progress
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {currentModule.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-              </p>
-            </div>
+            <Button
+              variant="secondary"
+              onClick={handleExitOperation}
+              className="ml-4"
+            >
+              Exit Operation
+            </Button>
           </div>
         </Card>
       )}
@@ -166,47 +190,6 @@ const Homepage = () => {
           </CardBody>
         </Card>
       )}
-
-      {/* Features Grid */}
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <FeatureCard
-          icon={
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
-          }
-          title="Offline First"
-          description="Works without internet connection"
-        />
-        <FeatureCard
-          icon={
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-            </svg>
-          }
-          title="Fast Entry"
-          description="Quick runner mark-off and data entry"
-        />
-        <FeatureCard
-          icon={
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-              <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-            </svg>
-          }
-          title="Real-time Status"
-          description="Live race progress monitoring"
-        />
-        <FeatureCard
-          icon={
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clipRule="evenodd" />
-            </svg>
-          }
-          title="Easy Sharing"
-          description="Export and import race configs"
-        />
-      </div>
     </div>
   );
 };
@@ -251,23 +234,6 @@ const ModuleCard = ({ title, description, icon, disabled, onClick }) => (
         </div>
       )}
     </div>
-  </Card>
-);
-
-// Feature card component
-const FeatureCard = ({ icon, title, description }) => (
-  <Card variant="default" className="text-center">
-    <div className="flex justify-center mb-3">
-      <div className="p-3 bg-navy-100 text-navy-900 dark:bg-navy-900 dark:text-navy-100 rounded-lg">
-        {icon}
-      </div>
-    </div>
-    <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
-      {title}
-    </h4>
-    <p className="text-sm text-gray-600 dark:text-gray-400">
-      {description}
-    </p>
   </Card>
 );
 

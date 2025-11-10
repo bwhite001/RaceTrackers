@@ -51,6 +51,27 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     setShowWithdrawalDialog(true);
   }, []);
 
+  // Handle settings
+  const handleOpenSettings = useCallback(() => {
+    // TODO: Implement settings modal
+    console.log('Open settings');
+  }, []);
+
+  // Handle help
+  const handleOpenHelp = useCallback(() => {
+    // TODO: Implement help dialog
+    console.log('Open help');
+  }, []);
+
+  // Handle exit
+  const handleExit = useCallback(() => {
+    if (onExitAttempt) {
+      onExitAttempt();
+    } else {
+      navigate('/');
+    }
+  }, [onExitAttempt, navigate]);
+
   // Define hotkeys
   const hotkeys = {
     [HOTKEYS.NEW_ENTRY]: () => handleTabChange('data-entry'),
@@ -80,9 +101,10 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         {/* Header */}
         <Header
           title="Base Station Operations"
-          stats={stats}
-          onTabChange={handleTabChange}
-          activeTab={activeTab}
+          stats={stats || { finished: 0, active: 0 }}
+          onExit={handleExit}
+          onOpenSettings={handleOpenSettings}
+          onOpenHelp={handleOpenHelp}
         />
 
         {/* Main Content */}

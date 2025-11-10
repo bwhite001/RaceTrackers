@@ -142,6 +142,41 @@ export const TIME_FORMATS = {
   ISO: "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"
 };
 
+/**
+ * App Modes
+ */
+export const APP_MODES = {
+  CHECKPOINT: 'checkpoint',
+  BASE_STATION: 'base_station',
+  RACE_SETUP: 'race_setup'
+};
+
+/**
+ * Group Sizes for Runner Display
+ */
+export const GROUP_SIZES = {
+  SMALL: 10,
+  MEDIUM: 25,
+  LARGE: 50,
+  XLARGE: 100
+};
+
+/**
+ * Segment Duration in Minutes
+ */
+export const SEGMENT_DURATION_MINUTES = 5;
+
+/**
+ * Default Settings
+ */
+export const DEFAULT_SETTINGS = {
+  darkMode: false,
+  soundEnabled: true,
+  autoSave: true,
+  segmentDuration: SEGMENT_DURATION_MINUTES,
+  groupSize: GROUP_SIZES.MEDIUM
+};
+
 export default {
   RUNNER_STATUSES,
   SORT_ORDERS,
@@ -150,5 +185,9 @@ export default {
   STATUS_COLORS,
   STATUS_LABELS,
   HOTKEYS,
-  TIME_FORMATS
+  TIME_FORMATS,
+  APP_MODES,
+  GROUP_SIZES,
+  SEGMENT_DURATION_MINUTES,
+  DEFAULT_SETTINGS
 };

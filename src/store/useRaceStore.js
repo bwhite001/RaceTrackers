@@ -705,6 +705,69 @@ export const useRaceStore = create(
                 }
             },
 
+            // Initialize runners from race configuration
+            initializeRunnersFromRace: async (raceConfig) => {
+                if (!raceConfig || !raceConfig.runnerRanges) return;
+
+                set({ isLoading: true, error: null });
+                try {
+                    // If we have a race ID, load runners from storage
+                    if (raceConfig.id) {
+                        const runners = await StorageService.getRunners(raceConfig.id);
+                        if (runners && runners.length > 0) {
+                            set({ runners, isLoading: false });
+                            return;
+                        }
+                    }
+
+                    // Otherwise, create runners from runner ranges (for display purposes)
+                    const runners = [];
+                    
+                    // Parse runner ranges and create runner objects
+                    for (const range of raceConfig.runnerRanges) {
+                        // Handle both string format and object format
+                        if (typeof range === 'string') {
+                            // String format: "100-200"
+                            const [start, end] = range.split('-').map(num => parseInt(num.trim()));
+                            
+                            for (let num = start; num <= end; num++) {
+                                runners.push({
+                                    number: num,
+                                    status: RUNNER_STATUSES.NOT_STARTED,
+                                    recordedTime: null,
+                                });
+                            }
+                        } else if (range && typeof range === 'object') {
+                            // Object format: { min, max, individualNumbers, etc. }
+                            if (range.individualNumbers && range.individualNumbers.length > 0) {
+                                // Individual numbers
+                                for (const num of range.individualNumbers) {
+                                    runners.push({
+                                        number: num,
+                                        status: RUNNER_STATUSES.NOT_STARTED,
+                                        recordedTime: null,
+                                    });
+                                }
+                            } else if (range.min !== undefined && range.max !== undefined) {
+                                // Range with min/max
+                                for (let num = range.min; num <= range.max; num++) {
+                                    runners.push({
+                                        number: num,
+                                        status: RUNNER_STATUSES.NOT_STARTED,
+                                        recordedTime: null,
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+                    set({ runners, isLoading: false });
+                } catch (error) {
+                    set({ error: error.message, isLoading: false });
+                    throw error;
+                }
+            },
+
             // Utility actions
             resetRace: () => {
                 set({
