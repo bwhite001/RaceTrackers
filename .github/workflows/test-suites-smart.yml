@@ -1,0 +1,158 @@
+name: Smart Test Suites (Changed Files)
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # Detect which test suites need to run based on changed files
+  detect-changes:
+    name: Detect Changed Files
+    runs-on: ubuntu-latest
+    outputs:
+      unit: ${{ steps.filter.outputs.unit }}
+      base-operations: ${{ steps.filter.outputs.base-operations }}
+      database: ${{ steps.filter.outputs.database }}
+      integration: ${{ steps.filter.outputs.integration }}
+      e2e: ${{ steps.filter.outputs.e2e }}
+      services: ${{ steps.filter.outputs.services }}
+      components: ${{ steps.filter.outputs.components }}
+      run-all: ${{ steps.filter.outputs.run-all }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check changed files
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            unit:
+              - 'src/test/*.test.{js,jsx}'
+              - 'src/store/**'
+              - 'src/components/Settings/**'
+              - 'src/components/Layout/**'
+            
+            base-operations:
+              - 'src/test/base-operations/**'
+              - 'src/modules/base-operations/**'
+              - 'src/components/BaseStation/**'
+              - 'src/views/BaseStationView.jsx'
+            
+            database:
+              - 'src/test/database/**'
+              - 'src/services/storage.js'
+              - 'src/shared/services/database/**'
+            
+            integration:
+              - 'src/test/integration/**'
+              - 'src/modules/**'
+              - 'src/shared/store/**'
+            
+            e2e:
+              - 'src/test/e2e/**'
+              - 'src/views/**'
+              - 'src/App.jsx'
+            
+            services:
+              - 'src/test/services/**'
+              - 'src/services/import-export/**'
+            
+            components:
+              - 'src/test/components/**'
+              - 'src/components/Shared/**'
+              - 'src/design-system/**'
+            
+            run-all:
+              - 'package.json'
+              - 'vitest.config*.js'
+              - 'test-runner.js'
+              - '.github/workflows/**'
+
+  # Run only the test suites that are affected by changes
+  test-changed-suites:
+    name: ${{ matrix.suite }} Tests
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.run-all == 'true' ||
+      (matrix.suite == 'unit' && needs.detect-changes.outputs.unit == 'true') ||
+      (matrix.suite == 'base-operations' && needs.detect-changes.outputs.base-operations == 'true') ||
+      (matrix.suite == 'database' && needs.detect-changes.outputs.database == 'true') ||
+      (matrix.suite == 'integration' && needs.detect-changes.outputs.integration == 'true') ||
+      (matrix.suite == 'e2e' && needs.detect-changes.outputs.e2e == 'true') ||
+      (matrix.suite == 'services' && needs.detect-changes.outputs.services == 'true') ||
+      (matrix.suite == 'components' && needs.detect-changes.outputs.components == 'true')
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        suite:
+          - unit
+          - base-operations
+          - database
+          - integration
+          - e2e
+          - services
+          - components
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run ${{ matrix.suite }} test suite
+        run: npm run test:suite:${{ matrix.suite }}
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.suite }}
+          path: |
+            test-results/
+            *.log
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # Summary of smart test results
+  smart-test-summary:
+    name: Smart Test Summary
+    runs-on: ubuntu-latest
+    needs: [detect-changes, test-changed-suites]
+    if: always()
+    
+    steps:
+      - name: Create summary
+        run: |
+          echo "# Smart Test Suite Results 🎯" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Only affected test suites were run based on changed files." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Suites Run" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.detect-changes.outputs.run-all }}" == "true" ]; then
+            echo "⚠️ **All suites run** (core files changed)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Suite | Run | Status |" >> $GITHUB_STEP_SUMMARY
+            echo "|-------|-----|--------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Unit | ${{ needs.detect-changes.outputs.unit == 'true' && '✅' || '⏭️' }} | ${{ needs.test-changed-suites.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Base Operations | ${{ needs.detect-changes.outputs.base-operations == 'true' && '✅' || '⏭️' }} | ${{ needs.test-changed-suites.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Database | ${{ needs.detect-changes.outputs.database == 'true' && '✅' || '⏭️' }} | ${{ needs.test-changed-suites.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Integration | ${{ needs.detect-changes.outputs.integration == 'true' && '✅' || '⏭️' }} | ${{ needs.test-changed-suites.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| E2E | ${{ needs.detect-changes.outputs.e2e == 'true' && '✅' || '⏭️' }} | ${{ needs.test-changed-suites.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Services | ${{ needs.detect-changes.outputs.services == 'true' && '✅' || '⏭️' }} | ${{ needs.test-changed-suites.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Components | ${{ needs.detect-changes.outputs.components == 'true' && '✅' || '⏭️' }} | ${{ needs.test-changed-suites.result }} |" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ = Run, ⏭️ = Skipped (no changes)" >> $GITHUB_STEP_SUMMARY
