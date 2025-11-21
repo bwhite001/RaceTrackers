@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import 'fake-indexeddb/auto';
 
 // Mock IntersectionObserver
 class IntersectionObserver {
