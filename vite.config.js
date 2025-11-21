@@ -30,66 +30,92 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'favicon_io/apple-touch-icon.png', 'favicon_io/favicon-16x16.png', 'favicon_io/favicon-32x32.png'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      
       manifest: {
         name: 'RaceTracker Pro',
         short_name: 'RaceTracker',
-        description: 'Offline race tracking app for checkpoints and base stations',
-        start_url: '/',
+        description: 'Professional race timing and checkpoint management system for ultra-marathons, trail races, and endurance events',
+        theme_color: '#21808D',
+        background_color: '#FCFCF9',
         display: 'standalone',
-        background_color: '#ffffff',
-        theme_color: '#1f2937',
-        orientation: 'portrait-primary',
         scope: '/',
+        start_url: '/',
+        orientation: 'portrait-primary',
         icons: [
+          {
+            src: 'pwa-64x64.png',
+            sizes: '64x64',
+            type: 'image/png'
+          },
           {
             src: 'pwa-192x192.png',
             sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any maskable'
+            type: 'image/png'
           },
           {
             src: 'pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable'
-          }
-        ],
-        categories: ['sports', 'utilities', 'productivity'],
-        lang: 'en',
-        dir: 'ltr',
-        prefer_related_applications: false,
-        shortcuts: [
-          {
-            name: 'Checkpoint Mode',
-            short_name: 'Checkpoint',
-            description: 'Track runners at checkpoints',
-            url: '/?mode=checkpoint',
-            icons: [
-              {
-                src: 'pwa-192x192.png',
-                sizes: '192x192'
-              }
-            ]
+            type: 'image/png'
           },
           {
-            name: 'Base Station Mode',
-            short_name: 'Base Station',
-            description: 'Manage race data at base station',
-            url: '/?mode=base-station',
-            icons: [
+            src: 'maskable-icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
+          }
+        ],
+        categories: ['sports', 'productivity', 'utilities'],
+        shortcuts: [
+          {
+            name: 'Create Race',
+            short_name: 'New Race',
+            description: 'Start a new race event',
+            url: '/setup?action=new',
+            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+          },
+          {
+            name: 'Checkpoint',
+            short_name: 'Checkpoint',
+            description: 'Open checkpoint operations',
+            url: '/checkpoint',
+            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+          },
+          {
+            name: 'Base Station',
+            short_name: 'Base',
+            description: 'Open base station',
+            url: '/base-station',
+            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
+          }
+        ],
+        share_target: {
+          action: '/share',
+          method: 'POST',
+          enctype: 'multipart/form-data',
+          params: {
+            files: [
               {
-                src: 'pwa-192x192.png',
-                sizes: '192x192'
+                name: 'raceData',
+                accept: ['application/json', '.json']
               }
             ]
           }
-        ]
+        }
       },
+
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        // Service worker caching strategies
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        
+        // Cache all navigation requests
+        navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/api/],
+        
+        // Runtime caching strategies
         runtimeCaching: [
           {
+            // Cache Google Fonts
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
@@ -97,13 +123,88 @@ export default defineConfig({
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            // Cache Google Fonts static resources
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'gstatic-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            // Cache images
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+              }
+            }
+          },
+          {
+            // Cache API responses (if any external APIs used)
+            urlPattern: /^https:\/\/api\..*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              networkTimeoutSeconds: 10,
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 5 // 5 minutes
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
               }
             }
           }
-        ]
+        ],
+        
+        // Clean up old caches
+        cleanupOutdatedCaches: true,
+        
+        // Skip waiting for service worker activation
+        skipWaiting: true,
+        clientsClaim: true
+      },
+
+      devOptions: {
+        enabled: true, // Enable PWA in development
+        type: 'module'
       }
     })
   ],
+  
+  // Optimize build
+  build: {
+    target: 'esnext',
+    minify: 'terser',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'state-vendor': ['zustand'],
+          'db-vendor': ['dexie']
+        }
+      }
+    }
+  },
+  
   server: {
     host: true,
     port: 3000
