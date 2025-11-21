@@ -17,6 +17,7 @@ export const useRaceStore = create(
             isLoading: false,
             error: null,
             currentRaceId: null,
+            isOnline: navigator.onLine, // Network status
 
             // Actions
             setLoading: (loading) => set({ isLoading: loading }),
@@ -24,6 +25,9 @@ export const useRaceStore = create(
             setError: (error) => set({ error }),
 
             clearError: () => set({ error: null }),
+
+            // Network status actions
+            setNetworkStatus: (status) => set({ isOnline: status }),
 
             // Race configuration actions
             createRace: async (raceData) => {

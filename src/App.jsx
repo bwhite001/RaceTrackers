@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { MODULE_TYPES } from './shared/store/navigationStore';
 import useSettingsStore from './shared/store/settingsStore';
 import ProtectedRoute from './shared/components/ProtectedRoute';
+import NetworkStatusIndicator from './shared/components/NetworkStatusIndicator';
 
 // Import module components
 import Homepage from './components/Home/Homepage';
@@ -21,6 +22,7 @@ function App() {
 
   return (
     <Router>
+      <NetworkStatusIndicator />
       <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
         <main className="flex-grow container mx-auto px-4 py-8">
           <Routes>
