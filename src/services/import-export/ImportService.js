@@ -28,23 +28,23 @@ export class ImportService {
    * @returns {{valid: boolean, errors?: Array, data?: Object}}
    */
   static validatePackage(exportPackage) {
+    // Checksum validation first (before schema validation)
+    if (!this.verifyChecksum(exportPackage)) {
+      return {
+        valid: false,
+        errors: [{ path: 'checksum', message: 'Checksum mismatch - data may be corrupted' }],
+      };
+    }
+
     // Schema validation
     const validation = safeValidateExportPackage(exportPackage);
     if (!validation.success) {
       return {
         valid: false,
-        errors: validation.error.errors.map(e => ({
+        errors: validation.error?.errors?.map(e => ({
           path: e.path.join('.'),
           message: e.message,
-        })),
-      };
-    }
-
-    // Checksum validation
-    if (!this.verifyChecksum(exportPackage)) {
-      return {
-        valid: false,
-        errors: [{ path: 'checksum', message: 'Checksum mismatch - data may be corrupted' }],
+        })) || [{ path: 'validation', message: 'Validation failed' }],
       };
     }
 
