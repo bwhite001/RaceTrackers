@@ -11,6 +11,7 @@ export { default as FormField } from './FormField';
 export { default as DialogHeader } from './DialogHeader';
 export { default as DialogFooter } from './DialogFooter';
 export { default as WarningBox } from './WarningBox';
+export { default as StandardModal } from './StandardModal';
 
 // Settings Components
 export { default as SettingsSection } from './SettingsSection';

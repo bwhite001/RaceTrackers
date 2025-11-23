@@ -53,14 +53,14 @@ const Modal = ({
   const modalRef = useRef(null);
   const previousActiveElement = useRef(null);
 
-  // Size styles
+  // Size styles - Updated for wider modals with better UX
   const sizeStyles = {
     sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
-    '2xl': 'max-w-6xl',
-    full: 'max-w-full mx-4',
+    md: 'max-w-2xl',
+    lg: 'max-w-4xl',
+    xl: 'max-w-6xl',
+    '2xl': 'max-w-7xl',
+    full: 'max-w-[95vw]',
   };
 
   // Handle ESC key
@@ -172,29 +172,32 @@ const Modal = ({
         {...props}
       >
         <ModalContext.Provider value={contextValue}>
-          {/* Close button */}
+          {/* Close button - Larger and more prominent */}
           {showCloseButton && (
             <button
               type="button"
               onClick={onClose}
               className={cn(
-                'absolute top-4 right-4 z-10',
-                'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
-                'transition-colors duration-200',
-                'focus:outline-none focus:ring-2 focus:ring-navy-500 rounded-lg p-1'
+                'absolute top-3 right-3 z-10',
+                'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
+                'hover:bg-gray-100 dark:hover:bg-gray-700',
+                'transition-all duration-200',
+                'focus:outline-none focus:ring-2 focus:ring-navy-500 rounded-lg p-2',
+                'touch-target'
               )}
               aria-label="Close modal"
+              title="Close (Esc)"
             >
               <svg
-                className="w-6 h-6"
+                className="w-7 h-7"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                strokeWidth={2.5}
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
                   d="M6 18L18 6M6 6l12 12"
                 />
               </svg>

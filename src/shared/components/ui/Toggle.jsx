@@ -1,11 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Switch } from '@headlessui/react';
 import { cn } from '../../../design-system/utils/classNames';
 
 /**
  * Toggle Component
  * 
- * Accessible switch component following WCAG 2.1 guidelines.
+ * Accessible switch component using Headless UI for mobile-optimized UX.
+ * Built with Tailwind CSS for consistent styling across mobile apps.
  * Replaces 9+ duplicated toggle implementations.
  * 
  * @component
@@ -33,47 +35,30 @@ const Toggle = ({
     sm: {
       track: 'h-5 w-9',
       thumb: 'h-3 w-3',
-      translate: 'translate-x-5'
+      translate: 'translate-x-4'
     },
     md: {
       track: 'h-6 w-11',
       thumb: 'h-4 w-4',
-      translate: 'translate-x-6'
+      translate: 'translate-x-5'
     },
     lg: {
       track: 'h-7 w-14',
       thumb: 'h-5 w-5',
-      translate: 'translate-x-8'
+      translate: 'translate-x-7'
     }
   };
 
   const sizeClasses = sizes[size];
 
-  const handleChange = () => {
-    if (!disabled && !loading) {
-      onChange(!checked);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === ' ' || e.key === 'Enter') {
-      e.preventDefault();
-      handleChange();
-    }
-  };
-
   const ToggleSwitch = () => (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
+    <Switch
+      checked={checked}
+      onChange={onChange}
       disabled={disabled || loading}
-      onClick={handleChange}
-      onKeyDown={handleKeyDown}
       className={cn(
         'relative inline-flex items-center rounded-full transition-colors duration-200 ease-in-out',
-        'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy-500',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-navy-500',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         'touch-target',
         sizeClasses.track,
@@ -84,15 +69,17 @@ const Toggle = ({
       )}
       {...props}
     >
+      <span className="sr-only">{label || 'Toggle'}</span>
       <span
+        aria-hidden="true"
         className={cn(
-          'inline-block transform bg-white rounded-full transition-transform duration-200 ease-in-out',
+          'pointer-events-none inline-block transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out',
           sizeClasses.thumb,
           checked ? sizeClasses.translate : 'translate-x-1'
         )}
       />
       {loading && (
-        <span className="absolute inset-0 flex items-center justify-center">
+        <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <svg
             className="animate-spin h-3 w-3 text-white"
             xmlns="http://www.w3.org/2000/svg"
@@ -115,7 +102,7 @@ const Toggle = ({
           </svg>
         </span>
       )}
-    </button>
+    </Switch>
   );
 
   if (!label) {
@@ -124,9 +111,9 @@ const Toggle = ({
 
   const LabelContent = () => (
     <div className="flex-1">
-      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+      <Switch.Label className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
         {label}
-      </label>
+      </Switch.Label>
       {description && (
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           {description}
@@ -136,16 +123,18 @@ const Toggle = ({
   );
 
   return (
-    <div
-      className={cn(
-        'flex items-center gap-3',
-        labelPosition === 'left' ? 'justify-between' : 'flex-row-reverse justify-end'
-      )}
-    >
-      {labelPosition === 'left' && <LabelContent />}
-      <ToggleSwitch />
-      {labelPosition === 'right' && <LabelContent />}
-    </div>
+    <Switch.Group>
+      <div
+        className={cn(
+          'flex items-center gap-3',
+          labelPosition === 'left' ? 'justify-between' : 'flex-row-reverse justify-end'
+        )}
+      >
+        {labelPosition === 'left' && <LabelContent />}
+        <ToggleSwitch />
+        {labelPosition === 'right' && <LabelContent />}
+      </div>
+    </Switch.Group>
   );
 };
 
