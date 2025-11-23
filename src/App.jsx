@@ -8,6 +8,7 @@ import NetworkStatusIndicator from './shared/components/NetworkStatusIndicator';
 // Import module components
 import Homepage from './components/Home/Homepage';
 import RaceSetup from './components/Setup/RaceSetup';
+import RaceManagementView from './views/RaceManagementView';
 import CheckpointView from './views/CheckpointView';
 import BaseStationView from './views/BaseStationView';
 import RaceOverview from './views/RaceOverview';
@@ -28,6 +29,16 @@ function App() {
           <Routes>
             {/* Home page - accessible to all */}
             <Route path="/" element={<Homepage />} />
+
+            {/* Race Management - Dedicated page for managing all races */}
+            <Route
+              path="/race-management"
+              element={
+                <ProtectedRoute moduleType={MODULE_TYPES.RACE_MAINTENANCE}>
+                  <RaceManagementView />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Race Maintenance Module */}
             <Route
