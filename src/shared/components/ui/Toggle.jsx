@@ -72,7 +72,7 @@ const Toggle = ({
       onClick={handleChange}
       onKeyDown={handleKeyDown}
       className={cn(
-        'relative inline-flex items-center rounded-md transition-colors duration-200 ease-in-out',
+        'relative inline-flex items-center rounded-full transition-colors duration-200 ease-in-out',
         'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy-500',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         'touch-target',
@@ -86,7 +86,7 @@ const Toggle = ({
     >
       <span
         className={cn(
-          'inline-block transform bg-white rounded transition-transform duration-200 ease-in-out',
+          'inline-block transform bg-white rounded-full transition-transform duration-200 ease-in-out',
           sizeClasses.thumb,
           checked ? sizeClasses.translate : 'translate-x-1'
         )}
