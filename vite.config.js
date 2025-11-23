@@ -22,7 +22,7 @@ const getVersion = () => {
 }
 
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/RaceTrackers/' : '/',
   define: {
     __APP_VERSION__: JSON.stringify(process.env.VITE_APP_VERSION || getVersion()),
   },
