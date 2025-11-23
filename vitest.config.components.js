@@ -3,7 +3,7 @@ import { defineConfig } from 'vitest/config';
 /**
  * Vitest Configuration for Components Tests
  * Scope: Shared component tests
- * Files: src/test/components/**
+ * Files: test/components/**
  * Run with: npm run test:suite:components
  */
 export default defineConfig({
@@ -11,10 +11,10 @@ export default defineConfig({
     name: 'components',
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.js'],
+    setupFiles: ['./test/setup.js'],
     include: [
-      'src/test/components/**/*.test.{js,jsx}',
-      'src/test/components/**/*.spec.{js,jsx}'
+      'test/components/**/*.test.{js,jsx}',
+      'test/components/**/*.spec.{js,jsx}'
     ],
     exclude: [
       '**/node_modules/**',
@@ -25,7 +25,7 @@ export default defineConfig({
       reportsDirectory: './coverage/components',
       exclude: [
         'node_modules/',
-        'src/test/setup.js',
+        'test/setup.js',
       ],
     },
     deps: {

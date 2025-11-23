@@ -3,7 +3,7 @@ import { defineConfig } from 'vitest/config';
 /**
  * Vitest Configuration for Integration Tests
  * Scope: Cross-module workflows and data synchronization
- * Files: src/test/integration/**
+ * Files: test/integration/**
  * Run with: npm run test:suite:integration
  */
 export default defineConfig({
@@ -11,10 +11,10 @@ export default defineConfig({
     name: 'integration',
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.js', './src/test/integration/setup.js'],
+    setupFiles: ['./test/setup.js', './test/integration/setup.js'],
     include: [
-      'src/test/integration/**/*.test.{js,jsx}',
-      'src/test/integration/**/*.spec.{js,jsx}'
+      'test/integration/**/*.test.{js,jsx}',
+      'test/integration/**/*.spec.{js,jsx}'
     ],
     exclude: [
       '**/node_modules/**',
@@ -25,8 +25,8 @@ export default defineConfig({
       reportsDirectory: './coverage/integration',
       exclude: [
         'node_modules/',
-        'src/test/setup.js',
-        'src/test/integration/setup.js',
+        'test/setup.js',
+        'test/integration/setup.js',
       ],
     },
     deps: {
