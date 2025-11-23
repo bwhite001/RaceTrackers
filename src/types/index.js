@@ -148,7 +148,25 @@ export const TIME_FORMATS = {
 export const APP_MODES = {
   CHECKPOINT: 'checkpoint',
   BASE_STATION: 'base_station',
-  RACE_SETUP: 'race_setup'
+  RACE_SETUP: 'race_setup',
+  SETUP: 'setup',
+  RACE_OVERVIEW: 'race_overview'
+};
+
+/**
+ * View Modes for Runner Display
+ */
+export const VIEW_MODES = {
+  GRID: 'grid',
+  LIST: 'list'
+};
+
+/**
+ * Contrast Modes
+ */
+export const CONTRAST_MODES = {
+  NORMAL: 'normal',
+  HIGH: 'high'
 };
 
 /**
@@ -162,19 +180,67 @@ export const GROUP_SIZES = {
 };
 
 /**
+ * Touch Target Sizes (WCAG 2.5.5)
+ */
+export const TOUCH_TARGETS = {
+  STANDARD: 44,  // Minimum for WCAG AA
+  OPTIMIZED: 48, // Recommended for touch devices
+  LARGE: 56      // Enhanced accessibility
+};
+
+/**
+ * Font Size Range
+ */
+export const FONT_SIZE = {
+  MIN: 0.8,
+  MAX: 1.5,
+  DEFAULT: 1.0,
+  STEP: 0.1
+};
+
+/**
  * Segment Duration in Minutes
  */
 export const SEGMENT_DURATION_MINUTES = 5;
 
 /**
+ * Default Status Colors
+ */
+export const DEFAULT_STATUS_COLORS = {
+  'not-started': '#9ca3af',  // Gray-400
+  'passed': '#10b981',       // Green-500
+  'non-starter': '#ef4444',  // Red-500
+  'dnf': '#f59e0b'          // Amber-500
+};
+
+/**
  * Default Settings
+ * Comprehensive settings object with all customization options
  */
 export const DEFAULT_SETTINGS = {
+  // Theme Settings
   darkMode: false,
+  highContrastMode: false,
+  reducedMotion: false,
+  
+  // Display Settings
+  fontSize: FONT_SIZE.DEFAULT,
+  runnerViewMode: VIEW_MODES.GRID,
+  groupSize: GROUP_SIZES.MEDIUM,
+  touchOptimized: true,
+  compactMode: false,
+  
+  // Accessibility Settings
   soundEnabled: true,
+  hapticsEnabled: true,
+  keyboardShortcuts: true,
+  
+  // Color Settings
+  statusColors: DEFAULT_STATUS_COLORS,
+  
+  // Performance Settings
   autoSave: true,
-  segmentDuration: SEGMENT_DURATION_MINUTES,
-  groupSize: GROUP_SIZES.MEDIUM
+  segmentDuration: SEGMENT_DURATION_MINUTES
 };
 
 export default {
@@ -187,7 +253,12 @@ export default {
   HOTKEYS,
   TIME_FORMATS,
   APP_MODES,
+  VIEW_MODES,
+  CONTRAST_MODES,
   GROUP_SIZES,
+  TOUCH_TARGETS,
+  FONT_SIZE,
   SEGMENT_DURATION_MINUTES,
+  DEFAULT_STATUS_COLORS,
   DEFAULT_SETTINGS
 };

@@ -77,13 +77,28 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     return <ErrorMessage message={error} />;
   }
 
+  const handleBackToHome = () => {
+    onExitAttempt(); // This will trigger the exit confirmation if needed
+  };
+
   return (
     <div className="space-y-6">
       {/* Checkpoint Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold dark:text-white">
-          Checkpoint {checkpointId}
-        </h1>
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={handleBackToHome}
+            className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            title="Back to Home"
+          >
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+          <h1 className="text-2xl font-bold dark:text-white">
+            Checkpoint {checkpointId}
+          </h1>
+        </div>
         <div className="space-x-4">
           <button
             onClick={() => setShowCalloutSheet(true)}

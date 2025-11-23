@@ -17,6 +17,7 @@ export const useRaceStore = create(
             isLoading: false,
             error: null,
             currentRaceId: null,
+            selectedRaceForMode: null, // Race selected for entering a module
             isOnline: navigator.onLine, // Network status
 
             // Actions
@@ -28,6 +29,28 @@ export const useRaceStore = create(
 
             // Network status actions
             setNetworkStatus: (status) => set({ isOnline: status }),
+
+            // Race selection for module entry
+            setSelectedRaceForMode: (raceId) => set({ selectedRaceForMode: raceId }),
+
+            clearSelectedRaceForMode: () => set({ selectedRaceForMode: null }),
+
+            // Get race statistics (categorized)
+            getRaceStatistics: async () => {
+                try {
+                    const races = await get().getAllRaces();
+                    const { categorizeRaces } = await import('../utils/raceStatistics.js');
+                    return categorizeRaces(races);
+                } catch (error) {
+                    console.error('Failed to get race statistics:', error);
+                    return {
+                        current: [],
+                        upcoming: [],
+                        recent: [],
+                        all: [],
+                    };
+                }
+            },
 
             // Race configuration actions
             createRace: async (raceData) => {
@@ -803,6 +826,7 @@ export const useRaceStore = create(
             name: "race-tracker-storage",
             partialize: (state) => ({
                 currentRaceId: state.currentRaceId,
+                selectedRaceForMode: state.selectedRaceForMode,
                 mode: state.mode,
                 settings: state.settings,
             }),

@@ -79,18 +79,7 @@
 
 ### Screenshots
 
-<table>
-  <tr>
-    <td><img src="screenshots/01-initial-application-launch.png" alt="Home Screen" width="300"/></td>
-    <td><img src="screenshots/05-checkpoint-mode-interface.png" alt="Checkpoint Mode" width="300"/></td>
-    <td><img src="screenshots/06-base-station-data-entry.png" alt="Base Station" width="300"/></td>
-  </tr>
-  <tr>
-    <td align="center"><b>Home Screen</b></td>
-    <td align="center"><b>Checkpoint Mode</b></td>
-    <td align="center"><b>Base Station</b></td>
-  </tr>
-</table>
+Comming Soon
 
 📸 [View all screenshots](./screenshots)
 

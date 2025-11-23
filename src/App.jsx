@@ -2,23 +2,62 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useEffect } from 'react';
 import { MODULE_TYPES } from './shared/store/navigationStore';
 import useSettingsStore from './shared/store/settingsStore';
+import { useRaceStore } from './store/useRaceStore';
+import { initializeSettings } from './utils/settingsDOM';
 import ProtectedRoute from './shared/components/ProtectedRoute';
 import NetworkStatusIndicator from './shared/components/NetworkStatusIndicator';
 
 // Import module components
 import Homepage from './components/Home/Homepage';
 import RaceSetup from './components/Setup/RaceSetup';
+import RaceManagementView from './views/RaceManagementView';
 import CheckpointView from './views/CheckpointView';
 import BaseStationView from './views/BaseStationView';
 import RaceOverview from './views/RaceOverview';
 import Footer from './components/Layout/Footer';
 
 function App() {
-  const { initializeSettings } = useSettingsStore();
+  const { initializeSettings: initSettingsStore } = useSettingsStore();
+  const { settings } = useRaceStore();
 
+  // Initialize settings on mount
   useEffect(() => {
-    initializeSettings();
-  }, [initializeSettings]);
+    // Initialize settings store (if it exists)
+    if (initSettingsStore) {
+      initSettingsStore();
+    }
+    
+    // Apply settings to DOM
+    initializeSettings(settings);
+  }, []);
+
+  // Listen for system preference changes
+  useEffect(() => {
+    const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const handleDarkModeChange = (e) => {
+      // Only apply if user hasn't explicitly set dark mode
+      if (!settings.darkMode && e.matches) {
+        document.documentElement.classList.add('dark');
+      }
+    };
+
+    const handleMotionChange = (e) => {
+      // Only apply if user hasn't explicitly set reduced motion
+      if (!settings.reducedMotion && e.matches) {
+        document.documentElement.classList.add('reduce-motion');
+      }
+    };
+
+    darkModeQuery.addEventListener('change', handleDarkModeChange);
+    motionQuery.addEventListener('change', handleMotionChange);
+
+    return () => {
+      darkModeQuery.removeEventListener('change', handleDarkModeChange);
+      motionQuery.removeEventListener('change', handleMotionChange);
+    };
+  }, [settings.darkMode, settings.reducedMotion]);
 
   return (
     <Router>
@@ -28,6 +67,16 @@ function App() {
           <Routes>
             {/* Home page - accessible to all */}
             <Route path="/" element={<Homepage />} />
+
+            {/* Race Management - Dedicated page for managing all races */}
+            <Route
+              path="/race-management"
+              element={
+                <ProtectedRoute moduleType={MODULE_TYPES.RACE_MAINTENANCE}>
+                  <RaceManagementView />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Race Maintenance Module */}
             <Route
