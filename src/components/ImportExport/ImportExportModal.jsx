@@ -2,6 +2,9 @@ import React, { useState, useRef } from 'react';
 import QRCode from 'qrcode.react';
 import useRaceMaintenanceStore from '../../modules/race-maintenance/store/raceMaintenanceStore';
 import { useRaceStore } from '../../store/useRaceStore.js';
+import { ExportService } from '../../services/import-export/ExportService.js';
+import { ImportService } from '../../services/import-export/ImportService.js';
+import ConflictResolutionDialog from './ConflictResolutionDialog.jsx';
 
 const ImportExportModal = ({ isOpen, onClose }) => {
   // Use the new race maintenance store for current race data
@@ -11,12 +14,10 @@ const ImportExportModal = ({ isOpen, onClose }) => {
     loading: isLoading 
   } = useRaceMaintenanceStore();
   
-  // Use the old race store for export/import functions (these still work with the old storage)
+  // Use the old race store for some functions that haven't been migrated yet
   const { 
-    exportRaceConfig, 
     exportRaceResults, 
     exportCheckpointResults,
-    importRaceConfig, 
     importCheckpointResults
   } = useRaceStore();
   
@@ -32,6 +33,12 @@ const ImportExportModal = ({ isOpen, onClose }) => {
   const [exportType, setExportType] = useState('config'); // 'config', 'results', or 'checkpoint'
   const [selectedCheckpoint, setSelectedCheckpoint] = useState(1);
   const fileInputRef = useRef(null);
+  
+  // Conflict resolution state
+  const [showConflictDialog, setShowConflictDialog] = useState(false);
+  const [conflicts, setConflicts] = useState([]);
+  const [importPackage, setImportPackage] = useState(null);
+  const [importPreview, setImportPreview] = useState(null);
 
   const handleExport = async () => {
     setIsProcessing(true);
@@ -45,11 +52,12 @@ const ImportExportModal = ({ isOpen, onClose }) => {
       
       let data;
       if (exportType === 'config') {
-        // Pass the currentRaceId to the export function
-        data = await exportRaceConfig(currentRaceId);
+        // Use the new ExportService
+        data = await ExportService.exportRace(currentRaceId);
         setExportData(data);
         setSuccess('Race configuration exported successfully!');
       } else if (exportType === 'results') {
+        // Still using old method for CSV export
         data = await exportRaceResults('csv', currentRaceId);
         // For CSV, trigger download directly
         const blob = new Blob([data.content], { type: data.mimeType });
@@ -85,26 +93,40 @@ const ImportExportModal = ({ isOpen, onClose }) => {
     setSuccess('');
 
     try {
+      // Parse the JSON data
       const data = JSON.parse(importText.trim());
       
-      // Determine import type based on data structure
-      if (data.exportType === 'checkpoint-results') {
-        await importCheckpointResults(data);
-        setSuccess('Checkpoint results imported successfully!');
-      } else if (data.exportType === 'full-race-data') {
-        await importRaceConfig(data);
-        setSuccess('Full race data imported and merged successfully! All checkpoint data has been consolidated.');
-      } else {
-        await importRaceConfig(data);
-        setSuccess('Race configuration imported successfully!');
+      // Preview the import using the new ImportService
+      const preview = await ImportService.previewImport(data);
+      
+      if (!preview.valid) {
+        throw new Error(preview.errors?.map(e => e.message).join(', ') || 'Invalid import data');
       }
       
-      setImportText('');
+      setImportPreview(preview);
       
-      // Close modal after successful import
-      setTimeout(() => {
-        onClose();
-      }, 2000);
+      // Check for conflicts
+      if (preview.conflicts && preview.conflicts.length > 0) {
+        // Show conflict resolution dialog
+        setConflicts(preview.conflicts);
+        setImportPackage(preview.exportPackage);
+        setShowConflictDialog(true);
+      } else {
+        // No conflicts, proceed with import
+        const result = await ImportService.importWithStrategy(preview.exportPackage, 'newer');
+        
+        if (result.success) {
+          setSuccess(`Import successful! Imported ${result.imported.races} races, ${result.imported.runners} runners, ${result.imported.checkpoints} checkpoints.`);
+          setImportText('');
+          
+          // Close modal after successful import
+          setTimeout(() => {
+            onClose();
+          }, 2000);
+        } else {
+          throw new Error('Import failed');
+        }
+      }
     } catch (err) {
       if (err instanceof SyntaxError) {
         setError('Invalid JSON format. Please check the configuration data.');
@@ -115,22 +137,59 @@ const ImportExportModal = ({ isOpen, onClose }) => {
       setIsProcessing(false);
     }
   };
+  
+  /**
+   * Handle conflict resolution
+   */
+  const handleResolveConflicts = async (resolutions) => {
+    setShowConflictDialog(false);
+    setIsProcessing(true);
+    
+    try {
+      // Import with manual resolutions
+      const result = await ImportService.importWithStrategy(
+        importPackage, 
+        'manual', 
+        resolutions
+      );
+      
+      if (result.success) {
+        setSuccess(`Import successful! Imported ${result.imported.races} races, ${result.imported.runners} runners, ${result.imported.checkpoints} checkpoints.`);
+        setImportText('');
+        
+        // Close modal after successful import
+        setTimeout(() => {
+          onClose();
+        }, 2000);
+      } else {
+        throw new Error('Import failed after conflict resolution');
+      }
+    } catch (err) {
+      setError('Failed to import after conflict resolution: ' + err.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  
+  /**
+   * Cancel conflict resolution
+   */
+  const handleCancelConflicts = () => {
+    setShowConflictDialog(false);
+    setConflicts([]);
+    setImportPackage(null);
+  };
 
   const handleDownload = () => {
     if (!exportData) return;
 
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
+    // Use the ExportService download method
+    ExportService.downloadExport(
+      exportData, 
+      `race-config-${raceConfig?.name?.replace(/\s+/g, '-') || 'export'}.json`
+    );
     
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `race-config-${raceConfig?.name?.replace(/\s+/g, '-') || 'export'}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    URL.revokeObjectURL(url);
+    setSuccess('File downloaded successfully!');
   };
 
   const handleFileUpload = (event) => {
@@ -201,6 +260,7 @@ const ImportExportModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
+    <>
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
@@ -615,6 +675,16 @@ const ImportExportModal = ({ isOpen, onClose }) => {
         </div>
       </div>
     </div>
+    
+    {/* Conflict Resolution Dialog */}
+    {showConflictDialog && (
+      <ConflictResolutionDialog
+        conflicts={conflicts}
+        onResolve={handleResolveConflicts}
+        onCancel={handleCancelConflicts}
+      />
+    )}
+    </>
   );
 };
 

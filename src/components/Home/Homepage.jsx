@@ -1,15 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useNavigationStore, { MODULE_TYPES, OPERATION_STATUS } from '../../shared/store/navigationStore';
 import useSettingsStore from '../../shared/store/settingsStore';
 import useRaceMaintenanceStore from '../../modules/race-maintenance/store/raceMaintenanceStore';
 import { Card, CardHeader, CardBody, Button } from '../../design-system/components';
+import ImportExportModal from '../ImportExport/ImportExportModal';
+import { ImportService } from '../../services/import-export/ImportService';
 
 const Homepage = () => {
   const navigate = useNavigate();
   const { currentModule, operationStatus, startOperation, endOperation, canNavigateTo } = useNavigationStore();
   const { settings } = useSettingsStore();
   const { currentRace, loadCurrentRace } = useRaceMaintenanceStore();
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importError, setImportError] = useState('');
+  const [importSuccess, setImportSuccess] = useState('');
 
   // Load current race if not loaded
   React.useEffect(() => {
@@ -172,24 +177,100 @@ const Homepage = () => {
 
       {/* Quick Info Cards */}
       {!currentRace && (
-        <Card variant="elevated" className="border-l-4 border-navy-600">
-          <CardHeader
-            title="Get Started"
-            subtitle="Create your first race to begin tracking"
-          />
-          <CardBody>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Set up a new race with custom runner ranges, configure checkpoints, and start tracking immediately.
-            </p>
-            <Button
-              variant="primary"
-              onClick={() => handleModuleSelect(MODULE_TYPES.RACE_MAINTENANCE, '/race-maintenance/setup')}
-            >
-              Create New Race
-            </Button>
-          </CardBody>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card variant="elevated" className="border-l-4 border-navy-600">
+            <CardHeader
+              title="Get Started"
+              subtitle="Create your first race to begin tracking"
+            />
+            <CardBody>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Set up a new race with custom runner ranges, configure checkpoints, and start tracking immediately.
+              </p>
+              <Button
+                variant="primary"
+                onClick={() => handleModuleSelect(MODULE_TYPES.RACE_MAINTENANCE, '/race-maintenance/setup')}
+              >
+                Create New Race
+              </Button>
+            </CardBody>
+          </Card>
+          
+          <Card 
+            variant="elevated" 
+            className="border-l-4 border-accent-600"
+            hoverable
+            clickable
+            onClick={() => setShowImportModal(true)}
+          >
+            <CardHeader
+              title="Import Race Configuration"
+              subtitle="Load an existing race from a backup or another device"
+            />
+            <CardBody>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Import a race configuration from a JSON file, QR code, or clipboard. This will restore all race data including runners, checkpoints, and timing information.
+              </p>
+              <Button
+                variant="secondary"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent card click from triggering
+                  setShowImportModal(true);
+                }}
+              >
+                Import Race Data
+              </Button>
+            </CardBody>
+          </Card>
+          
+          {/* Import Status Messages */}
+          {importError && (
+            <div className="col-span-1 md:col-span-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm text-red-800 dark:text-red-200">{importError}</span>
+              </div>
+              <Button
+                variant="text"
+                className="mt-2 text-red-600 dark:text-red-400"
+                onClick={() => setImportError('')}
+              >
+                Dismiss
+              </Button>
+            </div>
+          )}
+          
+          {importSuccess && (
+            <div className="col-span-1 md:col-span-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm text-green-800 dark:text-green-200">{importSuccess}</span>
+              </div>
+              <Button
+                variant="text"
+                className="mt-2 text-green-600 dark:text-green-400"
+                onClick={() => setImportSuccess('')}
+              >
+                Dismiss
+              </Button>
+            </div>
+          )}
+        </div>
       )}
+      
+      {/* Import/Export Modal */}
+      <ImportExportModal 
+        isOpen={showImportModal} 
+        onClose={() => {
+          setShowImportModal(false);
+          // Reload current race after import
+          loadCurrentRace();
+        }}
+      />
     </div>
   );
 };

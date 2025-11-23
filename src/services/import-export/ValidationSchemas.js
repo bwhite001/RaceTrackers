@@ -2,10 +2,21 @@ import { z } from 'zod';
 
 /**
  * Zod validation schemas for all database entities
- * Ensures data integrity during import/export
+ * Ensures data integrity during import/export operations
+ * 
+ * This module provides:
+ * 1. Schema definitions for all database entities
+ * 2. Validation functions for individual entities
+ * 3. Safe validation wrappers that return success/error objects
+ * 4. Helper functions for array validation and error formatting
+ * 
+ * @module ValidationSchemas
  */
 
-// Race schema
+/**
+ * Race schema - Validates race entity data
+ * @type {import('zod').ZodObject}
+ */
 export const raceSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   name: z.string().min(1, 'Race name is required'),
@@ -25,7 +36,10 @@ export const raceSchema = z.object({
   })).optional(),
 });
 
-// Runner schema
+/**
+ * Runner schema - Validates runner entity data
+ * @type {import('zod').ZodObject}
+ */
 export const runnerSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
@@ -43,7 +57,10 @@ export const runnerSchema = z.object({
   emergencyContact: z.string().optional(),
 });
 
-// Checkpoint schema
+/**
+ * Checkpoint schema - Validates checkpoint entity data
+ * @type {import('zod').ZodObject}
+ */
 export const checkpointSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
@@ -56,7 +73,10 @@ export const checkpointSchema = z.object({
   cutoffTime: z.string().optional(),
 });
 
-// Checkpoint runner schema
+/**
+ * Checkpoint runner schema - Validates checkpoint runner entity data
+ * @type {import('zod').ZodObject}
+ */
 export const checkpointRunnerSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
@@ -68,7 +88,10 @@ export const checkpointRunnerSchema = z.object({
   notes: z.string().nullable().optional(),
 });
 
-// Base station runner schema
+/**
+ * Base station runner schema - Validates base station runner entity data
+ * @type {import('zod').ZodObject}
+ */
 export const baseStationRunnerSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
@@ -79,7 +102,10 @@ export const baseStationRunnerSchema = z.object({
   notes: z.string().nullable().optional(),
 });
 
-// Deleted entry schema
+/**
+ * Deleted entry schema - Validates deleted entry entity data
+ * @type {import('zod').ZodObject}
+ */
 export const deletedEntrySchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
@@ -89,7 +115,10 @@ export const deletedEntrySchema = z.object({
   data: z.any().optional(),
 });
 
-// Strapper call schema
+/**
+ * Strapper call schema - Validates strapper call entity data
+ * @type {import('zod').ZodObject}
+ */
 export const strapperCallSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
@@ -101,7 +130,10 @@ export const strapperCallSchema = z.object({
   notes: z.string().optional(),
 });
 
-// Audit log schema
+/**
+ * Audit log schema - Validates audit log entity data
+ * @type {import('zod').ZodObject}
+ */
 export const auditLogSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
@@ -112,7 +144,10 @@ export const auditLogSchema = z.object({
   changes: z.any().optional(),
 });
 
-// Withdrawal record schema
+/**
+ * Withdrawal record schema - Validates withdrawal record entity data
+ * @type {import('zod').ZodObject}
+ */
 export const withdrawalRecordSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
@@ -124,7 +159,10 @@ export const withdrawalRecordSchema = z.object({
   notes: z.string().optional(),
 });
 
-// Vet out record schema
+/**
+ * Vet out record schema - Validates vet out record entity data
+ * @type {import('zod').ZodObject}
+ */
 export const vetOutRecordSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
@@ -135,7 +173,11 @@ export const vetOutRecordSchema = z.object({
   notes: z.string().optional(),
 });
 
-// Export package schema (complete export)
+/**
+ * Export package schema - Validates complete export package
+ * Includes metadata, checksum, and all entity data
+ * @type {import('zod').ZodObject}
+ */
 export const exportPackageSchema = z.object({
   version: z.string().min(1, 'Version is required'),
   exportDate: z.string().min(1, 'Export date is required'),
@@ -175,24 +217,112 @@ export const exportPackageSchema = z.object({
   }).optional(),
 });
 
-// Validation helper functions
+/**
+ * Validation helper functions
+ * These functions validate data against schemas and throw errors if invalid
+ */
+
+/**
+ * Validate race data
+ * @param {Object} data - Race data to validate
+ * @returns {Object} Validated race data
+ * @throws {import('zod').ZodError} If validation fails
+ */
 export const validateRace = (data) => raceSchema.parse(data);
+
+/**
+ * Validate runner data
+ * @param {Object} data - Runner data to validate
+ * @returns {Object} Validated runner data
+ * @throws {import('zod').ZodError} If validation fails
+ */
 export const validateRunner = (data) => runnerSchema.parse(data);
+
+/**
+ * Validate checkpoint data
+ * @param {Object} data - Checkpoint data to validate
+ * @returns {Object} Validated checkpoint data
+ * @throws {import('zod').ZodError} If validation fails
+ */
 export const validateCheckpoint = (data) => checkpointSchema.parse(data);
+
+/**
+ * Validate checkpoint runner data
+ * @param {Object} data - Checkpoint runner data to validate
+ * @returns {Object} Validated checkpoint runner data
+ * @throws {import('zod').ZodError} If validation fails
+ */
 export const validateCheckpointRunner = (data) => checkpointRunnerSchema.parse(data);
+
+/**
+ * Validate base station runner data
+ * @param {Object} data - Base station runner data to validate
+ * @returns {Object} Validated base station runner data
+ * @throws {import('zod').ZodError} If validation fails
+ */
 export const validateBaseStationRunner = (data) => baseStationRunnerSchema.parse(data);
+
+/**
+ * Validate export package data
+ * @param {Object} data - Export package data to validate
+ * @returns {Object} Validated export package data
+ * @throws {import('zod').ZodError} If validation fails
+ */
 export const validateExportPackage = (data) => exportPackageSchema.parse(data);
 
-// Safe validation (returns { success, data, error })
+/**
+ * Safe validation functions
+ * These functions validate data against schemas and return a result object
+ * instead of throwing errors
+ * @returns {Object} Object with success, data, and error properties
+ */
+
+/**
+ * Safely validate race data
+ * @param {Object} data - Race data to validate
+ * @returns {Object} { success: boolean, data?: Object, error?: ZodError }
+ */
 export const safeValidateRace = (data) => raceSchema.safeParse(data);
+
+/**
+ * Safely validate runner data
+ * @param {Object} data - Runner data to validate
+ * @returns {Object} { success: boolean, data?: Object, error?: ZodError }
+ */
 export const safeValidateRunner = (data) => runnerSchema.safeParse(data);
+
+/**
+ * Safely validate checkpoint data
+ * @param {Object} data - Checkpoint data to validate
+ * @returns {Object} { success: boolean, data?: Object, error?: ZodError }
+ */
 export const safeValidateCheckpoint = (data) => checkpointSchema.safeParse(data);
+
+/**
+ * Safely validate checkpoint runner data
+ * @param {Object} data - Checkpoint runner data to validate
+ * @returns {Object} { success: boolean, data?: Object, error?: ZodError }
+ */
 export const safeValidateCheckpointRunner = (data) => checkpointRunnerSchema.safeParse(data);
+
+/**
+ * Safely validate base station runner data
+ * @param {Object} data - Base station runner data to validate
+ * @returns {Object} { success: boolean, data?: Object, error?: ZodError }
+ */
 export const safeValidateBaseStationRunner = (data) => baseStationRunnerSchema.safeParse(data);
+
+/**
+ * Safely validate export package data
+ * @param {Object} data - Export package data to validate
+ * @returns {Object} { success: boolean, data?: Object, error?: ZodError }
+ */
 export const safeValidateExportPackage = (data) => exportPackageSchema.safeParse(data);
 
 /**
  * Format Zod validation errors into user-friendly messages
+ * Converts complex ZodError structure into a simple array of path/message objects
+ * 
  * @param {import('zod').ZodError} error - The Zod error object
  * @returns {Array<{path: string, message: string}>} Formatted error messages
  */
@@ -208,6 +338,9 @@ export const formatValidationErrors = (error) => {
 
 /**
  * Validate an array of items with a schema
+ * Useful for validating collections of entities
+ * Returns both valid items and detailed error information
+ * 
  * @param {Array} items - Items to validate
  * @param {import('zod').ZodSchema} schema - Zod schema to validate against
  * @returns {{valid: boolean, errors: Array, validItems: Array}} Validation result

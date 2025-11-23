@@ -5,6 +5,17 @@ import { ExportService } from './ExportService.js';
 /**
  * Import Service
  * Handles race data import with validation, conflict detection, and resolution
+ * 
+ * This service provides functionality for:
+ * - Verifying checksums to ensure data integrity
+ * - Validating import packages against schemas
+ * - Detecting conflicts with existing data
+ * - Resolving conflicts using various strategies
+ * - Importing data with transactional safety
+ * - Previewing imports before committing
+ * - Supporting legacy import formats for backward compatibility
+ * 
+ * @module ImportService
  */
 
 export class ImportService {

@@ -4,6 +4,16 @@ import CryptoJS from 'crypto-js';
 /**
  * Export Service
  * Handles race data export with validation and checksums
+ * 
+ * This service provides functionality for:
+ * - Generating SHA-256 checksums for data integrity
+ * - Tracking device IDs for multi-device scenarios
+ * - Exporting single or multiple races with all related data
+ * - Creating downloadable export files
+ * - Validating exports before download
+ * - Supporting legacy export formats for backward compatibility
+ * 
+ * @module ExportService
  */
 
 export class ExportService {
