@@ -1,8 +1,9 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import useDeviceDetection from '../../shared/hooks/useDeviceDetection';
 import { HOTKEYS } from '../../types';
+import ImportExportModal from '../ImportExport/ImportExportModal';
 
 /**
  * Header Component
@@ -18,6 +19,7 @@ const Header = memo(({
 }) => {
   const navigate = useNavigate();
   const { isDesktop } = useDeviceDetection();
+  const [showImportExportModal, setShowImportExportModal] = useState(false);
 
   const handleExit = () => {
     if (onExit) {
@@ -55,6 +57,27 @@ const Header = memo(({
 
           {/* Right Section - Actions */}
           <div className="flex items-center space-x-2">
+            {/* Import/Export Button */}
+            <button
+              onClick={() => setShowImportExportModal(true)}
+              className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+              aria-label="Import/Export"
+            >
+              <svg 
+                className="w-5 h-5" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" 
+                />
+              </svg>
+            </button>
+            
             {/* Help Button */}
             <button
               onClick={onOpenHelp}
@@ -125,6 +148,12 @@ const Header = memo(({
           Last update: {lastSync ? new Date(lastSync).toLocaleTimeString() : 'Never'}
         </div>
       </div>
+      
+      {/* Import/Export Modal */}
+      <ImportExportModal 
+        isOpen={showImportExportModal} 
+        onClose={() => setShowImportExportModal(false)} 
+      />
     </header>
   );
 });
