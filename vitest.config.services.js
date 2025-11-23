@@ -3,7 +3,7 @@ import { defineConfig } from 'vitest/config';
 /**
  * Vitest Configuration for Services Tests
  * Scope: Service layer tests (import/export, validation)
- * Files: src/test/services/**
+ * Files: test/services/**
  * Run with: npm run test:suite:services
  */
 export default defineConfig({
@@ -11,10 +11,10 @@ export default defineConfig({
     name: 'services',
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.js'],
+    setupFiles: ['./test/setup.js'],
     include: [
-      'src/test/services/**/*.test.{js,jsx}',
-      'src/test/services/**/*.spec.{js,jsx}'
+      'test/services/**/*.test.{js,jsx}',
+      'test/services/**/*.spec.{js,jsx}'
     ],
     exclude: [
       '**/node_modules/**',
@@ -25,7 +25,7 @@ export default defineConfig({
       reportsDirectory: './coverage/services',
       exclude: [
         'node_modules/',
-        'src/test/setup.js',
+        'test/setup.js',
       ],
     },
     deps: {

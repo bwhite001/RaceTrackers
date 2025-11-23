@@ -4,7 +4,7 @@ import { defineConfig } from 'vitest/config';
  * Vitest Configuration for Base Operations Tests
  * 
  * Scope: Base Station module components, dialogs, hooks, utils
- * Files: src/test/base-operations/**/*.test.{js,jsx}
+ * Files: test/base-operations/**/*.test.{js,jsx}
  * 
  * Run with: npm run test:suite:base-operations
  */
@@ -13,10 +13,10 @@ export default defineConfig({
     name: 'base-operations',
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.js'],
+    setupFiles: ['./test/setup.js'],
     include: [
-      'src/test/base-operations/**/*.test.{js,jsx}',
-      'src/test/base-operations/**/*.spec.{js,jsx}'
+      'test/base-operations/**/*.test.{js,jsx}',
+      'test/base-operations/**/*.spec.{js,jsx}'
     ],
     exclude: [
       '**/node_modules/**',
@@ -27,7 +27,7 @@ export default defineConfig({
       reportsDirectory: './coverage/base-operations',
       exclude: [
         'node_modules/',
-        'src/test/setup.js',
+        'test/setup.js',
       ],
     },
     deps: {

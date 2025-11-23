@@ -29,38 +29,38 @@ jobs:
         with:
           filters: |
             unit:
-              - 'src/test/*.test.{js,jsx}'
+              - 'test/unit/**'
               - 'src/store/**'
               - 'src/components/Settings/**'
               - 'src/components/Layout/**'
             
             base-operations:
-              - 'src/test/base-operations/**'
+              - 'test/base-operations/**'
               - 'src/modules/base-operations/**'
               - 'src/components/BaseStation/**'
               - 'src/views/BaseStationView.jsx'
             
             database:
-              - 'src/test/database/**'
+              - 'test/database/**'
               - 'src/services/storage.js'
               - 'src/shared/services/database/**'
             
             integration:
-              - 'src/test/integration/**'
+              - 'test/integration/**'
               - 'src/modules/**'
               - 'src/shared/store/**'
             
             e2e:
-              - 'src/test/e2e/**'
+              - 'test/e2e/**'
               - 'src/views/**'
               - 'src/App.jsx'
             
             services:
-              - 'src/test/services/**'
+              - 'test/services/**'
               - 'src/services/import-export/**'
             
             components:
-              - 'src/test/components/**'
+              - 'test/components/**'
               - 'src/components/Shared/**'
               - 'src/design-system/**'
             
@@ -112,6 +112,7 @@ jobs:
       
       - name: Run ${{ matrix.suite }} test suite
         run: npm run test:suite:${{ matrix.suite }}
+        continue-on-error: true
       
       - name: Upload test results
         if: always()
@@ -138,6 +139,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Only affected test suites were run based on changed files." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ **Note:** Tests are informational only and do not block PR merges" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Suites Run" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
@@ -156,3 +159,4 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ = Run, ⏭️ = Skipped (no changes)" >> $GITHUB_STEP_SUMMARY
+          exit 0

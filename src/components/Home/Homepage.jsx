@@ -222,7 +222,6 @@ const Homepage = () => {
               </Button>
             </CardBody>
           </Card>
-          
           {/* Import Status Messages */}
           {importError && (
             <div className="col-span-1 md:col-span-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">

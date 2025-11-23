@@ -3,7 +3,7 @@ import { defineConfig } from 'vitest/config';
 /**
  * Vitest Configuration for Database Tests
  * Scope: Database schema, migrations, and storage tests
- * Files: src/test/database/**
+ * Files: test/database/**
  * Run with: npm run test:suite:database
  */
 export default defineConfig({
@@ -11,10 +11,10 @@ export default defineConfig({
     name: 'database',
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.js'],
+    setupFiles: ['./test/setup.js'],
     include: [
-      'src/test/database/**/*.test.{js,jsx}',
-      'src/test/database/**/*.spec.{js,jsx}'
+      'test/database/**/*.test.{js,jsx}',
+      'test/database/**/*.spec.{js,jsx}'
     ],
     exclude: [
       '**/node_modules/**',
@@ -25,7 +25,7 @@ export default defineConfig({
       reportsDirectory: './coverage/database',
       exclude: [
         'node_modules/',
-        'src/test/setup.js',
+        'test/setup.js',
       ],
     },
     deps: {

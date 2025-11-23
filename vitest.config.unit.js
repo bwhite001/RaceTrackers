@@ -13,10 +13,10 @@ export default defineConfig({
     name: 'unit',
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.js'],
+    setupFiles: ['./test/setup.js'],
     include: [
-      'src/test/*.test.{js,jsx}',
-      'src/test/*.spec.{js,jsx}'
+      'test/unit/**/*.test.{js,jsx}',
+      'test/unit/**/*.spec.{js,jsx}'
     ],
     exclude: [
       '**/node_modules/**',
@@ -33,7 +33,7 @@ export default defineConfig({
       reportsDirectory: './coverage/unit',
       exclude: [
         'node_modules/',
-        'src/test/setup.js',
+        'test/setup.js',
       ],
     },
     deps: {
