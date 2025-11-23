@@ -1,31 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { 
+  BoltIcon, 
+  RadioIcon, 
+  Cog6ToothIcon, 
+  QuestionMarkCircleIcon,
+  PlusIcon,
+  ArrowRightIcon
+} from '@heroicons/react/24/outline';
 import { Button } from '../../design-system/components';
 import RaceStatsCard from './RaceStatsCard';
 import RaceSelectionModal from './RaceSelectionModal';
+import SettingsModal from '../Settings/SettingsModal';
 import { categorizeRaces } from '../../utils/raceStatistics';
 import { useRaceStore } from '../../store/useRaceStore';
 import useNavigationStore, { MODULE_TYPES } from '../../shared/store/navigationStore';
 
 /**
- * LandingPage Component
+ * LandingPage Component - App-Friendly Homepage
  * 
- * Main landing page showing race statistics and module selection.
- * Follows Single Responsibility Principle - orchestrates landing page layout.
- * Delegates race display to RaceStatsCard and selection to RaceSelectionModal.
+ * Touch-optimized interface for mobile and tablet devices.
+ * Follows accessibility guidelines with 48px minimum touch targets.
  * 
  * @component
  */
 const LandingPage = () => {
   const navigate = useNavigate();
-  const { getAllRaces, setSelectedRaceForMode } = useRaceStore();
+  const { getAllRaces, setSelectedRaceForMode, settings } = useRaceStore();
   const { startOperation, canNavigateTo, endOperation } = useNavigationStore();
 
   const [races, setRaces] = useState([]);
-  const [runnersMap, setRunnersMap] = useState({}); // Map of raceId -> runners
+  const [runnersMap, setRunnersMap] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [showRaceModal, setShowRaceModal] = useState(false);
   const [selectedModuleType, setSelectedModuleType] = useState(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Load all races on mount
   useEffect(() => {
@@ -38,8 +47,7 @@ const LandingPage = () => {
       const allRaces = await getAllRaces();
       setRaces(allRaces || []);
       
-      // Load runners for each race (for progress calculation)
-      // In a real app, you might want to lazy load this or cache it
+      // Load runners for each race
       const StorageService = (await import('../../services/storage.js')).default;
       const runnersData = {};
       for (const race of allRaces || []) {
@@ -64,6 +72,11 @@ const LandingPage = () => {
 
   // Handle module selection
   const handleModuleSelect = (moduleType, defaultPath) => {
+    // Haptic feedback on touch devices
+    if (settings.hapticsEnabled && 'vibrate' in navigator) {
+      navigator.vibrate(10);
+    }
+
     // Check if navigation is allowed
     if (!canNavigateTo(moduleType)) {
       const confirmed = window.confirm(
@@ -82,18 +95,22 @@ const LandingPage = () => {
   const handleRaceSelect = (race) => {
     if (!selectedModuleType) return;
 
-    // Set the selected race in store
+    // Haptic feedback
+    if (settings.hapticsEnabled && 'vibrate' in navigator) {
+      navigator.vibrate(10);
+    }
+
     setSelectedRaceForMode(race.id);
-
-    // Start operation for the module
     startOperation(selectedModuleType.type);
-
-    // Navigate to the module
     navigate(selectedModuleType.path);
   };
 
   // Handle direct race management navigation
   const handleGoToRaceManagement = () => {
+    if (settings.hapticsEnabled && 'vibrate' in navigator) {
+      navigator.vibrate(10);
+    }
+
     if (!canNavigateTo(MODULE_TYPES.RACE_MAINTENANCE)) {
       const confirmed = window.confirm(
         'You are currently in an active operation. Do you want to exit? Any unsaved changes may be lost.'
@@ -118,211 +135,233 @@ const LandingPage = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-navy-900 to-navy-700 rounded-2xl overflow-hidden mb-12 shadow-elevated">
-        <div className="absolute top-0 right-0 w-64 h-full bg-accent-600 transform skew-x-12 translate-x-32 opacity-20"></div>
-        
-        <div className="relative px-8 py-12 md:py-16">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Race Tracking System
-            </h1>
-            <p className="text-xl text-navy-100 mb-6">
-              Professional offline race management for checkpoints and base stations
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Button
-                variant="primary"
-                onClick={handleGoToRaceManagement}
-                className="bg-white text-navy-900 hover:bg-navy-50"
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* App Header */}
+      <header className="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo & Title */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-navy-600 dark:bg-navy-500 rounded-lg flex items-center justify-center">
+                <BoltIcon className="w-6 h-6 text-white" />
+              </div>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                Race Tracker Pro
+              </h1>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  if (settings.hapticsEnabled && 'vibrate' in navigator) {
+                    navigator.vibrate(10);
+                  }
+                  // TODO: Implement help modal
+                  alert('Help documentation coming soon!');
+                }}
+                className="p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors touch-target"
+                aria-label="Help"
               >
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                </svg>
-                Manage Races
-              </Button>
-              {categorized.current.length === 0 && categorized.upcoming.length === 0 && (
-                <Button
-                  variant="secondary"
-                  onClick={() => navigate('/race-maintenance/setup')}
-                  className="bg-navy-800 text-white hover:bg-navy-700 border-navy-600"
-                >
-                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-                  </svg>
-                  Create New Race
-                </Button>
-              )}
+                <QuestionMarkCircleIcon className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+              </button>
+              
+              <button
+                onClick={() => {
+                  if (settings.hapticsEnabled && 'vibrate' in navigator) {
+                    navigator.vibrate(10);
+                  }
+                  setShowSettings(true);
+                }}
+                className="p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors touch-target"
+                aria-label="Settings"
+              >
+                <Cog6ToothIcon className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Current Races Section */}
-      {categorized.current.length > 0 && (
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Current Races
-            </h2>
-            <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm font-medium">
-              {categorized.current.length} Active
-            </span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categorized.current.map((race) => (
-              <RaceStatsCard
-                key={race.id}
-                race={race}
-                runners={runnersMap[race.id] || []}
-                variant="current"
-                onSelect={() => {
-                  setSelectedModuleType(null);
-                  setShowRaceModal(true);
-                  // Pre-select this race
-                  setTimeout(() => handleRaceSelect(race), 100);
-                }}
-                onManage={() => {
-                  setSelectedRaceForMode(race.id);
-                  navigate('/race-management');
-                }}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Module Selection Section */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          Select Operation Mode
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <ModuleCard
-            title="Checkpoint Operations"
-            description="Track runners at checkpoints, mark off numbers, and manage callout sheets"
-            icon={
-              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            }
-            onClick={() => handleModuleSelect(MODULE_TYPES.CHECKPOINT, '/checkpoint/1')}
-          />
-
-          <ModuleCard
-            title="Base Station Operations"
-            description="Monitor race progress, enter data, and manage overall race status"
-            icon={
-              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z" />
-                <path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z" />
-                <path d="M17 5c0 1.657-3.134 3-7 3S3 6.657 3 5s3.134-3 7-3 7 1.343 7 3z" />
-              </svg>
-            }
-            onClick={() => handleModuleSelect(MODULE_TYPES.BASE_STATION, '/base-station/operations')}
-          />
-
-          <ModuleCard
-            title="Race Maintenance"
-            description="Set up and configure races, manage runner ranges, and export configurations"
-            icon={
-              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-              </svg>
-            }
-            onClick={handleGoToRaceManagement}
-          />
-        </div>
-      </section>
-
-      {/* Upcoming Races Section */}
-      {categorized.upcoming.length > 0 && (
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            Upcoming Races
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Welcome Section */}
+        <div className="text-center mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3">
+            Welcome Back
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categorized.upcoming.map((race) => (
-              <RaceStatsCard
-                key={race.id}
-                race={race}
-                runners={runnersMap[race.id] || []}
-                variant="upcoming"
-                showProgress={false}
-                onSelect={() => handleRaceSelect(race)}
-                onManage={() => {
-                  setSelectedRaceForMode(race.id);
-                  navigate('/race-management');
-                }}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Recent Races Section */}
-      {categorized.recent.length > 0 && (
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Recent Races
-            </h2>
-            <Button
-              variant="text"
-              onClick={handleGoToRaceManagement}
-              className="text-navy-600 dark:text-navy-400"
-            >
-              View All Races
-              <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-              </svg>
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categorized.recent.map((race) => (
-              <RaceStatsCard
-                key={race.id}
-                race={race}
-                runners={runnersMap[race.id] || []}
-                variant="past"
-                showProgress={false}
-                onSelect={() => handleRaceSelect(race)}
-                onManage={() => {
-                  setSelectedRaceForMode(race.id);
-                  navigate('/race-management');
-                }}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Empty State */}
-      {races.length === 0 && (
-        <div className="text-center py-12">
-          <svg className="mx-auto h-24 w-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">
-            No races yet
-          </h3>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Get started by creating your first race
+          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Select your operation mode to begin tracking. All data is stored locally on your device.
           </p>
-          <div className="mt-6">
+        </div>
+
+        {/* Module Selection Grid */}
+        <section className="mb-12">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Select Operation Mode
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <ModuleCard
+              title="Checkpoint Operations"
+              description="Track runners at your assigned checkpoint"
+              icon={BoltIcon}
+              color="blue"
+              onClick={() => handleModuleSelect(MODULE_TYPES.CHECKPOINT, '/checkpoint/1')}
+              hapticsEnabled={settings.hapticsEnabled}
+            />
+
+            <ModuleCard
+              title="Base Station Operations"
+              description="Monitor all checkpoints and manage race data"
+              icon={RadioIcon}
+              color="green"
+              onClick={() => handleModuleSelect(MODULE_TYPES.BASE_STATION, '/base-station/operations')}
+              hapticsEnabled={settings.hapticsEnabled}
+            />
+
+            <ModuleCard
+              title="Race Maintenance"
+              description="Configure race details and runner information"
+              icon={Cog6ToothIcon}
+              color="purple"
+              onClick={handleGoToRaceManagement}
+              hapticsEnabled={settings.hapticsEnabled}
+            />
+          </div>
+        </section>
+
+        {/* Current Races Section */}
+        {categorized.current.length > 0 && (
+          <section className="mb-12">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Current Races
+              </h3>
+              <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm font-medium">
+                {categorized.current.length} Active
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {categorized.current.map((race) => (
+                <RaceStatsCard
+                  key={race.id}
+                  race={race}
+                  runners={runnersMap[race.id] || []}
+                  variant="current"
+                  onSelect={() => {
+                    if (settings.hapticsEnabled && 'vibrate' in navigator) {
+                      navigator.vibrate(10);
+                    }
+                    setSelectedModuleType(null);
+                    setShowRaceModal(true);
+                    setTimeout(() => handleRaceSelect(race), 100);
+                  }}
+                  onManage={() => {
+                    if (settings.hapticsEnabled && 'vibrate' in navigator) {
+                      navigator.vibrate(10);
+                    }
+                    setSelectedRaceForMode(race.id);
+                    navigate('/race-management');
+                  }}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Upcoming Races Section */}
+        {categorized.upcoming.length > 0 && (
+          <section className="mb-12">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Upcoming Races
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {categorized.upcoming.map((race) => (
+                <RaceStatsCard
+                  key={race.id}
+                  race={race}
+                  runners={runnersMap[race.id] || []}
+                  variant="upcoming"
+                  showProgress={false}
+                  onSelect={() => handleRaceSelect(race)}
+                  onManage={() => {
+                    if (settings.hapticsEnabled && 'vibrate' in navigator) {
+                      navigator.vibrate(10);
+                    }
+                    setSelectedRaceForMode(race.id);
+                    navigate('/race-management');
+                  }}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Recent Races Section */}
+        {categorized.recent.length > 0 && (
+          <section className="mb-12">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Recent Races
+              </h3>
+              <Button
+                variant="text"
+                onClick={handleGoToRaceManagement}
+                className="text-navy-600 dark:text-navy-400 touch-target inline-flex items-center"
+              >
+                View All Races
+                <ArrowRightIcon className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {categorized.recent.map((race) => (
+                <RaceStatsCard
+                  key={race.id}
+                  race={race}
+                  runners={runnersMap[race.id] || []}
+                  variant="past"
+                  showProgress={false}
+                  onSelect={() => handleRaceSelect(race)}
+                  onManage={() => {
+                    if (settings.hapticsEnabled && 'vibrate' in navigator) {
+                      navigator.vibrate(10);
+                    }
+                    setSelectedRaceForMode(race.id);
+                    navigate('/race-management');
+                  }}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Empty State */}
+        {races.length === 0 && (
+          <div className="text-center py-16">
+            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+              <BoltIcon className="w-12 h-12 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              No races yet
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+              Get started by creating your first race. You can configure checkpoints, add runners, and start tracking.
+            </p>
             <Button
               variant="primary"
-              onClick={() => navigate('/race-maintenance/setup')}
+              onClick={() => {
+                if (settings.hapticsEnabled && 'vibrate' in navigator) {
+                  navigator.vibrate(10);
+                }
+                navigate('/race-maintenance/setup');
+              }}
+              className="touch-target inline-flex items-center"
             >
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
+              <PlusIcon className="w-5 h-5 mr-2" />
               Create New Race
             </Button>
           </div>
-        </div>
-      )}
+        )}
+      </main>
 
       {/* Race Selection Modal */}
       <RaceSelectionModal
@@ -335,37 +374,63 @@ const LandingPage = () => {
         onSelectRace={handleRaceSelect}
         moduleType={selectedModuleType?.type}
       />
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
     </div>
   );
 };
 
 /**
- * ModuleCard Component
- * Internal component for module selection cards
+ * ModuleCard Component - Touch-Optimized Module Selection Card
+ * Follows WCAG 2.5.5 with 48px minimum touch targets
  */
-const ModuleCard = ({ title, description, icon, onClick }) => (
-  <button
-    onClick={onClick}
-    className="text-left p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-navy-500 dark:hover:border-navy-400 hover:shadow-lg transition-all duration-200 bg-white dark:bg-gray-800 group"
-  >
-    <div className="flex items-center mb-4">
-      <div className="p-3 rounded-lg bg-navy-100 text-navy-900 dark:bg-navy-900 dark:text-navy-100 group-hover:bg-navy-600 group-hover:text-white transition-colors duration-200">
-        {icon}
+const ModuleCard = ({ title, description, icon: Icon, color, onClick, hapticsEnabled }) => {
+  const colorClasses = {
+    blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 border-blue-200 dark:border-blue-800',
+    green: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 border-green-200 dark:border-green-800',
+    purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30 border-purple-200 dark:border-purple-800',
+  };
+
+  const handleClick = () => {
+    if (hapticsEnabled && 'vibrate' in navigator) {
+      navigator.vibrate(10);
+    }
+    onClick();
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      className={`
+        text-left p-6 rounded-xl border-2 transition-all duration-200
+        hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]
+        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+        touch-target w-full
+        ${colorClasses[color]}
+      `}
+      style={{ minHeight: '140px' }}
+    >
+      <div className="flex flex-col h-full">
+        <div className="mb-4">
+          <Icon className="w-10 h-10" />
+        </div>
+        <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
+          {title}
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 flex-grow">
+          {description}
+        </p>
+        <div className="flex items-center mt-4 font-medium text-sm">
+          <span>Get Started</span>
+          <ArrowRightIcon className="w-5 h-5 ml-2" />
+        </div>
       </div>
-    </div>
-    <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white group-hover:text-navy-600 dark:group-hover:text-navy-400">
-      {title}
-    </h3>
-    <p className="text-gray-600 dark:text-gray-400 mb-4">
-      {description}
-    </p>
-    <div className="flex items-center text-navy-600 dark:text-navy-400 font-medium">
-      <span>Get Started</span>
-      <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">
-        <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-      </svg>
-    </div>
-  </button>
-);
+    </button>
+  );
+};
 
 export default LandingPage;
