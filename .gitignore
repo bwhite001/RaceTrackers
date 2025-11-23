@@ -23,8 +23,10 @@ screenshots/e2e-tests/**
 !README.md
 !.github/copilot-instructions.md
 !/notes/**.md
+!/docs/**.md
 
 # Data files
 TODO.md
-Start List_Mount Glorious 2025.xlsx
+*.xlsx
+*.csv
 E2E-TEST-RESULTS.json
