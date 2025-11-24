@@ -6,8 +6,11 @@ import './index.css'
 // Register service worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
+    // Use dev-dist/sw.js in development, /sw.js in production
+    const swPath = import.meta.env.DEV ? '/dev-dist/sw.js' : '/sw.js';
+    
     navigator.serviceWorker
-      .register('/sw.js')
+      .register(swPath)
       .then(registration => {
         console.log('✅ Service Worker registered:', registration.scope);
         

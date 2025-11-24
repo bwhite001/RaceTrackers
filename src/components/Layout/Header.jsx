@@ -11,9 +11,9 @@ import ImportExportModal from '../ImportExport/ImportExportModal';
  */
 const Header = memo(({ 
   title, 
-  onExit, 
+  onExit = null, 
   stats, 
-  lastSync,
+  lastSync = null,
   onOpenSettings,
   onOpenHelp 
 }) => {
@@ -168,11 +168,6 @@ Header.propTypes = {
   lastSync: PropTypes.string,
   onOpenSettings: PropTypes.func.isRequired,
   onOpenHelp: PropTypes.func.isRequired
-};
-
-Header.defaultProps = {
-  lastSync: null,
-  onExit: null
 };
 
 // Add display name for debugging

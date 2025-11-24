@@ -24,9 +24,9 @@ const CardHeader = ({
         </div>
       )}
       {subtitle && (
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           {subtitle}
-        </p>
+        </div>
       )}
       {children}
     </div>

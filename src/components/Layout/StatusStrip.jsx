@@ -7,7 +7,7 @@ import { STATUS_COLORS } from '../../types';
  * StatusStrip Component
  * Displays live statistics and status information at the bottom of the base station view
  */
-const StatusStrip = memo(({ stats, lastSync }) => {
+const StatusStrip = memo(({ stats, lastSync = null }) => {
   const {
     total,
     finished,
@@ -103,10 +103,6 @@ StatusStrip.propTypes = {
     dns: PropTypes.number.isRequired
   }).isRequired,
   lastSync: PropTypes.string
-};
-
-StatusStrip.defaultProps = {
-  lastSync: null
 };
 
 // Add display name for debugging

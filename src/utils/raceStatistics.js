@@ -281,9 +281,40 @@ export const getRunnerRange = (race) => {
   
   if (race.runnerRanges && Array.isArray(race.runnerRanges)) {
     if (race.runnerRanges.length === 1) {
-      return race.runnerRanges[0];
+      const range = race.runnerRanges[0];
+      // Handle both string and object formats
+      if (typeof range === 'string') {
+        return range;
+      }
+      if (typeof range === 'object' && range !== null) {
+        // If it's an object with min/max, format it
+        if (range.min !== undefined && range.max !== undefined) {
+          return `${range.min}-${range.max}`;
+        }
+        // If it has a description, use that
+        if (range.description) {
+          return range.description;
+        }
+      }
+      return 'N/A';
     }
-    return 'Multiple ranges';
+    // Multiple ranges - format them as a comma-separated string
+    const formattedRanges = race.runnerRanges.map(range => {
+      if (typeof range === 'string') {
+        return range;
+      }
+      if (typeof range === 'object' && range !== null) {
+        if (range.min !== undefined && range.max !== undefined) {
+          return `${range.min}-${range.max}`;
+        }
+        if (range.description) {
+          return range.description;
+        }
+      }
+      return '';
+    }).filter(Boolean);
+    
+    return formattedRanges.length > 0 ? formattedRanges.join(', ') : 'Multiple ranges';
   }
   
   return 'N/A';
