@@ -21,6 +21,7 @@ screenshots/e2e-tests/**
 **_PROGRESS.md
 *.md
 !README.md
+!CLAUDE.md
 !.github/copilot-instructions.md
 !/notes/**.md
 !/docs/**.md
