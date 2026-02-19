@@ -214,7 +214,7 @@ export const validateReportConfig = (config) => {
     errors.columns = 'At least one column must be selected';
   }
 
-  if (!REPORT_FORMATS[config.format]) {
+  if (!Object.values(REPORT_FORMATS).includes(config.format)) {
     errors.format = 'Invalid report format';
   }
 

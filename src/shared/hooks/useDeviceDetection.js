@@ -46,7 +46,7 @@ const useDeviceDetection = (options = {}) => {
   const getDeviceType = useCallback((w = width) => {
     if (w < customBreakpoints.MOBILE) return 'mobile';
     if (w < customBreakpoints.TABLET) return 'tablet';
-    if (w < customBreakpoints.DESKTOP) return 'desktop';
+    if (w <= customBreakpoints.DESKTOP) return 'desktop';
     if (w < customBreakpoints.WIDE) return 'wide';
     return 'ultra-wide';
   }, [customBreakpoints, width]);

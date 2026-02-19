@@ -10,7 +10,7 @@ import {
   filterData,
   sortData,
   validateReportConfig
-} from '../../src/../utils/reportUtils';
+} from '../../../src/utils/reportUtils';
 
 describe('Report Utilities', () => {
   const mockData = [

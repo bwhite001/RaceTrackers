@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import useDeviceDetection, { BREAKPOINTS, ORIENTATIONS } from '../../src/../shared/hooks/useDeviceDetection';
+import useDeviceDetection, { BREAKPOINTS, ORIENTATIONS } from '../../../src/shared/hooks/useDeviceDetection';
 
 describe('useDeviceDetection Hook', () => {
   // Store original window dimensions

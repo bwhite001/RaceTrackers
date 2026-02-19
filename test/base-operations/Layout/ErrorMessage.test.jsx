@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, test, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import ErrorMessage from '../../src/../components/Layout/ErrorMessage';
+import ErrorMessage from '../../../src/components/Layout/ErrorMessage';
 
 describe('ErrorMessage', () => {
   const defaultProps = {

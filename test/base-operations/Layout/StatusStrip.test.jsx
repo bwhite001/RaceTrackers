@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, test, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { formatDistanceToNow } from 'date-fns';
-import StatusStrip from '../../src/../components/Layout/StatusStrip';
+import StatusStrip from '../../../src/components/Layout/StatusStrip';
 
 describe('StatusStrip', () => {
   const defaultProps = {

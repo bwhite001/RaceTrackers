@@ -6,7 +6,7 @@ import {
   findNumberGaps,
   groupIntoRanges,
   formatRange
-} from '../../src/../utils/runnerNumberUtils';
+} from '../../../src/utils/runnerNumberUtils';
 
 describe('Runner Number Utilities', () => {
   describe('parseRunnerNumbers', () => {

@@ -17,13 +17,19 @@ import ErrorMessage from '../components/Layout/ErrorMessage';
 import Header from '../components/Layout/Header';
 import StatusStrip from '../components/Layout/StatusStrip';
 
+const TABS = [
+  { id: 'data-entry', label: 'Data Entry' },
+  { id: 'overview', label: 'Overview' },
+  { id: 'reports', label: 'Reports' },
+];
+
 /**
  * BaseStationView Component
  * Main view for base station operations
  */
 const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const navigate = useNavigate();
-  
+
   // Store access
   const { currentRaceId, loading, error, stats } = useBaseOperationsStore();
   const { darkMode } = useSettingsStore();
@@ -87,6 +93,10 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     }
   };
 
+  if (!currentRaceId) {
+    return null; // useEffect handles navigate('/')
+  }
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -109,8 +119,35 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
         {/* Main Content */}
         <main className="container mx-auto px-4 py-6">
+          {/* Tab Navigation */}
+          <nav aria-label="View navigation" className="mb-6">
+            <div className="flex space-x-1 border-b border-gray-200 dark:border-gray-700" role="tablist">
+              {TABS.map(tab => (
+                <button
+                  key={tab.id}
+                  aria-pressed={activeTab === tab.id}
+                  aria-controls={`tabpanel-${tab.id}`}
+                  aria-label={tab.label}
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`px-4 py-2 text-sm font-medium rounded-t-md transition-colors
+                    ${activeTab === tab.id
+                      ? 'bg-white dark:bg-gray-800 border border-b-white dark:border-gray-700 text-blue-600 dark:text-blue-400'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                    }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </nav>
+
           {/* Tab Content */}
-          <div className="space-y-6">
+          <div
+            role="tabpanel"
+            id={`tabpanel-${activeTab}`}
+            aria-labelledby={`tab-${activeTab}`}
+            className="space-y-6"
+          >
             {activeTab === 'data-entry' && (
               <DataEntry
                 onWithdrawal={handleWithdrawal}

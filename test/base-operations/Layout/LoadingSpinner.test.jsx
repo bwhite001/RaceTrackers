@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, test, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import LoadingSpinner from '../../src/../components/Layout/LoadingSpinner';
+import LoadingSpinner from '../../../src/components/Layout/LoadingSpinner';
 
 describe('LoadingSpinner', () => {
   test('renders with default props', () => {
@@ -40,8 +40,8 @@ describe('LoadingSpinner', () => {
     };
 
     Object.entries(sizes).forEach(([size, expectedClass]) => {
-      const { container, unmount } = render(<LoadingSpinner size={size} />);
-      const spinnerIcon = container.querySelector('div > div');
+      const { unmount } = render(<LoadingSpinner size={size} />);
+      const spinnerIcon = screen.getByRole('status').querySelector('div');
       expect(spinnerIcon).toHaveClass(...expectedClass.split(' '));
       unmount();
     });

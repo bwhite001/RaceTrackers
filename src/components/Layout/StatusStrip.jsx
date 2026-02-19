@@ -25,7 +25,7 @@ const StatusStrip = memo(({ stats, lastSync }) => {
     : 'Never';
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg">
+    <footer className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg">
       <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between text-sm">
           {/* Runner Statistics */}
@@ -90,7 +90,7 @@ const StatusStrip = memo(({ stats, lastSync }) => {
           </div>
         </div>
       </div>
-    </div>
+    </footer>
   );
 });
 

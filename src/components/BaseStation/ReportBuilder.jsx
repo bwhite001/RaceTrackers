@@ -93,7 +93,10 @@ const ReportBuilder = ({ onGenerate, onCancel }) => {
             type="text"
             id="reportName"
             value={reportConfig.name}
-            onChange={e => setReportConfig(prev => ({ ...prev, name: e.target.value }))}
+            onChange={e => {
+              setReportConfig(prev => ({ ...prev, name: e.target.value }));
+              setValidationErrors(prev => ({ ...prev, name: '' }));
+            }}
             className={`mt-1 block w-full rounded-md shadow-sm 
               ${validationErrors.name 
                 ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 

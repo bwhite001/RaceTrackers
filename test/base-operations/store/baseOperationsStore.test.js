@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
-import useBaseOperationsStore from '../../src/../modules/base-operations/store/baseOperationsStore';
-import { RUNNER_STATUSES } from '../../src/../types';
+import useBaseOperationsStore from '../../../src/modules/base-operations/store/baseOperationsStore';
+import { RUNNER_STATUSES } from '../../../src/types';
 
 describe('Base Operations Store', () => {
   beforeEach(() => {

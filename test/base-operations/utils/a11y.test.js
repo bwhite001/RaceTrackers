@@ -8,7 +8,7 @@ import {
   isVisibleToScreenReader,
   getAccessibleName,
   announceNotification
-} from '../../src/../utils/a11y';
+} from '../../../src/utils/a11y';
 
 // Helper to flush promises and timers
 const flushPromisesAndTimers = async () => {

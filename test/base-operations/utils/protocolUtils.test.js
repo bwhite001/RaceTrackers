@@ -11,7 +11,7 @@ import {
   sortLogEntries,
   groupEntriesByTimeBlock,
   generateBlockSummary
-} from '../../src/../utils/protocolUtils';
+} from '../../../src/utils/protocolUtils';
 
 describe('Protocol Utilities', () => {
   describe('getNextTimeBlock', () => {

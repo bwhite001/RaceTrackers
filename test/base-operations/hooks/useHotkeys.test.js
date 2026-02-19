@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import useHotkeys, { HOTKEY_COMBINATIONS } from '../../src/../shared/hooks/useHotkeys';
+import useHotkeys, { HOTKEY_COMBINATIONS } from '../../../src/shared/hooks/useHotkeys';
 
 describe('useHotkeys Hook', () => {
   let addEventListenerSpy;
