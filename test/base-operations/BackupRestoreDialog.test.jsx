@@ -7,8 +7,8 @@ import useBaseOperationsStore from '../../src/modules/base-operations/store/base
 import TimeUtils from '../../src/services/timeUtils';
 
 // Mock the store and TimeUtils
-vi.mock('../../modules/base-operations/store/baseOperationsStore');
-vi.mock('../../services/timeUtils');
+vi.mock('../../src/modules/base-operations/store/baseOperationsStore');
+vi.mock('../../src/services/timeUtils');
 
 describe('BackupRestoreDialog', () => {
   const mockCreateBackup = vi.fn();

@@ -1,4 +1,4 @@
-import { format, parseISO, addMinutes, startOfMinute } from 'date-fns';
+import { format, parseISO, addMinutes, startOfMinute, formatDistanceToNow } from 'date-fns';
 
 /**
  * Utility functions for time management in the race tracker
@@ -304,6 +304,26 @@ export class TimeUtils {
     const time = timestamp ? parseISO(timestamp) : new Date();
     const hour = time.getHours();
     return hour >= 6 && hour <= 22; // 6 AM to 10 PM
+  }
+
+  /**
+   * Format timestamp as a relative time string (e.g. "30 minutes ago")
+   */
+  static formatRelative(timestamp) {
+    if (!timestamp) return 'unknown time';
+    try {
+      return formatDistanceToNow(parseISO(timestamp), { addSuffix: true });
+    } catch (error) {
+      return 'unknown time';
+    }
+  }
+
+  /**
+   * Format ISO timestamp for use in datetime-local input (YYYY-MM-DDTHH:MM)
+   * Alias for isoToDatetimeLocal for component compatibility.
+   */
+  static formatDateTimeLocal(isoString) {
+    return TimeUtils.isoToDatetimeLocal(isoString);
   }
 }
 

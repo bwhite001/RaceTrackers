@@ -7,10 +7,10 @@ import useBaseOperationsStore from '../../src/modules/base-operations/store/base
 import { RUNNER_STATUSES, STATUS_LABELS } from '../../src/types';
 
 // Mock the store
-vi.mock('../../modules/base-operations/store/baseOperationsStore');
+vi.mock('../../src/modules/base-operations/store/baseOperationsStore');
 
 // Mock device detection hook
-vi.mock('../../shared/hooks/useDeviceDetection', () => ({
+vi.mock('../../src/shared/hooks/useDeviceDetection', () => ({
   default: () => ({
     isDesktop: true
   })
@@ -173,7 +173,7 @@ describe('RaceOverview', () => {
 
   test('handles mobile layout', () => {
     // Mock mobile device
-    vi.mock('../../shared/hooks/useDeviceDetection', () => ({
+    vi.mock('../../src/shared/hooks/useDeviceDetection', () => ({
       default: () => ({
         isDesktop: false
       })

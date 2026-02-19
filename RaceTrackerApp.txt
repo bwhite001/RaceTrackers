@@ -12,6 +12,7 @@ Tab 1: Runner Mark-Off
 * Grid/List View: Display all runner numbers as interactive squares or in a list, depending on user preference.
 * Search Functionality: A search bar allows instant filtering by runner number.
 * Quick Mark-Off: Tapping a runner marks them as "passed," recording the timestamp automatically.
+* [AJ] Add ability to quickly type in runner numbers (base and checkpoints)
 * Accessibility: Supports both grid (for large screens) and list (for mobile or preference) layouts.
 Tab 2: Callout Sheet
 * 5-Minute Segmentation: Automatically groups runners who have passed into 5-minute time intervals, from the earliest to the latest.
@@ -103,6 +104,7 @@ a. Runner Mark-Off (Tab 1)
 * Search Bar: Quickly filter runner numbers.
 * Quick Mark-Off: Tap a number to mark a runner as "passed," automatically recording the timestamp.
 * Grouping/Pagination: For large ranges, runners can be grouped (by 10s, 25s, 50s, or 100s) or paginated for efficient navigation and mark-off.
+* [AJ] Ability to quickly key in numbers as they pass
 b. Callout Sheet (Tab 2)
 * Time Segmentation: Groups runners who have passed into 5-minute intervals, from earliest to latest.
 * Call-In Tracking: Each segment can be marked as "called in" once reported, with visual completion indicators.
@@ -122,10 +124,12 @@ a. Data Entry (Tab 1)
 * Common Time Assignment: Enter a time and assign it to multiple runners (in any order or grouping).
 * Flexible Input: Add runner numbers individually or in bulk.
 * Batch Processing: Efficiently assign the same timestamp to groups of runners.
+* [AJ] Ability to quickly key in numbers as they are radio’ed back to base with a group time block reference.
 b. Race Overview (Tab 2)
 * Comprehensive Dashboard: Mirrors the Checkpoint Overview tab, showing all runners and their statuses.
 * Manual Updates: Mark non-starters and DNFs directly from the overview.
 * Progress Tracking: View real-time status and timing for all racers.
+* [AJ] View to group check points so you can see reports back from specific checkpoints (ie so we can see based on reports back a global view and a view of each checkpoint about who as passed/not passed through yet)
 5. Settings & Configuration Sharing
 * Accessible from any page.
 * Features:

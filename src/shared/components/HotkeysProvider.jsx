@@ -1,13 +1,9 @@
 import React, { createContext, useContext, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import useHotkeys, { HOTKEY_COMBINATIONS } from '../hooks/useHotkeys';
+import useHotkeysHook, { HOTKEY_COMBINATIONS } from '../hooks/useHotkeys';
 
-// Create context
-const HotkeysContext = createContext({
-  isEnabled: true,
-  trigger: () => {},
-  combinations: HOTKEY_COMBINATIONS
-});
+// Create context — null default so useHotkeysContext throws outside a provider
+const HotkeysContext = createContext(null);
 
 /**
  * HotkeysProvider Component
@@ -15,7 +11,7 @@ const HotkeysContext = createContext({
  */
 const HotkeysProvider = ({
   children,
-  hotkeys = {},
+  hotkeys: hotkeysMap = {},
   enabled = true,
   allowedKeys,
   enableInForms = false,
@@ -42,19 +38,21 @@ const HotkeysProvider = ({
   }, [filter, enableInForms]);
 
   // Initialize hotkeys hook
-  const { isEnabled, trigger } = useHotkeys(hotkeys, {
+  const { isEnabled, trigger } = useHotkeysHook(hotkeysMap, {
     enabled,
     allowedKeys,
     preventDefault,
     stopPropagation,
-    filter: hotkeyFilter
+    filter: hotkeyFilter,
+    enableInForms
   });
 
   // Create context value
   const contextValue = {
     isEnabled,
     trigger,
-    combinations: HOTKEY_COMBINATIONS
+    combinations: HOTKEY_COMBINATIONS,
+    hotkeys: hotkeysMap
   };
 
   return (
@@ -66,7 +64,7 @@ const HotkeysProvider = ({
 
 HotkeysProvider.propTypes = {
   children: PropTypes.node.isRequired,
-  hotkeys: PropTypes.objectOf(PropTypes.func),
+  hotkeys: PropTypes.object,
   enabled: PropTypes.bool,
   allowedKeys: PropTypes.arrayOf(PropTypes.string),
   enableInForms: PropTypes.bool,
@@ -82,6 +80,12 @@ export const useHotkeysContext = () => {
     throw new Error('useHotkeysContext must be used within a HotkeysProvider');
   }
   return context;
+};
+
+// Named hook that exposes registered hotkeys — used by HelpDialog and similar
+export const useHotkeys = () => {
+  const context = useContext(HotkeysContext);
+  return context || { isEnabled: false, trigger: () => {}, combinations: HOTKEY_COMBINATIONS, hotkeys: {} };
 };
 
 // Export component

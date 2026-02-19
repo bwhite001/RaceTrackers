@@ -6,7 +6,7 @@ import DuplicateEntriesDialog from '../../src/modules/base-operations/components
 import TimeUtils from '../../src/services/timeUtils';
 
 // Mock TimeUtils
-vi.mock('../../services/timeUtils');
+vi.mock('../../src/services/timeUtils');
 
 describe('DuplicateEntriesDialog', () => {
   const mockOnClose = vi.fn();

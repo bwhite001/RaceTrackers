@@ -6,7 +6,7 @@ import Header from '../../src/../components/Layout/Header';
 import { HOTKEYS } from '../../src/../types';
 
 // Mock useDeviceDetection hook
-vi.mock('../../../shared/hooks/useDeviceDetection', () => ({
+vi.mock('../../../src/shared/hooks/useDeviceDetection', () => ({
   default: () => ({
     isDesktop: true
   })
@@ -135,7 +135,7 @@ describe('Header', () => {
 
   test('is responsive on mobile', () => {
     // Mock mobile device
-    vi.mock('../../../shared/hooks/useDeviceDetection', () => ({
+    vi.mock('../../../src/shared/hooks/useDeviceDetection', () => ({
       default: () => ({
         isDesktop: false
       })

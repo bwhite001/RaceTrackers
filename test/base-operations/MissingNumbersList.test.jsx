@@ -6,7 +6,7 @@ import MissingNumbersList from '../../src/modules/base-operations/components/Mis
 import useBaseOperationsStore from '../../src/modules/base-operations/store/baseOperationsStore';
 
 // Mock the store
-vi.mock('../../modules/base-operations/store/baseOperationsStore');
+vi.mock('../../src/modules/base-operations/store/baseOperationsStore');
 
 describe('MissingNumbersList', () => {
   const mockLoadMissingRunners = vi.fn();

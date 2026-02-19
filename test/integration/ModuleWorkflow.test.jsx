@@ -5,17 +5,17 @@ import { MemoryRouter } from 'react-router-dom';
 import App from '../../src/App';
 
 // Mock all stores
-vi.mock('../../shared/store/navigationStore');
-vi.mock('../../modules/race-maintenance/store/raceMaintenanceStore');
-vi.mock('../../modules/checkpoint-operations/store/checkpointStore');
-vi.mock('../../modules/base-operations/store/baseOperationsStore');
-vi.mock('../../shared/store/settingsStore');
+vi.mock('../../src/shared/store/navigationStore');
+vi.mock('../../src/modules/race-maintenance/store/raceMaintenanceStore');
+vi.mock('../../src/modules/checkpoint-operations/store/checkpointStore');
+vi.mock('../../src/modules/base-operations/store/baseOperationsStore');
+vi.mock('../../src/shared/store/settingsStore');
 
 // Mock repositories
-vi.mock('../../modules/race-maintenance/services/RaceMaintenanceRepository');
-vi.mock('../../modules/checkpoint-operations/services/CheckpointRepository');
-vi.mock('../../modules/base-operations/services/BaseOperationsRepository');
-vi.mock('../../shared/services/database/SettingsRepository');
+vi.mock('../../src/modules/race-maintenance/services/RaceMaintenanceRepository');
+vi.mock('../../src/modules/checkpoint-operations/services/CheckpointRepository');
+vi.mock('../../src/modules/base-operations/services/BaseOperationsRepository');
+vi.mock('../../src/shared/services/database/SettingsRepository');
 
 describe('Module Integration Workflows', () => {
   beforeEach(() => {

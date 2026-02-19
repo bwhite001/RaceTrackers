@@ -7,7 +7,7 @@ import useBaseOperationsStore from '../../src/modules/base-operations/store/base
 import { RUNNER_STATUSES } from '../../src/types';
 
 // Mock the store
-vi.mock('../../modules/base-operations/store/baseOperationsStore');
+vi.mock('../../src/modules/base-operations/store/baseOperationsStore');
 
 describe('WithdrawalDialog', () => {
   const mockStore = {

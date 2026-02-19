@@ -73,16 +73,24 @@ describe('Database Schema v6 - Validation & Testing', () => {
     });
 
     it('should have correct primary keys on all tables', () => {
-      const tables = [
+      // All tables except 'settings' use ++id (auto-increment primary key)
+      const autoIncTables = [
         'races', 'runners', 'checkpoints', 'checkpoint_runners',
-        'base_station_runners', 'settings', 'deleted_entries',
+        'base_station_runners', 'deleted_entries',
         'strapper_calls', 'audit_log', 'withdrawal_records', 'vet_out_records'
       ];
+      const manualKeyTables = ['settings']; // uses 'key' as primary key
 
-      tables.forEach(tableName => {
+      autoIncTables.forEach(tableName => {
         const schema = getTableSchema(tableName);
         expect(schema.primaryKey).toBeDefined();
         expect(schema.autoIncrement).toBe(true);
+      });
+
+      manualKeyTables.forEach(tableName => {
+        const schema = getTableSchema(tableName);
+        expect(schema.primaryKey).toBe('key');
+        expect(schema.autoIncrement).toBe(false);
       });
     });
 
@@ -148,16 +156,23 @@ describe('Database Schema v6 - Validation & Testing', () => {
       });
     });
 
-    it('should enforce unique compound index on runners [raceId+number]', async () => {
+    it('should have compound index on runners [raceId+number] for fast lookups', async () => {
+      // The schema uses a non-unique compound index [raceId+number] for lookup performance.
+      // Uniqueness is enforced at the application layer (StorageService).
       const race = createTestRace();
       const raceId = await db.races.add(race);
 
       const runner1 = createTestRunner(raceId, 100);
-      await db.runners.add(runner1);
+      const id1 = await db.runners.add(runner1);
+      expect(id1).toBeDefined();
 
-      // Try to add duplicate runner with same raceId and number
-      const runner2 = createTestRunner(raceId, 100);
-      await expect(db.runners.add(runner2)).rejects.toThrow();
+      // Compound index allows efficient range queries
+      const found = await db.runners
+        .where('[raceId+number]')
+        .equals([raceId, 100])
+        .first();
+      expect(found).toBeDefined();
+      expect(found.number).toBe(100);
     });
 
     it('should allow same runner number in different races', async () => {

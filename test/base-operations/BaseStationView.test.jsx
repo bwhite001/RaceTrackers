@@ -9,24 +9,24 @@ import useSettingsStore from '../../src/shared/store/settingsStore';
 import { HOTKEYS } from '../../src/types';
 
 // Mock the stores
-vi.mock('../../modules/base-operations/store/baseOperationsStore');
-vi.mock('../../shared/store/navigationStore');
-vi.mock('../../shared/store/settingsStore');
+vi.mock('../../src/modules/base-operations/store/baseOperationsStore');
+vi.mock('../../src/shared/store/navigationStore');
+vi.mock('../../src/shared/store/settingsStore');
 
 // Mock the components
-vi.mock('../../components/BaseStation/DataEntry', () => ({
+vi.mock('../../src/components/BaseStation/DataEntry', () => ({
   default: () => <div data-testid="data-entry">Data Entry</div>
 }));
 
-vi.mock('../../components/BaseStation/RaceOverview', () => ({
+vi.mock('../../src/components/BaseStation/RaceOverview', () => ({
   default: () => <div data-testid="race-overview">Race Overview</div>
 }));
 
-vi.mock('../../components/BaseStation/ReportsPanel', () => ({
+vi.mock('../../src/components/BaseStation/ReportsPanel', () => ({
   default: () => <div data-testid="reports-panel">Reports Panel</div>
 }));
 
-vi.mock('../../components/BaseStation/WithdrawalDialog', () => ({
+vi.mock('../../src/components/BaseStation/WithdrawalDialog', () => ({
   default: ({ isOpen, type }) => isOpen ? <div data-testid="withdrawal-dialog">Withdrawal Dialog ({type})</div> : null
 }));
 

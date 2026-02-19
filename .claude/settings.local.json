@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+"Bash(*)",
+      "Bash(git -C /brandon/RaceTrackers status)",
+      "Bash(git -C /brandon/RaceTrackers log --oneline -5)",
+      "Bash(git -C /brandon/RaceTrackers status --short)",
+      "Bash(git -C /brandon/RaceTrackers add CLAUDE.md .gitignore)",
+      "Bash(git -C:*)",
+      "Bash(grep:*)",
+      "Bash(git ls-files:*)",
+      "Skill(ralph-loop:ralph-loop)",
+      "Bash(npm run test:run:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(\"/home/brandon/.claude/plugins/cache/claude-plugins-official/ralph-loop/8deab8460a9d/scripts/setup-ralph-loop.sh\" \"Work through notes/RALPH_LOOP_TODO.md top to bottom. Start with all T0 items \\(test infrastructure fixes\\), then Tier 1 MVP features, then Tier 2 missing tests. After each item mark its checklist done in the TODO file and update the progress table. Use npm run test:run to verify after each T0 fix.\" --completion-promise \"All epics implemented, all unit tests pass \\(npm run test:run\\), all UI/E2E tests pass \\(npm run test:e2e\\)\" --max-iterations 50)",
+      "Bash(python3:*)"
+    ]
+  }
+}

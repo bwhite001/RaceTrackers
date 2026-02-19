@@ -5,12 +5,12 @@ import { MemoryRouter } from 'react-router-dom';
 import App from '../../src/App';
 
 // Mock stores and repositories
-vi.mock('../../shared/store/navigationStore');
-vi.mock('../../modules/race-maintenance/store/raceMaintenanceStore');
-vi.mock('../../modules/checkpoint-operations/store/checkpointStore');
-vi.mock('../../modules/base-operations/store/baseOperationsStore');
-vi.mock('../../shared/store/settingsStore');
-vi.mock('../../shared/services/database/SettingsRepository');
+vi.mock('../../src/shared/store/navigationStore');
+vi.mock('../../src/modules/race-maintenance/store/raceMaintenanceStore');
+vi.mock('../../src/modules/checkpoint-operations/store/checkpointStore');
+vi.mock('../../src/modules/base-operations/store/baseOperationsStore');
+vi.mock('../../src/shared/store/settingsStore');
+vi.mock('../../src/shared/services/database/SettingsRepository');
 
 describe('Module Data Synchronization', () => {
   beforeEach(() => {

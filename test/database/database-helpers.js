@@ -110,9 +110,10 @@ export const verifyIndexes = (tableName, expectedIndexes) => {
     const schema = table.schema;
     
     // Get all index names (including primary key and compound indexes)
+    // schema.indexes is an array of IndexSpec objects in Dexie v6
     const actualIndexes = [
       schema.primKey.name,
-      ...Object.keys(schema.indexes)
+      ...schema.indexes.map(idx => idx.name)
     ];
     
     // Check if all expected indexes are present
@@ -325,7 +326,7 @@ export const getTableSchema = (tableName) => {
     return {
       name: table.name,
       primaryKey: table.schema.primKey.name,
-      indexes: Object.keys(table.schema.indexes),
+      indexes: table.schema.indexes.map(idx => idx.name),
       autoIncrement: table.schema.primKey.auto,
     };
   } catch (error) {

@@ -6,7 +6,7 @@ import HelpDialog from '../../src/modules/base-operations/components/HelpDialog'
 import { useHotkeys } from '../../src/shared/components/HotkeysProvider';
 
 // Mock the hotkeys hook
-vi.mock('../../shared/components/HotkeysProvider');
+vi.mock('../../src/shared/components/HotkeysProvider');
 
 describe('HelpDialog', () => {
   const mockOnClose = vi.fn();

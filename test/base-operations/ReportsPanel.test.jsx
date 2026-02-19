@@ -7,17 +7,17 @@ import useBaseOperationsStore from '../../src/modules/base-operations/store/base
 import { REPORT_TYPES } from '../../src/utils/reportUtils';
 
 // Mock the store
-vi.mock('../../modules/base-operations/store/baseOperationsStore');
+vi.mock('../../src/modules/base-operations/store/baseOperationsStore');
 
 // Mock device detection hook
-vi.mock('../../shared/hooks/useDeviceDetection', () => ({
+vi.mock('../../src/shared/hooks/useDeviceDetection', () => ({
   default: () => ({
     isDesktop: true
   })
 }));
 
 // Mock ReportBuilder component
-vi.mock('../../components/BaseStation/ReportBuilder', () => ({
+vi.mock('../../src/components/BaseStation/ReportBuilder', () => ({
   default: ({ onGenerate, onCancel }) => (
     <div data-testid="report-builder">
       <button onClick={() => onGenerate({ name: 'Test Report' })}>Generate</button>
@@ -155,7 +155,7 @@ describe('ReportsPanel', () => {
   });
 
   test('hides keyboard shortcut on mobile', () => {
-    vi.mock('../../shared/hooks/useDeviceDetection', () => ({
+    vi.mock('../../src/shared/hooks/useDeviceDetection', () => ({
       default: () => ({
         isDesktop: false
       })

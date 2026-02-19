@@ -6,7 +6,7 @@ import VetOutDialog from '../../src/modules/base-operations/components/VetOutDia
 import useBaseOperationsStore from '../../src/modules/base-operations/store/baseOperationsStore';
 
 // Mock the store
-vi.mock('../../modules/base-operations/store/baseOperationsStore');
+vi.mock('../../src/modules/base-operations/store/baseOperationsStore');
 
 describe('VetOutDialog', () => {
   const mockVetOutRunner = vi.fn();

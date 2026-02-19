@@ -8,10 +8,10 @@ import useBaseOperationsStore from '../../src/modules/base-operations/store/base
 import { HOTKEYS } from '../../src/types';
 
 // Mock the store
-vi.mock('../../modules/base-operations/store/baseOperationsStore');
+vi.mock('../../src/modules/base-operations/store/baseOperationsStore');
 
 // Mock device detection hook
-vi.mock('../../shared/hooks/useDeviceDetection', () => ({
+vi.mock('../../src/shared/hooks/useDeviceDetection', () => ({
   default: () => ({
     isDesktop: true
   })
