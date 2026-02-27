@@ -31,6 +31,25 @@ class RaceTrackerDB extends Dexie {
             withdrawal_records: "++id, [raceId+runnerNumber], raceId, runnerNumber, checkpoint, withdrawalTime, reversedAt",
             vet_out_records: "++id, [raceId+runnerNumber], raceId, runnerNumber, checkpoint, vetOutTime"
         });
+
+    // Version 7: Add imported checkpoint results (non-breaking, additive only)
+    // Stores checkpoint result JSONs imported from checkpoint devices.
+    // Runners are stored as a JSON blob — this data is read-only at base station.
+    this.version(7)
+        .stores({
+            races: "++id, name, date, startTime, minRunner, maxRunner, createdAt",
+            runners: "++id, [raceId+number], raceId, number, status, recordedTime, notes",
+            checkpoints: "++id, [raceId+number], raceId, number, name",
+            checkpoint_runners: "++id, [raceId+checkpointNumber+number], raceId, checkpointNumber, number, markOffTime, callInTime, status, notes",
+            base_station_runners: "++id, [raceId+checkpointNumber+number], raceId, checkpointNumber, number, commonTime, status, notes",
+            settings: "key, value",
+            deleted_entries: "++id, raceId, entryType, deletedAt, restorable",
+            strapper_calls: "++id, [raceId+checkpoint], raceId, checkpoint, status, priority, createdAt",
+            audit_log: "++id, raceId, entityType, action, performedAt",
+            withdrawal_records: "++id, [raceId+runnerNumber], raceId, runnerNumber, checkpoint, withdrawalTime, reversedAt",
+            vet_out_records: "++id, [raceId+runnerNumber], raceId, runnerNumber, checkpoint, vetOutTime",
+            imported_checkpoint_results: "++id, [raceId+checkpointNumber], raceId, checkpointNumber, importedAt"
+        });
   }
 }
 
