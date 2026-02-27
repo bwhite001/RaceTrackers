@@ -25,6 +25,7 @@ screenshots/e2e-tests/**
 !.github/copilot-instructions.md
 !/notes/**.md
 !/docs/**.md
+!/docs/**/*.md
 !/src/shared/components/ui/guides/**.md
 
 # Data files
