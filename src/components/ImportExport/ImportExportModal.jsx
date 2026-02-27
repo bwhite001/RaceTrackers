@@ -5,6 +5,7 @@ import { useRaceStore } from '../../store/useRaceStore.js';
 import { ExportService } from '../../services/import-export/ExportService.js';
 import { ImportService } from '../../services/import-export/ImportService.js';
 import ConflictResolutionDialog from './ConflictResolutionDialog.jsx';
+import QRScannerModal from '../Shared/QRScannerModal.jsx';
 
 const ImportExportModal = ({ isOpen, onClose }) => {
   // Use the new race maintenance store for current race data
@@ -39,6 +40,7 @@ const ImportExportModal = ({ isOpen, onClose }) => {
   const [conflicts, setConflicts] = useState([]);
   const [importPackage, setImportPackage] = useState(null);
   const [importPreview, setImportPreview] = useState(null);
+  const [showQRScanner, setShowQRScanner] = useState(false);
 
   const handleExport = async () => {
     setIsProcessing(true);
@@ -619,10 +621,20 @@ const ImportExportModal = ({ isOpen, onClose }) => {
                     </svg>
                     <span>Upload JSON File</span>
                   </button>
+
+                  <button
+                    onClick={() => setShowQRScanner(true)}
+                    className="btn-secondary flex items-center space-x-2 mt-3"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    <span>Scan QR Code</span>
+                  </button>
                 </div>
 
                 <div className="text-center text-gray-500 dark:text-gray-400 mb-4">
-                  or
+                  or paste JSON below
                 </div>
                 
                 <textarea
@@ -686,6 +698,16 @@ const ImportExportModal = ({ isOpen, onClose }) => {
         onCancel={handleCancelConflicts}
       />
     )}
+
+    {/* QR Scanner */}
+    <QRScannerModal
+      isOpen={showQRScanner}
+      onScan={(data) => {
+        setImportText(data);
+        setShowQRScanner(false);
+      }}
+      onClose={() => setShowQRScanner(false)}
+    />
     </>
   );
 };
