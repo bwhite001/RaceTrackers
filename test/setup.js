@@ -46,6 +46,11 @@ class ResizeObserver {
 global.IntersectionObserver = IntersectionObserver;
 global.ResizeObserver = ResizeObserver;
 
+// scrollIntoView not implemented in jsdom — polyfill for focus-trap tests
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = vi.fn();
+}
+
 // Mock window properties and methods commonly used in focus management
 Object.defineProperties(window, {
   scrollTo: { value: vi.fn() },

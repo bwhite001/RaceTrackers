@@ -1,4 +1,4 @@
-import React, { memo, useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import useBaseOperationsStore from '../../modules/base-operations/store/baseOperationsStore';
 import useDeviceDetection from '../../shared/hooks/useDeviceDetection';
 import { RUNNER_STATUSES, STATUS_COLORS, STATUS_LABELS } from '../../types';
@@ -8,7 +8,7 @@ import { formatRunnerNumber } from '../../utils/runnerNumberUtils';
  * RaceOverview Component
  * Displays a grid of all runners with their current status and checkpoint times
  */
-const RaceOverview = memo(() => {
+const RaceOverview = () => {
   // Device detection
   const { isDesktop } = useDeviceDetection();
 
@@ -109,6 +109,7 @@ const RaceOverview = memo(() => {
         {/* Filters */}
         <div className="flex gap-2">
           <select
+            aria-label="Filter by status"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
             className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 
@@ -122,6 +123,7 @@ const RaceOverview = memo(() => {
           </select>
 
           <select
+            aria-label="Sort runners"
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
             className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 
@@ -137,10 +139,11 @@ const RaceOverview = memo(() => {
       </div>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div data-testid="stats-grid" className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {Object.entries(stats).map(([key, value]) => (
           <div 
             key={key}
+            data-testid={`stat-${key}`}
             className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm"
           >
             <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -216,7 +219,7 @@ const RaceOverview = memo(() => {
       )}
     </div>
   );
-});
+};
 
 // Add display name for debugging
 RaceOverview.displayName = 'RaceOverview';

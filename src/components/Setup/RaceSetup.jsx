@@ -63,9 +63,20 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
   const handleSubmit = async (runnerRanges) => {
     try {
+      const ranges = runnerRanges || formData.runnerRanges || [];
+      // Compute minRunner/maxRunner for SharedRunnerGrid grouping
+      const allNumbers = ranges.flatMap(r =>
+        r.isIndividual && r.individualNumbers
+          ? r.individualNumbers
+          : Array.from({ length: r.max - r.min + 1 }, (_, i) => r.min + i)
+      );
       const completeFormData = {
         ...formData,
-        runnerRanges: runnerRanges || formData.runnerRanges || []
+        runnerRanges: ranges,
+        ...(allNumbers.length > 0 && {
+          minRunner: Math.min(...allNumbers),
+          maxRunner: Math.max(...allNumbers),
+        }),
       };
       const raceId = await createRace(completeFormData);
       setHasUnsavedChanges(false);

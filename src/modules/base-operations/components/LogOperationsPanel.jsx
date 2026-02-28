@@ -78,9 +78,17 @@ const LogOperationsPanel = () => {
 
   // Filter and sort entries
   const filteredEntries = React.useMemo(() => {
-    let entries = showDeleted ? deletedEntries : 
-                 showDuplicates ? duplicateEntries : 
-                 logEntries;
+    let entries = showDeleted 
+      ? deletedEntries.map(e => ({
+          id: e.id,
+          number: e.originalEntry?.number,
+          checkpoint: e.originalEntry?.checkpoint,
+          timestamp: e.originalEntry?.timestamp,
+          notes: e.deletionReason || '',
+          deletedAt: e.deletedAt
+        }))
+      : showDuplicates ? duplicateEntries 
+      : logEntries;
 
     // Apply checkpoint filter
     if (filterCheckpoint !== 'all') {
@@ -223,6 +231,7 @@ const LogOperationsPanel = () => {
           />
         </div>
         <select
+          aria-label="All Checkpoints"
           value={filterCheckpoint}
           onChange={(e) => setFilterCheckpoint(e.target.value)}
           className="form-input"
@@ -235,6 +244,7 @@ const LogOperationsPanel = () => {
           ))}
         </select>
         <select
+          aria-label="Sort by"
           value={sortOrder}
           onChange={(e) => setSortOrder(e.target.value)}
           className="form-input"
@@ -250,7 +260,7 @@ const LogOperationsPanel = () => {
       {/* Entries Table */}
       <div className="card overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-12">
+          <div role="status" aria-label="Loading" className="flex items-center justify-center py-12">
             <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : filteredEntries.length === 0 ? (
@@ -298,7 +308,7 @@ const LogOperationsPanel = () => {
                   <tr key={entry.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        #{entry.number}
+                        {entry.number}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -375,11 +385,7 @@ const LogOperationsPanel = () => {
 
       {/* Entry Count */}
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        Showing {filteredEntries.length} of {
-          showDeleted ? deletedEntries.length :
-          showDuplicates ? duplicateEntries.length :
-          logEntries.length
-        } entries
+        Showing {filteredEntries.length} entries
       </p>
 
       {/* Info */}

@@ -13,8 +13,9 @@ import useBaseOperationsStore from '../store/baseOperationsStore';
  * - Auto-refresh capability
  */
 
-const MissingNumbersList = ({ checkpoint: initialCheckpoint = 1, autoRefresh = false }) => {
+const MissingNumbersList = ({ checkpoint: initialCheckpoint = 1, autoRefresh: initialAutoRefresh = false }) => {
   const [selectedCheckpoint, setSelectedCheckpoint] = useState(initialCheckpoint);
+  const [autoRefresh, setAutoRefresh] = useState(initialAutoRefresh);
   const [refreshInterval, setRefreshInterval] = useState(null);
 
   const {
@@ -29,6 +30,11 @@ const MissingNumbersList = ({ checkpoint: initialCheckpoint = 1, autoRefresh = f
   useEffect(() => {
     loadMissingRunners(selectedCheckpoint);
   }, [selectedCheckpoint, loadMissingRunners]);
+
+  // Sync selectedCheckpoint when checkpoint prop changes
+  useEffect(() => {
+    setSelectedCheckpoint(initialCheckpoint);
+  }, [initialCheckpoint]);
 
   // Auto-refresh setup
   useEffect(() => {
@@ -174,7 +180,7 @@ const MissingNumbersList = ({ checkpoint: initialCheckpoint = 1, autoRefresh = f
         </div>
         <div className="p-4">
           {loading ? (
-            <div className="flex items-center justify-center py-8">
+            <div role="status" aria-label="Loading" className="flex items-center justify-center py-8">
               <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : missingRunners.length === 0 ? (
@@ -229,7 +235,7 @@ const MissingNumbersList = ({ checkpoint: initialCheckpoint = 1, autoRefresh = f
             type="checkbox"
             id="autoRefresh"
             checked={autoRefresh}
-            onChange={(e) => setRefreshInterval(e.target.checked)}
+            onChange={(e) => setAutoRefresh(e.target.checked)}
             className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
           <label htmlFor="autoRefresh" className="text-sm text-gray-700 dark:text-gray-300">

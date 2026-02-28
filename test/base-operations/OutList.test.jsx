@@ -73,9 +73,9 @@ describe('OutList', () => {
   it('shows status summary cards', () => {
     render(<OutList />);
 
-    expect(screen.getByText('1')).toBeInTheDocument(); // 1 withdrawn
-    expect(screen.getByText('1')).toBeInTheDocument(); // 1 vet out
-    expect(screen.getByText('1')).toBeInTheDocument(); // 1 dnf
+    // Summary cards show counts — 1 withdrawn, 1 vet-out, 1 dnf, 0 non-starter
+    const ones = screen.getAllByText('1');
+    expect(ones.length).toBeGreaterThanOrEqual(3); // at least 3 cards showing "1"
   });
 
   it('filters by status', () => {
@@ -171,7 +171,10 @@ describe('OutList', () => {
 
     expect(screen.getByText('WITHDRAWN')).toHaveClass('bg-yellow-100');
     expect(screen.getByText('VET OUT')).toHaveClass('bg-orange-100');
-    expect(screen.getByText('DNF')).toHaveClass('bg-red-100');
+    // "DNF" appears in both the summary card label and the row badge
+    const dnfElements = screen.getAllByText('DNF');
+    const dnfBadge = dnfElements.find(el => el.classList.contains('bg-red-100'));
+    expect(dnfBadge).toBeTruthy();
   });
 
   it('shows correct timestamps', () => {
