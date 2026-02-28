@@ -297,6 +297,47 @@ export class ExportService {
       throw new Error(`Legacy export failed: ${error.message}`);
     }
   }
+
+  /**
+   * Export checkpoint results as a JSON package suitable for hand-off to Base Station.
+   * The produced file can be imported via BaseStation's checkpoint import flow.
+   *
+   * @param {number|string} raceId - The race ID
+   * @param {number} checkpointNumber - The checkpoint number
+   * @returns {Promise<Object>} Checkpoint results export package
+   */
+  static async exportCheckpointResults(raceId, checkpointNumber) {
+    try {
+      const runners = await db.checkpoint_runners
+        .where(['raceId', 'checkpointNumber'])
+        .equals([raceId, checkpointNumber])
+        .toArray();
+
+      const exportData = {
+        raceId,
+        checkpointNumber,
+        runners,
+      };
+
+      const checksum = this.generateChecksum(exportData);
+
+      return {
+        version: '1.0',
+        exportType: 'checkpoint-results',
+        exportDate: new Date().toISOString(),
+        deviceId: this.getDeviceId(),
+        checksum,
+        data: exportData,
+        metadata: {
+          totalRunners: runners.length,
+          exportedBy: 'RaceTracker Pro',
+        },
+      };
+    } catch (error) {
+      console.error('Checkpoint export error:', error);
+      throw new Error(`Checkpoint export failed: ${error.message}`);
+    }
+  }
 }
 
 export default ExportService;

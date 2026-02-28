@@ -12,6 +12,7 @@ import CalloutSheet from '../components/Checkpoint/CalloutSheet';
 import RunnerOverview from '../components/Shared/RunnerOverview';
 import LoadingSpinner from '../components/Layout/LoadingSpinner';
 import ErrorMessage from '../components/Layout/ErrorMessage';
+import { ExportService } from '../services/import-export/ExportService';
 
 const TABS = [
   { id: 'mark-off', label: 'Mark Off' },
@@ -89,6 +90,22 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     onExitAttempt(); // This will trigger the exit confirmation if needed
   };
 
+  const handleExportResults = async () => {
+    if (!currentRace) return;
+    try {
+      const pkg = await ExportService.exportCheckpointResults(
+        currentRace.id,
+        parseInt(checkpointId)
+      );
+      ExportService.downloadExport(
+        pkg,
+        `checkpoint-${checkpointId}-results-${Date.now()}.json`
+      );
+    } catch (err) {
+      console.error('Checkpoint export failed:', err);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Checkpoint Header */}
@@ -107,12 +124,21 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             Checkpoint {checkpointId}
           </h1>
         </div>
-        <button
-          onClick={onExitAttempt}
-          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-        >
-          Exit Checkpoint
-        </button>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={handleExportResults}
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            title="Download checkpoint results as JSON for Base Station import"
+          >
+            Export Results
+          </button>
+          <button
+            onClick={onExitAttempt}
+            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+          >
+            Exit Checkpoint
+          </button>
+        </div>
       </div>
 
       {/* Tab bar */}
