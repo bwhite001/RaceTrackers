@@ -63,7 +63,15 @@ function unescapeHtml(str) {
     .replace(/&gt;/g, '>');
 }
 
-function toTitleCase(str) {
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
@@ -124,6 +132,14 @@ function main() {
     chapters[chapter].push({ ...test, screenshotPaths });
   }
 
+  // ── Completeness check ────────────────────────────────────────────────
+  const found = new Set(tests.map(t => t.title));
+  const missing = Object.keys(SECTION_MAP).filter(t => !found.has(t));
+  if (missing.length) {
+    console.warn(`\nWARN: ${missing.length} mapped test(s) not found in report (maybe skipped or renamed):`);
+    missing.forEach(t => console.warn(`  - "${t}"`));
+  }
+
   // ── Markdown ──────────────────────────────────────────────────────────
   const mdLines = [
     '# RaceTracker Pro — User Guide',
@@ -139,7 +155,7 @@ function main() {
     if (!items.length) continue;
     mdLines.push(`## ${ch.title}`, '', ch.intro, '');
     for (const test of items) {
-      mdLines.push(`### ${toTitleCase(test.title)}`, '', unescapeHtml(test.description), '');
+      mdLines.push(`### ${capitalize(test.title)}`, '', unescapeHtml(test.description), '');
       for (let i = 0; i < test.screenshotPaths.length; i++) {
         mdLines.push(`![Step ${i + 1}](${test.screenshotPaths[i]})`, '');
       }
@@ -156,8 +172,8 @@ function main() {
     if (!items.length) continue;
     let block = `<div id="${ch.key}">\n<h2>${ch.title}</h2>\n<p class="chapter-intro">${ch.intro}</p>\n`;
     for (const test of items) {
-      const desc = unescapeHtml(test.description);
-      block += `<section class="task">\n<h3>${toTitleCase(test.title)}</h3>\n<p class="description">${desc}</p>\n<div class="filmstrip">\n`;
+      const desc = escapeHtml(unescapeHtml(test.description));
+      block += `<section class="task">\n<h3>${capitalize(test.title)}</h3>\n<p class="description">${desc}</p>\n<div class="filmstrip">\n`;
       for (let i = 0; i < test.screenshots.length; i++) {
         block += `<figure><img src="${test.screenshots[i]}" alt="Step ${i + 1}" loading="lazy"><figcaption>Step ${i + 1}</figcaption></figure>\n`;
       }
