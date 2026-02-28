@@ -248,32 +248,46 @@ export class StorageService {
       const race = await this.getRace(raceId);
       const checkpoints = await this.getCheckpoints(raceId);
       const runners = await this.getRunners(raceId);
+      const batches = await db.race_batches.where('raceId').equals(raceId).sortBy('batchNumber');
       
       // Get checkpoint runners if they exist (they may not be initialized yet)
       const checkpointRunners = await this.getCheckpointRunners(raceId);
       
       return {
+        schemaVersion: 8,
         raceConfig: {
           name: race.name,
           date: race.date,
           startTime: race.startTime,
           minRunner: race.minRunner,
           maxRunner: race.maxRunner,
-          runnerRanges: race.runnerRanges || [], // Include runner ranges if available
+          runnerRanges: race.runnerRanges || [],
           checkpoints: checkpoints.map(cp => ({ number: cp.number, name: cp.name }))
         },
+        batches: batches.map(b => ({
+          batchNumber: b.batchNumber,
+          batchName: b.batchName,
+          startTime: b.startTime
+        })),
         runners: runners.map(runner => ({
           number: runner.number,
+          firstName: runner.firstName || null,
+          lastName: runner.lastName || null,
+          gender: runner.gender || 'X',
+          batchNumber: runner.batchNumber || 1,
           status: runner.status,
           recordedTime: runner.recordedTime,
           notes: runner.notes
         })),
-        // Only include checkpoint runners if they exist
         checkpointRunners: checkpointRunners.length > 0 ? checkpointRunners.map(runner => ({
           checkpointNumber: runner.checkpointNumber,
           number: runner.number,
-          markOffTime: runner.markOffTime,
+          actualTime: runner.actualTime || runner.markOffTime,
+          commonTime: runner.commonTime,
+          commonTimeLabel: runner.commonTimeLabel,
+          calledIn: runner.calledIn || false,
           callInTime: runner.callInTime,
+          markOffTime: runner.markOffTime,
           status: runner.status,
           notes: runner.notes
         })) : [],
@@ -289,8 +303,16 @@ export class StorageService {
 
   static async importRaceConfig(exportData) {
     try {
-      const { raceConfig, runners, checkpointRunners, exportType } = exportData;
+      const { raceConfig, runners, checkpointRunners, exportType, schemaVersion, batches } = exportData;
       
+      // Version gate: reject exports that are too old to safely import
+      if (schemaVersion !== undefined && schemaVersion < 6) {
+        throw new Error(
+          `This export was created with an older version of RaceTracker Pro (schema v${schemaVersion}). ` +
+          'Exports from schema v6 or later are required. Please re-export from the source device.'
+        );
+      }
+
       // Validate the imported data
       if (!raceConfig || !raceConfig.name || !raceConfig.date || 
           !raceConfig.startTime || typeof raceConfig.minRunner !== 'number' || 

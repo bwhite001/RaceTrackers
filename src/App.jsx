@@ -14,6 +14,9 @@ import RaceManagementView from './views/RaceManagementView';
 import CheckpointView from './views/CheckpointView';
 import BaseStationView from './views/BaseStationView';
 import RaceOverview from './views/RaceOverview';
+import LiveDashboardView from './views/LiveDashboardView';
+import LeaderboardView from './views/LeaderboardView';
+import PendingCallInsView from './views/PendingCallInsView';
 import Footer from './components/Layout/Footer';
 
 function App() {
@@ -112,6 +115,9 @@ function App() {
                 <ProtectedRoute moduleType={MODULE_TYPES.BASE_STATION}>
                   <Routes>
                     <Route path="operations" element={<BaseStationView />} />
+                    <Route path="dashboard" element={<LiveDashboardView />} />
+                    <Route path="leaderboard" element={<LeaderboardView />} />
+                    <Route path="pending" element={<PendingCallInsView />} />
                     <Route path="*" element={<Navigate to="/base-station/operations" replace />} />
                   </Routes>
                 </ProtectedRoute>
