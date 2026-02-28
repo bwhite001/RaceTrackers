@@ -2,13 +2,19 @@
  * Runner Status Constants
  */
 export const RUNNER_STATUSES = {
-  NOT_STARTED: 'not_started',
-  ACTIVE: 'active',
-  FINISHED: 'finished',
+  NOT_STARTED: 'not-started',
+  PASSED: 'passed',
+  CALLED_IN: 'called-in',
+  MARKED_OFF: 'marked-off',
+  PENDING: 'pending',
+  NON_STARTER: 'non-starter',
   DNF: 'dnf', // Did Not Finish
   DNS: 'dns', // Did Not Start
   WITHDRAWN: 'withdrawn',
-  DISQUALIFIED: 'disqualified'
+  DISQUALIFIED: 'disqualified',
+  // Legacy aliases
+  ACTIVE: 'active',
+  FINISHED: 'finished',
 };
 
 /**

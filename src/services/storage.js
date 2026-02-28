@@ -593,8 +593,8 @@ export class StorageService {
     try {
       if (checkpointNumber !== null) {
         return await db.checkpoint_runners
-          .where(['raceId', 'checkpointNumber'])
-          .equals([raceId, checkpointNumber])
+          .where('[raceId+checkpointNumber+number]')
+          .between([raceId, checkpointNumber, -Infinity], [raceId, checkpointNumber, Infinity])
           .toArray();
       } else {
         return await db.checkpoint_runners.where('raceId').equals(raceId).toArray();

@@ -9,12 +9,12 @@ import { RUNNER_STATUSES, STATUS_LABELS } from '../../src/types';
 // Mock the store
 vi.mock('../../src/modules/base-operations/store/baseOperationsStore');
 
-// Mock device detection hook
+// Mock device detection hook as a configurable vi.fn
 vi.mock('../../src/shared/hooks/useDeviceDetection', () => ({
-  default: () => ({
-    isDesktop: true
-  })
+  default: vi.fn(() => ({ isDesktop: true }))
 }));
+
+import useDeviceDetection from '../../src/shared/hooks/useDeviceDetection';
 
 describe('RaceOverview', () => {
   const mockRunners = [
@@ -60,6 +60,7 @@ describe('RaceOverview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useBaseOperationsStore.mockImplementation(() => mockStore);
+    useDeviceDetection.mockReturnValue({ isDesktop: true });
   });
 
   test('renders all components correctly', () => {
@@ -72,10 +73,9 @@ describe('RaceOverview', () => {
     expect(screen.getByRole('combobox', { name: /filter/i })).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: /sort/i })).toBeInTheDocument();
 
-    // Check stats
+    // Check stats — use data-testid to scope each stat card lookup
     Object.entries(mockStats).forEach(([key, value]) => {
-      const statCard = screen.getByText(key.charAt(0).toUpperCase() + key.slice(1))
-        .closest('div');
+      const statCard = screen.getByTestId(`stat-${key}`);
       expect(within(statCard).getByText(value.toString())).toBeInTheDocument();
     });
 
@@ -89,8 +89,10 @@ describe('RaceOverview', () => {
   test('displays runners in table', () => {
     render(<RaceOverview />);
 
+    const table = screen.getByRole('table');
     mockRunners.forEach(runner => {
-      const row = screen.getByText(runner.number.toString()).closest('tr');
+      // Scope to table to avoid conflicts with stats section values
+      const row = within(table).getByText(runner.number.toString()).closest('tr');
       expect(within(row).getByText(STATUS_LABELS[runner.status])).toBeInTheDocument();
       expect(within(row).getByText(runner.notes)).toBeInTheDocument();
       if (runner.finishTime) {
@@ -129,7 +131,8 @@ describe('RaceOverview', () => {
   test('handles runner selection', () => {
     render(<RaceOverview />);
 
-    const firstRunner = screen.getByText('1').closest('tr');
+    const table = screen.getByRole('table');
+    const firstRunner = within(table).getByText('1').closest('tr');
     fireEvent.click(firstRunner);
 
     // Check selected state
@@ -154,8 +157,11 @@ describe('RaceOverview', () => {
   test('applies correct status colors', () => {
     render(<RaceOverview />);
 
+    const table = screen.getByRole('table');
     mockRunners.forEach(runner => {
-      const statusBadge = screen.getByText(STATUS_LABELS[runner.status]);
+      // Scope to table rows to avoid conflicts with stats section labels
+      const row = within(table).getByText(runner.number.toString()).closest('tr');
+      const statusBadge = within(row).getByText(STATUS_LABELS[runner.status]);
       
       switch (runner.status) {
         case RUNNER_STATUSES.FINISHED:
@@ -172,12 +178,8 @@ describe('RaceOverview', () => {
   });
 
   test('handles mobile layout', () => {
-    // Mock mobile device
-    vi.mock('../../src/shared/hooks/useDeviceDetection', () => ({
-      default: () => ({
-        isDesktop: false
-      })
-    }));
+    // Mock mobile device for this test only
+    useDeviceDetection.mockReturnValueOnce({ isDesktop: false });
 
     render(<RaceOverview />);
 

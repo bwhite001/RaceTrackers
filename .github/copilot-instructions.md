@@ -117,10 +117,12 @@ await db.checkpoint_runners
 
 ## Testing Strategy
 
-### Test Organization (`src/test/`)
-- **Unit tests** - Component behavior (Header.test.jsx, Settings, DarkMode.test.jsx)
-- **Integration tests** (`src/test/integration/`) - Cross-module workflows, data sync
-- **E2E tests** (`src/test/e2e/`) - Full user journeys with Puppeteer
+### Test Organization (`test/`)
+Tests live under `test/` at the repo root (not `src/test/`):
+- **Unit/component tests** - `test/*.test.jsx`, `test/base-operations/`, `test/checkpoint/`
+- **Integration tests** - `test/integration/` - Cross-module workflows, data sync
+- **E2E tests** - `test/e2e/` - Full user journeys with Puppeteer
+- **Global setup** - `test/setup.js` (configures jsdom + `fake-indexeddb` + jest-dom)
 
 ### Key Test Patterns
 **Module Isolation Testing:**
@@ -135,29 +137,53 @@ useNavigationStore.mockImplementation(() => ({
 ```
 
 **Database Mocking:**
-Tests use in-memory Dexie databases. Setup in `src/test/setup.js` configures:
-- jsdom environment with IndexedDB shims (`fake-indexeddb`)
-- React Testing Library globals
-- @testing-library/jest-dom matchers
+Tests use in-memory Dexie databases via `fake-indexeddb` (configured in `test/setup.js`). Direct IndexedDB access is shimmed automatically—no manual setup required per test.
 
-**Test Utilities:**
-- `src/test/setup.js` - Global config for all tests
-- `src/test/e2e/test-data-seeder.js` - Populate test races and runners
-- `vitest.config.js` - Test runner configuration
+**Vitest path aliases** (defined in `vitest.config.js` — use these in test `vi.mock()` calls):
+- `modules` → `src/modules`
+- `shared` → `src/shared`
+- `services` → `src/services`
+- `store` → `src/store`
+- `types` → `src/types`
 
 ### Running Tests
 ```bash
-npm test                      # Vitest unit tests (watch mode)
-npm run test:run             # Single run with exit
-npm run test:coverage        # Generate coverage report
-npm run test:e2e             # Puppeteer E2E (requires build first)
-npm run test:e2e:ci          # Headless E2E for CI
-npm run test:seed            # Populate complete test dataset
-npm run test:seed:minimal    # Minimal test data
-npm run test:clear           # Clear all test data from IndexedDB
-```
+npm test                          # Watch mode
+npm run test:run                  # Single run, then exit
+npm run test:coverage             # Coverage report
 
-**Before running E2E tests:** Must run `npm run build` first—E2E tests use production build via `npm run preview`.
+# Run a single test file
+npx vitest run test/path/to/file.test.jsx
+
+# Run tests matching a name pattern
+npx vitest run -t "test name pattern"
+
+# Run only tests affected by uncommitted changes
+npm run test:changed
+
+# Targeted test suites
+npm run test:suite:unit           # Unit tests only
+npm run test:suite:base-operations
+npm run test:suite:database
+npm run test:suite:integration
+npm run test:suite:components
+npm run test:suite:services
+
+# Module-specific suites
+npm run test:base-station         # test/base-operations/**
+npm run test:checkpoint           # test/checkpoint/**
+npm run test:database             # test/database/**
+npm run test:integration          # test/integration/**
+
+# Puppeteer E2E (requires production build first)
+npm run build && npm run test:e2e
+npm run test:e2e:ci               # Headless mode for CI
+
+# Test data management
+npm run test:seed                 # Populate complete dataset in IndexedDB
+npm run test:seed:minimal
+npm run test:clear
+```
 
 ## Runner Range System
 
@@ -258,162 +284,16 @@ Service worker caches all assets for offline use. **After code changes affecting
 
 When adding features:
 1. Update relevant `notes/*.md` files (especially IMPLEMENTATION.md for architectural changes)
-2. Add tests to appropriate `src/test/` directories
+2. Add tests to appropriate `test/` directories
 3. Update `src/types/index.js` if adding new constants/types
 4. Document breaking changes in a VERSION_HISTORY file (create if needed)
 
+### Plans and Design Docs
+
+**Never commit plan or design documents to this repo.** Plans (brainstorming outputs, implementation plans, design docs) are local-only artefacts. Save them to `docs/plans/` — they are covered by `.gitignore` and must stay that way. Do not force-add them or modify `.gitignore` to track them.
+
 ---
 
-## Future Roadmap & Enhancement Plan
+## Active Development
 
-### Current Status: MVP Complete + Base Station Refactoring
-The application has completed the core MVP (Epics 1-5) and is currently implementing enhanced base station operations. See `notes/TODO.md` for active development tasks.
-
-### Planned Enhancements (Post-MVP)
-
-#### Epic 6: Race Setup & Configuration (Weeks 15-17) 📋
-**Status:** Planned | **Points:** 21 | **Priority:** High
-
-**Key Features:**
-- **CSV/Excel Runner Import** - Bulk upload runner lists from spreadsheets
-  - Support `.csv` and `.xlsx` formats
-  - Flexible column mapping (Number, Name, Gender, Wave)
-  - Data validation and preview before import
-  - Handle name splitting (First/Last name)
-- **Checkpoint Configuration UI** - Visual checkpoint management
-  - Drag-and-drop checkpoint reordering
-  - Assign names, locations, and sequences
-  - Mark finish line checkpoint
-- **Race Templates** - Save and reuse race configurations
-
-**Implementation Notes:**
-- Use `xlsx` library for Excel parsing
-- Zod schemas for import validation (`RunnerImportSchema`)
-- Store in `src/features/raceSetup/services/RunnerImportService.ts`
-- When implementing: Follow patterns in `Epic-06-Race-Setup-Configuration.md`
-
-#### Epic 7: Advanced Analytics & Reporting (Weeks 18-21) 📊
-**Status:** Planned | **Points:** 34 | **Priority:** Medium
-
-**Key Features:**
-- **Real-Time Dashboard** - Live race monitoring
-  - Runner counts by status (not started, active, finished, DNS, DNF)
-  - Checkpoint throughput visualization (runners per time period)
-  - Pace statistics (average, median, fastest, slowest)
-  - Anomaly detection (slow times, missing runners)
-  - Auto-refresh every 30 seconds
-- **Runner Performance Analysis** - Individual analytics
-  - Complete checkpoint history per runner
-  - Segment time breakdown between checkpoints
-  - Pace graphs showing speed variations
-  - Rank progression through race
-  - Comparison with category averages (gender/wave)
-- **Report Generation** - Export comprehensive reports
-  - PDF generation with `jsPDF`
-  - Excel exports with `xlsx`
-  - Leaderboards by gender and wave
-  - DNS/DNF analysis
-  - Customizable report sections
-
-**Implementation Notes:**
-- Services: `DashboardService`, `RunnerAnalysisService`, `ReportGenerationService`
-- Store in `src/features/analytics/services/`
-- Chart.js for pace visualizations
-- Statistical algorithms for pace/anomaly detection
-
-#### Future Enhancements (Weeks 22+) 💡
-**Status:** Conceptual | **Priority:** Low
-
-**Potential Features:**
-- **Mobile App** - React Native version for native capabilities
-- **RFID Chip Integration** - Automated runner detection at checkpoints
-- **GPS Tracking** - Real-time runner location on course
-- **Multi-Race Management** - Manage multiple concurrent events
-- **Cloud Sync** (Optional) - Backup to cloud storage (maintains offline-first)
-- **AI Predictions** - Finish time predictions based on checkpoint paces
-- **Social Media Integration** - Share results and live updates
-
-**When considering these:**
-- Maintain offline-first architecture as core principle
-- All cloud features must be optional enhancements
-- Preserve data privacy and local control
-- Ensure backward compatibility with existing exports
-
-### Active Development: Base Station Refactoring
-
-**Current Focus** (See `notes/TODO.md` for details):
-- ✅ Phase 1-4 Complete: Database schema v6, repository layer, store enhancement
-- 🔄 Phase 5: Component creation (13 new components)
-  - Withdrawal/Vet-Out dialogs with reversal support
-  - Missing numbers list and Out list views
-  - Strapper calls management panel
-  - Log operations panel (update/delete/view deleted/duplicates)
-  - Report generation panel
-  - Backup/restore functionality
-  - Hotkey support via HotkeysProvider
-
-**New Schema v6 Tables:**
-```javascript
-deleted_entries    // Audit trail for deleted items
-strapper_calls     // Resource call tracking
-audit_log          // Complete operation history
-withdrawal_records // Runner withdrawals (reversible)
-vet_out_records    // Veterinary outs
-```
-
-**Legacy Feature Parity Goal:**
-The base station refactor aims to match functionality from a legacy VB6 application including hotkey support (Alt+A, Alt+B, etc.), missing numbers tracking, and comprehensive logging.
-
-### Development Priorities
-
-**Immediate (Current Sprint):**
-1. Complete base station component creation (Phase 5)
-2. Integration and testing (Phase 6)
-3. Documentation updates (Phase 7)
-
-**Next Sprint:**
-1. Begin Epic 6 (Race Setup & Configuration)
-2. CSV/Excel import implementation
-3. Checkpoint drag-and-drop UI
-
-**Quarter 2:**
-1. Epic 7 (Advanced Analytics)
-2. Real-time dashboard
-3. Report generation
-
-### Architecture Evolution Notes
-
-**When building future enhancements:**
-
-1. **Maintain Module Isolation** - New features should respect checkpoint/base station/race maintenance boundaries
-2. **Extend DAL Pattern** - Add new DAL classes for new entities (follow `src/database/dal/` patterns)
-3. **Schema Versioning** - Increment database version, provide migration in `schema.js`
-4. **Service Layer** - Business logic in `src/features/*/services/*.ts` (SOLID: Single Responsibility)
-5. **Store Integration** - Extend Zustand stores carefully, avoid state bloat
-6. **PWA Considerations** - Update service worker cache strategies when adding large assets
-7. **Testing Requirements** - Maintain >85% coverage, add E2E tests for new workflows
-
-**Performance Targets:**
-- Support 1000-2000+ runners without degradation
-- Database operations <100ms for single records
-- Bulk operations <500ms for 100 runners
-- UI interactions <50ms response time
-- Initial load <3 seconds on 3G
-
-**Accessibility Requirements:**
-- WCAG 2.1 AA compliance for all new UI
-- Keyboard navigation for all operations
-- Screen reader support
-- Touch target sizes ≥44x44px
-- Color contrast ratios ≥4.5:1
-
-### Reference Documentation
-
-**Implementation Guides:**
-- `Epic-01-Database-Foundation.md` through `Epic-07-Advanced-Analytics.md` - Complete feature specifications
-- `00-README-Implementation-Guide.md` - Master index and quick start
-- `Sprint-Planning-Timeline.md` - 7-sprint MVP + enhancement roadmap
-- `SolutionDesign.md` - Original technical design document
-- `Extended-Roadmap-Summary.md` - Complete epic collection overview
-
-**When implementing new features:** Always reference the corresponding Epic document for detailed user stories, acceptance criteria, and technical implementation patterns.
+Current focus is **Base Station Refactoring (Phase 5)**. See `notes/TODO.md` for detailed task list and `notes/BASE_STATION_README.md` for context. Implementation specs for all planned epics are in the `notes/` directory (`Epic-01` through `Epic-07` markdown files).

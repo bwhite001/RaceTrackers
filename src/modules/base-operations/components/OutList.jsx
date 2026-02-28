@@ -97,25 +97,25 @@ const OutList = () => {
     switch (status) {
       case 'withdrawn':
         return (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg role="img" aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd" />
           </svg>
         );
       case 'vet-out':
         return (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg role="img" aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
           </svg>
         );
       case 'dnf':
         return (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg role="img" aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
           </svg>
         );
       case 'non-starter':
         return (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg role="img" aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
           </svg>
         );
@@ -195,7 +195,7 @@ const OutList = () => {
       {/* Out List Table */}
       <div className="card overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-12">
+          <div role="status" aria-label="Loading" className="flex items-center justify-center py-12">
             <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : filteredRunners.length === 0 ? (
@@ -248,7 +248,7 @@ const OutList = () => {
                         <div className="flex items-center">
                           {getStatusIcon(runner.status)}
                           <span className="ml-2 text-sm font-medium text-gray-900 dark:text-white">
-                            #{runner.number}
+                            {runner.number}
                           </span>
                         </div>
                       </td>

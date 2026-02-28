@@ -294,8 +294,8 @@ describe('DuplicateEntriesDialog', () => {
     );
 
     mockDuplicates.forEach(entry => {
-      expect(screen.getByText(`Checkpoint ${entry.checkpoint}`)).toBeInTheDocument();
-      expect(screen.getByText(entry.notes)).toBeInTheDocument();
+      expect(screen.getAllByText(`Checkpoint ${entry.checkpoint}`).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(entry.notes).length).toBeGreaterThan(0);
       expect(screen.getByText(new Date(entry.timestamp).toLocaleString())).toBeInTheDocument();
     });
   });

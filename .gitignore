@@ -33,4 +33,11 @@ TODO.md
 *.xlsx
 *.csv
 E2E-TEST-RESULTS.json
+design/*
 .worktrees/
+
+# Uncompressed guide assets are tracked — compress before committing with npm run generate:guide
+# docs/guides/assets/
+
+# Design docs and plans (local only — never commit)
+docs/plans/

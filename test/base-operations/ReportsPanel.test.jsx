@@ -4,17 +4,14 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ReportsPanel from '../../src/components/BaseStation/ReportsPanel';
 import useBaseOperationsStore from '../../src/modules/base-operations/store/baseOperationsStore';
+import useDeviceDetection from '../../src/shared/hooks/useDeviceDetection';
 import { REPORT_TYPES } from '../../src/utils/reportUtils';
 
 // Mock the store
 vi.mock('../../src/modules/base-operations/store/baseOperationsStore');
 
 // Mock device detection hook
-vi.mock('../../src/shared/hooks/useDeviceDetection', () => ({
-  default: () => ({
-    isDesktop: true
-  })
-}));
+vi.mock('../../src/shared/hooks/useDeviceDetection');
 
 // Mock ReportBuilder component
 vi.mock('../../src/components/BaseStation/ReportBuilder', () => ({
@@ -39,6 +36,7 @@ describe('ReportsPanel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useBaseOperationsStore.mockImplementation(() => mockStore);
+    useDeviceDetection.mockReturnValue({ isDesktop: true });
   });
 
   test('renders quick reports', () => {
@@ -155,11 +153,7 @@ describe('ReportsPanel', () => {
   });
 
   test('hides keyboard shortcut on mobile', () => {
-    vi.mock('../../src/shared/hooks/useDeviceDetection', () => ({
-      default: () => ({
-        isDesktop: false
-      })
-    }));
+    useDeviceDetection.mockReturnValueOnce({ isDesktop: false });
 
     render(<ReportsPanel />);
     expect(screen.queryByText(/Press R to quickly access/i)).not.toBeInTheDocument();

@@ -1,9 +1,10 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { withOperationExit } from '../shared/components/ExitOperationModal';
 import HotkeysProvider from '../shared/components/HotkeysProvider';
 import useNavigationStore, { MODULE_TYPES } from '../shared/store/navigationStore';
 import useBaseOperationsStore from '../modules/base-operations/store/baseOperationsStore';
+import { useRaceStore } from '../store/useRaceStore.js';
 import useSettingsStore from '../shared/store/settingsStore';
 import { HOTKEYS } from '../types';
 
@@ -36,8 +37,10 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const navigate = useNavigate();
 
   // Store access
-  const { currentRaceId, loading, error, stats } = useBaseOperationsStore();
+  const { currentRaceId, loading, error, stats, initialize } = useBaseOperationsStore();
+  const { selectedRaceForMode } = useRaceStore();
   const { darkMode } = useSettingsStore();
+  const initStarted = useRef(false);
 
   // Local state
   const [activeTab, setActiveTab] = useState('data-entry');
@@ -46,12 +49,16 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
 
-  // Initialize base station
+  // Initialize base station from selectedRaceForMode, or redirect if no race
   useEffect(() => {
-    if (!currentRaceId) {
+    if (currentRaceId) return; // already initialized
+    if (selectedRaceForMode && !initStarted.current) {
+      initStarted.current = true;
+      initialize(selectedRaceForMode).catch(() => navigate('/'));
+    } else if (!selectedRaceForMode) {
       navigate('/');
     }
-  }, [currentRaceId, navigate]);
+  }, [currentRaceId, selectedRaceForMode, initialize, navigate]);
 
   // Handle tab change
   const handleTabChange = useCallback((tab) => {
