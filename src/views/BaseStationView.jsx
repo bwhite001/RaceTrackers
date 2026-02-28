@@ -16,6 +16,8 @@ import LoadingSpinner from '../components/Layout/LoadingSpinner';
 import ErrorMessage from '../components/Layout/ErrorMessage';
 import Header from '../components/Layout/Header';
 import StatusStrip from '../components/Layout/StatusStrip';
+import SettingsModal from '../components/Settings/SettingsModal';
+import HelpDialog from '../modules/base-operations/components/HelpDialog';
 
 const TABS = [
   { id: 'data-entry', label: 'Data Entry' },
@@ -38,6 +40,8 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const [activeTab, setActiveTab] = useState('data-entry');
   const [showWithdrawalDialog, setShowWithdrawalDialog] = useState(false);
   const [withdrawalType, setWithdrawalType] = useState('dnf');
+  const [showSettings, setShowSettings] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   // Initialize base station
   useEffect(() => {
@@ -59,14 +63,12 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
   // Handle settings
   const handleOpenSettings = useCallback(() => {
-    // TODO: Implement settings modal
-    console.log('Open settings');
+    setShowSettings(true);
   }, []);
 
   // Handle help
   const handleOpenHelp = useCallback(() => {
-    // TODO: Implement help dialog
-    console.log('Open help');
+    setShowHelp(true);
   }, []);
 
   // Handle exit
@@ -173,6 +175,16 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
           isOpen={showWithdrawalDialog}
           onClose={() => setShowWithdrawalDialog(false)}
           type={withdrawalType}
+        />
+
+        <SettingsModal
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+        />
+
+        <HelpDialog
+          isOpen={showHelp}
+          onClose={() => setShowHelp(false)}
         />
       </div>
     </HotkeysProvider>
