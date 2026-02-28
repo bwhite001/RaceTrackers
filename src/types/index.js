@@ -52,6 +52,10 @@ export const MODULE_TYPES = {
  * Runner Type Definition
  * @typedef {Object} Runner
  * @property {number} number - Runner's bib number
+ * @property {string} [firstName] - Runner's first name (optional)
+ * @property {string} [lastName] - Runner's last name (optional)
+ * @property {'M'|'F'|'X'} [gender] - Runner's gender (default 'X')
+ * @property {number} [batchNumber] - Wave/batch number this runner belongs to (default 1)
  * @property {string} status - Current status (from RUNNER_STATUSES)
  * @property {Object} checkpoints - Checkpoint times keyed by checkpoint number
  * @property {string} [finishTime] - ISO timestamp of finish
@@ -62,6 +66,31 @@ export const MODULE_TYPES = {
  * @property {string} [withdrawalReason] - Reason for withdrawal
  * @property {string} [disqualificationReason] - Reason for disqualification
  * @property {string} lastUpdate - ISO timestamp of last update
+ */
+
+/**
+ * Race Batch / Wave Type Definition
+ * @typedef {Object} RaceBatch
+ * @property {number} id - Auto-incremented DB id
+ * @property {number} raceId - Parent race id
+ * @property {number} batchNumber - Wave number (1-based)
+ * @property {string} batchName - Display name e.g. "Elite Wave", "Wave A"
+ * @property {string} startTime - ISO timestamp of this wave's start
+ */
+
+/**
+ * Checkpoint Runner Type Definition (v8)
+ * @typedef {Object} CheckpointRunner
+ * @property {number} raceId
+ * @property {number} checkpointNumber
+ * @property {number} number - Bib number
+ * @property {string} [actualTime] - Exact tap timestamp (ISO)
+ * @property {string} [commonTime] - Floored to 5-min interval (ISO)
+ * @property {string} [commonTimeLabel] - e.g. "10:45–10:50"
+ * @property {boolean} calledIn - Whether this group has been called to base
+ * @property {string} [callInTime] - When group was called (ISO)
+ * @property {string} status
+ * @property {string} [notes]
  */
 
 /**
