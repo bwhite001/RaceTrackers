@@ -8,7 +8,7 @@ export class RaceMaintenanceRepository extends BaseRepository {
 
   async createRace(raceConfig) {
     try {
-      return await db.transaction('rw', [db.races, db.runners, db.checkpoints], async () => {
+      return await db.transaction('rw', [db.races, db.runners, db.checkpoints, db.race_batches], async () => {
         // Create race
         const raceId = await this.add({
           ...raceConfig,
@@ -30,6 +30,15 @@ export class RaceMaintenanceRepository extends BaseRepository {
             name: 'Checkpoint 1'
           });
         }
+
+        // Create batches
+        const batches = raceConfig.batches?.length > 0
+          ? raceConfig.batches
+          : [{ batchNumber: 1, batchName: 'All Runners', startTime: raceConfig.startTime || new Date().toISOString() }];
+
+        await db.race_batches.bulkAdd(
+          batches.map(b => ({ raceId, batchNumber: b.batchNumber, batchName: b.batchName, startTime: b.startTime }))
+        );
 
         // Initialize runners
         const runners = [];
