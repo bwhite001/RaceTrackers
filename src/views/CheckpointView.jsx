@@ -7,6 +7,7 @@ import useSettingsStore from '../shared/store/settingsStore';
 import useRaceMaintenanceStore from '../modules/race-maintenance/store/raceMaintenanceStore';
 
 import RunnerGrid from '../components/Checkpoint/RunnerGrid';
+import QuickEntryBar from '../components/Checkpoint/QuickEntryBar';
 import CalloutSheet from '../components/Checkpoint/CalloutSheet';
 import RunnerOverview from '../components/Shared/RunnerOverview';
 import LoadingSpinner from '../components/Layout/LoadingSpinner';
@@ -135,9 +136,12 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
       {/* Tab panels */}
       {activeTab === 'mark-off' && (
-        <RunnerGrid
-          onRunnerUpdate={() => setHasUnsavedChanges(true)}
-        />
+        <div className="space-y-4">
+          <QuickEntryBar />
+          <RunnerGrid
+            onRunnerUpdate={() => setHasUnsavedChanges(true)}
+          />
+        </div>
       )}
       {activeTab === 'callout' && <CalloutSheet />}
       {activeTab === 'overview' && <RunnerOverview />}
