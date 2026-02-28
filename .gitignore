@@ -34,3 +34,4 @@ TODO.md
 *.csv
 E2E-TEST-RESULTS.json
 design/*
+.worktrees/
