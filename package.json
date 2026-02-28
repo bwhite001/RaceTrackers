@@ -80,7 +80,8 @@
     "test:passing": "vitest run --reporter=verbose --passWithNoTests",
     "test:failing": "vitest run --reporter=verbose --bail 1",
     "test:changed": "vitest run --changed",
-    "test:related": "vitest run --related"
+    "test:related": "vitest run --related",
+    "generate:guide": "node test/e2e/playwright/generate-guide.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",

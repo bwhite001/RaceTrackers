@@ -35,3 +35,6 @@ TODO.md
 E2E-TEST-RESULTS.json
 design/*
 .worktrees/
+
+# Generated user guide artefacts
+docs/guides/
