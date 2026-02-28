@@ -4,6 +4,7 @@ import useRaceMaintenanceStore from '../modules/race-maintenance/store/raceMaint
 import useNavigationStore, { MODULE_TYPES } from '../shared/store/navigationStore';
 import { useRaceStore } from '../store/useRaceStore.js';
 import RunnerOverview from '../components/Shared/RunnerOverview.jsx';
+import RosterImport from '../modules/race-maintenance/components/RosterImport.jsx';
 import { Card, CardHeader, CardBody, Button } from '../design-system/components';
 
 const RaceOverview = () => {
@@ -306,6 +307,22 @@ const RaceOverview = () => {
         </h2>
         <RunnerOverview />
       </div>
+
+      {/* CSV Roster Import */}
+      {raceConfig?.id && (
+        <div className="mb-6">
+          <Card variant="elevated">
+            <CardBody>
+              <RosterImport
+                raceId={raceConfig.id}
+                onComplete={() => {
+                  if (raceConfig?.id) initializeRunnersFromRace && initializeRunnersFromRace(raceConfig.id);
+                }}
+              />
+            </CardBody>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
