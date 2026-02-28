@@ -179,4 +179,5 @@ const useCheckpointStore = create((set, get) => ({
   }
 }));
 
+export { useCheckpointStore as checkpointStore };
 export default useCheckpointStore;

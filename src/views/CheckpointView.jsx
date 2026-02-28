@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { withOperationExit } from '../shared/components/ExitOperationModal';
 import useNavigationStore, { MODULE_TYPES } from '../shared/store/navigationStore';
-import useCheckpointStore from '../modules/checkpoint-operations/store/checkpointStore';
+import useCheckpointStore, { checkpointStore } from '../modules/checkpoint-operations/store/checkpointStore';
 import useSettingsStore from '../shared/store/settingsStore';
-import useRaceMaintenanceStore from '../modules/race-maintenance/store/raceMaintenanceStore';
+import useRaceMaintenanceStore, { raceMaintenanceStore } from '../modules/race-maintenance/store/raceMaintenanceStore';
 import { useRaceStore } from '../store/useRaceStore.js';
 
 import RunnerGrid from '../components/Checkpoint/RunnerGrid';
@@ -49,14 +49,14 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         }
 
         // Read fresh state after async load (avoid stale closure)
-        const freshRace = useRaceMaintenanceStore.getState().currentRace;
+        const freshRace = raceMaintenanceStore.getState().currentRace;
         if (freshRace) {
           // Start checkpoint operation
           startOperation(MODULE_TYPES.CHECKPOINT);
           
           // Initialize or load checkpoint data first (ensures runners are in IndexedDB)
           await loadCheckpointData(freshRace.id, parseInt(checkpointId));
-          const { runners: existingRunners } = useCheckpointStore.getState();
+          const { runners: existingRunners } = checkpointStore.getState();
           if (!existingRunners || existingRunners.length === 0) {
             await initializeCheckpoint(freshRace.id, parseInt(checkpointId));
           }

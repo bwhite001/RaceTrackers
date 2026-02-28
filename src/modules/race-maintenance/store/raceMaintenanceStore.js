@@ -163,4 +163,5 @@ const useRaceMaintenanceStore = create((set, get) => ({
   }
 }));
 
+export { useRaceMaintenanceStore as raceMaintenanceStore };
 export default useRaceMaintenanceStore;
