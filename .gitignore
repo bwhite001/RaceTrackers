@@ -38,3 +38,6 @@ design/*
 
 # Generated user guide artefacts
 docs/guides/
+
+# Design docs and plans (local only — never commit)
+docs/plans/
