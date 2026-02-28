@@ -36,8 +36,8 @@ E2E-TEST-RESULTS.json
 design/*
 .worktrees/
 
-# Generated user guide artefacts
-docs/guides/
+# Generated user guide assets (large PNGs — regenerate with npm run generate:guide)
+docs/guides/assets/
 
 # Design docs and plans (local only — never commit)
 docs/plans/

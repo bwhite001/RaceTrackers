@@ -217,6 +217,80 @@ The `commonTime` (5-min interval) is computed on-the-fly in `useRaceStore` for d
 
 ---
 
+---
+
+## GAP-10 — baseOperationsStore Uses localStorage Instead of Dexie
+
+**Requirement:** All persistent race data must be stored in IndexedDB (Dexie) to support offline-first operation and cross-module consistency.
+
+**Current state:** `src/modules/base-operations/store/baseOperationsStore.js` reads and writes race config and runner data using `localStorage.getItem/setItem` directly:
+- `loadRaceConfig()` — `localStorage.getItem('race_${raceId}_config')`
+- `loadRunners()` — `localStorage.getItem('race_${raceId}_runners')`
+- `initializeRunners()` — `localStorage.setItem('race_${raceId}_runners', ...)`
+- `updateRunner()` — `localStorage.setItem('race_${raceId}_runners', ...)`
+- `bulkUpdateRunners()` — `localStorage.setItem('race_${raceId}_runners', ...)`
+
+The `base_station_runners` table exists in Dexie (schema v7) and `StorageService` already has `loadBaseStationRunners()`, `markBaseStationRunner()`, and `bulkMarkBaseStationRunners()` — the store just never calls them.
+
+**Impact:** Base station runners are isolated from the shared Dexie database. Data entered at base station is invisible to any report, export, or cross-module query. 11 of 14 store tests are skipped.
+
+**What's needed:**
+- Replace `loadRaceConfig()` with `StorageService.getRace(raceId)` (returns from `db.races`)
+- Replace `loadRunners()` with `StorageService.loadBaseStationRunners(raceId)` (returns from `db.base_station_runners`)
+- Replace `initializeRunners()` with `StorageService.bulkMarkBaseStationRunners()` or runner init from `db.runners`
+- Replace `updateRunner()` / `bulkUpdateRunners()` with `StorageService.markBaseStationRunner()` / `bulkMarkBaseStationRunners()`
+
+**Affected files:**
+- `src/modules/base-operations/store/baseOperationsStore.js` — primary target
+- `test/base-operations/store/baseOperationsStore.test.js` — test setup must seed Dexie, not localStorage
+
+---
+
+## GAP-11 — CalloutSheet Calls Non-Existent Store Methods
+
+**Requirement:** The callout sheet must group runners into 5-minute time windows and allow volunteers to mark a whole group as "called in" to base station.
+
+**Current state:** `src/components/Checkpoint/CalloutSheet.jsx` calls two methods that do **not exist** in `useRaceStore`:
+- `getTimeSegments(checkpointNumber)` — expected to return runner groups bucketed into 5-min windows
+- `markSegmentCalled(checkpointNumber, segmentStart)` — expected to mark a window as called-in
+
+`SEGMENT_DURATION_MINUTES = 5` exists in `src/types/index.js` but no grouping logic is in the store. The grouping currently happens inline in the component (re-computed on each render) and is not persisted.
+
+**This gap is a consequence of GAP-03** — without a persisted `calledIn` field on `checkpoint_runners`, any "mark called" action is lost on reload.
+
+**What's needed:**
+- Add `getTimeSegments(checkpointNumber)` to `useRaceStore` — groups `checkpointRunners` by `floor(markOffTime / 5min)`
+- Add `markSegmentCalled(checkpointNumber, segmentStart)` to `useRaceStore` — sets `calledIn = true` on all matching `checkpoint_runners` rows (requires GAP-03 `calledIn` field)
+- Wire `useRaceStore` in `CalloutSheet.jsx` instead of inline computation
+
+**Affected files:**
+- `src/store/useRaceStore.js` — add two methods
+- `src/services/timeUtils.js` — `getSegmentStart()` exists; add `getSegmentLabel()` helper
+- `src/components/Checkpoint/CalloutSheet.jsx` — switch to store methods (no structural change)
+- `src/shared/services/database/schema.js` — needs `calledIn` field (GAP-03)
+
+**Blocked by:** GAP-03 (persisted `calledIn` field)
+
+---
+
+## GAP-12 — baseOperationsStore Tests Fail Due to Stale Store References
+
+**Current state:** The 11 skipped tests in `test/base-operations/store/baseOperationsStore.test.js` have two issues:
+1. **Stale store reference** — tests call `const store = useBaseOperationsStore.getState()` once, then mutate via `store.someAction()`, then assert on `store.someField`. After a Zustand `set()`, the captured `store` reference holds pre-mutation state. Must call `useBaseOperationsStore.getState()` again after each mutation.
+2. **localStorage coupling** — test setup seeds data via `localStorage.setItem(...)`. Once GAP-10 is resolved and the store reads from Dexie, tests must seed via Dexie instead (fake-indexeddb is already configured in `src/test/setup.js`).
+
+**Impact:** 11 tests are masked — the skip comment "store methods not implemented" is misleading; the methods exist but stale refs prevent assertions from seeing updated state.
+
+**What's needed:**
+- After resolving GAP-10, remove all `test.skip` markers
+- Update test setup to seed data via `StorageService` or direct `db.*` writes
+- Replace `store.someField` assertions with `useBaseOperationsStore.getState().someField` after mutations
+
+**Affected files:**
+- `test/base-operations/store/baseOperationsStore.test.js`
+
+---
+
 ## Dependency Map
 
 ```
@@ -225,12 +299,16 @@ GAP-01 (gender/name)   ───────────────────
 GAP-02 (batches/waves) ──────────────────────────► GAP-06 (leaderboard)
                                                       ▲
 GAP-03 (3 times / calledIn) ───────────────────► GAP-07 (pending call-ins)
+         │                                            │
+         └──────────────────────────────────────► GAP-11 (callout sheet methods)
 
 GAP-01 + GAP-02 + GAP-03 ──────────────────────► GAP-05 (heads-up grid)
 
 GAP-01 + GAP-02 ───────────────────────────────► GAP-09 (full export)
 
 GAP-08 (CSV import) ─── depends on GAP-01 + GAP-02 fields existing first
+
+GAP-10 (localStorage→Dexie) ───────────────────► GAP-12 (unskip store tests)
 ```
 
 ---
@@ -241,7 +319,9 @@ GAP-08 (CSV import) ─── depends on GAP-01 + GAP-02 fields existing first
 |---|---|---|
 | 1 | GAP-01, GAP-02 | Foundation — unlock all downstream features |
 | 2 | GAP-03, GAP-04 | Complete the time model; fix checkpoint data integrity |
-| 3 | GAP-07 | Pending call-ins (depends on GAP-03) |
-| 4 | GAP-05, GAP-06 | Dashboard + leaderboard (depends on 1+2+3) |
-| 5 | GAP-08 | CSV roster import (depends on GAP-01+02 fields) |
-| 6 | GAP-09 | Versioned export (add version + new fields) |
+| 3 | GAP-10 | Fix base station store to use Dexie; unblocks GAP-12 |
+| 4 | GAP-12 | Unskip store tests after GAP-10 resolved |
+| 5 | GAP-07, GAP-11 | Pending call-ins + callout sheet methods (depend on GAP-03) |
+| 6 | GAP-05, GAP-06 | Dashboard + leaderboard (depends on phases 1–3) |
+| 7 | GAP-08 | CSV roster import (depends on GAP-01+02 fields) |
+| 8 | GAP-09 | Versioned export (add version + new fields) |
