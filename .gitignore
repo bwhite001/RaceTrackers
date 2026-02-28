@@ -32,3 +32,4 @@ TODO.md
 *.xlsx
 *.csv
 E2E-TEST-RESULTS.json
+design/*
