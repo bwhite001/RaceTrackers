@@ -367,6 +367,57 @@ export class ImportService {
       throw new Error(`Legacy import failed: ${error.message}`);
     }
   }
+
+  /**
+   * Import checkpoint results from a checkpoint device export file.
+   * Validates that the raceId matches, then upserts into `imported_checkpoint_results`
+   * (overwrite semantics: delete existing entry for same raceId+checkpointNumber, then insert fresh).
+   *
+   * @param {Object} exportPackage - Package produced by ExportService.exportCheckpointResults()
+   * @param {number|string} currentRaceId - The raceId of the active race on this Base Station
+   * @returns {Promise<{success: boolean, checkpointNumber: number, totalRunners: number, error?: string}>}
+   */
+  static async importCheckpointResults(exportPackage, currentRaceId) {
+    try {
+      // Basic structure check
+      if (!exportPackage || exportPackage.exportType !== 'checkpoint-results') {
+        throw new Error('Invalid package: expected exportType "checkpoint-results"');
+      }
+
+      const { data } = exportPackage;
+      if (!data || !data.raceId || data.checkpointNumber == null || !Array.isArray(data.runners)) {
+        throw new Error('Invalid package: missing raceId, checkpointNumber, or runners');
+      }
+
+      // Verify the checkpoint data belongs to the active race
+      if (String(data.raceId) !== String(currentRaceId)) {
+        throw new Error(
+          `Race ID mismatch: package is for race "${data.raceId}", active race is "${currentRaceId}"`
+        );
+      }
+
+      const { raceId, checkpointNumber, runners } = data;
+
+      // Overwrite: delete any previous import for this checkpoint
+      await db.imported_checkpoint_results
+        .where(['raceId', 'checkpointNumber'])
+        .equals([raceId, checkpointNumber])
+        .delete();
+
+      // Insert fresh
+      await db.imported_checkpoint_results.add({
+        raceId,
+        checkpointNumber,
+        runners,
+        importedAt: new Date().toISOString(),
+      });
+
+      return { success: true, checkpointNumber, totalRunners: runners.length };
+    } catch (error) {
+      console.error('Checkpoint import error:', error);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 export default ImportService;
