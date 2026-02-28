@@ -1,0 +1,20 @@
+{
+  "id": "mountain-trail-100k",
+  "name": "Mountain Trail 100K",
+  "description": "Annual 100km trail race with 5 checkpoints across mountain terrain.",
+  "checkpoints": [
+    { "number": 1, "name": "Aid Station 1 – Valley" },
+    { "number": 2, "name": "Aid Station 2 – Ridge" },
+    { "number": 3, "name": "Aid Station 3 – Summit" },
+    { "number": 4, "name": "Aid Station 4 – Descent" },
+    { "number": 5, "name": "Aid Station 5 – Finish Approach" }
+  ],
+  "runnerRanges": [
+    { "min": 100, "max": 349 }
+  ],
+  "defaultBatches": [
+    { "batchNumber": 1, "batchName": "Elite Wave", "defaultStartOffsetMinutes": 0 },
+    { "batchNumber": 2, "batchName": "Wave A", "defaultStartOffsetMinutes": 15 },
+    { "batchNumber": 3, "batchName": "Wave B", "defaultStartOffsetMinutes": 30 }
+  ]
+}

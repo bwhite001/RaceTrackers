@@ -148,6 +148,45 @@ const useCheckpointStore = create((set, get) => ({
     }
   },
 
+  /**
+   * Build 5-minute time segments from current runners (passed only).
+   * Returns segments sorted by commonTime, each with { commonTimeLabel, commonTime, runners, calledIn }.
+   */
+  getTimeSegments: () => {
+    const { runners } = get();
+    const passed = runners.filter(r => r.status === 'passed' && r.commonTimeLabel);
+    const groups = {};
+    for (const r of passed) {
+      const key = r.commonTimeLabel;
+      if (!groups[key]) {
+        groups[key] = { commonTimeLabel: key, commonTime: r.commonTime, runners: [], calledIn: true };
+      }
+      groups[key].runners.push(r);
+      // If any runner in the group is not called in, the group is not called in
+      if (!r.calledIn) groups[key].calledIn = false;
+    }
+    return Object.values(groups).sort((a, b) =>
+      new Date(a.commonTime) - new Date(b.commonTime)
+    );
+  },
+
+  /**
+   * Persist calledIn=true for all runners in a 5-minute group.
+   */
+  markSegmentCalledIn: async (commonTimeLabel) => {
+    try {
+      const { currentRaceId, checkpointNumber } = get();
+      if (!currentRaceId || !checkpointNumber) throw new Error('No active checkpoint session');
+      set({ loading: true, error: null });
+      await CheckpointRepository.markGroupCalledIn(currentRaceId, checkpointNumber, commonTimeLabel);
+      const runners = await CheckpointRepository.getCheckpointRunners(currentRaceId, checkpointNumber);
+      set({ runners, loading: false, lastSync: new Date().toISOString() });
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
+
   // Export checkpoint data
   exportData: async () => {
     try {
