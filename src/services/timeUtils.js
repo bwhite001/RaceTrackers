@@ -325,6 +325,47 @@ export class TimeUtils {
   static formatDateTimeLocal(isoString) {
     return TimeUtils.isoToDatetimeLocal(isoString);
   }
+
+  /**
+   * Compute the ISO string and display label for a 5-minute common time group.
+   * @param {string|Date} actualTime - Exact runner arrival time
+   * @returns {{ commonTime: string, commonTimeLabel: string }}
+   */
+  static getCommonTimeLabel(actualTime) {
+    const dt = actualTime instanceof Date ? actualTime : parseISO(actualTime);
+    const segStart = new Date(dt);
+    segStart.setSeconds(0, 0);
+    segStart.setMinutes(Math.floor(segStart.getMinutes() / 5) * 5);
+
+    const segEnd = new Date(segStart);
+    segEnd.setMinutes(segEnd.getMinutes() + 5);
+
+    const pad = n => String(n).padStart(2, '0');
+    const fmt = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    const commonTimeLabel = `${fmt(segStart)}–${fmt(segEnd)}`;
+
+    return { commonTime: segStart.toISOString(), commonTimeLabel };
+  }
+
+  /**
+   * Calculate elapsed time between a checkpoint timestamp and a batch start time.
+   * @param {string} checkpointTime - ISO string of checkpoint passage
+   * @param {string} batchStartTime - ISO string of batch start
+   * @returns {{ hours: number, minutes: number, seconds: number, formatted: string }}
+   */
+  static calculateElapsed(checkpointTime, batchStartTime) {
+    const cpMs = new Date(checkpointTime).getTime();
+    const startMs = new Date(batchStartTime).getTime();
+    const totalSec = Math.max(0, Math.floor((cpMs - startMs) / 1000));
+
+    const hours = Math.floor(totalSec / 3600);
+    const minutes = Math.floor((totalSec % 3600) / 60);
+    const seconds = totalSec % 60;
+    const pad = n => String(n).padStart(2, '0');
+    const formatted = `${hours}:${pad(minutes)}:${pad(seconds)}`;
+
+    return { hours, minutes, seconds, formatted };
+  }
 }
 
 export default TimeUtils;

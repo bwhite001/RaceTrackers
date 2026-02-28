@@ -1,5 +1,6 @@
 import { BaseRepository } from '../../../shared/services/database/BaseRepository';
 import db from '../../../shared/services/database/schema';
+import TimeUtils from '../../../services/timeUtils';
 
 export class CheckpointRepository extends BaseRepository {
   constructor() {
@@ -20,7 +21,6 @@ export class CheckpointRepository extends BaseRepository {
 
   async initializeCheckpoint(raceId, checkpointNumber) {
     try {
-      // Get all race runners and create checkpoint-specific entries
       const raceRunners = await db.runners.where('raceId').equals(raceId).toArray();
       
       const checkpointRunners = raceRunners.map(runner => ({
@@ -28,6 +28,10 @@ export class CheckpointRepository extends BaseRepository {
         checkpointNumber,
         number: runner.number,
         status: 'not-started',
+        actualTime: null,
+        commonTime: null,
+        commonTimeLabel: null,
+        calledIn: false,
         callInTime: null,
         markOffTime: null,
         notes: null
@@ -49,12 +53,15 @@ export class CheckpointRepository extends BaseRepository {
         .first();
       
       if (!runner) {
-        // Create new checkpoint runner if it doesn't exist
         const newRunner = {
           raceId,
           checkpointNumber,
           number: runnerNumber,
           status: 'not-started',
+          actualTime: null,
+          commonTime: null,
+          commonTimeLabel: null,
+          calledIn: false,
           callInTime: null,
           markOffTime: null,
           notes: null,
@@ -72,31 +79,68 @@ export class CheckpointRepository extends BaseRepository {
     }
   }
 
+  /**
+   * Mark a runner as passed through a checkpoint.
+   * Computes and persists all 3 times: actualTime, commonTime, commonTimeLabel.
+   */
   async markRunner(raceId, checkpointNumber, runnerNumber, callInTime = null, markOffTime = null, status = 'passed') {
-    const timestamp = markOffTime || callInTime || new Date().toISOString();
+    const actualTime = markOffTime || callInTime || new Date().toISOString();
+    const { commonTime, commonTimeLabel } = TimeUtils.getCommonTimeLabel(actualTime);
+
     return this.updateRunner(raceId, checkpointNumber, runnerNumber, {
       status,
-      callInTime: callInTime || timestamp,
-      markOffTime: markOffTime || timestamp
+      actualTime,
+      commonTime,
+      commonTimeLabel,
+      markOffTime: actualTime, // keep for back-compat
+      callInTime: callInTime || null
     });
   }
 
   async bulkMarkRunners(raceId, checkpointNumber, runnerNumbers, callInTime = null, markOffTime = null, status = 'passed') {
     try {
-      const timestamp = markOffTime || callInTime || new Date().toISOString();
-      
+      const actualTime = markOffTime || callInTime || new Date().toISOString();
+      const { commonTime, commonTimeLabel } = TimeUtils.getCommonTimeLabel(actualTime);
+
       await db.transaction('rw', this.table, async () => {
         for (const runnerNumber of runnerNumbers) {
           await this.updateRunner(raceId, checkpointNumber, runnerNumber, {
             status,
-            callInTime: callInTime || timestamp,
-            markOffTime: markOffTime || timestamp
+            actualTime,
+            commonTime,
+            commonTimeLabel,
+            markOffTime: actualTime,
+            callInTime: callInTime || null
           });
         }
       });
     } catch (error) {
       console.error('Error bulk marking checkpoint runners:', error);
       throw new Error('Failed to bulk mark checkpoint runners');
+    }
+  }
+
+  /**
+   * Mark an entire 5-minute group as called in to base station.
+   * Persists calledIn=true and callInTime on all runners with matching commonTimeLabel.
+   */
+  async markGroupCalledIn(raceId, checkpointNumber, commonTimeLabel) {
+    try {
+      const callInTime = new Date().toISOString();
+      await db.transaction('rw', this.table, async () => {
+        const runners = await this.table
+          .where(['raceId', 'checkpointNumber'])
+          .equals([raceId, checkpointNumber])
+          .filter(r => r.commonTimeLabel === commonTimeLabel)
+          .toArray();
+
+        for (const runner of runners) {
+          await this.update(runner.id, { calledIn: true, callInTime });
+        }
+      });
+    } catch (error) {
+      console.error('Error marking group called in:', error);
+      throw new Error('Failed to mark group as called in');
     }
   }
 

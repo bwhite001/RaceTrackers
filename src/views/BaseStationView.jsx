@@ -133,7 +133,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         <main className="container mx-auto px-4 py-6">
           {/* Tab Navigation */}
           <nav aria-label="View navigation" className="mb-6">
-            <div className="flex space-x-1 border-b border-gray-200 dark:border-gray-700" role="tablist">
+            <div className="flex space-x-1 border-b border-gray-200 dark:border-gray-700 flex-wrap" role="tablist">
               {TABS.map(tab => (
                 <button
                   key={tab.id}
@@ -150,6 +150,27 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
                   {tab.label}
                 </button>
               ))}
+              {/* Additional views as separate routes */}
+              <div className="ml-auto flex items-center gap-1 pb-1">
+                <button
+                  onClick={() => navigate('/base-station/dashboard')}
+                  className="px-3 py-1.5 text-xs font-medium rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  Live Dashboard
+                </button>
+                <button
+                  onClick={() => navigate('/base-station/leaderboard')}
+                  className="px-3 py-1.5 text-xs font-medium rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  Leaderboard
+                </button>
+                <button
+                  onClick={() => navigate('/base-station/pending')}
+                  className="px-3 py-1.5 text-xs font-medium rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  Pending Call-Ins
+                </button>
+              </div>
             </div>
           </nav>
 

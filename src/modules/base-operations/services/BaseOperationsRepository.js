@@ -32,6 +32,7 @@ export class BaseOperationsRepository extends BaseRepository {
         number: runner.number,
         status: 'not-started',
         commonTime: null,
+        markOffEntryTime: null,
         notes: null
       }));
 
@@ -58,6 +59,7 @@ export class BaseOperationsRepository extends BaseRepository {
           number: runnerNumber,
           status: 'not-started',
           commonTime: null,
+          markOffEntryTime: null,
           notes: null,
           ...updates
         };
@@ -77,19 +79,22 @@ export class BaseOperationsRepository extends BaseRepository {
     const timestamp = commonTime || new Date().toISOString();
     return this.updateRunner(raceId, checkpointNumber, runnerNumber, {
       status,
-      commonTime: timestamp
+      commonTime: timestamp,
+      markOffEntryTime: new Date().toISOString()
     });
   }
 
   async bulkMarkRunners(raceId, checkpointNumber, runnerNumbers, commonTime = null, status = 'passed') {
     try {
       const timestamp = commonTime || new Date().toISOString();
+      const entryTime = new Date().toISOString();
       
       await db.transaction('rw', this.table, async () => {
         for (const runnerNumber of runnerNumbers) {
           await this.updateRunner(raceId, checkpointNumber, runnerNumber, {
             status,
-            commonTime: timestamp
+            commonTime: timestamp,
+            markOffEntryTime: entryTime
           });
         }
       });
