@@ -8,13 +8,20 @@ import useRaceMaintenanceStore from '../modules/race-maintenance/store/raceMaint
 
 import RunnerGrid from '../components/Checkpoint/RunnerGrid';
 import CalloutSheet from '../components/Checkpoint/CalloutSheet';
+import RunnerOverview from '../components/Shared/RunnerOverview';
 import LoadingSpinner from '../components/Layout/LoadingSpinner';
 import ErrorMessage from '../components/Layout/ErrorMessage';
+
+const TABS = [
+  { id: 'mark-off', label: 'Mark Off' },
+  { id: 'callout', label: 'Callout Sheet' },
+  { id: 'overview', label: 'Overview' },
+];
 
 const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const { checkpointId } = useParams();
   const navigate = useNavigate();
-  const [showCalloutSheet, setShowCalloutSheet] = useState(false);
+  const [activeTab, setActiveTab] = useState('mark-off');
   
   // Store hooks
   const { startOperation } = useNavigationStore();
@@ -99,38 +106,41 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             Checkpoint {checkpointId}
           </h1>
         </div>
-        <div className="space-x-4">
-          <button
-            onClick={() => setShowCalloutSheet(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            View Callout Sheet
-          </button>
-          <button
-            onClick={onExitAttempt}
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-          >
-            Exit Checkpoint
-          </button>
-        </div>
+        <button
+          onClick={onExitAttempt}
+          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+        >
+          Exit Checkpoint
+        </button>
       </div>
 
-      {/* Runner Grid */}
-      <RunnerGrid 
-        runners={runners}
-        onRunnerUpdate={(number, updates) => {
-          setHasUnsavedChanges(true);
-          // Runner update logic here
-        }}
-      />
+      {/* Tab bar */}
+      <div className="border-b border-gray-200 dark:border-gray-700">
+        <nav className="-mb-px flex space-x-4" aria-label="Checkpoint tabs">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`py-2 px-4 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === tab.id
+                  ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
 
-      {/* Callout Sheet Modal */}
-      {showCalloutSheet && (
-        <CalloutSheet
-          runners={runners}
-          onClose={() => setShowCalloutSheet(false)}
+      {/* Tab panels */}
+      {activeTab === 'mark-off' && (
+        <RunnerGrid
+          onRunnerUpdate={() => setHasUnsavedChanges(true)}
         />
       )}
+      {activeTab === 'callout' && <CalloutSheet />}
+      {activeTab === 'overview' && <RunnerOverview />}
     </div>
   );
 };
