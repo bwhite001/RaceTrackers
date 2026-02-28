@@ -12,6 +12,7 @@ import DataEntry from '../components/BaseStation/DataEntry';
 import RaceOverview from '../components/BaseStation/RaceOverview';
 import ReportsPanel from '../components/BaseStation/ReportsPanel';
 import WithdrawalDialog from '../components/BaseStation/WithdrawalDialog';
+import CheckpointImportPanel from '../components/BaseStation/CheckpointImportPanel';
 import LoadingSpinner from '../components/Layout/LoadingSpinner';
 import ErrorMessage from '../components/Layout/ErrorMessage';
 import Header from '../components/Layout/Header';
@@ -158,7 +159,10 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             )}
 
             {activeTab === 'overview' && (
-              <RaceOverview />
+              <div className="space-y-6">
+                <RaceOverview />
+                <CheckpointImportPanel />
+              </div>
             )}
 
             {activeTab === 'reports' && (
