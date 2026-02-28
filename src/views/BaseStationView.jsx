@@ -13,6 +13,7 @@ import RaceOverview from '../components/BaseStation/RaceOverview';
 import ReportsPanel from '../components/BaseStation/ReportsPanel';
 import WithdrawalDialog from '../components/BaseStation/WithdrawalDialog';
 import CheckpointImportPanel from '../components/BaseStation/CheckpointImportPanel';
+import CheckpointGroupingView from '../components/BaseStation/CheckpointGroupingView';
 import LoadingSpinner from '../components/Layout/LoadingSpinner';
 import ErrorMessage from '../components/Layout/ErrorMessage';
 import Header from '../components/Layout/Header';
@@ -23,6 +24,7 @@ import HelpDialog from '../modules/base-operations/components/HelpDialog';
 const TABS = [
   { id: 'data-entry', label: 'Data Entry' },
   { id: 'overview', label: 'Overview' },
+  { id: 'checkpoint-matrix', label: 'Checkpoint Matrix' },
   { id: 'reports', label: 'Reports' },
 ];
 
@@ -163,6 +165,10 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
                 <RaceOverview />
                 <CheckpointImportPanel />
               </div>
+            )}
+
+            {activeTab === 'checkpoint-matrix' && (
+              <CheckpointGroupingView />
             )}
 
             {activeTab === 'reports' && (
