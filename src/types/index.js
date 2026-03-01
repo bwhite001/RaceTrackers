@@ -269,6 +269,7 @@ export const DEFAULT_SETTINGS = {
   soundEnabled: true,
   hapticsEnabled: true,
   keyboardShortcuts: true,
+  sunlightMode: false,
   
   // Color Settings
   statusColors: DEFAULT_STATUS_COLORS,

@@ -14,10 +14,10 @@ import {
   applyReducedMotionToDOM,
   applyTouchOptimizedToDOM,
   applyCompactModeToDOM,
-  applyStatusColorsToDOM
+  applyStatusColorsToDOM,
+  applySunlightModeToDOM
 } from '../../utils/settingsDOM.js';
 import {
-  DialogHeader,
   DialogFooter,
   SettingsSection,
   SettingItem,
@@ -50,6 +50,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
       applyTouchOptimizedToDOM(localSettings.touchOptimized);
       applyCompactModeToDOM(localSettings.compactMode);
       applyStatusColorsToDOM(localSettings.statusColors);
+      applySunlightModeToDOM(localSettings.sunlightMode ?? false);
     }
   }, [
     localSettings.fontSize,
@@ -59,6 +60,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
     localSettings.touchOptimized,
     localSettings.compactMode,
     localSettings.statusColors,
+    localSettings.sunlightMode,
     isOpen
   ]);
 
@@ -101,6 +103,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
     applyTouchOptimizedToDOM(settings.touchOptimized);
     applyCompactModeToDOM(settings.compactMode);
     applyStatusColorsToDOM(settings.statusColors);
+    applySunlightModeToDOM(settings.sunlightMode ?? false);
     
     onClose();
   };
@@ -134,11 +137,22 @@ const SettingsModal = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] overflow-y-auto">
         
-        {/* Header */}
-        <DialogHeader
-          title="Settings"
-          onClose={handleCancel}
-        />
+        {/* Navy gradient header */}
+        <div className="bg-gradient-to-r from-navy-900 to-navy-800 rounded-t-lg px-6 py-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-white">Settings</h2>
+            <p className="text-xs text-white/60 mt-0.5">Customise your RaceTracker experience</p>
+          </div>
+          <button
+            onClick={handleCancel}
+            className="text-white/70 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
+            aria-label="Close settings"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
         {/* Content */}
         <div className="p-6 space-y-8">
@@ -176,6 +190,16 @@ const SettingsModal = ({ isOpen, onClose }) => {
               <Toggle
                 checked={localSettings.reducedMotion}
                 onChange={(checked) => handleSettingChange('reducedMotion', checked)}
+              />
+            </SettingItem>
+
+            <SettingItem
+              label="Sunlight Mode"
+              description="Maximum contrast for outdoor/direct sunlight use"
+            >
+              <Toggle
+                checked={localSettings.sunlightMode ?? false}
+                onChange={(checked) => handleSettingChange('sunlightMode', checked)}
               />
             </SettingItem>
 
