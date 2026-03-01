@@ -36,7 +36,8 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     loading, 
     error,
     initializeCheckpoint,
-    loadCheckpointData 
+    loadCheckpointData,
+    pendingCallInCount,
   } = useCheckpointStore();
   const { loadRace: loadRaceIntoLegacyStore, loadCheckpointRunners } = useRaceStore();
   const { updateSetting } = useSettingsStore();
@@ -167,7 +168,16 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
                 }
               `}
             >
-              {tab.label}
+              {tab.id === 'callout' ? (
+                <span className="flex items-center gap-2">
+                  Callout Sheet
+                  {pendingCallInCount() > 0 && (
+                    <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">
+                      {pendingCallInCount()}
+                    </span>
+                  )}
+                </span>
+              ) : tab.label}
             </button>
           ))}
         </div>
