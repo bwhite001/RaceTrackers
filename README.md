@@ -4,7 +4,8 @@
 [![React](https://img.shields.io/badge/React-18.2-blue.svg)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-7.0-646CFF.svg)](https://vitejs.dev/)
 [![PWA](https://img.shields.io/badge/PWA-Enabled-5A0FC8.svg)](https://web.dev/progressive-web-apps/)
-[![Test Coverage](https://img.shields.io/badge/Coverage-85%25-brightgreen.svg)](./test)
+[![Tests](https://github.com/bwhite001/RaceTrackers/actions/workflows/ci.yml/badge.svg)](https://github.com/bwhite001/RaceTrackers/actions/workflows/ci.yml)
+[![Test Suites](https://github.com/bwhite001/RaceTrackers/actions/workflows/test-suites.yml/badge.svg)](https://github.com/bwhite001/RaceTrackers/actions/workflows/test-suites.yml)
 
 > **Offline-first Progressive Web App for race event management**  
 > Track runners at checkpoints and manage race operations without internet connectivity.
@@ -438,6 +439,17 @@ The app is deployed automatically via GitHub Actions on every push to `main`.
    ```
 
 > Visiting any other URL (e.g. the old `github.io` address) will redirect automatically to the canonical domain.
+
+### CI / Branch Protection
+
+PRs to `main` must pass two required status checks before merging:
+
+| Check | What it does |
+|-------|-------------|
+| **CI Gate** (`ci.yml`) | Runs all 546 tests split across **4 parallel shards** + build verification |
+| **Suites Gate** (`test-suites.yml`) | Runs `unit`, `base-operations`, `database`, `integration`, `services` suites **in parallel** |
+
+To enforce this, enable branch protection on `main` in repository Settings → Branches and add `CI Gate` and `Suites Gate` as required status checks.
 
 ### Manual Deployment
 
