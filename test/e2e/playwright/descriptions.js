@@ -115,4 +115,28 @@ export const JOURNEY_DESCRIPTIONS = {
 
   'imports a race configuration and restores data':
     'After wiping all data from the app, this test uploads a previously exported race file and confirms the race is fully restored — the race name, checkpoints, and runner numbers all come back exactly as they were before the data was cleared.',
+
+  // ─── 08 Runner Names & Gender ─────────────────────────────────────────────
+
+  'runner name/gender section appears after adding a range':
+    'After a race director adds a bib number range on Step 3 of the setup wizard, an optional section appears for entering runner first names, last names, and gender. This is purely optional — races can be tracked without personal data.',
+
+  'entering a name and gender persists to store':
+    'If a race director enters first name "Alice", last name "Smith" and gender "F" for runner 200, those values should be saved to the store so they can appear on checkpoint callout sheets and base station reports.',
+
+  // ─── 09 Batch / Wave Configuration ───────────────────────────────────────
+
+  'waves step shows default wave and allows adding more':
+    'Step 4 of the race setup wizard is the Waves step, which groups runners into separate start batches. By default one wave is provided. A race director can add a second wave using the Add Wave button.',
+
+  'wave name and time fields are editable and save':
+    'A race director can give each wave a custom name (e.g. "Wave B") and a specific start time (e.g. "07:30"). These are saved to the database so checkpoint volunteers know when each wave started.',
+
+  // ─── 10 Callout Sheet ─────────────────────────────────────────────────────
+
+  'callout sheet tab shows runners who passed but not called in':
+    'The Callout Sheet tab lists all runners who have been marked as passed at the checkpoint but have not yet been confirmed as called in to base station. Checkpoint volunteers use this list to make radio calls.',
+
+  'pending count badge decrements when runner is called in':
+    'When a checkpoint volunteer marks a runner as called in, the pending count badge on the Callout Sheet tab decreases by one. If all runners have been called in the badge disappears.',
 };
