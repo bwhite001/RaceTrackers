@@ -232,46 +232,134 @@ RaceTrackers/
 
 ### Technology Stack
 
-| Category | Technology |
-|----------|-----------|
-| **Frontend** | React 18, React Router |
-| **Build Tool** | Vite 7 |
-| **Styling** | Tailwind CSS |
-| **State Management** | Zustand |
-| **Database** | Dexie.js (IndexedDB) |
-| **PWA** | Vite PWA Plugin + Workbox |
-| **Testing** | Vitest, React Testing Library, Puppeteer |
-| **Validation** | Zod |
+#### Core
+| Category | Technology | Version |
+|----------|-----------|---------|
+| **UI Framework** | React | 18.2 |
+| **Router** | React Router | 7.9 |
+| **Build Tool** | Vite | 7.0 |
+| **Styling** | Tailwind CSS | 3.3 |
+| **State Management** | Zustand | 4.4 |
+| **Database** | Dexie.js (IndexedDB) | 3.2 |
+| **PWA** | vite-plugin-pwa + Workbox | 1.0 |
+| **Icons / UI** | Heroicons + Headless UI | 2.x |
+| **Date Handling** | date-fns | 2.30 |
+| **QR Codes** | qrcode.react + jsQR | 3.1 / 1.4 |
+| **Validation** | Zod | 4.1 |
+| **Encryption** | crypto-js | 4.2 |
+
+#### Testing
+| Tool | Purpose | Version |
+|------|---------|---------|
+| Vitest | Unit & integration tests | 3.2 |
+| React Testing Library | Component testing | 16.3 |
+| Puppeteer | E2E browser automation | 24 |
+| Playwright | E2E test runner | 1.58 |
+| fake-indexeddb | In-memory IndexedDB shim | 6.2 |
+
+#### Language
+Plain JavaScript with JSDoc type annotations and prop-types — no TypeScript.
+
+---
+
+### Colour System
+
+#### Brand — Navy Blue
+`primary-*` and `navy-*` are identical aliases in Tailwind.
+
+| Scale | Hex | Usage |
+|-------|-----|-------|
+| `navy-900` | `#263454` | Primary buttons, nav headers |
+| `navy-800` | `#293c64` | Button hover, dark-mode surfaces |
+| `navy-700` | `#2e4677` | Dark panels |
+| `navy-500` | `#4a6faf` | Focus rings, mid tones |
+| `navy-300` | `#9fb5da` | Light accents |
+| `navy-50` | `#f4f6fb` | Tinted backgrounds |
+
+#### Accents
+| Name | Hex | Usage |
+|------|-----|-------|
+| `accent-red-600` | `#dc2626` | Danger buttons, errors |
+| `gold-500` / `accent-gold-500` | `#f59e0b` | Warning buttons, DNF badges |
+
+#### Runner Status Colours
+Fixed semantic colours used across all modules (user-customisable in Settings):
+
+| Status | Colour | Hex |
+|--------|--------|-----|
+| Not Started | Gray | `#9ca3af` |
+| Passed / Active | Emerald | `#10b981` |
+| Non-Starter | Red | `#ef4444` |
+| DNF | Amber | `#f59e0b` |
+| Called In | Violet | `#8b5cf6` |
+
+#### Surfaces
+| Token | Value | Usage |
+|-------|-------|-------|
+| `page-bg` | `#f1f5f9` | Page background (slate-100) |
+| `surface` | `#ffffff` | Cards and panels |
+
+---
+
+### UI Design Principles
+
+- **Dark mode** — class-based toggle (`dark:`); dark surfaces use `navy-800/900/950`
+- **Typography** — native system font stack (no web fonts loaded); monospace for runner numbers
+- **Border radius** — `rounded-lg` (8 px) throughout
+- **Shadows** — `shadow-md` on buttons, `shadow-lg` on hover; subtle card elevation
+- **Transitions** — `duration-200` on all interactive elements
+- **Focus** — `focus:ring-2 focus:ring-navy-500` for full keyboard accessibility
+- **Layout** — responsive Tailwind breakpoints; optimised for tablet/mobile field use
+- **Components** — design system in `src/design-system/`: Button (8 variants), Card, Modal, Badge, Container, full Form suite
+
+#### Button Variants
+| Variant | Appearance |
+|---------|-----------|
+| `primary` | Navy-900 fill, white text |
+| `secondary` | Gray fill, dark text |
+| `danger` | Red-600 fill, white text |
+| `success` | Green-600 fill, white text |
+| `warning` | Gold-500 fill, white text |
+| `ghost` | Transparent, hover gray tint |
+| `outline` | Navy border, fills navy on hover |
+| `link` | Transparent, underline on hover |
+
+---
 
 ### Available Scripts
 
+Prefer `make` — run `make help` to list all targets.
+
 #### Development
 ```bash
-npm run dev              # Start dev server (localhost:3000)
-npm run build            # Production build
-npm run preview          # Preview production build
+make install             # Install dependencies
+make dev                 # Start dev server (localhost:3000)
+make build               # Production build
+make preview             # Build and serve locally (localhost:4173)
+make clean               # Remove build artefacts
 ```
 
 #### Testing
 ```bash
-npm test                 # Run all tests in watch mode
-npm run test:run         # Run all tests once
-npm run test:coverage    # Generate coverage report
-npm run test:ui          # Open Vitest UI
-
-# Test Suites
-npm run test:suite:unit              # Unit tests
-npm run test:suite:base-operations   # Base station tests
-npm run test:suite:database          # Database tests
-npm run test:suite:integration       # Integration tests
-npm run test:suite:e2e               # E2E tests
+make test                # Watch mode
+make test-run            # Run once
+make test-coverage       # With coverage report
+make test-unit           # Unit tests
+make test-base           # Base station tests
+make test-db             # Database tests
+make test-integration    # Integration tests
+make test-services       # Service layer tests
+make test-components     # Component tests
+make test-e2e            # E2E (auto-builds first)
+make test-e2e-ci         # E2E headless
+make test-changed        # Only tests affected by uncommitted changes
 ```
 
-#### Utilities
+#### Test Data
 ```bash
-npm run test:seed        # Seed test data
-npm run test:clear       # Clear test data
-npm run screenshots:all  # Capture screenshots
+make seed                # Seed full dataset into IndexedDB
+make seed-minimal        # Seed minimal dataset
+make clear-data          # Clear all test data
 ```
 
 📖 [Development Guide](./docs/guides/development-guide.md)
