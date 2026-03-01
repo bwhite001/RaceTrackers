@@ -24,6 +24,7 @@ vi.mock('modules/checkpoint-operations/store/checkpointStore', () => ({
     error: null,
     initializeCheckpoint: vi.fn(),
     loadCheckpointData: vi.fn(() => Promise.resolve([])),
+    pendingCallInCount: vi.fn(() => 0),
   })),
 }));
 
