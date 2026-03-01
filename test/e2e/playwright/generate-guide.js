@@ -29,6 +29,7 @@ const SECTION_MAP = {
   'navigates to checkpoint and sees runner grid':                        'checkpoint',
   'marks off a single runner via the runner grid':                       'checkpoint',
   'marks off multiple runners via Quick Entry':                          'checkpoint',
+  'switches to Callout Sheet tab':                                       'checkpoint',
   'switches to Overview tab and shows runner counts':                    'checkpoint',
   'can export checkpoint results':                                       'checkpoint',
   'navigates from race overview to a checkpoint':                        'checkpoint',
