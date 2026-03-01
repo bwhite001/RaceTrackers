@@ -215,6 +215,14 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
             {activeTab === 'overview' && (
               <div className="space-y-6">
+                <HeadsUpGrid
+                  runners={(runners ?? []).map(r => ({
+                    number: r.number,
+                    status: r.status,
+                    checkpointStatuses: r.checkpoints ?? {},
+                  }))}
+                  checkpoints={checkpoints ?? []}
+                />
                 <RaceOverview />
                 <CheckpointImportPanel />
               </div>
