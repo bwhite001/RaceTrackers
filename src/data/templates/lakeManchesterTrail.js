@@ -6,7 +6,7 @@
  * Event Details:
  * - Distance: 12km, 23km, 42km options
  * - Terrain: Lake trails
- * - Checkpoints: 5 (including start/finish)
+ * - Checkpoints: 3
  * - Typical Runners: 80-120
  */
 
@@ -26,21 +26,9 @@ export const lakeManchesterTrail = {
   checkpoints: [
     {
       number: 1,
-      name: 'Start - Lake Manchester Dam',
-      location: '-27.4989, 152.7423',
-      orderSequence: 1,
-      metadata: {
-        operators: ['VK4HIT (Allan)'],
-        description: 'Race start at dam wall',
-        terrain: 'Dam area',
-        facilities: ['Water station', 'Toilets', 'Parking']
-      }
-    },
-    {
-      number: 2,
       name: 'CP1 - Northern Trail',
       location: '-27.4867, 152.7534',
-      orderSequence: 2,
+      orderSequence: 1,
       metadata: {
         operators: ['VK4SIR (Peter)', 'VK4SQL (Stephen)'],
         description: 'First checkpoint on northern trail',
@@ -49,10 +37,10 @@ export const lakeManchesterTrail = {
       }
     },
     {
-      number: 3,
+      number: 2,
       name: 'CP2 - Eastern Shore',
       location: '-27.4923, 152.7689',
-      orderSequence: 3,
+      orderSequence: 2,
       metadata: {
         operators: ['VK4IE (John)', 'VK4AJJ (Andrew)'],
         description: 'Eastern shore checkpoint',
@@ -61,27 +49,15 @@ export const lakeManchesterTrail = {
       }
     },
     {
-      number: 4,
+      number: 3,
       name: 'CP3 - Southern Loop',
       location: '-27.5078, 152.7456',
-      orderSequence: 4,
+      orderSequence: 3,
       metadata: {
         operators: ['VK4SMA (Mark)', 'VK4TMK (Trish)'],
         description: 'Southern loop checkpoint',
         terrain: 'Trail section',
         facilities: ['Water station', 'First aid']
-      }
-    },
-    {
-      number: 5,
-      name: 'Finish - Lake Manchester Dam',
-      location: '-27.4989, 152.7423',
-      orderSequence: 5,
-      metadata: {
-        operators: ['VK4BRW (Brandon)', 'VK4GJW (Greg)'],
-        description: 'Finish line at dam',
-        terrain: 'Dam area',
-        facilities: ['Water station', 'First aid', 'Food', 'Medical', 'Toilets']
       }
     }
   ],

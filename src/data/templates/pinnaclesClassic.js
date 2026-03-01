@@ -6,7 +6,7 @@
  * Event Details:
  * - Distance: Multiple options
  * - Terrain: Challenging trails
- * - Checkpoints: 5 (including start/finish)
+ * - Checkpoints: 3
  * - Typical Runners: 100-150
  */
 
@@ -26,21 +26,9 @@ export const pinnaclesClassic = {
   checkpoints: [
     {
       number: 1,
-      name: 'Start - Gold Creek Reservoir',
-      location: '-27.3894, 152.8556',
-      orderSequence: 1,
-      metadata: {
-        operators: ['VK4HIT (Allan)'],
-        description: 'Race start at Gold Creek Reservoir',
-        terrain: 'Reservoir area',
-        facilities: ['Water station', 'Toilets', 'Parking']
-      }
-    },
-    {
-      number: 2,
       name: 'CP1 - Mt Glorious Road Junction',
       location: '-27.3423, 152.7889',
-      orderSequence: 2,
+      orderSequence: 1,
       metadata: {
         operators: ['VK4SIR (Peter)', 'VK4SQL (Stephen)'],
         description: 'First checkpoint at road junction',
@@ -49,10 +37,10 @@ export const pinnaclesClassic = {
       }
     },
     {
-      number: 3,
+      number: 2,
       name: 'CP2 - Pinnacles Lookout',
       location: '-27.3156, 152.7734',
-      orderSequence: 3,
+      orderSequence: 2,
       metadata: {
         operators: ['VK4IE (John)', 'VK4AJJ (Andrew)'],
         description: 'Pinnacles lookout checkpoint',
@@ -61,27 +49,15 @@ export const pinnaclesClassic = {
       }
     },
     {
-      number: 4,
+      number: 3,
       name: 'CP3 - Return Trail',
       location: '-27.3567, 152.8123',
-      orderSequence: 4,
+      orderSequence: 3,
       metadata: {
         operators: ['VK4SMA (Mark)', 'VK4TMK (Trish)'],
         description: 'Return trail checkpoint',
         terrain: 'Trail section',
         facilities: ['Water station', 'First aid']
-      }
-    },
-    {
-      number: 5,
-      name: 'Finish - Gold Creek Reservoir',
-      location: '-27.3894, 152.8556',
-      orderSequence: 5,
-      metadata: {
-        operators: ['VK4BRW (Brandon)', 'VK4GJW (Greg)'],
-        description: 'Finish line at reservoir',
-        terrain: 'Reservoir area',
-        facilities: ['Water station', 'First aid', 'Food', 'Medical', 'Toilets']
       }
     }
   ],

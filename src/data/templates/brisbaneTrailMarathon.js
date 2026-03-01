@@ -6,7 +6,7 @@
  * Event Details:
  * - Distance: 22km and 42km options
  * - Terrain: Trail running
- * - Checkpoints: 5 (including start/finish)
+ * - Checkpoints: 3
  * - Typical Runners: 150-200
  */
 
@@ -26,21 +26,9 @@ export const brisbaneTrailMarathon = {
   checkpoints: [
     {
       number: 1,
-      name: 'Start - Enoggera Reservoir',
-      location: '-27.4447, 152.9556',
-      orderSequence: 1,
-      metadata: {
-        operators: ['VK4HIT (Allan)'],
-        description: 'Race start location at reservoir',
-        terrain: 'Reservoir area',
-        facilities: ['Water station', 'Toilets', 'Parking']
-      }
-    },
-    {
-      number: 2,
       name: 'CP1 - Mt Nebo Road',
       location: '-27.3875, 152.9123',
-      orderSequence: 2,
+      orderSequence: 1,
       metadata: {
         operators: ['VK4SIR (Peter)', 'VK4SQL (Stephen)'],
         description: 'First checkpoint on Mt Nebo Road',
@@ -49,10 +37,10 @@ export const brisbaneTrailMarathon = {
       }
     },
     {
-      number: 3,
+      number: 2,
       name: 'CP2 - Walkabout Creek',
       location: '-27.4123, 152.9345',
-      orderSequence: 3,
+      orderSequence: 2,
       metadata: {
         operators: ['VK4IE (John)', 'VK4AJJ (Andrew)'],
         description: 'Mid-course checkpoint',
@@ -61,27 +49,15 @@ export const brisbaneTrailMarathon = {
       }
     },
     {
-      number: 4,
+      number: 3,
       name: 'CP3 - Simpson Falls',
       location: '-27.4289, 152.9478',
-      orderSequence: 4,
+      orderSequence: 3,
       metadata: {
         operators: ['VK4SMA (Mark)', 'VK4TMK (Trish)'],
         description: 'Simpson Falls checkpoint',
         terrain: 'Falls area',
         facilities: ['Water station', 'First aid']
-      }
-    },
-    {
-      number: 5,
-      name: 'Finish - Enoggera Reservoir',
-      location: '-27.4447, 152.9556',
-      orderSequence: 5,
-      metadata: {
-        operators: ['VK4BRW (Brandon)', 'VK4GJW (Greg)'],
-        description: 'Finish line at reservoir',
-        terrain: 'Reservoir area',
-        facilities: ['Water station', 'First aid', 'Food', 'Medical', 'Toilets']
       }
     }
   ],

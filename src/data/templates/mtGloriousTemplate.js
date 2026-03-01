@@ -7,7 +7,7 @@
  * Event Details:
  * - Distance: Multiple options (typically 22km, 42km)
  * - Terrain: Mountain trails
- * - Checkpoints: 5 (including start/finish)
+ * - Checkpoints: 4
  * - Typical Runners: 100-128
  */
 
@@ -73,18 +73,6 @@ export const mtGloriousTemplate = {
         facilities: ['Water station', 'First aid']
       }
     },
-    {
-      number: 5,
-      name: 'Finish - Maiala Picnic Area',
-      location: '-27.320035, 152.750278',
-      orderSequence: 5,
-      metadata: {
-        operators: ['VK4BRW (Brandon)', 'VK4GJW (Greg)'],
-        description: 'Finish line at Maiala Park',
-        terrain: 'Picnic area',
-        facilities: ['Water station', 'First aid', 'Food', 'Medical']
-      }
-    }
   ],
   
   // Race Metadata
