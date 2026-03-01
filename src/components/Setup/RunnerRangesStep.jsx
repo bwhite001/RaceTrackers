@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import useRaceStore from '../../store/useRaceStore.js';
 import {
   FormGroup,
   FormLabel,
@@ -28,6 +29,11 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
   const [newRange, setNewRange] = useState({ min: '201', max: '300', description: '' });
   const [validationErrors, setValidationErrors] = useState({});
   const [rangeInput, setRangeInput] = useState('');
+  const [showNameFields, setShowNameFields] = useState(false);
+
+  const runnerRoster = useRaceStore(s => s.runnerRoster);
+  const updateRunnerPersonalData = useRaceStore(s => s.updateRunnerPersonalData);
+  const raceId = raceDetails?.id || raceDetails?.raceId || null;
 
   // Add new state for tracking all individual runner numbers
   const [allRunnerNumbers, setAllRunnerNumbers] = useState(new Set(
@@ -272,6 +278,94 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
           </div>
         </CardBody>
       </Card>
+
+      {/* Optional Runner Names & Gender */}
+      {ranges.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <button
+            type="button"
+            onClick={() => setShowNameFields(!showNameFields)}
+            className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+          >
+            <span>{showNameFields ? '▾' : '▸'}</span>
+            Add runner names &amp; gender (optional)
+          </button>
+          {showNameFields && (
+            <div className="mt-3 overflow-x-auto max-h-60 border rounded">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0">
+                  <tr>
+                    <th className="px-3 py-2 text-left">Bib #</th>
+                    <th className="px-3 py-2 text-left">First Name</th>
+                    <th className="px-3 py-2 text-left">Last Name</th>
+                    <th className="px-3 py-2 text-left">Gender</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {getRunnerNumbers().map(runnerNumber => {
+                    const existing = runnerRoster.find(r => r.number === runnerNumber) || {};
+                    return (
+                      <tr key={runnerNumber} className="border-t dark:border-gray-600" data-runner-row={runnerNumber}>
+                        <td className="px-3 py-1 font-mono text-gray-500">{runnerNumber}</td>
+                        <td className="px-3 py-1">
+                          <input
+                            type="text"
+                            name="firstName"
+                            defaultValue={existing.firstName || ''}
+                            placeholder="Optional"
+                            className="w-full border-0 bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 rounded px-1"
+                            onBlur={(e) => {
+                              if (raceId) updateRunnerPersonalData(raceId, runnerNumber, {
+                                firstName: e.target.value || null,
+                                lastName: existing.lastName || null,
+                                gender: existing.gender || 'X'
+                              });
+                            }}
+                          />
+                        </td>
+                        <td className="px-3 py-1">
+                          <input
+                            type="text"
+                            name="lastName"
+                            defaultValue={existing.lastName || ''}
+                            placeholder="Optional"
+                            className="w-full border-0 bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 rounded px-1"
+                            onBlur={(e) => {
+                              if (raceId) updateRunnerPersonalData(raceId, runnerNumber, {
+                                firstName: existing.firstName || null,
+                                lastName: e.target.value || null,
+                                gender: existing.gender || 'X'
+                              });
+                            }}
+                          />
+                        </td>
+                        <td className="px-3 py-1">
+                          <select
+                            name="gender"
+                            defaultValue={existing.gender || 'X'}
+                            className="border-0 bg-transparent text-sm focus:outline-none"
+                            onChange={(e) => {
+                              if (raceId) updateRunnerPersonalData(raceId, runnerNumber, {
+                                firstName: existing.firstName || null,
+                                lastName: existing.lastName || null,
+                                gender: e.target.value
+                              });
+                            }}
+                          >
+                            <option value="X">—</option>
+                            <option value="M">M</option>
+                            <option value="F">F</option>
+                          </select>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
