@@ -13,18 +13,20 @@ import TimeUtils from '../../../services/timeUtils';
  */
 
 const DuplicateEntriesDialog = ({ isOpen, onClose, duplicates, onResolve }) => {
-  const [selectedAction, setSelectedAction] = useState('keep-first');
+  const [selectedAction, setSelectedAction] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
   if (!isOpen || !duplicates || duplicates.length === 0) return null;
 
   const handleResolve = async () => {
+    if (!selectedAction) return;
     setIsSubmitting(true);
     setErrors({});
 
     try {
       await onResolve(duplicates, selectedAction);
+      setIsSubmitting(false);
       onClose();
     } catch (error) {
       setErrors({
@@ -157,25 +159,27 @@ const DuplicateEntriesDialog = ({ isOpen, onClose, duplicates, onResolve }) => {
                             : 'bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700'
                         }`}
                       >
-                        <div className="flex items-start justify-between">
+                        <span className="font-medium text-gray-900 dark:text-white">
+                          Entry {index + 1}
+                          {index === 0 && ' (Earliest)'}
+                          {index === entries.length - 1 && index !== 0 && ' (Latest)'}
+                        </span>
+                        <div className="flex items-start justify-between mt-1">
                           <div>
-                            <div className="font-medium text-gray-900 dark:text-white">
-                              Entry {index + 1}
-                              {index === 0 && ' (Earliest)'}
-                              {index === entries.length - 1 && ' (Latest)'}
-                            </div>
-                            <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                              Checkpoint {entry.checkpoint} • {TimeUtils.formatTime(entry.timestamp)}
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              <span>Checkpoint {entry.checkpoint}</span>
+                              {' • '}
+                              <span>{TimeUtils.formatTime(entry.timestamp)}</span>
                             </div>
                             {entry.notes && (
                               <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                                Notes: {entry.notes}
+                                {entry.notes}
                               </div>
                             )}
                           </div>
                           {index > 0 && (
                             <div className="text-sm text-gray-500 dark:text-gray-400">
-                              +{getTimeDifference(entries[0], entry)} from first
+                              +<span>{getTimeDifference(entries[0], entry)}</span> from first
                             </div>
                           )}
                         </div>
@@ -222,7 +226,7 @@ const DuplicateEntriesDialog = ({ isOpen, onClose, duplicates, onResolve }) => {
               {isSubmitting ? (
                 <div className="flex items-center space-x-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Resolving...</span>
+                  <span>Processing...</span>
                 </div>
               ) : (
                 'Resolve Duplicates'

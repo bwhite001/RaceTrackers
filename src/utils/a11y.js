@@ -26,8 +26,7 @@ export function createFocusTrap(element) {
   let isActive = false;
 
   function getFocusableElements() {
-    return Array.from(element.querySelectorAll(focusableSelectors))
-      .filter(el => el.offsetParent !== null);
+    return Array.from(element.querySelectorAll(focusableSelectors));
   }
 
   function handleKeyDown(e) {

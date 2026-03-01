@@ -281,7 +281,11 @@ export const getRunnerRange = (race) => {
   
   if (race.runnerRanges && Array.isArray(race.runnerRanges)) {
     if (race.runnerRanges.length === 1) {
-      return race.runnerRanges[0];
+      const r = race.runnerRanges[0];
+      if (r && typeof r === 'object') {
+        return r.isIndividual ? `${r.count || r.individualNumbers?.length || '?'} individual` : `${r.min}-${r.max}`;
+      }
+      return String(r);
     }
     return 'Multiple ranges';
   }

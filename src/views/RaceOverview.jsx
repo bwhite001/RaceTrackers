@@ -40,7 +40,7 @@ const RaceOverview = () => {
     };
     
     loadRaceData();
-  }, [raceId, raceConfig, loadRace, loadCurrentRace]);
+  }, [raceId, loadRace, loadCurrentRace]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialize runners when race config is loaded
   useEffect(() => {

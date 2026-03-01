@@ -10,8 +10,8 @@ export class CheckpointRepository extends BaseRepository {
   async getCheckpointRunners(raceId, checkpointNumber) {
     try {
       return await this.table
-        .where(['raceId', 'checkpointNumber'])
-        .equals([raceId, checkpointNumber])
+        .where('[raceId+checkpointNumber+number]')
+        .between([raceId, checkpointNumber, -Infinity], [raceId, checkpointNumber, Infinity])
         .toArray();
     } catch (error) {
       console.error('Error getting checkpoint runners:', error);

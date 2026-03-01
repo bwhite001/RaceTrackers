@@ -121,13 +121,15 @@ describe('HelpDialog', () => {
       />
     );
 
-    // Navigation category
+    // Navigation category (visible in Quick Start by default)
     const navigationSection = screen.getByText('Navigation').closest('div');
     expect(navigationSection).toHaveTextContent('Add checkpoint');
 
-    // Data Entry category
-    const dataEntrySection = screen.getByText('Data Entry').closest('div');
-    expect(dataEntrySection).toHaveTextContent('Add number');
+    // Data Entry category - navigate to Data Entry section first
+    fireEvent.click(screen.getByText('Data Entry'));
+    const dataEntryHeadings = screen.getAllByText('Data Entry');
+    const contentHeading = dataEntryHeadings.find(el => el.tagName === 'H4');
+    expect(contentHeading.closest('div')).toHaveTextContent('Add number');
   });
 
   it('handles close button click', () => {
@@ -183,8 +185,10 @@ describe('HelpDialog', () => {
     // Click Data Entry section
     fireEvent.click(screen.getByText('Data Entry'));
 
-    // Data Entry should be highlighted
-    const dataEntryButton = screen.getByText('Data Entry').closest('button');
+    // Data Entry should be highlighted - find the sidebar button (not the hotkey heading)
+    const dataEntryButton = screen.getAllByText('Data Entry')
+      .map(el => el.closest('button'))
+      .find(Boolean);
     expect(dataEntryButton).toHaveClass('bg-primary-50');
   });
 
@@ -196,7 +200,7 @@ describe('HelpDialog', () => {
       />
     );
 
-    // Select Data Entry section
+    // Select Data Entry section - click the sidebar button
     fireEvent.click(screen.getByText('Data Entry'));
 
     // Re-render

@@ -17,7 +17,7 @@ const HELP_SECTIONS = {
   quickStart: {
     label: 'Quick Start',
     icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+      <svg className="w-5 h-5" role="img" fill="currentColor" viewBox="0 0 20 20">
         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd" />
       </svg>
     )
@@ -25,7 +25,7 @@ const HELP_SECTIONS = {
   dataEntry: {
     label: 'Data Entry',
     icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+      <svg className="w-5 h-5" role="img" fill="currentColor" viewBox="0 0 20 20">
         <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V8z" clipRule="evenodd" />
       </svg>
     )
@@ -33,7 +33,7 @@ const HELP_SECTIONS = {
   runnerStatus: {
     label: 'Runner Status',
     icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+      <svg className="w-5 h-5" role="img" fill="currentColor" viewBox="0 0 20 20">
         <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
       </svg>
     )
@@ -41,7 +41,7 @@ const HELP_SECTIONS = {
   reports: {
     label: 'Reports',
     icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+      <svg className="w-5 h-5" role="img" fill="currentColor" viewBox="0 0 20 20">
         <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm2 10a1 1 0 10-2 0v3a1 1 0 102 0v-3zm2-3a1 1 0 011 1v5a1 1 0 11-2 0v-5a1 1 0 011-1zm4-1a1 1 0 10-2 0v7a1 1 0 102 0V8z" clipRule="evenodd" />
       </svg>
     )
@@ -49,7 +49,7 @@ const HELP_SECTIONS = {
   backup: {
     label: 'Backup & Restore',
     icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+      <svg className="w-5 h-5" role="img" fill="currentColor" viewBox="0 0 20 20">
         <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
       </svg>
     )
@@ -57,7 +57,7 @@ const HELP_SECTIONS = {
   troubleshooting: {
     label: 'Troubleshooting',
     icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+      <svg className="w-5 h-5" role="img" fill="currentColor" viewBox="0 0 20 20">
         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
       </svg>
     )
@@ -77,7 +77,7 @@ const HelpDialog = ({ isOpen, onClose, initialSection = 'quickStart' }) => {
     return (
       <div className="mt-4">
         <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-          Keyboard Shortcuts
+          {category.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
         </h4>
         <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 space-y-2">
           {categoryHotkeys.map(([key, { description }]) => (
@@ -112,7 +112,7 @@ const HelpDialog = ({ isOpen, onClose, initialSection = 'quickStart' }) => {
                 <li>Generate reports as needed</li>
               </ol>
             </div>
-            {renderHotkeysSection('general')}
+            {renderHotkeysSection('navigation')}
           </div>
         );
 
@@ -132,7 +132,7 @@ const HelpDialog = ({ isOpen, onClose, initialSection = 'quickStart' }) => {
 
               <h4 className="mt-4">Bulk Entry</h4>
               <ul className="list-disc pl-4">
-                <li>Use "Bulk Entry" mode for groups</li>
+                <li>Switch to bulk mode for groups of runners</li>
                 <li>Enter multiple numbers (comma or space separated)</li>
                 <li>Set common time for the group</li>
                 <li>Preview before submitting</li>
@@ -334,7 +334,7 @@ const HelpDialog = ({ isOpen, onClose, initialSection = 'quickStart' }) => {
         {/* Footer */}
         <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
           <div className="text-sm text-gray-500 dark:text-gray-400">
-            Press <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">Alt + H</kbd> to open help anytime
+            Press Alt + H to open help anytime
           </div>
           <button
             onClick={onClose}

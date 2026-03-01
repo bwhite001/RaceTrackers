@@ -1,4 +1,4 @@
-import db from '../../shared/services/database/schema.js';
+imimport db from '../../shared/services/database/schema.js';
 import { safeValidateExportPackage } from './ValidationSchemas.js';
 import { ExportService } from './ExportService.js';
 
@@ -374,6 +374,10 @@ export class ImportService {
    * (overwrite semantics: delete existing entry for same raceId+checkpointNumber, then insert fresh).
    *
    * @param {Object} exportPackage - Package produced by ExportService.exportCheckpointResults()
+   *   @param {Object} exportPackage.data - The data object containing checkpoint results
+   *   @param {number|string} exportPackage.data.raceId - The raceId for the results
+   *   @param {number} exportPackage.data.checkpointNumber - The checkpoint number
+   *   @param {Array<Object>} exportPackage.data.runners - Array of runner result objects (not a string)
    * @param {number|string} currentRaceId - The raceId of the active race on this Base Station
    * @returns {Promise<{success: boolean, checkpointNumber: number, totalRunners: number, error?: string}>}
    */

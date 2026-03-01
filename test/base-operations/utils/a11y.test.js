@@ -13,7 +13,7 @@ import {
 // Helper to flush promises and timers
 const flushPromisesAndTimers = async () => {
   await vi.runAllTimersAsync();
-  await new Promise(resolve => setTimeout(resolve, 0));
+  await Promise.resolve();
 };
 
 describe('Accessibility Utilities - Critical Path Tests', () => {
@@ -188,6 +188,7 @@ describe('Accessibility Utilities - Critical Path Tests', () => {
     let element;
 
     beforeEach(() => {
+      vi.useFakeTimers();
       element = document.createElement('button');
       element.setAttribute('tabindex', '0');
       element.setAttribute('data-testid', 'test-button');
@@ -196,6 +197,7 @@ describe('Accessibility Utilities - Critical Path Tests', () => {
     });
 
     afterEach(() => {
+      vi.useRealTimers();
       if (document.body.contains(element)) {
         document.body.removeChild(element);
       }

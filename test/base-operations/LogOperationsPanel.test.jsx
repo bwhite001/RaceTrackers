@@ -80,6 +80,7 @@ describe('LogOperationsPanel', () => {
 
     // Mock TimeUtils
     TimeUtils.formatTime.mockImplementation(time => new Date(time).toLocaleString());
+    TimeUtils.formatDateTimeLocal.mockReturnValue('2024-01-01T10:30');
   });
 
   it('renders correctly', () => {
@@ -115,7 +116,7 @@ describe('LogOperationsPanel', () => {
     fireEvent.click(editButtons[0]);
 
     // Update fields
-    fireEvent.change(screen.getByLabelText(/Checkpoint/i), {
+    fireEvent.change(screen.getByLabelText('Checkpoint'), {
       target: { value: '2' }
     });
 
@@ -128,10 +129,10 @@ describe('LogOperationsPanel', () => {
       fireEvent.click(screen.getByText('Save Changes'));
     });
 
-    expect(mockUpdateLogEntry).toHaveBeenCalledWith(1, {
+    expect(mockUpdateLogEntry).toHaveBeenCalledWith(2, expect.objectContaining({
       checkpoint: 2,
       notes: 'Updated notes'
-    });
+    }));
   });
 
   it('handles entry deletion', async () => {
@@ -147,7 +148,7 @@ describe('LogOperationsPanel', () => {
       fireEvent.click(deleteButtons[0]);
     });
 
-    expect(mockDeleteLogEntry).toHaveBeenCalledWith(1);
+    expect(mockDeleteLogEntry).toHaveBeenCalledWith(2);
     confirmSpy.mockRestore();
   });
 

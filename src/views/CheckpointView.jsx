@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { withOperationExit } from '../shared/components/ExitOperationModal';
 import useNavigationStore, { MODULE_TYPES } from '../shared/store/navigationStore';
-import useCheckpointStore from '../modules/checkpoint-operations/store/checkpointStore';
+import useCheckpointStore, { checkpointStore } from '../modules/checkpoint-operations/store/checkpointStore';
 import useSettingsStore from '../shared/store/settingsStore';
-import useRaceMaintenanceStore from '../modules/race-maintenance/store/raceMaintenanceStore';
+import useRaceMaintenanceStore, { raceMaintenanceStore } from '../modules/race-maintenance/store/raceMaintenanceStore';
+import { useRaceStore } from '../store/useRaceStore.js';
 
 import RunnerGrid from '../components/Checkpoint/RunnerGrid';
 import QuickEntryBar from '../components/Checkpoint/QuickEntryBar';
@@ -35,6 +36,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     initializeCheckpoint,
     loadCheckpointData 
   } = useCheckpointStore();
+  const { loadRace: loadRaceIntoLegacyStore, loadCheckpointRunners } = useRaceStore();
   const { updateSetting } = useSettingsStore();
 
   // Initialize checkpoint operation
@@ -46,20 +48,28 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
           await loadCurrentRace();
         }
 
-        if (currentRace) {
+        // Read fresh state after async load (avoid stale closure)
+        const freshRace = raceMaintenanceStore.getState().currentRace;
+        if (freshRace) {
           // Start checkpoint operation
           startOperation(MODULE_TYPES.CHECKPOINT);
           
+          // Initialize or load checkpoint data first (ensures runners are in IndexedDB)
+          await loadCheckpointData(freshRace.id, parseInt(checkpointId));
+          const { runners: existingRunners } = checkpointStore.getState();
+          if (!existingRunners || existingRunners.length === 0) {
+            await initializeCheckpoint(freshRace.id, parseInt(checkpointId));
+          }
+
+          // After data is ready, load race into the legacy useRaceStore so RunnerGrid can access it
+          await loadRaceIntoLegacyStore(freshRace.id);
+          // Explicitly load checkpoint runners since currentCheckpoint may not change (stays 1)
+          await loadCheckpointRunners(parseInt(checkpointId));
+          
           // Save current checkpoint in settings
           await updateSetting('currentCheckpoint', parseInt(checkpointId));
-
-          // Initialize or load checkpoint data
-          const existingRunners = await loadCheckpointData(currentRace.id, parseInt(checkpointId));
-          if (!existingRunners || existingRunners.length === 0) {
-            await initializeCheckpoint(currentRace.id, parseInt(checkpointId));
-          }
-        } else {
-          // No race found, redirect to home
+        } else if (!currentRace) {
+          // No race found after attempted load, redirect to home
           navigate('/', { 
             replace: true,
             state: { error: 'No active race found. Please create or select a race first.' }
@@ -71,7 +81,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     };
 
     initializeOperation();
-  }, [checkpointId, currentRace, loadCurrentRace, initializeCheckpoint, loadCheckpointData, startOperation, updateSetting, navigate]);
+  }, [checkpointId, currentRace, loadCurrentRace, initializeCheckpoint, loadCheckpointData, startOperation, updateSetting, navigate, loadRaceIntoLegacyStore, loadCheckpointRunners]);
 
   // Track unsaved changes
   useEffect(() => {

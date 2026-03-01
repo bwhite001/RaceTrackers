@@ -7,6 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test:playwright": "playwright test",
+    "test:playwright:ui": "playwright test --ui",
+    "test:playwright:headed": "playwright test --headed",
+    "test:playwright:debug": "playwright test --debug",
+    "test:playwright:report": "playwright show-report",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:ui": "vitest --ui",
@@ -75,7 +80,8 @@
     "test:passing": "vitest run --reporter=verbose --passWithNoTests",
     "test:failing": "vitest run --reporter=verbose --bail 1",
     "test:changed": "vitest run --changed",
-    "test:related": "vitest run --related"
+    "test:related": "vitest run --related",
+    "generate:guide": "node test/e2e/playwright/generate-guide.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
@@ -92,6 +98,7 @@
     "zustand": "^4.4.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -110,6 +117,7 @@
     "prop-types": "^15.8.1",
     "react-router-dom": "^7.9.5",
     "react-test-renderer": "^18.2.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^3.3.3",
     "vite": "^7.0.4",
     "vite-plugin-pwa": "^1.0.1",
