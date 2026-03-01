@@ -14,7 +14,28 @@ import {
 } from '../../design-system/components';
 import { DocumentIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
+/**
+ * Ensures every range object has numeric min/max, count, and individualNumbers.
+ * Template-provided ranges only carry {min, max} — this fills the gaps so
+ * summary maths and handleRemoveRange never crash or produce NaN.
+ */
+function normalizeRange(r) {
+  const min = Number(r.min);
+  const max = Number(r.max);
+  const individualNumbers = r.individualNumbers ||
+    Array.from({ length: max - min + 1 }, (_, i) => min + i);
+  return {
+    ...r,
+    min,
+    max,
+    count: r.count ?? individualNumbers.length,
+    individualNumbers,
+    description: r.description || `Runners ${min}–${max}`,
+  };
+}
+
 const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCreate, isLoading }) => {
+
   // Initialize with default range if no initial ranges provided
   const defaultRange = initialRanges.length === 0 ? [{
     min: 100,
@@ -24,15 +45,17 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
     individualNumbers: Array.from({ length: 101 }, (_, i) => 100 + i)
   }] : [];
   
-  const [ranges, setRanges] = useState(initialRanges.length > 0 ? initialRanges : defaultRange);
+  const [ranges, setRanges] = useState(
+    initialRanges.length > 0 ? initialRanges.map(normalizeRange) : defaultRange
+  );
   const [newRange, setNewRange] = useState({ min: '201', max: '300', description: '' });
   const [validationErrors, setValidationErrors] = useState({});
   const [rangeInput, setRangeInput] = useState('');
 
   // Add new state for tracking all individual runner numbers
   const [allRunnerNumbers, setAllRunnerNumbers] = useState(new Set(
-    (initialRanges.length > 0 ? initialRanges : defaultRange).flatMap(range => 
-      range.individualNumbers || 
+    (initialRanges.length > 0 ? initialRanges.map(normalizeRange) : defaultRange).flatMap(range =>
+      range.individualNumbers ||
       Array.from({ length: range.max - range.min + 1 }, (_, i) => range.min + i)
     )
   ));
