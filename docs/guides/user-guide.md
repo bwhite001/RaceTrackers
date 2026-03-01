@@ -152,13 +152,9 @@ A checkpoint volunteer opens the app, taps "Checkpoint Operations", selects thei
 
 ![Home — tap Checkpoint Operations module card](assets/navigates-to-checkpoint-and-sees-runner-grid-step-01.png)
 
-**Select Race modal — choose race from list**
-
-![Select Race modal — choose race from list](assets/navigates-to-checkpoint-and-sees-runner-grid-step-02.png)
-
 **Checkpoint view — runner grid loaded with bib numbers 200–210**
 
-![Checkpoint view — runner grid loaded with bib numbers 200–210](assets/navigates-to-checkpoint-and-sees-runner-grid-step-03.png)
+![Checkpoint view — runner grid loaded with bib numbers 200–210](assets/navigates-to-checkpoint-and-sees-runner-grid-step-02.png)
 
 ### Marks off a single runner via the runner grid
 
