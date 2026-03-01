@@ -38,7 +38,6 @@ test.describe('Base Station Operator – Full Operations Journey', () => {
   });
 
   test('navigates to base station and sees data entry form', async ({ page }) => {
-    test.skip(true, 'DEVELOPMENT GAP: baseOperationsStore reads from localStorage (race_X_config) which the main app never populates — needs architectural integration');
     await goHome(page);
 
     await page.getByRole('button', { name: /base station/i }).click();
@@ -50,7 +49,6 @@ test.describe('Base Station Operator – Full Operations Journey', () => {
   });
 
   test('enters a common time and runner batch, then verifies in overview', async ({ page, step }) => {
-    test.skip(true, 'DEVELOPMENT GAP: baseOperationsStore uses localStorage — not integrated with main app data');
     await step('Base Station — Data Entry tab: form ready', async () => {
       await page.goto('/base-station/operations');
       await page.waitForSelector('#commonTime', { timeout: 5000 });
@@ -71,7 +69,6 @@ test.describe('Base Station Operator – Full Operations Journey', () => {
   });
 
   test('records a DNF via the withdrawal dialog', async ({ page, step }) => {
-    test.skip(true, 'DEVELOPMENT GAP: baseOperationsStore uses localStorage — not integrated with main app data');
     await step('Base Station — Data Entry tab: form ready', async () => {
       await page.goto('/base-station/operations');
       await page.waitForSelector('#commonTime', { timeout: 5000 });
@@ -105,7 +102,6 @@ test.describe('Base Station Operator – Full Operations Journey', () => {
   });
 
   test('opens the Checkpoint Matrix tab', async ({ page }) => {
-    test.skip(true, 'DEVELOPMENT GAP: baseOperationsStore uses localStorage — not integrated with main app data');
     await page.goto('/base-station/operations');
 
     await page.getByRole('tab', { name: /checkpoint matrix/i }).click();
@@ -113,7 +109,6 @@ test.describe('Base Station Operator – Full Operations Journey', () => {
   });
 
   test('switches to Reports tab and renders a report', async ({ page }) => {
-    test.skip(true, 'DEVELOPMENT GAP: baseOperationsStore uses localStorage — not integrated with main app data');
     await page.goto('/base-station/operations');
 
     await page.getByRole('tab', { name: /reports/i }).click();
@@ -130,7 +125,6 @@ test.describe('Base Station Operator – Full Operations Journey', () => {
   });
 
   test('exports base station data', async ({ page }) => {
-    test.skip(true, 'DEVELOPMENT GAP: baseOperationsStore uses localStorage — not integrated with main app data');
     await page.goto('/base-station/operations');
     await page.waitForSelector('#commonTime', { timeout: 5000 });
 

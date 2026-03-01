@@ -40,7 +40,6 @@ test.describe('Import / Export Journey', () => {
   });
 
   test('export modal opens from base station header', async ({ page, step }) => {
-    test.skip(true, 'DEVELOPMENT GAP: baseOperationsStore uses localStorage — base station UI cannot be reached without architectural integration');
     await step('Base Station — operations screen with created race', async () => {
       await createRace(page, RACE);
       await page.goto('/base-station/operations');
