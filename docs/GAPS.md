@@ -290,7 +290,6 @@ The `base_station_runners` table exists in Dexie (schema v7) and `StorageService
 - `test/base-operations/store/baseOperationsStore.test.js`
 
 ---
-
 ## Dependency Map
 
 ```
