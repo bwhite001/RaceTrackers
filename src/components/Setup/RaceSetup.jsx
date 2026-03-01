@@ -193,7 +193,7 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
       </Section>
 
       <Section spacing="normal">
-        <Card>
+        <Card data-screenshot-target>
           <CardBody>
             {currentStep === STEP_TEMPLATE && (
               <TemplateSelectionStep onSelect={handleTemplateSelect} />

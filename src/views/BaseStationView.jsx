@@ -201,6 +201,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             id={`tabpanel-${activeTab}`}
             aria-labelledby={`tab-${activeTab}`}
             className="space-y-6"
+            data-screenshot-target
           >
             {activeTab === 'data-entry' && (
               <DataEntry

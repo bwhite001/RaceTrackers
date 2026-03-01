@@ -304,7 +304,7 @@ const RaceManagementView = () => {
           </CardBody>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4" data-screenshot-target>
           {filteredAndSortedRaces.map((race) => (
             <RaceListItem
               key={race.id}

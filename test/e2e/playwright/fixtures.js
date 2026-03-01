@@ -24,7 +24,16 @@ export const test = base.extend({
     let seq = 0;
     const capture = async (label) => {
       try {
-        const body = await page.screenshot({ fullPage: false });
+        const target = page.locator('[data-screenshot-target]').first();
+        const hasTarget = await target.isVisible().catch(() => false);
+        let body;
+        if (hasTarget) {
+          body = await target.screenshot();
+        } else {
+          body = await page.locator('main').screenshot().catch(
+            () => page.screenshot({ fullPage: false })
+          );
+        }
         await testInfo.attach(
           `${String(++seq).padStart(3, '0')} ${label}`,
           { body, contentType: 'image/png' }
@@ -90,7 +99,11 @@ export const test = base.extend({
         const n = ++stepSeq;
         // Before
         try {
-          const body = await page.screenshot({ fullPage: false });
+          const target = page.locator('[data-screenshot-target]').first();
+          const hasTarget = await target.isVisible().catch(() => false);
+          const body = hasTarget
+            ? await target.screenshot()
+            : await page.locator('main').screenshot().catch(() => page.screenshot({ fullPage: false }));
           await testInfo.attach(
             `${String(n).padStart(2, '0')}-A ${title}`,
             { body, contentType: 'image/png' }
@@ -101,7 +114,11 @@ export const test = base.extend({
 
         // After
         try {
-          const body = await page.screenshot({ fullPage: false });
+          const target = page.locator('[data-screenshot-target]').first();
+          const hasTarget = await target.isVisible().catch(() => false);
+          const body = hasTarget
+            ? await target.screenshot()
+            : await page.locator('main').screenshot().catch(() => page.screenshot({ fullPage: false }));
           await testInfo.attach(
             `${String(n).padStart(2, '0')}-B ${title}`,
             { body, contentType: 'image/png' }

@@ -12,10 +12,10 @@ export const JOURNEY_DESCRIPTIONS = {
     'A race director fills in all the details needed to create a brand-new race — the race name, date, start time, how many checkpoints there are, and the range of runner bib numbers. Once saved, the race overview page should correctly display the race name, list every checkpoint, and show the right number of registered runners.',
 
   'step indicator advances correctly through setup wizard':
-    'The race creation form is split into two screens. This test checks that the progress indicator at the top of the form clearly updates when you move from the first screen (race details) to the second screen (runner numbers), so the race director always knows which step they are on.',
+    'The race creation wizard has four steps: Template, Race Details, Runner Setup, and Waves. This test checks that the progress indicator at the top updates as you advance through each step, so the race director always knows where they are in the setup process.',
 
   'back button on step 2 returns to race details with data preserved':
-    'If a race director fills in the race name and other details, moves on to the second screen, then clicks Back, all their work should still be there — the race name and other fields must not be wiped out. Nobody should have to retype information just because they went back a step.',
+    'If a race director fills in the race name and other details on Step 2 of 4 (Race Details), moves on to Step 3 of 4 (Runner Setup), then clicks Back, all their work should still be there — the race name and other fields must not be wiped out. Nobody should have to retype information just because they went back a step.',
 
   // ─── 02 Checkpoint Operations ─────────────────────────────────────────────
 
