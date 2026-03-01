@@ -51,19 +51,19 @@ test.describe('Base Station Operator – Full Operations Journey', () => {
 
   test('enters a common time and runner batch, then verifies in overview', async ({ page, step }) => {
     test.skip(true, 'DEVELOPMENT GAP: baseOperationsStore uses localStorage — not integrated with main app data');
-    await step('open base station data entry', async () => {
+    await step('Base Station — Data Entry tab: form ready', async () => {
       await page.goto('/base-station/operations');
       await page.waitForSelector('#commonTime', { timeout: 5000 });
     });
 
-    await step('enter finish time and runner numbers', async () => {
+    await step('Data Entry — type finish time 10:45:00 and runner bib batch', async () => {
       await page.fill('#commonTime', '10:45:00');
       await page.fill('#runnerInput', '300, 301, 302, 303');
       await page.getByRole('button', { name: /submit|record|save|log/i }).click();
       await expect(page.locator('#runnerInput')).toHaveValue('');
     });
 
-    await step('verify runners appear in overview', async () => {
+    await step('Overview tab — runners 300–303 visible after submission', async () => {
       await page.getByRole('tab', { name: /overview/i }).click();
       await expect(page.getByText('300')).toBeVisible();
       await expect(page.getByText('303')).toBeVisible();
@@ -72,12 +72,12 @@ test.describe('Base Station Operator – Full Operations Journey', () => {
 
   test('records a DNF via the withdrawal dialog', async ({ page, step }) => {
     test.skip(true, 'DEVELOPMENT GAP: baseOperationsStore uses localStorage — not integrated with main app data');
-    await step('open base station', async () => {
+    await step('Base Station — Data Entry tab: form ready', async () => {
       await page.goto('/base-station/operations');
       await page.waitForSelector('#commonTime', { timeout: 5000 });
     });
 
-    await step('open the DNF withdrawal dialog', async () => {
+    await step('Data Entry — open DNF withdrawal dialog', async () => {
       const dnfBtn = page.getByRole('button', { name: /dnf|withdrawal|did not finish/i }).first();
       if (await dnfBtn.isVisible({ timeout: 2000 })) {
         await dnfBtn.click();
@@ -87,7 +87,7 @@ test.describe('Base Station Operator – Full Operations Journey', () => {
       await page.getByRole('dialog').waitFor({ state: 'visible', timeout: 5000 });
     });
 
-    await step('enter DNF runner and reason', async () => {
+    await step('Withdrawal Dialog — enter runner 310 and reason, then submit', async () => {
       const dialog = page.getByRole('dialog');
       const runnerInput = dialog.locator('textarea, input[type="text"]').first();
       await runnerInput.fill('310');
@@ -97,7 +97,7 @@ test.describe('Base Station Operator – Full Operations Journey', () => {
       await expect(dialog).toBeHidden({ timeout: 3000 });
     });
 
-    await step('verify runner shows DNF in overview', async () => {
+    await step('Overview tab — runner 310 shows DNF status', async () => {
       await page.getByRole('tab', { name: /overview/i }).click();
       await expect(page.getByText('310')).toBeVisible();
       await expect(page.getByText(/dnf/i).first()).toBeVisible();

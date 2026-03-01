@@ -22,12 +22,12 @@ const RUNNER_MAX = 115; // 15 runners
 
 test.describe('Race Director – Race Setup Journey', () => {
   test('creates a new race from scratch and verifies the overview', async ({ page, step }) => {
-    await step('open home page', async () => {
+    await step('Home — Welcome Back screen with 3 module cards', async () => {
       await goHome(page);
       await expect(page.getByRole('heading', { name: /race tracker pro/i })).toBeVisible();
     });
 
-    await step('navigate to race setup', async () => {
+    await step('Race Maintenance → Create New Race — setup wizard opens', async () => {
       const createRaceBtn = page.getByRole('button', { name: /create new race|race maintenance/i }).first();
       await createRaceBtn.click();
       if (page.url().includes('race-management')) {
@@ -37,10 +37,13 @@ test.describe('Race Director – Race Setup Journey', () => {
       await expect(page.getByRole('heading', { name: /race setup|create race|new race/i })).toBeVisible();
     });
 
-    await step('fill race details (step 1)', async () => {
+    await step('Step 1 of 4 — Template: choose Start from Scratch', async () => {
       // Template step — click Start from Scratch to proceed to Race Details
       await page.locator('button').filter({ hasText: 'Start from Scratch' }).first().click();
       await page.waitForTimeout(300);
+    });
+
+    await step('Step 2 of 4 — Race Details: enter name, date, start time and checkpoints', async () => {
       await fillReactInput(page, '#name', RACE_NAME);
       await page.waitForTimeout(100);
       await page.fill('#date', RACE_DATE);
@@ -61,7 +64,7 @@ test.describe('Race Director – Race Setup Journey', () => {
       await page.getByRole('button', { name: /next|continue/i }).click();
     });
 
-    await step('configure runner range (step 2)', async () => {
+    await step('Step 3 of 4 — Runner Setup: add bib number range 101–115', async () => {
       await page.waitForSelector('#min', { timeout: 5000 });
       // Delete the default pre-loaded range (100-200) before adding our own
       const removeBtn = page.getByRole('button', { name: /remove range/i }).first();
@@ -77,6 +80,9 @@ test.describe('Race Director – Race Setup Journey', () => {
       await page.waitForTimeout(200);
       // "Create Race" on Runner Ranges step moves to Batches step
       await page.getByRole('button', { name: /create race|save|finish/i }).click();
+    });
+
+    await step('Step 4 of 4 — Waves: confirm wave and save race', async () => {
       // Batches step — click "Create Race" to actually save the race
       const batchesCreateBtn = page.getByRole('button', { name: /create race/i });
       if (await batchesCreateBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
@@ -84,7 +90,7 @@ test.describe('Race Director – Race Setup Journey', () => {
       }
     });
 
-    await step('verify race overview', async () => {
+    await step('Race overview — name, 3 checkpoints and 15 runners correct', async () => {
       await page.waitForURL(/race-maintenance\/overview/);
       // Wait for race data to load from IndexedDB (loading spinner disappears)
       await page.waitForFunction(() => !document.querySelector('.animate-spin'), { timeout: 30000 });
@@ -94,62 +100,77 @@ test.describe('Race Director – Race Setup Journey', () => {
       await expect(page.getByText('15 runners')).toBeVisible();
     });
 
-    await step('confirm race appears on home page', async () => {
+    await step('Home — new race listed under module cards', async () => {
       await page.goto('/');
       await page.waitForSelector('h1:has-text("Race Tracker Pro")', { timeout: 30000 });
       await expect(page.getByText(RACE_NAME)).toBeVisible();
     });
   });
 
-  test('step indicator advances correctly through setup wizard', async ({ page }) => {
-    await page.goto('/race-maintenance/setup');
-    // Template step — click Start from Scratch to proceed to Race Details
-    await page.locator('button').filter({ hasText: 'Start from Scratch' }).first().click();
-    await page.waitForTimeout(300);
-    await page.waitForSelector('#name');
+  test('step indicator advances correctly through setup wizard', async ({ page, step }) => {
+    await step('Step 1 of 4 — Template: setup wizard opens', async () => {
+      await page.goto('/race-maintenance/setup');
+      // Template step — click Start from Scratch to proceed to Race Details
+      await page.locator('button').filter({ hasText: 'Start from Scratch' }).first().click();
+      await page.waitForTimeout(300);
+    });
 
-    // Step 2 (Race Details) should be active
-    const step2Label = page.getByText(/race details/i).first();
-    await expect(step2Label).toBeVisible();
+    await step('Step 2 of 4 — Race Details: step indicator shows step 2', async () => {
+      await page.waitForSelector('#name');
 
-    await fillReactInput(page, '#name', 'Indicator Test Race');
-    await page.waitForTimeout(100);
-    await page.fill('#date', '2025-10-01');
-    await page.waitForTimeout(100);
-    await page.fill('#startTime', '08:00');
-    await page.waitForTimeout(100);
-    await page.selectOption('#numCheckpoints', '1');
+      // Step 2 (Race Details) should be active
+      const step2Label = page.getByText(/race details/i).first();
+      await expect(step2Label).toBeVisible();
 
-    await page.getByRole('button', { name: /next|continue/i }).click();
+      await fillReactInput(page, '#name', 'Indicator Test Race');
+      await page.waitForTimeout(100);
+      await page.fill('#date', '2025-10-01');
+      await page.waitForTimeout(100);
+      await page.fill('#startTime', '08:00');
+      await page.waitForTimeout(100);
+      await page.selectOption('#numCheckpoints', '1');
 
-    // Step 2 (runner ranges) should now be active
-    await page.waitForSelector('#min');
-    const step2Indicator = page.getByText(/runner|step 2/i).first();
-    await expect(step2Indicator).toBeVisible();
+      await page.getByRole('button', { name: /next|continue/i }).click();
+    });
+
+    await step('Step 3 of 4 — Runner Setup: step indicator advances to step 3', async () => {
+      // Step 2 (runner ranges) should now be active
+      await page.waitForSelector('#min');
+      const step2Indicator = page.getByText(/runner|step 2/i).first();
+      await expect(step2Indicator).toBeVisible();
+    });
   });
 
-  test('back button on step 2 returns to race details with data preserved', async ({ page }) => {
-    await page.goto('/race-maintenance/setup');
-    // Template step — click Start from Scratch to proceed to Race Details
-    await page.locator('button').filter({ hasText: 'Start from Scratch' }).first().click();
-    await page.waitForTimeout(300);
-    await page.waitForSelector('#name');
-    await page.waitForTimeout(500); // Wait for React to finish mounting
+  test('back button on step 2 returns to race details with data preserved', async ({ page, step }) => {
+    await step('Step 1 of 4 — Template: choose Start from Scratch', async () => {
+      await page.goto('/race-maintenance/setup');
+      // Template step — click Start from Scratch to proceed to Race Details
+      await page.locator('button').filter({ hasText: 'Start from Scratch' }).first().click();
+      await page.waitForTimeout(300);
+      await page.waitForSelector('#name');
+      await page.waitForTimeout(500); // Wait for React to finish mounting
+    });
 
-    await fillReactInput(page, '#name', 'Back Button Race');
-    await page.waitForTimeout(100);
-    await page.fill('#date', '2025-11-10');
-    await page.waitForTimeout(100);
-    await page.fill('#startTime', '09:00');
-    await page.waitForTimeout(100);
-    await page.selectOption('#numCheckpoints', '1');
-    await page.getByRole('button', { name: /next|continue/i }).click();
+    await step('Step 2 of 4 — Race Details: fill in race name and details', async () => {
+      await fillReactInput(page, '#name', 'Back Button Race');
+      await page.waitForTimeout(100);
+      await page.fill('#date', '2025-11-10');
+      await page.waitForTimeout(100);
+      await page.fill('#startTime', '09:00');
+      await page.waitForTimeout(100);
+      await page.selectOption('#numCheckpoints', '1');
+      await page.getByRole('button', { name: /next|continue/i }).click();
+    });
 
-    await page.waitForSelector('#min');
-    await page.getByRole('button', { name: /back|previous/i }).click();
+    await step('Step 3 of 4 — Runner Setup: navigate forward then press Back', async () => {
+      await page.waitForSelector('#min');
+      await page.getByRole('button', { name: /back|previous/i }).click();
+    });
 
-    // Race name should still be filled
-    await page.waitForSelector('#name');
-    await expect(page.locator('#name')).toHaveValue('Back Button Race');
+    await step('Step 2 of 4 — Race Details: data preserved after Back', async () => {
+      // Race name should still be filled
+      await page.waitForSelector('#name');
+      await expect(page.locator('#name')).toHaveValue('Back Button Race');
+    });
   });
 });
