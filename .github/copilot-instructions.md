@@ -148,9 +148,9 @@ Tests use in-memory Dexie databases via `fake-indexeddb` (configured in `test/se
 
 ### Running Tests
 ```bash
-npm test                          # Watch mode
-npm run test:run                  # Single run, then exit
-npm run test:coverage             # Coverage report
+make test                             # Watch mode
+make test-run                         # Single run, then exit
+make test-coverage                    # Coverage report
 
 # Run a single test file
 npx vitest run test/path/to/file.test.jsx
@@ -159,30 +159,24 @@ npx vitest run test/path/to/file.test.jsx
 npx vitest run -t "test name pattern"
 
 # Run only tests affected by uncommitted changes
-npm run test:changed
+make test-changed
 
 # Targeted test suites
-npm run test:suite:unit           # Unit tests only
-npm run test:suite:base-operations
-npm run test:suite:database
-npm run test:suite:integration
-npm run test:suite:components
-npm run test:suite:services
+make test-unit           # Unit tests only
+make test-base           # test/base-operations/**
+make test-db             # test/database/**
+make test-integration    # test/integration/**
+make test-components     # test/components/**
+make test-services       # test/services/**
 
-# Module-specific suites
-npm run test:base-station         # test/base-operations/**
-npm run test:checkpoint           # test/checkpoint/**
-npm run test:database             # test/database/**
-npm run test:integration          # test/integration/**
-
-# Puppeteer E2E (requires production build first)
-npm run build && npm run test:e2e
-npm run test:e2e:ci               # Headless mode for CI
+# Puppeteer E2E (make auto-builds first)
+make test-e2e            # Headed
+make test-e2e-ci         # Headless mode for CI
 
 # Test data management
-npm run test:seed                 # Populate complete dataset in IndexedDB
-npm run test:seed:minimal
-npm run test:clear
+make seed                # Populate complete dataset in IndexedDB
+make seed-minimal
+make clear-data
 ```
 
 ## Runner Range System
@@ -256,10 +250,15 @@ Use `src/services/timeUtils.js` utilities, not raw `Date()`. Timestamps stored a
 ## Development Workflow
 
 ### Build & Run
+
+Prefer `make` for everyday tasks — run `make` or `make help` to list all targets.
+
 ```bash
-npm run dev              # Vite dev server (localhost:5173)
-npm run build            # Production build
-npm run preview          # Test production build locally
+make install             # Install dependencies
+make dev                 # Vite dev server (localhost:3000)
+make build               # Production build
+make preview             # Build then serve locally (localhost:4173)
+make clean               # Remove dist/ and dev-dist/
 ```
 
 ### PWA Features

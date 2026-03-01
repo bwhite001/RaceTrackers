@@ -8,34 +8,47 @@ RaceTracker Pro — offline-first React PWA for race timing and checkpoint manag
 
 ## Commands
 
+Prefer `make` for everyday tasks — run `make` or `make help` to list all targets.
+
 ```bash
 # Development
-npm run dev              # Vite dev server (localhost:5173)
-npm run build            # Production build
-npm run preview          # Serve production build locally
+make dev                 # Vite dev server (localhost:3000)
+make build               # Production build
+make preview             # Build then serve locally (localhost:4173)
 
-# Testing (Vitest)
-npm test                 # Watch mode
-npm run test:run         # Single run with exit
-npm run test:coverage    # Coverage report
-npm run test:ui          # Vitest UI dashboard
+# Testing
+make test                # Watch mode
+make test-run            # Single run with exit
+make test-coverage       # Coverage report
+npm run test:ui          # Vitest UI dashboard (no make target)
 
 # Targeted test suites
-npm run test:suite:unit
-npm run test:suite:base-operations
-npm run test:suite:database
-npm run test:suite:integration
-npm run test:suite:services
-npm run test:suite:components
+make test-unit
+make test-base
+make test-db
+make test-integration
+make test-services
+make test-components
 
-# E2E tests (Puppeteer — requires production build first)
-npm run build && npm run test:e2e
-npm run test:e2e:ci      # Headless
+# E2E tests (make auto-builds first)
+make test-e2e            # Headed
+make test-e2e-ci         # Headless
+
+# Single file / pattern (no make target — use npx directly)
+npx vitest run test/path/to/file.test.jsx
+npx vitest run -t "test name pattern"
+
+# Tests affected by uncommitted changes
+make test-changed
 
 # Test data
-npm run test:seed        # Populate complete test dataset in IndexedDB
-npm run test:seed:minimal
-npm run test:clear
+make seed                # Populate complete dataset in IndexedDB
+make seed-minimal
+make clear-data
+
+# Housekeeping
+make install             # npm install
+make clean               # Remove dist/ and dev-dist/
 ```
 
 ## Architecture
