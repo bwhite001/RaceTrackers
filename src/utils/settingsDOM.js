@@ -62,6 +62,14 @@ export const applyCompactModeToDOM = (enabled) => {
 };
 
 /**
+ * Apply sunlight mode to DOM (maximum contrast for outdoor use)
+ * @param {boolean} enabled - Enable sunlight mode
+ */
+export const applySunlightModeToDOM = (enabled) => {
+  document.documentElement.classList.toggle('sunlight-mode', enabled);
+};
+
+/**
  * Apply status colors to DOM as CSS custom properties
  * @param {Object} statusColors - Object with status color mappings
  */
@@ -80,20 +88,19 @@ export const applyStatusColorsToDOM = (statusColors) => {
  */
 export const initializeSettings = (settings) => {
   applyThemeToDOM(settings.darkMode);
-  applyFontSizeToDOM(settings.fontSize);
   applyContrastToDOM(settings.highContrastMode ? 'high' : 'normal');
   applyReducedMotionToDOM(settings.reducedMotion);
   applyTouchOptimizedToDOM(settings.touchOptimized);
   applyCompactModeToDOM(settings.compactMode);
+  applySunlightModeToDOM(settings.sunlightMode ?? false);
   applyStatusColorsToDOM(settings.statusColors);
-  
+
+  // Touch devices: default to 1.1 font scale if user hasn't customised it
+  const defaultFontScale = (settings.touchOptimized && settings.fontSize === 1.0) ? 1.1 : settings.fontSize;
+  applyFontSizeToDOM(defaultFontScale);
+
   // Respect system preferences as fallback
   if (!settings.reducedMotion && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     applyReducedMotionToDOM(true);
-  }
-  
-  if (!settings.darkMode && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    // Only apply if user hasn't explicitly set dark mode
-    // This is optional - you may want to respect user's explicit choice
   }
 };

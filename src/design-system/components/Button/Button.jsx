@@ -17,7 +17,7 @@ import { getVariant, getSize, combineVariants } from '../../utils/variants';
 const buttonVariants = {
   primary: 'bg-navy-900 hover:bg-navy-800 text-white shadow-md hover:shadow-lg dark:bg-navy-800 dark:hover:bg-navy-700',
   secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
-  danger: 'bg-accent-600 hover:bg-accent-700 text-white shadow-md hover:shadow-lg',
+  danger: 'bg-accent-red-600 hover:bg-accent-red-700 text-white shadow-md hover:shadow-lg',
   success: 'bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg',
   warning: 'bg-gold-500 hover:bg-gold-600 text-white shadow-md hover:shadow-lg',
   ghost: 'bg-transparent hover:bg-gray-100 text-gray-700 dark:hover:bg-gray-800 dark:text-gray-200',

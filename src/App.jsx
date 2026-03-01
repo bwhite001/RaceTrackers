@@ -6,6 +6,7 @@ import { useRaceStore } from './store/useRaceStore';
 import { initializeSettings } from './utils/settingsDOM';
 import ProtectedRoute from './shared/components/ProtectedRoute';
 import NetworkStatusIndicator from './shared/components/NetworkStatusIndicator';
+import { ToastProvider } from './shared/components/ui/Toast';
 
 // Import module components
 import Homepage from './components/Home/Homepage';
@@ -63,9 +64,10 @@ function App() {
   }, [settings.darkMode, settings.reducedMotion]);
 
   return (
-    <Router>
-      <NetworkStatusIndicator />
-      <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
+    <ToastProvider>
+      <Router>
+        <NetworkStatusIndicator />
+        <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
         <main className="flex-grow container mx-auto px-4 py-8">
           <Routes>
             {/* Home page - accessible to all */}
@@ -132,6 +134,7 @@ function App() {
         <Footer />
       </div>
     </Router>
+    </ToastProvider>
   );
 }
 

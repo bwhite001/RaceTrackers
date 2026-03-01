@@ -12,6 +12,9 @@ export { default as DialogHeader } from './DialogHeader';
 export { default as DialogFooter } from './DialogFooter';
 export { default as WarningBox } from './WarningBox';
 export { default as StandardModal } from './StandardModal';
+export { default as ConfirmModal } from './ConfirmModal';
+export { ToastProvider, useToast } from './Toast';
+export { default as OfflineBadge } from './OfflineBadge';
 
 // Settings Components
 export { default as SettingsSection } from './SettingsSection';
