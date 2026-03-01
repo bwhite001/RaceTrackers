@@ -173,17 +173,28 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         </div>
       </nav>
 
-      {/* Main content — bottom padding prevents overlap with mobile tab bar */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
+      {/* Main content — bottom padding prevents overlap with mobile tab bar + QuickEntryBar */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-40 md:pb-6">
         {activeTab === 'mark-off' && (
           <div className="space-y-4">
-            <QuickEntryBar />
             <RunnerGrid onRunnerUpdate={() => setHasUnsavedChanges(true)} />
           </div>
         )}
         {activeTab === 'callout' && <CalloutSheet />}
         {activeTab === 'overview' && <RunnerOverview />}
       </main>
+
+      {/* QuickEntryBar — sticky above mobile tab bar, inline on desktop */}
+      {activeTab === 'mark-off' && (
+        <div className="fixed bottom-[56px] left-0 right-0 z-20 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3 shadow-lg md:hidden">
+          <QuickEntryBar />
+        </div>
+      )}
+      {activeTab === 'mark-off' && (
+        <div className="hidden md:block max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+          <QuickEntryBar />
+        </div>
+      )}
     </div>
   );
 };

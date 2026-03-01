@@ -1,8 +1,21 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import useBaseOperationsStore from '../../modules/base-operations/store/baseOperationsStore';
 import useDeviceDetection from '../../shared/hooks/useDeviceDetection';
-import { RUNNER_STATUSES, STATUS_COLORS, STATUS_LABELS } from '../../types';
+import { RUNNER_STATUSES, STATUS_LABELS } from '../../types';
 import { formatRunnerNumber } from '../../utils/runnerNumberUtils';
+
+// Static status colour classes (Tailwind JIT requires static strings)
+const STATUS_CLASS_MAP = {
+  active:    { badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-200',   accent: 'border-t-blue-500' },
+  finished:  { badge: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200', accent: 'border-t-green-500' },
+  dnf:       { badge: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200',       accent: 'border-t-red-500' },
+  dns:       { badge: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200', accent: 'border-t-yellow-500' },
+  total:     { badge: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200',      accent: 'border-t-navy-500' },
+};
+
+const STAT_LABELS = {
+  total: 'Total', finished: 'Finished', active: 'Active', dnf: 'DNF', dns: 'DNS',
+};
 
 /**
  * RaceOverview Component
@@ -84,10 +97,9 @@ const RaceOverview = () => {
     setSelectedRunner(prev => prev?.number === runner.number ? null : runner);
   }, []);
 
-  // Get status color class
-  const getStatusColorClass = useCallback((status) => {
-    const color = STATUS_COLORS[status] || 'gray';
-    return `bg-${color}-100 text-${color}-800 dark:bg-${color}-900/20 dark:text-${color}-200`;
+  // Get status badge class (static map — no dynamic Tailwind)
+  const getStatusBadgeClass = useCallback((status) => {
+    return STATUS_CLASS_MAP[status]?.badge ?? STATUS_CLASS_MAP.total.badge;
   }, []);
 
   return (
@@ -138,22 +150,25 @@ const RaceOverview = () => {
         </div>
       </div>
 
-      {/* Stats Summary */}
+      {/* Stats Summary — bordered accent cards */}
       <div data-testid="stats-grid" className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {Object.entries(stats).map(([key, value]) => (
-          <div 
-            key={key}
-            data-testid={`stat-${key}`}
-            className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm"
-          >
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              {key.charAt(0).toUpperCase() + key.slice(1)}
+        {Object.entries(stats).map(([key, value]) => {
+          const accentClass = STATUS_CLASS_MAP[key]?.accent ?? 'border-t-gray-400';
+          return (
+            <div
+              key={key}
+              data-testid={`stat-${key}`}
+              className={`p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border-t-4 ${accentClass}`}
+            >
+              <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                {STAT_LABELS[key] ?? key}
+              </div>
+              <div className="mt-1 text-3xl font-bold text-gray-900 dark:text-white">
+                {value}
+              </div>
             </div>
-            <div className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-              {value}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Runners Grid */}
@@ -190,7 +205,7 @@ const RaceOverview = () => {
                     {formatRunnerNumber(runner.number)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColorClass(runner.status)}`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(runner.status)}`}>
                       {STATUS_LABELS[runner.status]}
                     </span>
                   </td>

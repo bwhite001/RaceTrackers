@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { formatDistanceToNow } from 'date-fns';
-import { STATUS_COLORS } from '../../types';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
 /**
  * StatusStrip Component
@@ -36,56 +36,34 @@ const StatusStrip = memo(({ stats, lastSync }) => {
             </div>
 
             <div className="flex items-center">
-              <span className={`font-medium text-${STATUS_COLORS.finished}-600 dark:text-${STATUS_COLORS.finished}-400`}>
-                Finished:
-              </span>
+              <span className="font-medium text-green-600 dark:text-green-400">Finished:</span>
               <span className="ml-1 text-gray-900 dark:text-white">{finished}</span>
             </div>
 
             <div className="flex items-center">
-              <span className={`font-medium text-${STATUS_COLORS.active}-600 dark:text-${STATUS_COLORS.active}-400`}>
-                Active:
-              </span>
+              <span className="font-medium text-blue-600 dark:text-blue-400">Active:</span>
               <span className="ml-1 text-gray-900 dark:text-white">{active}</span>
             </div>
 
             <div className="flex items-center">
-              <span className={`font-medium text-${STATUS_COLORS.dnf}-600 dark:text-${STATUS_COLORS.dnf}-400`}>
-                DNF:
-              </span>
+              <span className="font-medium text-red-600 dark:text-red-400">DNF:</span>
               <span className="ml-1 text-gray-900 dark:text-white">{dnf}</span>
             </div>
 
             <div className="flex items-center">
-              <span className={`font-medium text-${STATUS_COLORS.dns}-600 dark:text-${STATUS_COLORS.dns}-400`}>
-                DNS:
-              </span>
+              <span className="font-medium text-yellow-600 dark:text-yellow-400">DNS:</span>
               <span className="ml-1 text-gray-900 dark:text-white">{dns}</span>
             </div>
 
             <div className="flex items-center">
-              <span className="font-medium text-gray-700 dark:text-gray-300">
-                Remaining:
-              </span>
+              <span className="font-medium text-gray-700 dark:text-gray-300">Remaining:</span>
               <span className="ml-1 text-gray-900 dark:text-white">{remaining}</span>
             </div>
           </div>
 
           {/* Last Sync Status */}
           <div className="flex items-center text-gray-600 dark:text-gray-400">
-            <svg 
-              className="w-4 h-4 mr-1" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
-              />
-            </svg>
+            <ArrowPathIcon className="w-4 h-4 mr-1" />
             <span>Last update: {lastSyncFormatted}</span>
           </div>
         </div>
