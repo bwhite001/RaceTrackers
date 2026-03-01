@@ -42,3 +42,6 @@ design/*
 # Design docs and plans (local only — never commit)
 docs/plans/
 test-results/
+
+# Git worktrees
+.worktrees/
