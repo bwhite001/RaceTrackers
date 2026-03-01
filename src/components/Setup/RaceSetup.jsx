@@ -56,9 +56,10 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
     if (template) {
       setFormData(prev => ({
         ...prev,
+        name: template.name || '',
+        startTime: template.defaultStartTime?.slice(0, 5) || '',
         checkpoints: template.checkpoints || [],
         runnerRanges: template.runnerRanges || [],
-        // Store template default batches — start times filled in step 3
         _templateBatches: template.defaultBatches || []
       }));
     }

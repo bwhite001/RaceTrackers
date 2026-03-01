@@ -23,7 +23,7 @@ const RaceDetailsStep = ({ data = {}, onNext, onCancel, isLoading }) => {
     name: data.name || '',
     date: data.date || TimeUtils.getTodayDateString(),
     startTime: data.startTime || '06:00',
-    numCheckpoints: data.numCheckpoints || 1,
+    numCheckpoints: data.numCheckpoints || data.checkpoints?.length || 1,
     checkpoints: data.checkpoints || [{ number: 1, name: 'Checkpoint 1' }]
   });
 
