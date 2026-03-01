@@ -132,7 +132,11 @@ const useBaseOperationsStore = create(
       // Actions - Runner Management
       updateRunner: async (runnerNumber, updates) => {
         const { currentRaceId, runners } = get();
-        if (!currentRaceId) throw new Error('No active race');
+        if (!currentRaceId) {
+          const err = new Error('No active race');
+          set({ error: err.message, loading: false });
+          throw err;
+        }
 
         try {
           set({ loading: true, error: null });

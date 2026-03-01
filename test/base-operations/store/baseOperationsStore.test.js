@@ -63,32 +63,26 @@ describe('Base Operations Store', () => {
       await useBaseOperationsStore.getState().initialize(raceId);
     };
 
-    test.skip('updates single runner', async () => {
-      // TODO: Fix in Task 8.3 - store methods not implemented
+    test('updates single runner', async () => {
       await setupTestRace();
-      const store = useBaseOperationsStore.getState();
-
-      await store.updateRunner(1, {
+      await useBaseOperationsStore.getState().updateRunner(1, {
         status: RUNNER_STATUSES.FINISHED,
         finishTime: '2023-01-01T12:00:00Z'
       });
 
-      const updatedRunner = store.runners.find(r => r.number === 1);
+      const updatedRunner = useBaseOperationsStore.getState().runners.find(r => r.number === 1);
       expect(updatedRunner.status).toBe(RUNNER_STATUSES.FINISHED);
       expect(updatedRunner.finishTime).toBe('2023-01-01T12:00:00Z');
     });
 
-    test.skip('bulk updates runners', async () => {
-      // TODO: Fix in Task 8.3 - store methods not implemented
+    test('bulk updates runners', async () => {
       await setupTestRace();
-      const store = useBaseOperationsStore.getState();
-
-      await store.bulkUpdateRunners([1, 2], {
+      await useBaseOperationsStore.getState().bulkUpdateRunners([1, 2], {
         status: RUNNER_STATUSES.FINISHED,
         finishTime: '2023-01-01T12:00:00Z'
       });
 
-      const updatedRunners = store.runners.filter(r => [1, 2].includes(r.number));
+      const updatedRunners = useBaseOperationsStore.getState().runners.filter(r => [1, 2].includes(r.number));
       expect(updatedRunners).toHaveLength(2);
       updatedRunners.forEach(runner => {
         expect(runner.status).toBe(RUNNER_STATUSES.FINISHED);
@@ -96,14 +90,11 @@ describe('Base Operations Store', () => {
       });
     });
 
-    test.skip('marks runners as DNF', async () => {
-      // TODO: Fix in Task 8.3 - store methods not implemented
+    test('marks runners as DNF', async () => {
       await setupTestRace();
-      const store = useBaseOperationsStore.getState();
+      await useBaseOperationsStore.getState().markAsDNF([1, 2], 'Test reason');
 
-      await store.markAsDNF([1, 2], 'Test reason');
-
-      const dnfRunners = store.runners.filter(r => [1, 2].includes(r.number));
+      const dnfRunners = useBaseOperationsStore.getState().runners.filter(r => [1, 2].includes(r.number));
       expect(dnfRunners).toHaveLength(2);
       dnfRunners.forEach(runner => {
         expect(runner.status).toBe(RUNNER_STATUSES.DNF);
@@ -112,14 +103,11 @@ describe('Base Operations Store', () => {
       });
     });
 
-    test.skip('marks runners as DNS', async () => {
-      // TODO: Fix in Task 8.3 - store methods not implemented
+    test('marks runners as DNS', async () => {
       await setupTestRace();
-      const store = useBaseOperationsStore.getState();
+      await useBaseOperationsStore.getState().markAsDNS([1, 2], 'Test reason');
 
-      await store.markAsDNS([1, 2], 'Test reason');
-
-      const dnsRunners = store.runners.filter(r => [1, 2].includes(r.number));
+      const dnsRunners = useBaseOperationsStore.getState().runners.filter(r => [1, 2].includes(r.number));
       expect(dnsRunners).toHaveLength(2);
       dnsRunners.forEach(runner => {
         expect(runner.status).toBe(RUNNER_STATUSES.DNS);
@@ -151,83 +139,62 @@ describe('Base Operations Store', () => {
   });
 
   describe('UI State Management', () => {
-    test.skip('manages selected runners', () => {
-      // TODO: Fix in Task 8.3 - store methods not implemented
-      const store = useBaseOperationsStore.getState();
-      
-      store.setSelectedRunners([1, 2, 3]);
-      expect(store.selectedRunners).toEqual([1, 2, 3]);
+    test('manages selected runners', () => {
+      useBaseOperationsStore.getState().setSelectedRunners([1, 2, 3]);
+      expect(useBaseOperationsStore.getState().selectedRunners).toEqual([1, 2, 3]);
 
-      store.setSelectedRunners([]);
-      expect(store.selectedRunners).toEqual([]);
+      useBaseOperationsStore.getState().setSelectedRunners([]);
+      expect(useBaseOperationsStore.getState().selectedRunners).toEqual([]);
     });
 
-    test.skip('manages common time', () => {
-      // TODO: Fix in Task 8.3 - store methods not implemented
-      const store = useBaseOperationsStore.getState();
+    test('manages common time', () => {
       const time = '2023-01-01T12:00:00Z';
-      
-      store.setCommonTime(time);
-      expect(store.commonTime).toBe(time);
+      useBaseOperationsStore.getState().setCommonTime(time);
+      expect(useBaseOperationsStore.getState().commonTime).toBe(time);
     });
 
-    test.skip('manages batch entry mode', () => {
-      // TODO: Fix in Task 8.3 - store methods not implemented
-      const store = useBaseOperationsStore.getState();
-      
-      store.setBatchEntryMode(true);
-      expect(store.batchEntryMode).toBe(true);
+    test('manages batch entry mode', () => {
+      useBaseOperationsStore.getState().setBatchEntryMode(true);
+      expect(useBaseOperationsStore.getState().batchEntryMode).toBe(true);
 
-      store.setBatchEntryMode(false);
-      expect(store.batchEntryMode).toBe(false);
+      useBaseOperationsStore.getState().setBatchEntryMode(false);
+      expect(useBaseOperationsStore.getState().batchEntryMode).toBe(false);
     });
 
-    test.skip('manages sort order', () => {
-      // TODO: Fix in Task 8.3 - store methods not implemented
-      const store = useBaseOperationsStore.getState();
-      
-      store.setSortOrder('status');
-      expect(store.sortOrder).toBe('status');
+    test('manages sort order', () => {
+      useBaseOperationsStore.getState().setSortOrder('status');
+      expect(useBaseOperationsStore.getState().sortOrder).toBe('status');
 
-      store.setSortOrder('time');
-      expect(store.sortOrder).toBe('time');
+      useBaseOperationsStore.getState().setSortOrder('time');
+      expect(useBaseOperationsStore.getState().sortOrder).toBe('time');
     });
 
-    test.skip('manages filter status', () => {
-      // TODO: Fix in Task 8.3 - store methods not implemented
-      const store = useBaseOperationsStore.getState();
-      
-      store.setFilterStatus('finished');
-      expect(store.filterStatus).toBe('finished');
+    test('manages filter status', () => {
+      useBaseOperationsStore.getState().setFilterStatus('finished');
+      expect(useBaseOperationsStore.getState().filterStatus).toBe('finished');
 
-      store.setFilterStatus('all');
-      expect(store.filterStatus).toBe('all');
+      useBaseOperationsStore.getState().setFilterStatus('all');
+      expect(useBaseOperationsStore.getState().filterStatus).toBe('all');
     });
   });
 
   describe('Error Handling', () => {
-    test.skip('handles initialization errors', async () => {
-      // TODO: Fix in Task 8.3 - store methods not implemented
-      const store = useBaseOperationsStore.getState();
-      
-      await expect(store.initialize('non-existent-race'))
+    test('handles initialization errors', async () => {
+      await expect(useBaseOperationsStore.getState().initialize('non-existent-race'))
         .rejects
         .toThrow('Race configuration not found');
 
-      expect(store.error).toBe('Race configuration not found');
-      expect(store.loading).toBe(false);
+      expect(useBaseOperationsStore.getState().error).toBe('Race configuration not found');
+      expect(useBaseOperationsStore.getState().loading).toBe(false);
     });
 
-    test.skip('handles runner update errors', async () => {
-      // TODO: Fix in Task 8.3 - store methods not implemented
-      const store = useBaseOperationsStore.getState();
-      
-      await expect(store.updateRunner(1, {}))
+    test('handles runner update errors', async () => {
+      await expect(useBaseOperationsStore.getState().updateRunner(1, {}))
         .rejects
         .toThrow('No active race');
 
-      expect(store.error).toBe('No active race');
-      expect(store.loading).toBe(false);
+      expect(useBaseOperationsStore.getState().error).toBe('No active race');
+      expect(useBaseOperationsStore.getState().loading).toBe(false);
     });
   });
 });
