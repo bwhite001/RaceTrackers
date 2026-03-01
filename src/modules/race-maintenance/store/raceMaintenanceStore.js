@@ -151,12 +151,58 @@ const useRaceMaintenanceStore = create((set, get) => ({
     }
   },
 
+  // Batch / Wave Management
+  batches: [],
+
+  loadBatches: async (raceId) => {
+    try {
+      const batches = await RaceMaintenanceRepository.getBatches(raceId);
+      set({ batches });
+    } catch (error) {
+      console.error('Error loading batches:', error);
+    }
+  },
+
+  saveBatch: async (raceId, batchData) => {
+    try {
+      const { batches } = get();
+      const existing = batches.find(b => b.batchNumber === batchData.batchNumber);
+      if (existing) {
+        await RaceMaintenanceRepository.updateBatch(existing.id, {
+          batchName: batchData.batchName,
+          startTime: batchData.startTime,
+        });
+      } else {
+        await RaceMaintenanceRepository.createBatch(raceId, batchData);
+      }
+      await get().loadBatches(raceId);
+    } catch (error) {
+      console.error('Error saving batch:', error);
+      throw error;
+    }
+  },
+
+  deleteBatch: async (raceId, batchNumber) => {
+    try {
+      const { batches } = get();
+      const batch = batches.find(b => b.batchNumber === batchNumber);
+      if (batch) {
+        await RaceMaintenanceRepository.deleteBatch(batch.id);
+        await get().loadBatches(raceId);
+      }
+    } catch (error) {
+      console.error('Error deleting batch:', error);
+      throw error;
+    }
+  },
+
   // Reset state
   reset: () => {
     set({
       currentRace: null,
       races: [],
       checkpoints: [],
+      batches: [],
       loading: false,
       error: null
     });
