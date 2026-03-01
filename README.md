@@ -75,7 +75,7 @@
 ## 🚀 Demo
 
 ### Live Demo
-🔗 **[Try RaceTracker Pro](https://bwhite001.github.io/RaceTrackers)** *(GitHub Pages)*
+🔗 **[Try RaceTracker Pro](https://racetrackers.bwhite.id.au/)** *(Live App)*
 
 ### Screenshots
 
@@ -326,20 +326,30 @@ test/
 
 ### GitHub Pages (Recommended)
 
+The app is deployed automatically via GitHub Actions on every push to `main`.
+
 1. **Configure GitHub Pages**
    - Go to repository Settings → Pages
    - Source: GitHub Actions
+   - Custom domain: `racetrackers.bwhite.id.au`
 
-2. **Deploy**
+2. **DNS setup** — add a CNAME record:
+   ```
+   racetrackers  CNAME  bwhite001.github.io
+   ```
+
+3. **Deploy**
    ```bash
-   npm run build
-   # Push to main branch - GitHub Actions will deploy automatically
+   # Push to main branch - GitHub Actions deploys automatically
+   git push origin main
    ```
 
-3. **Access your app**
+4. **Live URL**
    ```
-   https://your-username.github.io/RaceTrackers
+   https://racetrackers.bwhite.id.au/
    ```
+
+> Visiting any other URL (e.g. the old `github.io` address) will redirect automatically to the canonical domain.
 
 ### Manual Deployment
 
