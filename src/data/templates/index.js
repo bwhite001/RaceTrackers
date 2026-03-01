@@ -1,17 +1,38 @@
-import mountainTrail100k from './mountain-trail-100k.json';
-import communityFunRun10k from './community-fun-run-10k.json';
-import ultraMarathon50k from './ultra-marathon-50k.json';
+import { normaliseTemplate } from '../../services/normaliseTemplate.js';
+import { mtGloriousTemplate } from './mtGloriousTemplate.js';
+import { brisbaneTrailMarathon } from './brisbaneTrailMarathon.js';
+import { pinnaclesClassic } from './pinnaclesClassic.js';
+import { lakeManchesterTrail } from './lakeManchesterTrail.js';
 
 /**
- * Static race templates committed to the codebase.
- * Available offline to all users — no database records needed.
- * Each template carries: checkpoints, runnerRanges, defaultBatches.
- * Does NOT carry: runner personal data, statuses, or historic results.
+ * All available race templates, normalised to canonical shape.
+ * Import via: import RACE_TEMPLATES from '../../data/templates/index';
+ *         or: import { getTemplateById } from '../../data/templates/index';
  */
 const RACE_TEMPLATES = [
-  mountainTrail100k,
-  communityFunRun10k,
-  ultraMarathon50k
+  normaliseTemplate(mtGloriousTemplate),
+  normaliseTemplate(brisbaneTrailMarathon),
+  normaliseTemplate(pinnaclesClassic),
+  normaliseTemplate(lakeManchesterTrail)
 ];
 
 export default RACE_TEMPLATES;
+
+export function getTemplateById(id) {
+  return RACE_TEMPLATES.find(t => t.id === id) || null;
+}
+
+export function getTemplateByName(name) {
+  return RACE_TEMPLATES.find(t => t.name === name) || null;
+}
+
+export function getAllTemplates() {
+  return RACE_TEMPLATES;
+}
+
+export function validateTemplate(template) {
+  const required = ['id', 'name', 'checkpoints', 'runnerRanges'];
+  return required.every(key => template[key] != null);
+}
+
+export { RACE_TEMPLATES as templates };

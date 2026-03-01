@@ -57,9 +57,21 @@ function TemplateSelectionStep({ onSelect }) {
               <span className="px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
                 {template.runnerRanges.map(r => `${r.min}–${r.max}`).join(', ')}
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300">
-                {template.defaultBatches.length} wave{template.defaultBatches.length !== 1 ? 's' : ''}
-              </span>
+              {template.defaultBatches.length > 0 && (
+                <span className="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300">
+                  {template.defaultBatches.length} wave{template.defaultBatches.length !== 1 ? 's' : ''}
+                </span>
+              )}
+              {template.defaultStartTime && (
+                <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                  🕐 {template.defaultStartTime.slice(0, 5)}
+                </span>
+              )}
+              {template.baseLocation && (
+                <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300">
+                  📍 {template.baseLocation}
+                </span>
+              )}
             </div>
           </button>
         ))}
