@@ -108,7 +108,7 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
   const handleSubmit = async () => {
     try {
-      const ranges = runnerRanges || formData.runnerRanges || [];
+      const ranges = formData.runnerRanges || [];
       // Compute minRunner/maxRunner for SharedRunnerGrid grouping
       const allNumbers = ranges.flatMap(r =>
         r.isIndividual && r.individualNumbers

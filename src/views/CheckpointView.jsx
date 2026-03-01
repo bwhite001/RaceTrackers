@@ -186,12 +186,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
       {/* QuickEntryBar — sticky above mobile tab bar, inline on desktop */}
       {activeTab === 'mark-off' && (
-        <div className="fixed bottom-[56px] left-0 right-0 z-20 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3 shadow-lg md:hidden">
-          <QuickEntryBar />
-        </div>
-      )}
-      {activeTab === 'mark-off' && (
-        <div className="hidden md:block max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="fixed bottom-[56px] left-0 right-0 z-20 md:static md:bottom-auto md:z-auto md:max-w-7xl md:w-full md:mx-auto md:px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3 shadow-lg md:shadow-none">
           <QuickEntryBar />
         </div>
       )}

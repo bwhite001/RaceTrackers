@@ -24,8 +24,8 @@ test.describe('Settings & Preferences Journey', () => {
     await page.click('button[aria-label="Settings"]');
     await expect(settingsHeading(page)).toBeVisible();
 
-    // Close with the X (aria-label="Close dialog") button in DialogHeader
-    await page.getByRole('button', { name: 'Close dialog' }).click();
+    // Close with the X button in the modal header
+    await page.getByRole('button', { name: /close/i }).first().click();
     await expect(settingsHeading(page)).toBeHidden();
   });
 

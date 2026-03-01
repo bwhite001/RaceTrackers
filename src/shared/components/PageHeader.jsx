@@ -71,9 +71,9 @@ const PageHeader = ({
               <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center ring-1 ring-white/20">
                 <BoltIcon className="w-5 h-5 text-white" aria-hidden="true" />
               </div>
-              <span className="text-lg font-bold text-white tracking-tight">
+              <h1 className="text-lg font-bold text-white tracking-tight">
                 Race Tracker Pro
-              </span>
+              </h1>
             </div>
           ) : (
             <div className="flex items-center gap-3 min-w-0">

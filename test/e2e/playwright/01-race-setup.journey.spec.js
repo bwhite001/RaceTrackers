@@ -38,6 +38,9 @@ test.describe('Race Director – Race Setup Journey', () => {
     });
 
     await step('fill race details (step 1)', async () => {
+      // Template step — click Start from Scratch to proceed to Race Details
+      await page.locator('button').filter({ hasText: 'Start from Scratch' }).first().click();
+      await page.waitForTimeout(300);
       await fillReactInput(page, '#name', RACE_NAME);
       await page.waitForTimeout(100);
       await page.fill('#date', RACE_DATE);
@@ -72,7 +75,13 @@ test.describe('Race Director – Race Setup Journey', () => {
       await page.waitForTimeout(100);
       await page.getByRole('button', { name: /add range/i }).click();
       await page.waitForTimeout(200);
+      // "Create Race" on Runner Ranges step moves to Batches step
       await page.getByRole('button', { name: /create race|save|finish/i }).click();
+      // Batches step — click "Create Race" to actually save the race
+      const batchesCreateBtn = page.getByRole('button', { name: /create race/i });
+      if (await batchesCreateBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await batchesCreateBtn.click();
+      }
     });
 
     await step('verify race overview', async () => {
@@ -94,11 +103,14 @@ test.describe('Race Director – Race Setup Journey', () => {
 
   test('step indicator advances correctly through setup wizard', async ({ page }) => {
     await page.goto('/race-maintenance/setup');
+    // Template step — click Start from Scratch to proceed to Race Details
+    await page.locator('button').filter({ hasText: 'Start from Scratch' }).first().click();
+    await page.waitForTimeout(300);
     await page.waitForSelector('#name');
 
-    // Step 1 should be active
-    const step1 = page.getByText(/race details|step 1/i).first();
-    await expect(step1).toBeVisible();
+    // Step 2 (Race Details) should be active
+    const step2Label = page.getByText(/race details/i).first();
+    await expect(step2Label).toBeVisible();
 
     await fillReactInput(page, '#name', 'Indicator Test Race');
     await page.waitForTimeout(100);
@@ -118,6 +130,9 @@ test.describe('Race Director – Race Setup Journey', () => {
 
   test('back button on step 2 returns to race details with data preserved', async ({ page }) => {
     await page.goto('/race-maintenance/setup');
+    // Template step — click Start from Scratch to proceed to Race Details
+    await page.locator('button').filter({ hasText: 'Start from Scratch' }).first().click();
+    await page.waitForTimeout(300);
     await page.waitForSelector('#name');
     await page.waitForTimeout(500); // Wait for React to finish mounting
 

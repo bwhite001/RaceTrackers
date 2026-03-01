@@ -20,6 +20,7 @@ export default defineConfig({
     video: 'on-first-retry',
     actionTimeout: 15000,
     navigationTimeout: 30000,
+    serviceWorkers: 'block', // prevent SW auto-reload from resetting React state mid-test
   },
   projects: [
     {
@@ -28,9 +29,10 @@ export default defineConfig({
     },
   ],
   // Optionally start the dev server automatically
-  // webServer: {
-  //   command: 'npm run dev',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  webServer: {
+    command: 'npx serve dist -p 3000 --single',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    timeout: 30000,
+  },
 });

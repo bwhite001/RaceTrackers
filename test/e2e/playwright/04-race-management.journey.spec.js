@@ -51,6 +51,11 @@ test.describe('Race Management Journey', () => {
     await newRaceBtn.click();
 
     await page.waitForURL(/race-maintenance\/setup/);
+    // Template step — click Start from Scratch
+    const scratchBtn = page.locator('button').filter({ hasText: 'Start from Scratch' }).first();
+    await scratchBtn.waitFor({ state: 'visible', timeout: 8000 });
+    await scratchBtn.click();
+    await page.waitForTimeout(300);
     await fillReactInput(page, '#name', RACE_B.name);
     await page.waitForTimeout(100);
     await page.fill('#date', RACE_B.date);
@@ -64,6 +69,11 @@ test.describe('Race Management Journey', () => {
     await page.fill('#min', String(RACE_B.runnerRange.min));
     await page.fill('#max', String(RACE_B.runnerRange.max));
     await page.getByRole('button', { name: /create race|save|finish/i }).click();
+    // Batches step — click Create Race again to actually save
+    const batchCreateBtn = page.getByRole('button', { name: /create race/i });
+    if (await batchCreateBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await batchCreateBtn.click();
+    }
 
     await page.waitForURL(/race-maintenance\/overview/);
     await expect(page.getByText(RACE_B.name)).toBeVisible();
