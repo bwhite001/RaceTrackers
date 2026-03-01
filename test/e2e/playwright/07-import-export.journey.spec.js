@@ -39,44 +39,58 @@ test.describe('Import / Export Journey', () => {
     }
   });
 
-  test('export modal opens from base station header', async ({ page }) => {
+  test('export modal opens from base station header', async ({ page, step }) => {
     test.skip(true, 'DEVELOPMENT GAP: baseOperationsStore uses localStorage — base station UI cannot be reached without architectural integration');
-    await createRace(page, RACE);
-    await page.goto('/base-station/operations');
-    await page.waitForSelector('#commonTime', { timeout: 5000 });
+    await step('Base Station — operations screen with created race', async () => {
+      await createRace(page, RACE);
+      await page.goto('/base-station/operations');
+      await page.waitForSelector('#commonTime', { timeout: 5000 });
+    });
 
-    const exportBtn = page.getByRole('button', { name: /export|import.*export/i }).first();
-    if (await exportBtn.isVisible({ timeout: 2000 })) {
-      await exportBtn.click();
+    await step('Base Station header — tap Import/Export button', async () => {
+      const exportBtn = page.getByRole('button', { name: /export|import.*export/i }).first();
+      if (await exportBtn.isVisible({ timeout: 2000 })) {
+        await exportBtn.click();
+      } else {
+        test.skip(true, 'No visible export button on base station view');
+      }
+    });
+
+    await step('Data portability dialog — export options visible', async () => {
       await expect(page.getByRole('dialog')).toBeVisible();
       await page.keyboard.press('Escape');
-    } else {
-      test.skip(true, 'No visible export button on base station view');
-    }
+    });
   });
 
-  test('downloads a race configuration JSON file', async ({ page }) => {
-    await createRace(page, RACE);
-    await page.goto('/race-management');
+  test('downloads a race configuration JSON file', async ({ page, step }) => {
+    await step('Race Management — page with created race listed', async () => {
+      await createRace(page, RACE);
+      await page.goto('/race-management');
+    });
 
-    // Look for an export option on the race management page
-    const exportBtn = page.getByRole('button', { name: /export|download/i }).first();
-    if (!(await exportBtn.isVisible({ timeout: 2000 }))) {
-      test.skip(true, 'Export button not found on race management page');
-      return;
-    }
+    await step('Race card — open export / download option', async () => {
+      // Look for an export option on the race management page
+      const exportBtn = page.getByRole('button', { name: /export|download/i }).first();
+      if (!(await exportBtn.isVisible({ timeout: 2000 }))) {
+        test.skip(true, 'Export button not found on race management page');
+        return;
+      }
 
-    const [download] = await Promise.all([
-      page.waitForEvent('download'),
-      exportBtn.click(),
-    ]);
+      const [download] = await Promise.all([
+        page.waitForEvent('download'),
+        exportBtn.click(),
+      ]);
 
-    await download.saveAs(exportFilePath);
-    expect(fs.existsSync(exportFilePath)).toBe(true);
+      await download.saveAs(exportFilePath);
+    });
 
-    const content = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'));
-    expect(content).toHaveProperty('races');
-    expect(Array.isArray(content.races)).toBe(true);
+    await step('Download triggered — JSON file confirmed in temp folder', async () => {
+      expect(fs.existsSync(exportFilePath)).toBe(true);
+
+      const content = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'));
+      expect(content).toHaveProperty('races');
+      expect(Array.isArray(content.races)).toBe(true);
+    });
   });
 
   test('imports a race configuration and restores data', async ({ page }) => {
