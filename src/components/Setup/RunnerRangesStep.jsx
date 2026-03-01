@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import useRaceStore from '../../store/useRaceStore.js';
+import { useRaceStore } from '../../store/useRaceStore.js';
 import {
   FormGroup,
   FormLabel,
