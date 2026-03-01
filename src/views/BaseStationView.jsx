@@ -22,10 +22,13 @@ import ErrorMessage from '../components/Layout/ErrorMessage';
 import StatusStrip from '../components/Layout/StatusStrip';
 import SettingsModal from '../components/Settings/SettingsModal';
 import HelpDialog from '../modules/base-operations/components/HelpDialog';
+import HeadsUpGrid from '../modules/base-operations/components/HeadsUpGrid';
+import Leaderboard from '../modules/base-operations/components/Leaderboard';
 
 const TABS = [
   { id: 'data-entry', label: 'Data Entry' },
   { id: 'overview', label: 'Overview' },
+  { id: 'leaderboard', label: 'Leaderboard' },
   { id: 'checkpoint-matrix', label: 'Checkpoint Matrix' },
   { id: 'reports', label: 'Reports' },
 ];
@@ -38,8 +41,8 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const navigate = useNavigate();
 
   // Store access
-  const { currentRaceId, loading, error, stats, initialize } = useBaseOperationsStore();
-  const { selectedRaceForMode } = useRaceStore();
+  const { currentRaceId, loading, error, stats, runners, initialize } = useBaseOperationsStore();
+  const { selectedRaceForMode, checkpoints } = useRaceStore();
   const { darkMode } = useSettingsStore();
   const initStarted = useRef(false);
 
@@ -215,6 +218,10 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
                 <RaceOverview />
                 <CheckpointImportPanel />
               </div>
+            )}
+
+            {activeTab === 'leaderboard' && (
+              <Leaderboard runners={runners ?? []} />
             )}
 
             {activeTab === 'checkpoint-matrix' && (
