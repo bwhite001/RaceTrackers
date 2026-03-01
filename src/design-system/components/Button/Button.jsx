@@ -15,26 +15,27 @@ import { getVariant, getSize, combineVariants } from '../../utils/variants';
 
 // Button variant styles
 const buttonVariants = {
-  primary: 'bg-navy-900 hover:bg-navy-800 text-white shadow-md hover:shadow-lg dark:bg-navy-800 dark:hover:bg-navy-700',
-  secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
-  danger: 'bg-accent-red-600 hover:bg-accent-red-700 text-white shadow-md hover:shadow-lg',
-  success: 'bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg',
-  warning: 'bg-gold-500 hover:bg-gold-600 text-white shadow-md hover:shadow-lg',
+  primary: 'bg-navy-900 hover:bg-navy-800 active:bg-navy-900 text-white shadow-md hover:shadow-lg dark:bg-navy-800 dark:hover:bg-navy-700',
+  secondary: 'bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
+  danger: 'bg-accent-red-600 hover:bg-accent-red-700 active:bg-accent-red-600 text-white shadow-md hover:shadow-lg',
+  success: 'bg-green-600 hover:bg-green-700 active:bg-green-600 text-white shadow-md hover:shadow-lg',
+  warning: 'bg-gold-500 hover:bg-gold-600 active:bg-gold-500 text-white shadow-md hover:shadow-lg',
   ghost: 'bg-transparent hover:bg-gray-100 text-gray-700 dark:hover:bg-gray-800 dark:text-gray-200',
-  outline: 'border-2 border-navy-900 bg-transparent hover:bg-navy-900 text-navy-900 hover:text-white dark:border-navy-600 dark:text-navy-400 dark:hover:bg-navy-800 dark:hover:text-white',
+  outline: 'border border-slate-300 bg-transparent hover:bg-slate-50 active:bg-slate-100 text-slate-900 dark:border-navy-600 dark:text-navy-400 dark:hover:bg-navy-800 dark:hover:text-white',
+  subtle: 'bg-transparent text-slate-700 hover:bg-slate-100 active:bg-slate-100 dark:text-slate-300 dark:hover:bg-navy-900/40',
   link: 'bg-transparent hover:underline text-navy-900 dark:text-navy-400 p-0',
 };
 
 // Button size styles
 const buttonSizes = {
   sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2 text-base',
+  md: 'px-4 py-2.5 text-base',
   lg: 'px-6 py-3 text-lg',
   xl: 'px-8 py-4 text-xl',
 };
 
 // Base button styles
-const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none';
+const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-navy-500 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none hover:-translate-y-px active:translate-y-0';
 
 const Button = React.forwardRef(({
   children,

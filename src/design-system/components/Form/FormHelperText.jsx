@@ -17,7 +17,7 @@ const FormHelperText = ({
   return (
     <p
       className={cn(
-        'text-sm text-gray-600 dark:text-gray-400',
+        'text-sm text-slate-500 dark:text-slate-400',
         className
       )}
       {...props}

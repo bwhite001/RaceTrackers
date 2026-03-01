@@ -26,8 +26,8 @@ const ModalFooter = ({
   return (
     <div
       className={cn(
-        'px-6 py-4 border-t border-gray-200 dark:border-gray-700',
-        'flex items-center gap-3',
+        'px-6 py-4 border-t border-slate-200 dark:border-navy-700',
+        'flex items-center gap-2',
         alignStyles[align],
         className
       )}

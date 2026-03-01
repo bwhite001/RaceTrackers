@@ -17,7 +17,7 @@ const FormGroup = ({
 }) => {
   return (
     <div
-      className={cn('space-y-1.5', className)}
+      className={cn('space-y-4', className)}
       {...props}
     >
       {children}

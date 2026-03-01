@@ -154,7 +154,7 @@ const Modal = ({
       onClick={handleBackdropClick}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-sm" />
 
       {/* Modal */}
       <div

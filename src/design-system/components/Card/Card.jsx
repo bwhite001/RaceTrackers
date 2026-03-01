@@ -15,7 +15,7 @@ import { cn } from '../../utils/classNames';
 
 const cardVariants = {
   default: 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
-  elevated: 'bg-white dark:bg-gray-800 shadow-card',
+  elevated: 'bg-white dark:bg-gray-800 shadow-md',
   bordered: 'bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600',
   flat: 'bg-gray-50 dark:bg-gray-900',
 };
@@ -40,8 +40,8 @@ const Card = ({
   };
 
   const interactiveClasses = cn(
-    hoverable && 'hover:shadow-card-hover transition-shadow duration-200',
-    clickable && 'cursor-pointer hover:shadow-card-hover transition-shadow duration-200'
+    hoverable && 'hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200',
+    clickable && 'cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200'
   );
 
   return (

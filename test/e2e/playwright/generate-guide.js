@@ -84,10 +84,17 @@ function extractPassingTests(html) {
     const block = m[1];
     const titleMatch = block.match(/class="test-title">([^<]+)<\/h3>/);
     const descMatch  = block.match(/class="test-description">([^<]+)<\/p>/);
-    const imgRe = /src="(data:image\/png;base64,[^"]+)"/g;
-    const screenshots = [];
+    // Extract { dataUri, label } pairs — src and alt are always adjacent in reporter output
+    const figRe = /<img src="(data:image\/png;base64,[^"]+)" alt="([^"]+)"/g;
+    const allScreenshots = [];
     let im;
-    while ((im = imgRe.exec(block)) !== null) screenshots.push(im[1]);
+    while ((im = figRe.exec(block)) !== null) {
+      allScreenshots.push({ dataUri: im[1], label: unescapeHtml(im[2]) });
+    }
+    // Keep only the "after-step" captures: labels like "01-B Step title"
+    // These show the result state the user should see after each action.
+    const screenshots = allScreenshots.filter(s => /^\d{2}-B /.test(s.label))
+      .map(s => ({ dataUri: s.dataUri, label: s.label.replace(/^\d{2}-B /, '') }));
     if (titleMatch) {
       tests.push({
         title: titleMatch[1].trim(),
@@ -126,9 +133,9 @@ function main() {
       console.warn(`  WARN: no chapter mapping for "${test.title}" — skipping`);
       continue;
     }
-    const screenshotPaths = test.screenshots.map((dataUri, i) => {
+    const screenshotPaths = test.screenshots.map((shot, i) => {
       const filename = `${slugify(test.title)}-step-${String(i + 1).padStart(2, '0')}.png`;
-      return saveScreenshot(dataUri, filename);
+      return { path: saveScreenshot(shot.dataUri, filename), label: shot.label };
     });
     chapters[chapter].push({ ...test, screenshotPaths });
   }
@@ -157,8 +164,8 @@ function main() {
     mdLines.push(`## ${ch.title}`, '', ch.intro, '');
     for (const test of items) {
       mdLines.push(`### ${capitalize(test.title)}`, '', unescapeHtml(test.description), '');
-      for (let i = 0; i < test.screenshotPaths.length; i++) {
-        mdLines.push(`![Step ${i + 1}](${test.screenshotPaths[i]})`, '');
+      for (const { path, label } of test.screenshotPaths) {
+        mdLines.push(`**${unescapeHtml(label)}**`, '', `![${unescapeHtml(label)}](${path})`, '');
       }
     }
   }
@@ -174,9 +181,10 @@ function main() {
     let block = `<div id="${ch.key}">\n<h2>${ch.title}</h2>\n<p class="chapter-intro">${ch.intro}</p>\n`;
     for (const test of items) {
       const desc = escapeHtml(unescapeHtml(test.description));
-      block += `<section class="task">\n<h3>${capitalize(test.title)}</h3>\n<p class="description">${desc}</p>\n<div class="filmstrip">\n`;
-      for (let i = 0; i < test.screenshots.length; i++) {
-        block += `<figure><img src="${test.screenshots[i]}" alt="Step ${i + 1}" loading="lazy"><figcaption>Step ${i + 1}</figcaption></figure>\n`;
+      block += `<section class="task">\n<h3>${capitalize(test.title)}</h3>\n<p class="description">${desc}</p>\n<div class="steps">\n`;
+      for (const { path, label } of test.screenshotPaths) {
+        const escapedLabel = escapeHtml(unescapeHtml(label));
+        block += `<div class="step"><p class="step-instruction">${escapedLabel}</p><img src="${path}" alt="${escapedLabel}" loading="lazy"></div>\n`;
       }
       block += `</div>\n</section>\n`;
     }
@@ -214,8 +222,12 @@ function main() {
   .filmstrip figure { flex: 0 0 auto; text-align: center; }
   .filmstrip img { width: 260px; border-radius: 6px; border: 1px solid #e2e8f0; display: block; }
   .filmstrip figcaption { font-size: .75rem; color: #94a3b8; margin-top: 4px; }
+  .steps { display: flex; flex-direction: column; gap: 24px; }
+  .step { display: flex; flex-direction: column; gap: 8px; }
+  .step-instruction { font-weight: 600; font-size: .95rem; color: #1e293b; margin: 0; }
+  .step img { max-width: 100%; width: 640px; border-radius: 8px; border: 1px solid #e2e8f0; display: block; }
   .page-footer { text-align: center; padding: 24px; font-size: .75rem; color: #94a3b8; border-top: 1px solid #e2e8f0; margin-top: 40px; }
-  @media (max-width: 640px) { .filmstrip img { width: 200px; } main { padding: 16px; } }
+  @media (max-width: 640px) { .step img { width: 100%; } main { padding: 16px; } }
 </style>
 </head>
 <body>

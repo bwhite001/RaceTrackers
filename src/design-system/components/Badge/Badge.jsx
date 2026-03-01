@@ -52,7 +52,7 @@ const Badge = ({
     default: {
       solid: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
       outline: 'border border-gray-300 text-gray-700 dark:border-gray-600 dark:text-gray-300',
-      soft: 'bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+      soft: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
     },
     primary: {
       solid: 'bg-navy-600 text-white dark:bg-navy-500',
@@ -65,24 +65,50 @@ const Badge = ({
       soft: 'bg-gold-50 text-gold-700 dark:bg-gold-900 dark:text-gold-300',
     },
     success: {
-      solid: 'bg-green-500 text-white dark:bg-green-600',
-      outline: 'border border-green-500 text-green-700 dark:border-green-600 dark:text-green-400',
-      soft: 'bg-green-50 text-green-700 dark:bg-green-900 dark:text-green-300',
+      solid: 'bg-emerald-500 text-white dark:bg-emerald-600',
+      outline: 'border border-emerald-500 text-emerald-700 dark:border-emerald-600 dark:text-emerald-400',
+      soft: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
     },
     warning: {
-      solid: 'bg-gold-500 text-white dark:bg-gold-600',
-      outline: 'border border-gold-500 text-gold-700 dark:border-gold-600 dark:text-gold-400',
-      soft: 'bg-gold-50 text-gold-700 dark:bg-gold-900 dark:text-gold-300',
+      solid: 'bg-amber-500 text-white dark:bg-amber-600',
+      outline: 'border border-amber-500 text-amber-700 dark:border-amber-600 dark:text-amber-400',
+      soft: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
     },
     danger: {
       solid: 'bg-red-600 text-white dark:bg-red-700',
       outline: 'border border-red-600 text-red-700 dark:border-red-700 dark:text-red-400',
-      soft: 'bg-red-50 text-red-700 dark:bg-red-900 dark:text-red-300',
+      soft: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
     },
     info: {
       solid: 'bg-blue-500 text-white dark:bg-blue-600',
       outline: 'border border-blue-500 text-blue-700 dark:border-blue-600 dark:text-blue-400',
       soft: 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+    },
+    // Runner status variants — Fluent tinted soft-container style
+    'status-not-started': {
+      solid: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
+      outline: 'border border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-300',
+      soft: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
+    },
+    'status-passed': {
+      solid: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
+      outline: 'border border-emerald-500 text-emerald-700 dark:border-emerald-600 dark:text-emerald-400',
+      soft: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
+    },
+    'status-non-starter': {
+      solid: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
+      outline: 'border border-red-400 text-red-700 dark:border-red-700 dark:text-red-400',
+      soft: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
+    },
+    'status-dnf': {
+      solid: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
+      outline: 'border border-amber-400 text-amber-700 dark:border-amber-600 dark:text-amber-400',
+      soft: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
+    },
+    'status-called-in': {
+      solid: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400',
+      outline: 'border border-violet-400 text-violet-700 dark:border-violet-600 dark:text-violet-400',
+      soft: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400',
     },
   };
 
@@ -112,10 +138,15 @@ const Badge = ({
     default: 'bg-gray-400 dark:bg-gray-500',
     primary: 'bg-navy-600 dark:bg-navy-500',
     secondary: 'bg-gold-500 dark:bg-gold-600',
-    success: 'bg-green-500 dark:bg-green-600',
-    warning: 'bg-gold-500 dark:bg-gold-600',
+    success: 'bg-emerald-500 dark:bg-emerald-600',
+    warning: 'bg-amber-500 dark:bg-amber-600',
     danger: 'bg-red-600 dark:bg-red-700',
     info: 'bg-blue-500 dark:bg-blue-600',
+    'status-not-started': 'bg-gray-400 dark:bg-gray-500',
+    'status-passed': 'bg-emerald-500 dark:bg-emerald-400',
+    'status-non-starter': 'bg-red-500 dark:bg-red-400',
+    'status-dnf': 'bg-amber-500 dark:bg-amber-400',
+    'status-called-in': 'bg-violet-500 dark:bg-violet-400',
   };
 
   // Base styles
@@ -202,6 +233,11 @@ Badge.propTypes = {
     'warning',
     'danger',
     'info',
+    'status-not-started',
+    'status-passed',
+    'status-non-starter',
+    'status-dnf',
+    'status-called-in',
   ]),
   
   /** Size of the badge */

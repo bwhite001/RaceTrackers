@@ -34,7 +34,7 @@ const Select = forwardRef(({
   const baseStyles = cn(
     'w-full rounded-lg border transition-colors duration-200',
     'focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900',
-    'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50 dark:disabled:bg-gray-900',
+    'disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:disabled:bg-gray-900',
     'appearance-none bg-no-repeat',
     'pr-10' // Space for dropdown arrow
   );
@@ -47,7 +47,7 @@ const Select = forwardRef(({
         'text-red-900 dark:text-red-100'
       )
     : cn(
-        'border-gray-300 dark:border-gray-600',
+        'border-slate-300 dark:border-gray-600',
         'focus:border-navy-500 focus:ring-navy-500',
         'text-gray-900 dark:text-gray-100'
       );

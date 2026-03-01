@@ -41,8 +41,8 @@ const Checkbox = forwardRef(({
   // Base styles
   const baseStyles = cn(
     'rounded border transition-colors duration-200',
-    'focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900',
-    'disabled:opacity-50 disabled:cursor-not-allowed'
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900',
+    'disabled:opacity-40 disabled:cursor-not-allowed'
   );
 
   // State styles
@@ -79,9 +79,9 @@ const Checkbox = forwardRef(({
       {label && (
         <span
           className={cn(
-            'ml-2 text-gray-700 dark:text-gray-300',
+            'ml-2 text-slate-700 dark:text-slate-300',
             labelSizeStyles[size],
-            disabled && 'opacity-50 cursor-not-allowed'
+            disabled && 'opacity-40 cursor-not-allowed'
           )}
         >
           {label}
