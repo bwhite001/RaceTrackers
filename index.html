@@ -15,6 +15,17 @@
     <meta name="apple-mobile-web-app-title" content="RaceTracker" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     
+    <!-- Canonical domain redirect -->
+    <script>
+      (function() {
+        var canonical = 'racetrackers.bwhite.id.au';
+        var host = window.location.hostname;
+        if (host && host !== canonical && host !== 'localhost' && host !== '127.0.0.1') {
+          window.location.replace('https://' + canonical + window.location.pathname + window.location.search + window.location.hash);
+        }
+      })();
+    </script>
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon_io/favicon.ico" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon_io/favicon-16x16.png" />

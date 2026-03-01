@@ -21,10 +21,8 @@ const getVersion = () => {
   }
 }
 
-// VITE_BASE_PATH sets the deploy path (e.g. /RaceTrackers/ or /my-app/).
-// Defaults to /RaceTrackers/ in production and / in development.
-const base = process.env.VITE_BASE_PATH
-  ?? (process.env.NODE_ENV === 'production' ? '/RaceTrackers/' : '/')
+// VITE_BASE_PATH sets the deploy path. Defaults to / (custom domain at root).
+const base = process.env.VITE_BASE_PATH ?? '/'
 
 export default defineConfig({
   base,

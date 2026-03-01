@@ -44,7 +44,7 @@ jobs:
               run: npm run build
               env:
                   NODE_ENV: production
-                  VITE_BASE_PATH: ${{ inputs.base_path || '/RaceTrackers/' }}
+                  VITE_BASE_PATH: ${{ inputs.base_path || '/' }}
 
             - name: Upload artifact
               uses: actions/upload-pages-artifact@v3
