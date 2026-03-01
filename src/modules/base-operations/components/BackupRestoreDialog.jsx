@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import TimeUtils from '../../../services/timeUtils';
+import ConfirmModal from '../../../shared/components/ui/ConfirmModal';
 
 /**
  * BackupRestoreDialog - Backup and restore race data
@@ -21,6 +22,8 @@ const BackupRestoreDialog = ({ isOpen, onClose }) => {
   const [isRestoring, setIsRestoring] = useState(false);
   const [isCreatingBackup, setIsCreatingBackup] = useState(false);
   const [errors, setErrors] = useState({});
+  const [restoreConfirm, setRestoreConfirm] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, backupId: null });
 
   const {
     backups,
@@ -60,16 +63,15 @@ const BackupRestoreDialog = ({ isOpen, onClose }) => {
 
   const handleRestore = async () => {
     if (!selectedBackup) return;
+    setRestoreConfirm(true);
+  };
 
-    if (!window.confirm('Are you sure you want to restore from this backup? Current data will be overwritten.')) {
-      return;
-    }
-
+  const doRestore = async () => {
+    setRestoreConfirm(false);
     setIsRestoring(true);
     setErrors({});
 
     try {
-      // Verify backup integrity first
       const isValid = await verifyBackup(selectedBackup.id);
       if (!isValid) {
         throw new Error('Backup verification failed. The backup file may be corrupted.');
@@ -87,10 +89,11 @@ const BackupRestoreDialog = ({ isOpen, onClose }) => {
   };
 
   const handleDelete = async (backupId) => {
-    if (!window.confirm('Are you sure you want to delete this backup?')) {
-      return;
-    }
+    setDeleteConfirm({ isOpen: true, backupId });
+  };
 
+    const doDelete = async (backupId) => {
+    setDeleteConfirm({ isOpen: false, backupId: null });
     try {
       await deleteBackup(backupId);
       await loadBackups();
@@ -352,6 +355,26 @@ const BackupRestoreDialog = ({ isOpen, onClose }) => {
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={restoreConfirm}
+        onClose={() => setRestoreConfirm(false)}
+        onConfirm={doRestore}
+        title="Restore from Backup"
+        message="Are you sure you want to restore from this backup? Current data will be overwritten."
+        confirmLabel="Restore"
+        confirmVariant="danger"
+      />
+
+      <ConfirmModal
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ isOpen: false, backupId: null })}
+        onConfirm={() => doDelete(deleteConfirm.backupId)}
+        title="Delete Backup"
+        message="Are you sure you want to delete this backup?"
+        confirmLabel="Delete"
+        confirmVariant="danger"
+      />
     </div>
   );
 };

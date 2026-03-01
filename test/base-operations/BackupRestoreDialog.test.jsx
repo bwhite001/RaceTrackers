@@ -153,10 +153,14 @@ describe('BackupRestoreDialog', () => {
     // Select a backup
     fireEvent.click(screen.getByText('Pre-race backup'));
 
-    // Confirm restore
-    window.confirm = vi.fn(() => true);
+    // Click restore — opens ConfirmModal
     await act(async () => {
       fireEvent.click(screen.getByText('Restore Selected Backup'));
+    });
+
+    // Confirm in ConfirmModal
+    await act(async () => {
+      fireEvent.click(screen.getByText('Restore'));
     });
 
     expect(mockVerifyBackup).toHaveBeenCalledWith(1);
@@ -178,10 +182,14 @@ describe('BackupRestoreDialog', () => {
     // Select a backup
     fireEvent.click(screen.getByText('Pre-race backup'));
 
-    // Try to restore
-    window.confirm = vi.fn(() => true);
+    // Click restore — opens ConfirmModal
     await act(async () => {
       fireEvent.click(screen.getByText('Restore Selected Backup'));
+    });
+
+    // Confirm in ConfirmModal
+    await act(async () => {
+      fireEvent.click(screen.getByText('Restore'));
     });
 
     expect(mockVerifyBackup).toHaveBeenCalledWith(1);
@@ -197,13 +205,15 @@ describe('BackupRestoreDialog', () => {
       />
     );
 
-    // Mock window.confirm
-    window.confirm = vi.fn(() => true);
-
-    // Delete a backup
+    // Click delete — opens ConfirmModal
     const deleteButtons = screen.getAllByTitle('Delete backup');
     await act(async () => {
       fireEvent.click(deleteButtons[0]);
+    });
+
+    // Confirm deletion in ConfirmModal
+    await act(async () => {
+      fireEvent.click(screen.getByText('Delete'));
     });
 
     expect(mockDeleteBackup).toHaveBeenCalledWith(1);
@@ -300,10 +310,14 @@ describe('BackupRestoreDialog', () => {
     // Select a backup
     fireEvent.click(screen.getByText('Pre-race backup'));
 
-    // Try to restore
-    window.confirm = vi.fn(() => true);
+    // Click restore — opens ConfirmModal
     await act(async () => {
       fireEvent.click(screen.getByText('Restore Selected Backup'));
+    });
+
+    // Confirm in ConfirmModal
+    await act(async () => {
+      fireEvent.click(screen.getByText('Restore'));
     });
 
     // errors.restore falls back to 'Failed to restore from backup' when error has no message

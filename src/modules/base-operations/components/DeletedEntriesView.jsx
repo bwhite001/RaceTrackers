@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import TimeUtils from '../../../services/timeUtils';
+import ConfirmModal from '../../../shared/components/ui/ConfirmModal';
 
 /**
  * DeletedEntriesView - View and manage deleted entries with audit trail
@@ -38,6 +39,7 @@ const DeletedEntriesView = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTimeRange, setSelectedTimeRange] = useState('all');
   const [showDetails, setShowDetails] = useState(new Set());
+  const [restoreConfirm, setRestoreConfirm] = useState({ isOpen: false, entryId: null });
 
   const {
     deletedEntries,
@@ -56,13 +58,7 @@ const DeletedEntriesView = () => {
   };
 
   const handleRestore = async (entryId) => {
-    if (window.confirm('Are you sure you want to restore this entry?')) {
-      try {
-        await restoreEntry(entryId);
-      } catch (error) {
-        console.error('Failed to restore entry:', error);
-      }
-    }
+    setRestoreConfirm({ isOpen: true, entryId });
   };
 
   const toggleDetails = (entryId) => {
@@ -351,6 +347,23 @@ const DeletedEntriesView = () => {
           <li>• Detailed view shows complete entry history</li>
         </ul>
       </div>
+
+      <ConfirmModal
+        isOpen={restoreConfirm.isOpen}
+        onClose={() => setRestoreConfirm({ isOpen: false, entryId: null })}
+        onConfirm={async () => {
+          try {
+            await restoreEntry(restoreConfirm.entryId);
+          } catch (error) {
+            console.error('Failed to restore entry:', error);
+          }
+          setRestoreConfirm({ isOpen: false, entryId: null });
+        }}
+        title="Restore Entry"
+        message="Are you sure you want to restore this entry?"
+        confirmLabel="Restore"
+        confirmVariant="primary"
+      />
     </div>
   );
 };

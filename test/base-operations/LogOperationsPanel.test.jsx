@@ -138,18 +138,18 @@ describe('LogOperationsPanel', () => {
   it('handles entry deletion', async () => {
     render(<LogOperationsPanel />);
 
-    // Mock window.confirm
-    const confirmSpy = vi.spyOn(window, 'confirm');
-    confirmSpy.mockImplementation(() => true);
-
-    // Delete an entry
+    // Click Delete — opens ConfirmModal
     const deleteButtons = screen.getAllByText('Delete');
     await act(async () => {
       fireEvent.click(deleteButtons[0]);
     });
 
+    // Confirm deletion in ConfirmModal
+    await act(async () => {
+      fireEvent.click(screen.getByText('Delete Entry'));
+    });
+
     expect(mockDeleteLogEntry).toHaveBeenCalledWith(2);
-    confirmSpy.mockRestore();
   });
 
   it('handles entry restoration', async () => {

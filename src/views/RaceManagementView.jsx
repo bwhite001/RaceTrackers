@@ -4,6 +4,7 @@ import { Button, Card, CardBody, Badge } from '../design-system/components';
 import ImportExportModal from '../components/ImportExport/ImportExportModal';
 import { useRaceStore } from '../store/useRaceStore';
 import useNavigationStore from '../shared/store/navigationStore';
+import { useToast } from '../shared/components/ui/Toast';
 import {
   formatRaceDate,
   getRaceStatus,
@@ -25,6 +26,7 @@ const RaceManagementView = () => {
   const navigate = useNavigate();
   const { getAllRaces, deleteRace, setSelectedRaceForMode, loadRace } = useRaceStore();
   const { endOperation } = useNavigationStore();
+  const { addToast } = useToast();
 
   const [races, setRaces] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -124,10 +126,10 @@ const RaceManagementView = () => {
       // Reload races
       await loadRaces();
       
-      alert(`Race "${newName}" created successfully!`);
+      addToast({ variant: "success", message: `Race "${newName}" created successfully!` });
     } catch (error) {
       console.error('Failed to duplicate race:', error);
-      alert('Failed to duplicate race. Please try again.');
+      addToast({ variant: "error", message: "Failed to duplicate race. Please try again." });
     }
   };
 
@@ -146,7 +148,7 @@ const RaceManagementView = () => {
       setSelectedRace(null);
     } catch (error) {
       console.error('Failed to delete race:', error);
-      alert('Failed to delete race. Please try again.');
+      addToast({ variant: "error", message: "Failed to delete race. Please try again." });
     }
   };
 
@@ -167,7 +169,7 @@ const RaceManagementView = () => {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Failed to export race:', error);
-      alert('Failed to export race. Please try again.');
+      addToast({ variant: "error", message: "Failed to export race. Please try again." });
     }
   };
 

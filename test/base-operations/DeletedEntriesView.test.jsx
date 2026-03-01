@@ -70,9 +70,6 @@ describe('DeletedEntriesView', () => {
     // Reset mocks
     vi.clearAllMocks();
 
-    // Mock window.confirm to return true (user confirms restore)
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
-
     // Mock store implementation
     useBaseOperationsStore.mockImplementation(() => ({
       deletedEntries: mockDeletedEntries,
@@ -134,12 +131,16 @@ describe('DeletedEntriesView', () => {
     render(<DeletedEntriesView />);
 
     // Entries are sorted newest-first, so entry 2 (id=2) appears first.
-    // To restore entry id=1, click Restore in its specific row.
+    // Click Restore in row for runner #101 — opens ConfirmModal
     const row1 = getRowByRunnerNumber(101);
-    const restoreBtn = within(row1).getByText('Restore');
-
     await act(async () => {
-      fireEvent.click(restoreBtn);
+      fireEvent.click(within(row1).getByText('Restore'));
+    });
+
+    // Confirm in ConfirmModal dialog
+    const dialog = screen.getByRole('dialog');
+    await act(async () => {
+      fireEvent.click(within(dialog).getByText('Restore'));
     });
 
     expect(mockRestoreEntry).toHaveBeenCalledWith(1);
@@ -151,10 +152,13 @@ describe('DeletedEntriesView', () => {
     render(<DeletedEntriesView />);
 
     const row2 = getRowByRunnerNumber(102);
-    const restoreBtn = within(row2).getByText('Restore');
-
     await act(async () => {
-      fireEvent.click(restoreBtn);
+      fireEvent.click(within(row2).getByText('Restore'));
+    });
+
+    const dialog = screen.getByRole('dialog');
+    await act(async () => {
+      fireEvent.click(within(dialog).getByText('Restore'));
     });
 
     expect(mockRestoreEntry).toHaveBeenCalledWith(2);

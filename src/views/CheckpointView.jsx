@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { withOperationExit } from '../shared/components/ExitOperationModal';
 import useNavigationStore, { MODULE_TYPES } from '../shared/store/navigationStore';
 import useCheckpointStore, { checkpointStore } from '../modules/checkpoint-operations/store/checkpointStore';
 import useSettingsStore from '../shared/store/settingsStore';
 import useRaceMaintenanceStore, { raceMaintenanceStore } from '../modules/race-maintenance/store/raceMaintenanceStore';
 import { useRaceStore } from '../store/useRaceStore.js';
+import PageHeader from '../shared/components/PageHeader';
 
 import RunnerGrid from '../components/Checkpoint/RunnerGrid';
 import QuickEntryBar from '../components/Checkpoint/QuickEntryBar';
@@ -117,70 +119,71 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Checkpoint Header */}
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={handleBackToHome}
-            className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            title="Back to Home"
-          >
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-            </svg>
-          </button>
-          <h1 className="text-2xl font-bold dark:text-white">
-            Checkpoint {checkpointId}
-          </h1>
-        </div>
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={handleExportResults}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-            title="Download checkpoint results as JSON for Base Station import"
-          >
-            Export Results
-          </button>
-          <button
-            onClick={onExitAttempt}
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-          >
-            Exit Checkpoint
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+      {/* Unified page header */}
+      <PageHeader
+        variant="operational"
+        title={currentRace?.name}
+        moduleType={MODULE_TYPES.CHECKPOINT}
+        moduleLabel={`Checkpoint ${checkpointId}`}
+        onExit={onExitAttempt}
+        actions={[
+          {
+            icon: <ArrowDownTrayIcon />,
+            label: 'Export Results',
+            onClick: handleExportResults,
+          },
+        ]}
+      />
 
-      {/* Tab bar */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="-mb-px flex space-x-4" aria-label="Checkpoint tabs">
+      {/*
+        Single tab nav — responsive position:
+        mobile: fixed to bottom, flex row of compact tabs
+        desktop: sticky below header, underline-style horizontal tabs
+      */}
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-30
+                   md:sticky md:top-[64px] md:bottom-auto md:z-10
+                   bg-white dark:bg-gray-800
+                   border-t border-gray-200 dark:border-gray-700
+                   md:border-t-0 md:border-b md:border-gray-200 md:dark:border-gray-700
+                   shadow-[0_-4px_12px_rgba(0,0,0,0.08)] md:shadow-sm"
+        aria-label="Checkpoint tabs"
+      >
+        <div className="md:max-w-7xl md:mx-auto md:px-4 sm:px-6 lg:px-8 flex md:block">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-2 px-4 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === tab.id
-                  ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
+              className={`
+                flex-1 md:flex-none
+                py-3 px-2 md:px-5
+                text-xs md:text-sm font-semibold
+                transition-colors
+                border-t-2 md:border-t-0 md:border-b-2 -mt-px md:mt-0 md:-mb-px
+                ${activeTab === tab.id
+                  ? 'text-navy-700 dark:text-navy-300 border-navy-600 dark:border-navy-400'
                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300'
-              }`}
+                }
+              `}
             >
               {tab.label}
             </button>
           ))}
-        </nav>
-      </div>
-
-      {/* Tab panels */}
-      {activeTab === 'mark-off' && (
-        <div className="space-y-4">
-          <QuickEntryBar />
-          <RunnerGrid
-            onRunnerUpdate={() => setHasUnsavedChanges(true)}
-          />
         </div>
-      )}
-      {activeTab === 'callout' && <CalloutSheet />}
-      {activeTab === 'overview' && <RunnerOverview />}
+      </nav>
+
+      {/* Main content — bottom padding prevents overlap with mobile tab bar */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
+        {activeTab === 'mark-off' && (
+          <div className="space-y-4">
+            <QuickEntryBar />
+            <RunnerGrid onRunnerUpdate={() => setHasUnsavedChanges(true)} />
+          </div>
+        )}
+        {activeTab === 'callout' && <CalloutSheet />}
+        {activeTab === 'overview' && <RunnerOverview />}
+      </main>
     </div>
   );
 };

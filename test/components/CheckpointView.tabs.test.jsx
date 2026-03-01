@@ -130,8 +130,8 @@ describe('CheckpointView — 3-tab layout', () => {
     expect(screen.getByText('Checkpoint 3')).toBeDefined();
   });
 
-  it('shows "Exit Checkpoint" button in header', () => {
+  it('shows "Exit operation" button in header', () => {
     renderCheckpointView();
-    expect(screen.getByRole('button', { name: 'Exit Checkpoint' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Exit operation' })).toBeDefined();
   });
 });

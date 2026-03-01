@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import TimeUtils from '../../../services/timeUtils';
+import ConfirmModal from '../../../shared/components/ui/ConfirmModal';
 
 /**
  * LogOperationsPanel - Entry log management with CRUD operations
@@ -40,6 +41,7 @@ const LogOperationsPanel = () => {
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, entry: null });
 
   const {
     logEntries,
@@ -123,13 +125,7 @@ const LogOperationsPanel = () => {
   };
 
   const handleDelete = async (entry) => {
-    if (window.confirm(`Are you sure you want to delete entry for runner ${entry.number}?`)) {
-      try {
-        await deleteLogEntry(entry.id);
-      } catch (error) {
-        console.error('Failed to delete entry:', error);
-      }
-    }
+    setDeleteConfirm({ isOpen: true, entry });
   };
 
   const handleRestore = async (entry) => {
@@ -414,6 +410,24 @@ const LogOperationsPanel = () => {
           onUpdate={updateLogEntry}
         />
       )}
+
+      {/* Delete Confirmation */}
+      <ConfirmModal
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ isOpen: false, entry: null })}
+        onConfirm={async () => {
+          try {
+            await deleteLogEntry(deleteConfirm.entry.id);
+          } catch (error) {
+            console.error('Failed to delete entry:', error);
+          }
+          setDeleteConfirm({ isOpen: false, entry: null });
+        }}
+        title="Delete Log Entry"
+        message={`Are you sure you want to delete entry for runner ${deleteConfirm.entry?.number}?`}
+        confirmLabel="Delete Entry"
+        confirmVariant="danger"
+      />
     </div>
   );
 };

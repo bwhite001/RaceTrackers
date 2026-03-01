@@ -4,7 +4,6 @@ import {
   BoltIcon, 
   RadioIcon, 
   Cog6ToothIcon, 
-  QuestionMarkCircleIcon,
   PlusIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline';
@@ -12,6 +11,10 @@ import { Button } from '../../design-system/components';
 import RaceStatsCard from './RaceStatsCard';
 import RaceSelectionModal from './RaceSelectionModal';
 import SettingsModal from '../Settings/SettingsModal';
+import PageHeader from '../../shared/components/PageHeader';
+import ConfirmModal from '../../shared/components/ui/ConfirmModal';
+import EmptyState from '../../shared/components/ui/EmptyState';
+import { StandardModal } from '../../shared/components/ui';
 import { categorizeRaces } from '../../utils/raceStatistics';
 import { useRaceStore } from '../../store/useRaceStore';
 import useNavigationStore, { MODULE_TYPES } from '../../shared/store/navigationStore';
@@ -35,6 +38,8 @@ const LandingPage = () => {
   const [showRaceModal, setShowRaceModal] = useState(false);
   const [selectedModuleType, setSelectedModuleType] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: null });
 
   // Load all races on mount
   useEffect(() => {
@@ -79,11 +84,16 @@ const LandingPage = () => {
 
     // Check if navigation is allowed
     if (!canNavigateTo(moduleType)) {
-      const confirmed = window.confirm(
-        'You are currently in an active operation. Do you want to exit and switch modules? Any unsaved changes may be lost.'
-      );
-      if (!confirmed) return;
-      endOperation();
+      setConfirmModal({
+        isOpen: true,
+        message: 'You are currently in an active operation. Do you want to exit and switch modules? Any unsaved changes may be lost.',
+        onConfirm: () => {
+          endOperation();
+          setSelectedModuleType({ type: moduleType, path: defaultPath });
+          setShowRaceModal(true);
+        },
+      });
+      return;
     }
 
     // Show race selection modal
@@ -112,11 +122,16 @@ const LandingPage = () => {
     }
 
     if (!canNavigateTo(MODULE_TYPES.RACE_MAINTENANCE)) {
-      const confirmed = window.confirm(
-        'You are currently in an active operation. Do you want to exit? Any unsaved changes may be lost.'
-      );
-      if (!confirmed) return;
-      endOperation();
+      setConfirmModal({
+        isOpen: true,
+        message: 'You are currently in an active operation. Do you want to exit? Any unsaved changes may be lost.',
+        onConfirm: () => {
+          endOperation();
+          startOperation(MODULE_TYPES.RACE_MAINTENANCE);
+          navigate('/race-management');
+        },
+      });
+      return;
     }
 
     startOperation(MODULE_TYPES.RACE_MAINTENANCE);
@@ -125,106 +140,76 @@ const LandingPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-navy-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading races...</p>
-        </div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <PageHeader variant="landing" />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-10">
+            <div className="h-8 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
+            <div className="h-4 w-72 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
+                <div className="w-12 h-12 rounded-lg bg-gray-200 dark:bg-gray-700 mb-4" />
+                <div className="h-5 w-3/4 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
+                <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded mb-1" />
+                <div className="h-4 w-2/3 bg-gray-200 dark:bg-gray-700 rounded" />
+              </div>
+            ))}
+          </div>
+        </main>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* App Header */}
-      <header className="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo & Title */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-navy-600 dark:bg-navy-500 rounded-lg flex items-center justify-center">
-                <BoltIcon className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                Race Tracker Pro
-              </h1>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  if (settings.hapticsEnabled && 'vibrate' in navigator) {
-                    navigator.vibrate(10);
-                  }
-                  // TODO: Implement help modal
-                  alert('Help documentation coming soon!');
-                }}
-                className="p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors touch-target"
-                aria-label="Help"
-              >
-                <QuestionMarkCircleIcon className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-              </button>
-              
-              <button
-                onClick={() => {
-                  if (settings.hapticsEnabled && 'vibrate' in navigator) {
-                    navigator.vibrate(10);
-                  }
-                  setShowSettings(true);
-                }}
-                className="p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors touch-target"
-                aria-label="Settings"
-              >
-                <Cog6ToothIcon className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PageHeader
+        variant="landing"
+        onHelp={() => setShowHelp(true)}
+        onSettings={() => setShowSettings(true)}
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
-        <div className="text-center mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3">
+        <div className="mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Welcome Back
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="text-gray-600 dark:text-gray-400 max-w-2xl">
             Select your operation mode to begin tracking. All data is stored locally on your device.
           </p>
         </div>
 
         {/* Module Selection Grid */}
         <section className="mb-12">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Select Operation Mode
-          </h3>
+          <h3 className="section-heading">Select Operation Mode</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <ModuleCard
               title="Checkpoint Operations"
               description="Track runners at your assigned checkpoint"
               icon={BoltIcon}
-              color="blue"
+              accentColor="border-l-blue-600"
+              iconBg="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
               onClick={() => handleModuleSelect(MODULE_TYPES.CHECKPOINT, '/checkpoint/1')}
-              hapticsEnabled={settings.hapticsEnabled}
             />
 
             <ModuleCard
               title="Base Station Operations"
               description="Monitor all checkpoints and manage race data"
               icon={RadioIcon}
-              color="green"
+              accentColor="border-l-emerald-600"
+              iconBg="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400"
               onClick={() => handleModuleSelect(MODULE_TYPES.BASE_STATION, '/base-station/operations')}
-              hapticsEnabled={settings.hapticsEnabled}
             />
 
             <ModuleCard
               title="Race Maintenance"
               description="Configure race details and runner information"
               icon={Cog6ToothIcon}
-              color="purple"
+              accentColor="border-l-violet-600"
+              iconBg="bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400"
               onClick={handleGoToRaceManagement}
-              hapticsEnabled={settings.hapticsEnabled}
             />
           </div>
         </section>
@@ -233,9 +218,7 @@ const LandingPage = () => {
         {categorized.current.length > 0 && (
           <section className="mb-12">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Current Races
-              </h3>
+              <h3 className="section-heading mb-0 border-0 pb-0">Current Races</h3>
               <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm font-medium">
                 {categorized.current.length} Active
               </span>
@@ -271,9 +254,7 @@ const LandingPage = () => {
         {/* Upcoming Races Section */}
         {categorized.upcoming.length > 0 && (
           <section className="mb-12">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Upcoming Races
-            </h3>
+            <h3 className="section-heading">Upcoming Races</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {categorized.upcoming.map((race) => (
                 <RaceStatsCard
@@ -300,9 +281,7 @@ const LandingPage = () => {
         {categorized.recent.length > 0 && (
           <section className="mb-12">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Recent Races
-              </h3>
+              <h3 className="section-heading mb-0 border-0 pb-0">Recent Races</h3>
               <Button
                 variant="text"
                 onClick={handleGoToRaceManagement}
@@ -336,30 +315,16 @@ const LandingPage = () => {
 
         {/* Empty State */}
         {races.length === 0 && (
-          <div className="text-center py-16">
-            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-              <BoltIcon className="w-12 h-12 text-gray-400" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              No races yet
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-              Get started by creating your first race. You can configure checkpoints, add runners, and start tracking.
-            </p>
-            <Button
-              variant="primary"
-              onClick={() => {
-                if (settings.hapticsEnabled && 'vibrate' in navigator) {
-                  navigator.vibrate(10);
-                }
-                navigate('/race-maintenance/setup');
-              }}
-              className="touch-target inline-flex items-center"
-            >
-              <PlusIcon className="w-5 h-5 mr-2" />
-              Create New Race
-            </Button>
-          </div>
+          <EmptyState
+            icon={<BoltIcon className="w-full h-full" />}
+            title="No races yet"
+            description="Get started by creating your first race. You can configure checkpoints, add runners, and start tracking."
+            size="lg"
+            action={{
+              label: 'Create New Race',
+              onClick: () => navigate('/race-maintenance/setup'),
+            }}
+          />
         )}
       </main>
 
@@ -375,6 +340,51 @@ const LandingPage = () => {
         moduleType={selectedModuleType?.type}
       />
 
+      {/* Navigation confirmation modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, message: '', onConfirm: null })}
+        onConfirm={() => {
+          confirmModal.onConfirm?.();
+          setConfirmModal({ isOpen: false, message: '', onConfirm: null });
+        }}
+        title="Leave Active Operation?"
+        message={confirmModal.message}
+        confirmLabel="Exit & Continue"
+        confirmVariant="danger"
+      />
+
+      {/* Help modal */}
+      <StandardModal
+        isOpen={showHelp}
+        onClose={() => setShowHelp(false)}
+        title="Race Tracker Pro — Help"
+        size="lg"
+      >
+        <div className="space-y-6 text-sm text-gray-700 dark:text-gray-300">
+          <div>
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Modules</h4>
+            <ul className="space-y-2">
+              <li><span className="font-medium">Checkpoint Operations</span> — Track runners as they pass a specific checkpoint. Mark off, record times, and generate callout sheets.</li>
+              <li><span className="font-medium">Base Station</span> — Finish line operations. Import checkpoint results, manage DNFs/withdrawals, view real-time race overview.</li>
+              <li><span className="font-medium">Race Maintenance</span> — Configure race details, set up checkpoints, manage runner number ranges, and import/export data.</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Keyboard Shortcuts</h4>
+            <div className="grid grid-cols-2 gap-1 text-xs">
+              <span className="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">n</span><span>New data entry</span>
+              <span className="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">r</span><span>Reports tab</span>
+              <span className="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">d</span><span>DNF entry</span>
+              <span className="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">Esc</span><span>Close dialogs</span>
+            </div>
+          </div>
+          <p className="text-gray-500 dark:text-gray-400 text-xs">
+            All data is stored locally on this device using IndexedDB. No internet connection is required during race operations.
+          </p>
+        </div>
+      </StandardModal>
+
       {/* Settings Modal */}
       <SettingsModal
         isOpen={showSettings}
@@ -385,52 +395,38 @@ const LandingPage = () => {
 };
 
 /**
- * ModuleCard Component - Touch-Optimized Module Selection Card
- * Follows WCAG 2.5.5 with 48px minimum touch targets
+ * ModuleCard — Touch-optimized module selection card with left accent border.
  */
-const ModuleCard = ({ title, description, icon: Icon, color, onClick, hapticsEnabled }) => {
-  const colorClasses = {
-    blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 border-blue-200 dark:border-blue-800',
-    green: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 border-green-200 dark:border-green-800',
-    purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30 border-purple-200 dark:border-purple-800',
-  };
-
-  const handleClick = () => {
-    if (hapticsEnabled && 'vibrate' in navigator) {
-      navigator.vibrate(10);
-    }
-    onClick();
-  };
-
-  return (
-    <button
-      onClick={handleClick}
-      className={`
-        text-left p-6 rounded-xl border-2 transition-all duration-200
-        hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]
-        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-        touch-target w-full
-        ${colorClasses[color]}
-      `}
-      style={{ minHeight: '140px' }}
-    >
-      <div className="flex flex-col h-full">
-        <div className="mb-4">
-          <Icon className="w-10 h-10" />
-        </div>
-        <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
-          {title}
-        </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 flex-grow">
-          {description}
-        </p>
-        <div className="flex items-center mt-4 font-medium text-sm">
-          <span>Get Started</span>
-          <ArrowRightIcon className="w-5 h-5 ml-2" />
-        </div>
+const ModuleCard = ({ title, description, icon: Icon, accentColor, iconBg, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`
+      group card-hoverable text-left w-full
+      bg-white dark:bg-gray-800
+      rounded-xl border-l-4 border border-gray-200 dark:border-gray-700
+      ${accentColor}
+      p-6 transition-all duration-200
+      active:scale-[0.97]
+      focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2
+    `}
+    style={{ minHeight: '140px' }}
+  >
+    <div className="flex flex-col h-full">
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${iconBg}`}>
+        <Icon className="w-6 h-6" aria-hidden="true" />
       </div>
-    </button>
-  );
-};
+      <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1.5">
+        {title}
+      </h3>
+      <p className="text-sm text-gray-500 dark:text-gray-400 flex-grow">
+        {description}
+      </p>
+      <div className="flex items-center mt-4 text-sm font-semibold text-navy-700 dark:text-navy-300">
+        <span>Get Started</span>
+        <ArrowRightIcon className="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+      </div>
+    </div>
+  </button>
+);
 
 export default LandingPage;
