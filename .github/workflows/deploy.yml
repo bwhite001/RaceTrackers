@@ -6,7 +6,8 @@ on:
             - main
         paths-ignore:
             - '**.md'
-            - 'docs/**'
+            - 'docs/plans/**'
+            - 'docs/epics/**'
             - 'notes/**'
     workflow_dispatch:
         inputs:

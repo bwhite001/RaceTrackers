@@ -1,6 +1,7 @@
 # Dependencies and build outputs
 node_modules/
 dist/
+public/guides/
 
 # Editor and IDE files
 .vscode/settings.json

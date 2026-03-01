@@ -1,0 +1,60 @@
+name: Generate User Guides
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/guides/**'  # prevent loop when guide commit triggers workflow
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    name: Generate guides & PDFs
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Use a token with write access so the commit can push
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Run journey tests
+        run: npx playwright test
+        env:
+          CI: true
+
+      - name: Generate guide HTML & markdown
+        run: npm run generate:guide
+
+      - name: Generate guide PDFs
+        run: npm run generate:guide:pdfs
+
+      - name: Commit generated guides
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/guides/
+          if git diff --cached --quiet; then
+            echo "No guide changes — nothing to commit."
+          else
+            git commit -m "docs: regenerate user guides [skip ci]"
+            git push
+          fi

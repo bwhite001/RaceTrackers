@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/copy-guides.js",
     "build": "vite build",
     "preview": "vite preview",
     "test:playwright": "playwright test",
@@ -81,7 +82,8 @@
     "test:failing": "vitest run --reporter=verbose --bail 1",
     "test:changed": "vitest run --changed",
     "test:related": "vitest run --related",
-    "generate:guide": "node test/e2e/playwright/generate-guide.js"
+    "generate:guide": "node test/e2e/playwright/generate-guide.js",
+    "generate:guide:pdfs": "node test/e2e/playwright/generate-guide-pdfs.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",

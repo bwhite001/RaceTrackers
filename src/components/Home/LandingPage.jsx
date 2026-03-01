@@ -5,7 +5,9 @@ import {
   RadioIcon, 
   Cog6ToothIcon, 
   PlusIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  ArrowTopRightOnSquareIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '../../design-system/components';
 import RaceStatsCard from './RaceStatsCard';
@@ -379,6 +381,41 @@ const LandingPage = () => {
               <span className="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">Esc</span><span>Close dialogs</span>
             </div>
           </div>
+
+          {/* Full user guide links */}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-5">
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-3">User Guide</h4>
+            <a
+              href={`${import.meta.env.BASE_URL}guides/user-guide.html`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-navy-600 dark:text-navy-400 font-medium hover:underline mb-4"
+            >
+              View Full User Guide
+              <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+            </a>
+
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Download by journey:</p>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { key: 'setup',      label: 'Setting Up a Race' },
+                { key: 'checkpoint', label: 'Running a Checkpoint' },
+                { key: 'navigation', label: 'Navigating the App' },
+                { key: 'settings',   label: 'Settings' },
+              ].map(({ key, label }) => (
+                <a
+                  key={key}
+                  href={`${import.meta.env.BASE_URL}guides/user-guide-${key}.pdf`}
+                  download={`racetracker-guide-${key}.pdf`}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <ArrowDownTrayIcon className="w-3.5 h-3.5 shrink-0" />
+                  {label}
+                </a>
+              ))}
+            </div>
+          </div>
+
           <p className="text-gray-500 dark:text-gray-400 text-xs">
             All data is stored locally on this device using IndexedDB. No internet connection is required during race operations.
           </p>

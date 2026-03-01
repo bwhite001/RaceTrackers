@@ -69,6 +69,11 @@ seed-minimal: ## Seed minimal test dataset
 clear-data: ## Clear all test data from IndexedDB
 	npm run test:clear
 
+# ─── Docs ─────────────────────────────────────────────────────────────────────
+
+guide-pdfs: ## Generate PDFs from user guide (one per journey section)
+	npm run generate:guide:pdfs
+
 # ─── Housekeeping ─────────────────────────────────────────────────────────────
 
 clean: ## Remove build artifacts
