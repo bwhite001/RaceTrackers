@@ -37,10 +37,229 @@
   <p>Auto-generated from Playwright journey tests &bull; All roles combined</p>
 </header>
 <nav class="toc">
-
+  <a href="#setup">Setting Up a Race</a>
+  <a href="#checkpoint">Running a Checkpoint</a>
+  <a href="#navigation">Navigating the App</a>
+  <a href="#settings">Settings</a>
 </nav>
 <main>
-
+<div id="setup">
+<h2>Setting Up a Race</h2>
+<p class="chapter-intro">Use these steps to create and manage races. This section covers the full setup wizard, runner ranges, checkpoints, and the race overview.</p>
+<section class="task">
+<h3>Creates a new race from scratch and verifies the overview</h3>
+<p class="description">A race director fills in all the details needed to create a brand-new race — the race name, date, start time, how many checkpoints there are, and the range of runner bib numbers. Once saved, the race overview page should correctly display the race name, list every checkpoint, and show the right number of registered runners.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Home — Welcome Back screen with 3 module cards</p><img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-01.png" alt="Home — Welcome Back screen with 3 module cards" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Race Maintenance → Create New Race — setup wizard opens</p><img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-02.png" alt="Race Maintenance → Create New Race — setup wizard opens" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 1 of 4 — Template: choose Start from Scratch</p><img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-03.png" alt="Step 1 of 4 — Template: choose Start from Scratch" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 2 of 4 — Race Details: enter name, date, start time and checkpoints</p><img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-04.png" alt="Step 2 of 4 — Race Details: enter name, date, start time and checkpoints" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 3 of 4 — Runner Setup: add bib number range 101–115</p><img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-05.png" alt="Step 3 of 4 — Runner Setup: add bib number range 101–115" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 4 of 4 — Waves: confirm wave and save race</p><img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-06.png" alt="Step 4 of 4 — Waves: confirm wave and save race" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Race overview — name, 3 checkpoints and 15 runners correct</p><img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-07.png" alt="Race overview — name, 3 checkpoints and 15 runners correct" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Home — new race listed under module cards</p><img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-08.png" alt="Home — new race listed under module cards" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Step indicator advances correctly through setup wizard</h3>
+<p class="description">The race creation wizard has four steps: Template, Race Details, Runner Setup, and Waves. This test checks that the progress indicator at the top updates as you advance through each step, so the race director always knows where they are in the setup process.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Step 1 of 4 — Template: setup wizard opens</p><img src="assets/step-indicator-advances-correctly-through-setup-wizard-step-01.png" alt="Step 1 of 4 — Template: setup wizard opens" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 2 of 4 — Race Details: step indicator shows step 2</p><img src="assets/step-indicator-advances-correctly-through-setup-wizard-step-02.png" alt="Step 2 of 4 — Race Details: step indicator shows step 2" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 3 of 4 — Runner Setup: step indicator advances to step 3</p><img src="assets/step-indicator-advances-correctly-through-setup-wizard-step-03.png" alt="Step 3 of 4 — Runner Setup: step indicator advances to step 3" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Back button on step 2 returns to race details with data preserved</h3>
+<p class="description">If a race director fills in the race name and other details on Step 2 of 4 (Race Details), moves on to Step 3 of 4 (Runner Setup), then clicks Back, all their work should still be there — the race name and other fields must not be wiped out. Nobody should have to retype information just because they went back a step.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Step 1 of 4 — Template: choose Start from Scratch</p><img src="assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-01.png" alt="Step 1 of 4 — Template: choose Start from Scratch" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 2 of 4 — Race Details: fill in race name and details</p><img src="assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-02.png" alt="Step 2 of 4 — Race Details: fill in race name and details" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 3 of 4 — Runner Setup: navigate forward then press Back</p><img src="assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-03.png" alt="Step 3 of 4 — Runner Setup: navigate forward then press Back" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 2 of 4 — Race Details: data preserved after Back</p><img src="assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-04.png" alt="Step 2 of 4 — Race Details: data preserved after Back" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Race management page lists created races</h3>
+<p class="description">The Race Management page is the race director's central hub where all races are listed. This test confirms that a race created earlier in the test suite appears on that page.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Race Management — page lists all created races</p><img src="assets/race-management-page-lists-created-races-step-01.png" alt="Race Management — page lists all created races" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Clicking a race opens its overview</h3>
+<p class="description">When the race director clicks on a race in the management list, they should be taken to that race's overview page where they can see all the details. This test confirms that navigation works correctly.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Race Management — page with race listed</p><img src="assets/clicking-a-race-opens-its-overview-step-01.png" alt="Race Management — page with race listed" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Race card — click race name to open overview</p><img src="assets/clicking-a-race-opens-its-overview-step-02.png" alt="Race card — click race name to open overview" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Race overview — name and details visible</p><img src="assets/clicking-a-race-opens-its-overview-step-03.png" alt="Race overview — name and details visible" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Creates a second race from the management page</h3>
+<p class="description">A race director creates a second race directly from the management screen, going through the full two-step setup wizard (race details, then runner ranges) and landing on the new race's overview page.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Race Management — tap Create New Race button</p><img src="assets/creates-a-second-race-from-the-management-page-step-01.png" alt="Race Management — tap Create New Race button" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 1 of 4 — Template: choose Start from Scratch</p><img src="assets/creates-a-second-race-from-the-management-page-step-02.png" alt="Step 1 of 4 — Template: choose Start from Scratch" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 2 of 4 — Race Details: enter name, date, start time</p><img src="assets/creates-a-second-race-from-the-management-page-step-03.png" alt="Step 2 of 4 — Race Details: enter name, date, start time" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 3 of 4 — Runner Setup: add bib range 500–503</p><img src="assets/creates-a-second-race-from-the-management-page-step-04.png" alt="Step 3 of 4 — Runner Setup: add bib range 500–503" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 4 of 4 — Waves: confirm and save</p><img src="assets/creates-a-second-race-from-the-management-page-step-05.png" alt="Step 4 of 4 — Waves: confirm and save" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Race overview — second race created successfully</p><img src="assets/creates-a-second-race-from-the-management-page-step-06.png" alt="Race overview — second race created successfully" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Race overview shows correct runner and checkpoint counts</h3>
+<p class="description">After creating a race with runner bib numbers 400 to 405 (6 runners) and 2 checkpoints, the race overview page should display &quot;6&quot; as the runner count and &quot;2&quot; as the checkpoint count — no more, no less.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Race overview — runner count 6 and checkpoint count 2 shown</p><img src="assets/race-overview-shows-correct-runner-and-checkpoint-counts-step-01.png" alt="Race overview — runner count 6 and checkpoint count 2 shown" loading="lazy"></div>
+</div>
+</section>
+</div>
+<div id="checkpoint">
+<h2>Running a Checkpoint</h2>
+<p class="chapter-intro">Steps for checkpoint volunteers. Covers opening a checkpoint, marking off runners individually and in bulk, reviewing counts, and exporting data.</p>
+<section class="task">
+<h3>Navigates to checkpoint and sees runner grid</h3>
+<p class="description">A checkpoint volunteer opens the app, taps &quot;Checkpoint Operations&quot;, selects their race, and arrives at the correct checkpoint screen. This test confirms that the grid of runner bib numbers — the list of every runner they need to watch for — is visible and fully loaded.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Home — tap Checkpoint Operations module card</p><img src="assets/navigates-to-checkpoint-and-sees-runner-grid-step-01.png" alt="Home — tap Checkpoint Operations module card" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Select Race modal — choose race from list</p><img src="assets/navigates-to-checkpoint-and-sees-runner-grid-step-02.png" alt="Select Race modal — choose race from list" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Checkpoint view — runner grid loaded with bib numbers 200–210</p><img src="assets/navigates-to-checkpoint-and-sees-runner-grid-step-03.png" alt="Checkpoint view — runner grid loaded with bib numbers 200–210" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Marks off a single runner via the runner grid</h3>
+<p class="description">A checkpoint volunteer clicks on a single runner's bib number tile in the grid to record that the runner passed through. The tile should change colour or appearance to make it obvious that runner has been marked as &quot;through&quot;.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Checkpoint view — runner grid visible</p><img src="assets/marks-off-a-single-runner-via-the-runner-grid-step-01.png" alt="Checkpoint view — runner grid visible" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Runner grid — tap first runner tile (200s range)</p><img src="assets/marks-off-a-single-runner-via-the-runner-grid-step-02.png" alt="Runner grid — tap first runner tile (200s range)" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Runner tile — marked state applied</p><img src="assets/marks-off-a-single-runner-via-the-runner-grid-step-03.png" alt="Runner tile — marked state applied" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Marks off multiple runners via Quick Entry</h3>
+<p class="description">Instead of finding runners in the grid, a volunteer can just type a bib number and press Enter to record it quickly. This test enters two bib numbers one after the other using the quick-entry shortcut and confirms both runners are marked off.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Checkpoint view — Quick Entry bar visible</p><img src="assets/marks-off-multiple-runners-via-quick-entry-step-01.png" alt="Checkpoint view — Quick Entry bar visible" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Quick Entry — type first bib number and press Enter</p><img src="assets/marks-off-multiple-runners-via-quick-entry-step-02.png" alt="Quick Entry — type first bib number and press Enter" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Quick Entry — type second bib number and press Enter</p><img src="assets/marks-off-multiple-runners-via-quick-entry-step-03.png" alt="Quick Entry — type second bib number and press Enter" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Runner grid — both runners marked off</p><img src="assets/marks-off-multiple-runners-via-quick-entry-step-04.png" alt="Runner grid — both runners marked off" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Switches to Callout Sheet tab</h3>
+<p class="description">The Callout Sheet tab shows the list of runners who have not yet been recorded at this checkpoint. Volunteers read these numbers out over the radio to base station. This test checks the tab loads correctly and the list is visible.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Checkpoint view — Mark Off tab active</p><img src="assets/switches-to-callout-sheet-tab-step-01.png" alt="Checkpoint view — Mark Off tab active" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Callout Sheet tab — tap to switch</p><img src="assets/switches-to-callout-sheet-tab-step-02.png" alt="Callout Sheet tab — tap to switch" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Callout Sheet — unrecorded runners listed</p><img src="assets/switches-to-callout-sheet-tab-step-03.png" alt="Callout Sheet — unrecorded runners listed" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Switches to Overview tab and shows runner counts</h3>
+<p class="description">The Overview tab shows a summary — how many runners have been through, how many are still expected, and other totals. This test confirms those summary numbers appear correctly when the tab is selected.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Checkpoint view — navigate to checkpoint</p><img src="assets/switches-to-overview-tab-and-shows-runner-counts-step-01.png" alt="Checkpoint view — navigate to checkpoint" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Overview tab — tap to switch</p><img src="assets/switches-to-overview-tab-and-shows-runner-counts-step-02.png" alt="Overview tab — tap to switch" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Overview — runner count summary visible</p><img src="assets/switches-to-overview-tab-and-shows-runner-counts-step-03.png" alt="Overview — runner count summary visible" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Can export checkpoint results</h3>
+<p class="description">At the end of a checkpoint shift, a volunteer may need to export their recorded data to share with base station or keep as a backup. This test checks that the export option can be opened from the checkpoint screen.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Checkpoint view — navigate to checkpoint</p><img src="assets/can-export-checkpoint-results-step-01.png" alt="Checkpoint view — navigate to checkpoint" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Export dialog — checkpoint results export options shown</p><img src="assets/can-export-checkpoint-results-step-02.png" alt="Export dialog — checkpoint results export options shown" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Export option — open export dialog</p><img src="assets/can-export-checkpoint-results-step-03.png" alt="Export option — open export dialog" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Navigates from race overview to a checkpoint</h3>
+<p class="description">From the race overview, a race director can jump straight to any checkpoint's live mark-off screen. This test clicks the Checkpoint 1 link and confirms the checkpoint mark-off screen opens.</p>
+<div class="steps">
+</div>
+</section>
+</div>
+<div id="navigation">
+<h2>Navigating the App</h2>
+<p class="chapter-intro">How to move between modules, what to expect on the home screen, and how the app protects active operations from accidental navigation.</p>
+<section class="task">
+<h3>Navigates from race overview to base station</h3>
+<p class="description">From the race overview, a race director can jump straight to the base station. This test clicks the Base Station button on the overview page and confirms the base station operations screen opens.</p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Home page landing shows the race management module card</h3>
+<p class="description">The Race Maintenance module card should always be visible on the home screen so race directors can always find it easily. This test simply confirms the card is present.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Home — Race Maintenance module card visible</p><img src="assets/home-page-landing-shows-the-race-management-module-card-step-01.png" alt="Home — Race Maintenance module card visible" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Shows protection modal when leaving active checkpoint operation</h3>
+<p class="description">While a checkpoint volunteer is actively recording runners, the app should warn them if they try to navigate away — for example by tapping the back button or going to a different module. This prevents accidentally losing all their recorded data. This test triggers that navigation and confirms the warning appears.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Attempt navigation away — go to home /</p><img src="assets/shows-protection-modal-when-leaving-active-checkpoint-operation-step-01.png" alt="Attempt navigation away — go to home /" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Protection modal — operation warning or graceful fallback</p><img src="assets/shows-protection-modal-when-leaving-active-checkpoint-operation-step-02.png" alt="Protection modal — operation warning or graceful fallback" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Allows navigation after confirming exit from active operation</h3>
+<p class="description">If a volunteer sees the &quot;you're about to leave an active session&quot; warning and confirms they want to leave anyway, the app should let them go and return them to the home screen. This test confirms that confirming the exit actually works.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Confirm exit — trigger exit and accept confirmation</p><img src="assets/allows-navigation-after-confirming-exit-from-active-operation-step-01.png" alt="Confirm exit — trigger exit and accept confirmation" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Navigation complete — landed on non-checkpoint route</p><img src="assets/allows-navigation-after-confirming-exit-from-active-operation-step-02.png" alt="Navigation complete — landed on non-checkpoint route" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Home page module cards are all accessible when no operation is active</h3>
+<p class="description">When the app is idle on the home screen and no operation is in progress, all three module cards — Checkpoint Operations, Base Station, and Race Maintenance — should be enabled and ready to tap. This test confirms none of them are accidentally disabled.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Home page — all module cards visible and enabled</p><img src="assets/home-page-module-cards-are-all-accessible-when-no-operation-is-active-step-01.png" alt="Home page — all module cards visible and enabled" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Unknown routes redirect to home</h3>
+<p class="description">If someone types a web address that doesn't exist in the app (perhaps a typo or an old bookmark), they should be automatically sent to the home page rather than seeing a blank or broken screen.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Unknown route — redirects to home page</p><img src="assets/unknown-routes-redirect-to-home-step-01.png" alt="Unknown route — redirects to home page" loading="lazy"></div>
+</div>
+</section>
+</div>
+<div id="settings">
+<h2>Settings</h2>
+<p class="chapter-intro">Personalise the app. Toggle dark mode and understand how preferences are saved.</p>
+<section class="task">
+<h3>Opens and closes the Settings modal</h3>
+<p class="description">Tapping the settings cog in the top-right corner should open the settings panel. Pressing the Escape key (or tapping close) should dismiss it cleanly. This test confirms both actions work.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Home — tap Settings cog button (aria-label Settings)</p><img src="assets/opens-and-closes-the-settings-modal-step-01.png" alt="Home — tap Settings cog button (aria-label Settings)" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Settings modal — panel open with customisation options</p><img src="assets/opens-and-closes-the-settings-modal-step-02.png" alt="Settings modal — panel open with customisation options" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Settings modal — closed after pressing X button</p><img src="assets/opens-and-closes-the-settings-modal-step-03.png" alt="Settings modal — closed after pressing X button" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Toggles dark mode on and off</h3>
+<p class="description">The dark mode toggle in settings switches the app between a light colour scheme and a dark one. This test turns dark mode on, confirms the dark theme is applied, then turns it back off and confirms the light theme is restored.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Home — open Settings modal</p><img src="assets/toggles-dark-mode-on-and-off-step-01.png" alt="Home — open Settings modal" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Settings modal — locate Dark Mode toggle switch</p><img src="assets/toggles-dark-mode-on-and-off-step-02.png" alt="Settings modal — locate Dark Mode toggle switch" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Dark mode ON — html element gains &quot;dark&quot; class</p><img src="assets/toggles-dark-mode-on-and-off-step-03.png" alt="Dark mode ON — html element gains &quot;dark&quot; class" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Dark mode OFF — &quot;dark&quot; class removed from html element</p><img src="assets/toggles-dark-mode-on-and-off-step-04.png" alt="Dark mode OFF — &quot;dark&quot; class removed from html element" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Settings persist after closing and reopening the modal</h3>
+<p class="description">Changes made in settings should be saved and remembered. If dark mode is turned on and the settings panel is closed then reopened, dark mode should still be on — the preference should not reset.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Home — open Settings modal</p><img src="assets/settings-persist-after-closing-and-reopening-the-modal-step-01.png" alt="Home — open Settings modal" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Settings modal — enable dark mode and save</p><img src="assets/settings-persist-after-closing-and-reopening-the-modal-step-02.png" alt="Settings modal — enable dark mode and save" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Home — reopen Settings modal</p><img src="assets/settings-persist-after-closing-and-reopening-the-modal-step-03.png" alt="Home — reopen Settings modal" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Settings modal — dark mode toggle persists as checked</p><img src="assets/settings-persist-after-closing-and-reopening-the-modal-step-04.png" alt="Settings modal — dark mode toggle persists as checked" loading="lazy"></div>
+</div>
+</section>
+</div>
 </main>
 <footer class="page-footer">Generated by generate-guide.js &bull; Regenerate with <code>npm run generate:guide</code></footer>
 </body>
