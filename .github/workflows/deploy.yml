@@ -9,6 +9,11 @@ on:
             - 'docs/**'
             - 'notes/**'
     workflow_dispatch:
+        inputs:
+            base_path:
+                description: 'Base URL path (e.g. /RaceTrackers/ or /)'
+                required: false
+                default: '/RaceTrackers/'
 
 permissions:
     contents: read
@@ -39,6 +44,7 @@ jobs:
               run: npm run build
               env:
                   NODE_ENV: production
+                  VITE_BASE_PATH: ${{ inputs.base_path || '/RaceTrackers/' }}
 
             - name: Upload artifact
               uses: actions/upload-pages-artifact@v3

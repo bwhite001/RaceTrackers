@@ -21,8 +21,13 @@ const getVersion = () => {
   }
 }
 
+// VITE_BASE_PATH sets the deploy path (e.g. /RaceTrackers/ or /my-app/).
+// Defaults to /RaceTrackers/ in production and / in development.
+const base = process.env.VITE_BASE_PATH
+  ?? (process.env.NODE_ENV === 'production' ? '/RaceTrackers/' : '/')
+
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/RaceTrackers/' : '/',
+  base,
   define: {
     __APP_VERSION__: JSON.stringify(process.env.VITE_APP_VERSION || getVersion()),
   },
