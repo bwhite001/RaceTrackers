@@ -139,4 +139,20 @@ export const JOURNEY_DESCRIPTIONS = {
 
   'pending count badge decrements when runner is called in':
     'When a checkpoint volunteer marks a runner as called in, the pending count badge on the Callout Sheet tab decreases by one. If all runners have been called in the badge disappears.',
+
+  // ─── 11 Heads-Up Grid (Overview Tab) ─────────────────────────────────────
+
+  'overview tab shows heads-up grid with checkpoint columns':
+    'The Overview tab on the Base Station screen shows a live grid of all runners across all checkpoints — like a scoreboard. Each checkpoint is a column and each runner is a row, so the race director can see at a glance who has passed each checkpoint.',
+
+  'grid shows runner status indicators':
+    'When a runner passes a checkpoint, their cell in the grid shows a ✓ tick. DNF runners show ✗. Runners who have not yet reached a checkpoint show an empty cell.',
+
+  // ─── 12 Leaderboard ───────────────────────────────────────────────────────
+
+  'leaderboard tab shows runners sorted by finish time':
+    'The Leaderboard tab on the Base Station screen shows all runners who have finished, sorted by their finish time so the first-place runner is at the top. Race directors and media can use this for live results.',
+
+  'dnf runners shown separately from finishers':
+    'Runners who have been marked as Did Not Finish (DNF) are shown separately at the bottom of the leaderboard, below all finishers, in a "Did Not Finish" section.',
 };
