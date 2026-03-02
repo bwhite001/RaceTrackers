@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import db from '../../shared/services/database/schema';
-import useBaseOperationsStore from '../../modules/base-operations/store/baseOperationsStore';
+import db from '../../../shared/services/database/schema';
+import useBaseOperationsStore from '../store/baseOperationsStore';
 
 /**
  * CheckpointGroupingView

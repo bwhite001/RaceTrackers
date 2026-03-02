@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { ImportService } from '../../services/import-export/ImportService';
-import useBaseOperationsStore from '../../modules/base-operations/store/baseOperationsStore';
+import { ImportService } from '../../../services/import-export/ImportService';
+import useBaseOperationsStore from '../store/baseOperationsStore';
 
 /**
  * CheckpointImportPanel

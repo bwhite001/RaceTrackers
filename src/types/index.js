@@ -9,12 +9,12 @@ export const RUNNER_STATUSES = {
   PENDING: 'pending',
   NON_STARTER: 'non-starter',
   DNF: 'dnf', // Did Not Finish
-  DNS: 'dns', // Did Not Start
+  DNS: 'non-starter', // Did Not Start — aligns with DB value 'non-starter'
   WITHDRAWN: 'withdrawn',
   DISQUALIFIED: 'disqualified',
   // Legacy aliases
   ACTIVE: 'active',
-  FINISHED: 'finished',
+  FINISHED: 'passed',     // base station "completed" aligns with checkpoint 'passed'
 };
 
 /**
@@ -47,6 +47,12 @@ export const MODULE_TYPES = {
   CHECKPOINT: 'checkpoint',
   RACE_SETUP: 'race_setup'
 };
+
+/**
+ * Fixed checkpoint number for base station runner records.
+ * Checkpoint volunteers use numbers ≥ 1; base station uses 0.
+ */
+export const BASE_STATION_CP = 0;
 
 /**
  * Runner Type Definition

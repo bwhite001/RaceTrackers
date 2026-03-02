@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import RaceOverview from '../../src/components/BaseStation/RaceOverview';
+import RaceOverview from '../../src/modules/base-operations/components/RaceOverview';
 import useBaseOperationsStore from '../../src/modules/base-operations/store/baseOperationsStore';
 import { RUNNER_STATUSES, STATUS_LABELS } from '../../src/types';
 

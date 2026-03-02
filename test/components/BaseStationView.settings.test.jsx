@@ -23,9 +23,14 @@ vi.mock('shared/store/navigationStore', () => ({
 vi.mock('modules/base-operations/store/baseOperationsStore', () => ({
   default: vi.fn(() => ({
     currentRaceId: 'race-1',
+    currentRace: { id: 'race-1', name: 'Test Race' },
     loading: false,
     error: null,
+    runners: [],
     stats: { total: 0, passed: 0, dnf: 0, notStarted: 0 },
+    initialize: vi.fn().mockResolvedValue(undefined),
+    refreshData: vi.fn().mockResolvedValue(undefined),
+    reset: vi.fn(),
   })),
 }));
 
@@ -41,12 +46,25 @@ vi.mock('shared/components/HotkeysProvider', () => ({
   useHotkeys: vi.fn(),
 }));
 
+vi.mock('store/useRaceStore', () => ({
+  useRaceStore: vi.fn(() => ({
+    selectedRaceForMode: 'race-1',
+    checkpoints: [],
+  })),
+}));
+
+vi.mock('components/ImportExport/ImportExportModal', () => ({ default: () => null }));
+
 // ─── Component mocks ──────────────────────────────────────────────────────────
 
-vi.mock('components/BaseStation/DataEntry', () => ({ default: () => <div>DataEntry</div> }));
-vi.mock('components/BaseStation/RaceOverview', () => ({ default: () => <div>RaceOverview</div> }));
-vi.mock('components/BaseStation/ReportsPanel', () => ({ default: () => <div>ReportsPanel</div> }));
-vi.mock('components/BaseStation/WithdrawalDialog', () => ({ default: () => null }));
+vi.mock('modules/base-operations/components/DataEntry', () => ({ default: () => <div>DataEntry</div> }));
+vi.mock('modules/base-operations/components/RaceOverview', () => ({ default: () => <div>RaceOverview</div> }));
+vi.mock('modules/base-operations/components/ReportsPanel', () => ({ default: () => <div>ReportsPanel</div> }));
+vi.mock('modules/base-operations/components/WithdrawalDialog', () => ({ default: () => null }));
+vi.mock('modules/base-operations/components/CheckpointImportPanel', () => ({ default: () => null }));
+vi.mock('modules/base-operations/components/CheckpointGroupingView', () => ({ default: () => null }));
+vi.mock('modules/base-operations/components/HeadsUpGrid', () => ({ default: () => null }));
+vi.mock('modules/base-operations/components/Leaderboard', () => ({ default: () => null }));
 vi.mock('components/Layout/LoadingSpinner', () => ({ default: () => <div>Loading…</div> }));
 vi.mock('components/Layout/ErrorMessage', () => ({ default: ({ message }) => <div>{message}</div> }));
 vi.mock('components/Layout/StatusStrip', () => ({ default: () => null }));
@@ -68,12 +86,11 @@ vi.mock('modules/base-operations/components/HelpDialog', () => ({
   },
 }));
 
-// Header mock that exposes settings and help buttons
-vi.mock('components/Layout/Header', () => ({
-  default: ({ onOpenSettings, onOpenHelp }) => (
+vi.mock('shared/components/PageHeader', () => ({
+  default: ({ onSettings, onHelp }) => (
     <header>
-      <button onClick={onOpenSettings}>Settings</button>
-      <button onClick={onOpenHelp}>Help</button>
+      <button onClick={onSettings}>Settings</button>
+      <button onClick={onHelp}>Help</button>
     </header>
   ),
 }));
@@ -83,7 +100,7 @@ vi.mock('shared/components/ExitOperationModal', () => ({
     <Component {...props} onExitAttempt={vi.fn()} setHasUnsavedChanges={vi.fn()} />,
 }));
 
-import BaseStationView from 'views/BaseStationView.jsx';
+import BaseStationView from 'modules/base-operations/views/BaseStationView';
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 

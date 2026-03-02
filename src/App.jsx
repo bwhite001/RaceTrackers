@@ -13,7 +13,7 @@ import Homepage from './components/Home/Homepage';
 import RaceSetup from './components/Setup/RaceSetup';
 import RaceManagementView from './views/RaceManagementView';
 import CheckpointView from './views/CheckpointView';
-import BaseStationView from './views/BaseStationView';
+import BaseStationView from './modules/base-operations/views/BaseStationView';
 import RaceOverview from './views/RaceOverview';
 import LiveDashboardView from './views/LiveDashboardView';
 import LeaderboardView from './views/LeaderboardView';

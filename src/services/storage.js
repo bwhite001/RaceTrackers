@@ -1,4 +1,5 @@
 import db from '../shared/services/database/schema.js';
+import { BASE_STATION_CP } from '../types/index.js';
 
 // Storage service for managing race data
 export class StorageService {
@@ -712,8 +713,11 @@ export class StorageService {
     try {
       if (checkpointNumber !== null) {
         return await db.base_station_runners
-          .where(['raceId', 'checkpointNumber'])
-          .equals([raceId, checkpointNumber])
+          .where('[raceId+checkpointNumber+number]')
+          .between(
+            [raceId, checkpointNumber, -Infinity],
+            [raceId, checkpointNumber, Infinity]
+          )
           .toArray();
       } else {
         return await db.base_station_runners.where('raceId').equals(raceId).toArray();
@@ -724,7 +728,7 @@ export class StorageService {
     }
   }
 
-  static async initializeBaseStationRunners(raceId, checkpointNumber = 1) {
+  static async initializeBaseStationRunners(raceId, checkpointNumber = BASE_STATION_CP) {
     try {
       // Get all race runners and create base station-specific entries
       const raceRunners = await this.getRunners(raceId);

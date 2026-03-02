@@ -6,7 +6,7 @@ import {
   REPORT_TEMPLATES,
   COLUMN_DEFINITIONS,
   validateReportConfig
-} from '../../utils/reportUtils';
+} from '../../../utils/reportUtils';
 
 /**
  * ReportBuilder Component
