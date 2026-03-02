@@ -189,7 +189,6 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
           <QuickEntryBar />
         </div>
       )}
-    </div>
 
       <ExportCheckpointResultsModal
         isOpen={showExportModal}
@@ -199,6 +198,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         raceName={currentRace?.name ?? ''}
         onClose={() => setShowExportModal(false)}
       />
+    </div>
   );
 };
 
