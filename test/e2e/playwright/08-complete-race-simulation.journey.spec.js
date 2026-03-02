@@ -373,7 +373,7 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
     await test.step('Navigate to base station and switch to Overview tab', async () => {
       await _page.goto(`${BASE}/base-station/operations`);
       await _page.waitForSelector('[aria-label="Base station tabs"]', { timeout: 20000 });
-      await _page.getByRole('button', { name: /^overview$/i }).click();
+      await _page.getByRole('tab', { name: /overview/i }).click();
     });
 
     await test.step('Overview — runners 103–108 visible with Finished status', async () => {
@@ -389,7 +389,7 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
 
     await test.step('Status strip — total of 10 runners shown', async () => {
       await expect(_page.getByText(/total/i).first()).toBeVisible();
-      await expect(_page.getByText('10')).toBeVisible({ timeout: 5000 });
+      await expect(_page.getByText('10').first()).toBeVisible({ timeout: 5000 });
     });
   });
 
@@ -397,7 +397,7 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
     await test.step('Navigate to base station and switch to Reports tab', async () => {
       await _page.goto(`${BASE}/base-station/operations`);
       await _page.waitForSelector('[aria-label="Base station tabs"]', { timeout: 20000 });
-      await _page.getByRole('button', { name: /^reports$/i }).click();
+      await _page.getByRole('tab', { name: /reports/i }).click();
     });
 
     await test.step('Reports — content or generate button visible', async () => {
