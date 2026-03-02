@@ -9,6 +9,7 @@ import { useRaceStore } from '../store/useRaceStore.js';
 import useSettingsStore from '../shared/store/settingsStore';
 import { HOTKEYS } from '../types';
 import PageHeader from '../shared/components/PageHeader';
+import ImportExportModal from '../components/ImportExport/ImportExportModal';
 
 // Components
 import DataEntry from '../components/BaseStation/DataEntry';
@@ -52,6 +53,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const [withdrawalType, setWithdrawalType] = useState('dnf');
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showImportExport, setShowImportExport] = useState(false);
 
   // Initialize base station from selectedRaceForMode, or redirect if no race
   useEffect(() => {
@@ -129,6 +131,9 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
           variant="operational"
           title={selectedRaceForMode?.name ?? 'Base Station Operations'}
           moduleType={MODULE_TYPES.BASE_STATION}
+          actions={[
+            { icon: <ArrowUpTrayIcon className="w-5 h-5" />, label: 'Import / Export', onClick: () => setShowImportExport(true) },
+          ]}
           onExit={handleExit}
           onHelp={handleOpenHelp}
           onSettings={handleOpenSettings}
@@ -261,6 +266,10 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
           isOpen={showHelp}
           onClose={() => setShowHelp(false)}
         />
+
+        {showImportExport && (
+          <ImportExportModal onClose={() => setShowImportExport(false)} />
+        )}
       </div>
     </HotkeysProvider>
   );

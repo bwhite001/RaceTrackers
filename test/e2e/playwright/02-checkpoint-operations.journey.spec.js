@@ -115,16 +115,7 @@ test.describe('Checkpoint Volunteer – Mark-Off Journey', () => {
     });
 
     await step('Callout Sheet — unrecorded runners listed', async () => {
-      // Callout sheet rendering — note: getTimeSegments/markSegmentCalled are not yet
-      // implemented in useRaceStore, so the component may crash. Accept either the
-      // heading text OR a visible error/empty state.
-      const calloutVisible = await page.getByText(/callout|no pending|segment/i).first().isVisible({ timeout: 5000 }).catch(() => false);
-      if (!calloutVisible) {
-        // Document as a known gap
-        test.skip(true, 'CalloutSheet uses getTimeSegments/markSegmentCalled which are not implemented in useRaceStore — needs dev intervention');
-      } else {
-        await expect(page.getByText(/callout|no pending|segment/i).first()).toBeVisible();
-      }
+      await expect(page.getByText(/callout|no pending|segment/i).first()).toBeVisible({ timeout: 5000 });
     });
   });
 
@@ -150,29 +141,14 @@ test.describe('Checkpoint Volunteer – Mark-Off Journey', () => {
       await page.waitForSelector('nav[aria-label="Checkpoint tabs"]', { timeout: 15000 });
     });
 
-    // Look for an export button
-    const exportBtn = page.getByRole('button', { name: /export|share|download/i }).first();
-
-    await step('Export option — open export dialog', async () => {
-      const exportVisible = await exportBtn.isVisible({ timeout: 3000 }).catch(() => false);
-      if (exportVisible) {
-        // Export triggers a direct file download (no dialog) — just verify no crash
-        const [download] = await Promise.all([
-          page.waitForEvent('download', { timeout: 5000 }).catch(() => null),
-          exportBtn.click(),
-        ]);
-
-        await step('Export dialog — checkpoint results export options shown', async () => {
-          // Either a download started or a dialog appeared — both are valid outcomes
-          const dialogVisible = await page.getByRole('dialog').isVisible({ timeout: 1000 }).catch(() => false);
-          if (!download && !dialogVisible) {
-            // Export button exists but doesn't trigger download or dialog — document as gap
-            test.skip(true, 'Export button found but neither download nor dialog observed — functionality needs verification');
-          }
-        });
-      } else {
-        test.skip(true, 'Export button not found — feature may not be implemented');
-      }
+    await step('Export option — triggers JSON download', async () => {
+      const exportBtn = page.getByRole('button', { name: /export|share|download/i }).first();
+      await expect(exportBtn).toBeVisible({ timeout: 5000 });
+      const [download] = await Promise.all([
+        page.waitForEvent('download', { timeout: 10000 }),
+        exportBtn.click(),
+      ]);
+      expect(download.suggestedFilename()).toMatch(/\.json$/);
     });
   });
 });

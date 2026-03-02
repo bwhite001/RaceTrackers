@@ -67,19 +67,16 @@ test.describe('Import / Export Journey', () => {
       await page.goto('/race-management');
     });
 
-    await step('Race card — open export / download option', async () => {
-      // Look for an export option on the race management page
-      const exportBtn = page.getByRole('button', { name: /export|download/i }).first();
-      if (!(await exportBtn.isVisible({ timeout: 2000 }))) {
-        test.skip(true, 'Export button not found on race management page');
-        return;
-      }
-
+    await step('Race card — hover More Options, then click Export', async () => {
+      const moreBtn = page.getByRole('button', { name: /more options/i }).first();
+      await expect(moreBtn).toBeVisible({ timeout: 5000 });
+      await moreBtn.hover();
+      const exportBtn = page.getByRole('button', { name: /^export$/i }).first();
+      await exportBtn.waitFor({ state: 'visible', timeout: 3000 });
       const [download] = await Promise.all([
         page.waitForEvent('download'),
         exportBtn.click(),
       ]);
-
       await download.saveAs(exportFilePath);
     });
 
@@ -93,10 +90,8 @@ test.describe('Import / Export Journey', () => {
   });
 
   test('imports a race configuration and restores data', async ({ page }) => {
-    if (!exportFilePath || !fs.existsSync(exportFilePath)) {
-      test.skip(true, 'No export file available for import test');
-      return;
-    }
+    // exportFilePath is populated by the previous test; skip if it wasn't created
+    test.skip(!exportFilePath || !fs.existsSync(exportFilePath), 'Skipping: export file not available from previous test');
 
     // Clear data first
     await clearAppData(page);
@@ -104,12 +99,8 @@ test.describe('Import / Export Journey', () => {
     // Navigate to race management to trigger import
     await page.goto('/race-management');
 
-    const importBtn = page.getByRole('button', { name: /import/i }).first();
-    if (!(await importBtn.isVisible({ timeout: 2000 }))) {
-      test.skip(true, 'Import button not found');
-      return;
-    }
-
+    const importBtn = page.getByRole('button', { name: /import race/i }).first();
+    await expect(importBtn).toBeVisible({ timeout: 5000 });
     await importBtn.click();
     const dialog = page.getByRole('dialog');
     await dialog.waitFor();
