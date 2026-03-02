@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { RUNNER_STATUSES } from '../../../types';
 import db from '../../../shared/services/database/schema.js';
 import StorageService from '../../../services/storage.js';
+import BaseOperationsRepository from '../services/BaseOperationsRepository';
 
 /**
  * Base Operations Store
@@ -232,6 +233,71 @@ const useBaseOperationsStore = create(
 
       setSearchQuery: (query) => {
         set({ searchQuery: query });
+      },
+
+      // ─── Report actions ─────────────────────────────────────────────
+
+      generateReport: async (reportType, options = {}) => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) throw new Error('No active race');
+        const repo = new BaseOperationsRepository();
+        switch (reportType) {
+          case 'missing':
+            return repo.generateMissingNumbersReport(currentRaceId, options.checkpoint ?? 1);
+          case 'outList':
+            return repo.generateOutListReport(currentRaceId);
+          case 'checkpointLog':
+            return repo.generateCheckpointLogReport(currentRaceId, options.checkpoint ?? 1);
+          case 'summary':
+            return repo.generateRaceResults(currentRaceId, options.format ?? 'csv');
+          case 'finisherList':
+            return repo.generateFinisherListReport(currentRaceId);
+          case 'officialsReport':
+            return repo.generateOfficialsReport(currentRaceId);
+          case 'splitTimes':
+            return repo.generateSplitTimesReport(currentRaceId);
+          default:
+            throw new Error(`Unknown report type: ${reportType}`);
+        }
+      },
+
+      downloadReport: (report) => {
+        if (!report?.content || !report?.filename) return;
+        const blob = new Blob([report.content], { type: report.mimeType ?? 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = report.filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+
+      previewReport: (report) => {
+        if (!report?.content) return;
+        const blob = new Blob([report.content], { type: report.mimeType ?? 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      },
+
+      generateMissingNumbersReport: async (checkpoint) => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) throw new Error('No active race');
+        const repo = new BaseOperationsRepository();
+        return repo.generateMissingNumbersReport(currentRaceId, checkpoint);
+      },
+
+      generateOutListReport: async () => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) throw new Error('No active race');
+        const repo = new BaseOperationsRepository();
+        return repo.generateOutListReport(currentRaceId);
+      },
+
+      generateCheckpointLogReport: async (checkpoint) => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) throw new Error('No active race');
+        const repo = new BaseOperationsRepository();
+        return repo.generateCheckpointLogReport(currentRaceId, checkpoint);
       },
 
       // Utilities
