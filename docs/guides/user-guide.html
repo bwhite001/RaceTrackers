@@ -39,13 +39,16 @@
 <nav class="toc">
   <a href="#setup">Setting Up a Race</a>
   <a href="#checkpoint">Running a Checkpoint</a>
+  <a href="#base-station">Operating the Base Station</a>
+  <a href="#import-export">Importing & Exporting Data</a>
   <a href="#navigation">Navigating the App</a>
   <a href="#settings">Settings</a>
+  <a href="#simulation">Complete Race Walkthrough</a>
 </nav>
 <main>
 <div id="setup">
 <h2>Setting Up a Race</h2>
-<p class="chapter-intro">Use these steps to create and manage races. This section covers the full setup wizard, runner ranges, checkpoints, and the race overview.</p>
+<p class="chapter-intro">Use these steps to create and manage races. This section covers the full setup wizard, runner ranges, checkpoints, waves, and the race overview.</p>
 <section class="task">
 <h3>Creates a new race from scratch and verifies the overview</h3>
 <p class="description">A race director fills in all the details needed to create a brand-new race — the race name, date, start time, how many checkpoints there are, and the range of runner bib numbers. Once saved, the race overview page should correctly display the race name, list every checkpoint, and show the right number of registered runners.</p>
@@ -114,6 +117,36 @@
 <div class="step"><p class="step-instruction">Race overview — runner count 6 and checkpoint count 2 shown</p><img src="assets/race-overview-shows-correct-runner-and-checkpoint-counts-step-01.png" alt="Race overview — runner count 6 and checkpoint count 2 shown" loading="lazy"></div>
 </div>
 </section>
+<section class="task">
+<h3>Runner name/gender section appears after adding a range</h3>
+<p class="description">After a race director adds a bib number range on Step 3 of the setup wizard, an optional section appears for entering runner first names, last names, and gender. This is purely optional — races can be tracked without personal data.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Navigate to race setup wizard</p><img src="assets/runner-name-gender-section-appears-after-adding-a-range-step-01.png" alt="Navigate to race setup wizard" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Fill in Race Details and advance to Step 3</p><img src="assets/runner-name-gender-section-appears-after-adding-a-range-step-02.png" alt="Fill in Race Details and advance to Step 3" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Remove default range and add range 200-205</p><img src="assets/runner-name-gender-section-appears-after-adding-a-range-step-03.png" alt="Remove default range and add range 200-205" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Check that optional names section toggle is visible</p><img src="assets/runner-name-gender-section-appears-after-adding-a-range-step-04.png" alt="Check that optional names section toggle is visible" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Waves step shows default wave and allows adding more</h3>
+<p class="description">Step 4 of the race setup wizard is the Waves step, which groups runners into separate start batches. By default one wave is provided. A race director can add a second wave using the Add Wave button.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Navigate through setup wizard to the Waves step</p><img src="assets/waves-step-shows-default-wave-and-allows-adding-more-step-01.png" alt="Navigate through setup wizard to the Waves step" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Confirm Waves step heading and at least one wave row</p><img src="assets/waves-step-shows-default-wave-and-allows-adding-more-step-02.png" alt="Confirm Waves step heading and at least one wave row" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Click &quot;+ Add Wave&quot; to add a second wave</p><img src="assets/waves-step-shows-default-wave-and-allows-adding-more-step-03.png" alt="Click &quot;+ Add Wave&quot; to add a second wave" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Wave name and time fields are editable and save</h3>
+<p class="description">A race director can give each wave a custom name (e.g. &quot;Wave B&quot;) and a specific start time (e.g. &quot;07:30&quot;). These are saved to the database so checkpoint volunteers know when each wave started.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Navigate through setup wizard to the Waves step</p><img src="assets/wave-name-and-time-fields-are-editable-and-save-step-01.png" alt="Navigate through setup wizard to the Waves step" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Confirm &quot;+ Add Wave&quot; button is available</p><img src="assets/wave-name-and-time-fields-are-editable-and-save-step-02.png" alt="Confirm &quot;+ Add Wave&quot; button is available" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Add a second wave</p><img src="assets/wave-name-and-time-fields-are-editable-and-save-step-03.png" alt="Add a second wave" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Set second wave name to &quot;Wave B&quot; and start time to &quot;07:30&quot;</p><img src="assets/wave-name-and-time-fields-are-editable-and-save-step-04.png" alt="Set second wave name to &quot;Wave B&quot; and start time to &quot;07:30&quot;" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Verify &quot;Wave B&quot; appears in the wave name input</p><img src="assets/wave-name-and-time-fields-are-editable-and-save-step-05.png" alt="Verify &quot;Wave B&quot; appears in the wave name input" loading="lazy"></div>
+</div>
+</section>
 </div>
 <div id="checkpoint">
 <h2>Running a Checkpoint</h2>
@@ -123,7 +156,8 @@
 <p class="description">A checkpoint volunteer opens the app, taps &quot;Checkpoint Operations&quot;, selects their race, and arrives at the correct checkpoint screen. This test confirms that the grid of runner bib numbers — the list of every runner they need to watch for — is visible and fully loaded.</p>
 <div class="steps">
 <div class="step"><p class="step-instruction">Home — tap Checkpoint Operations module card</p><img src="assets/navigates-to-checkpoint-and-sees-runner-grid-step-01.png" alt="Home — tap Checkpoint Operations module card" loading="lazy"></div>
-<div class="step"><p class="step-instruction">Checkpoint view — runner grid loaded with bib numbers 200–210</p><img src="assets/navigates-to-checkpoint-and-sees-runner-grid-step-02.png" alt="Checkpoint view — runner grid loaded with bib numbers 200–210" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Select Race modal — choose race from list</p><img src="assets/navigates-to-checkpoint-and-sees-runner-grid-step-02.png" alt="Select Race modal — choose race from list" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Checkpoint view — runner grid loaded with bib numbers 200–210</p><img src="assets/navigates-to-checkpoint-and-sees-runner-grid-step-03.png" alt="Checkpoint view — runner grid loaded with bib numbers 200–210" loading="lazy"></div>
 </div>
 </section>
 <section class="task">
@@ -168,13 +202,105 @@
 <p class="description">At the end of a checkpoint shift, a volunteer may need to export their recorded data to share with base station or keep as a backup. This test checks that the export option can be opened from the checkpoint screen.</p>
 <div class="steps">
 <div class="step"><p class="step-instruction">Checkpoint view — navigate to checkpoint</p><img src="assets/can-export-checkpoint-results-step-01.png" alt="Checkpoint view — navigate to checkpoint" loading="lazy"></div>
-<div class="step"><p class="step-instruction">Export dialog — checkpoint results export options shown</p><img src="assets/can-export-checkpoint-results-step-02.png" alt="Export dialog — checkpoint results export options shown" loading="lazy"></div>
-<div class="step"><p class="step-instruction">Export option — open export dialog</p><img src="assets/can-export-checkpoint-results-step-03.png" alt="Export option — open export dialog" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Export option — triggers JSON download</p><img src="assets/can-export-checkpoint-results-step-02.png" alt="Export option — triggers JSON download" loading="lazy"></div>
 </div>
 </section>
 <section class="task">
 <h3>Navigates from race overview to a checkpoint</h3>
 <p class="description">From the race overview, a race director can jump straight to any checkpoint's live mark-off screen. This test clicks the Checkpoint 1 link and confirms the checkpoint mark-off screen opens.</p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Callout sheet tab shows runners who passed but not called in</h3>
+<p class="description">The Callout Sheet tab lists all runners who have been marked as passed at the checkpoint but have not yet been confirmed as called in to base station. Checkpoint volunteers use this list to make radio calls.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Mark Off tab — mark two runners as passed</p><img src="assets/callout-sheet-tab-shows-runners-who-passed-but-not-called-in-step-01.png" alt="Mark Off tab — mark two runners as passed" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Callout Sheet tab — click to switch</p><img src="assets/callout-sheet-tab-shows-runners-who-passed-but-not-called-in-step-02.png" alt="Callout Sheet tab — click to switch" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Callout Sheet — verify content is visible</p><img src="assets/callout-sheet-tab-shows-runners-who-passed-but-not-called-in-step-03.png" alt="Callout Sheet — verify content is visible" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Pending count badge decrements when runner is called in</h3>
+<p class="description">When a checkpoint volunteer marks a runner as called in, the pending count badge on the Callout Sheet tab decreases by one. If all runners have been called in the badge disappears.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Mark Off tab — mark a runner to create a callout segment</p><img src="assets/pending-count-badge-decrements-when-runner-is-called-in-step-01.png" alt="Mark Off tab — mark a runner to create a callout segment" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Tab bar — check for pending count badge</p><img src="assets/pending-count-badge-decrements-when-runner-is-called-in-step-02.png" alt="Tab bar — check for pending count badge" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Callout Sheet — click Mark Called if a pending segment exists</p><img src="assets/pending-count-badge-decrements-when-runner-is-called-in-step-03.png" alt="Callout Sheet — click Mark Called if a pending segment exists" loading="lazy"></div>
+</div>
+</section>
+</div>
+<div id="base-station">
+<h2>Operating the Base Station</h2>
+<p class="chapter-intro">Steps for the base station operator. Record finish times, mark DNF/DNS runners, and review race-wide status from the Overview and Reports tabs.</p>
+<section class="task">
+<h3>Navigates to base station and sees data entry form</h3>
+<p class="description">A base station operator opens the app, taps &quot;Base Station Operations&quot;, selects their race, and lands on the data entry screen. This test confirms the form for entering finish times and runner bib numbers is ready to use.</p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Enters a common time and runner batch, then verifies in overview</h3>
+<p class="description">The most common base station task: the operator types in a finish time (for example 10:45:00) then lists all the runner bib numbers who crossed the finish line at that time. After submitting, those runners should appear in the overview with their recorded finish time.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Base Station — Data Entry tab: form ready</p><img src="assets/enters-a-common-time-and-runner-batch-then-verifies-in-overview-step-01.png" alt="Base Station — Data Entry tab: form ready" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Data Entry — type finish time 10:45:00 and runner bib batch</p><img src="assets/enters-a-common-time-and-runner-batch-then-verifies-in-overview-step-02.png" alt="Data Entry — type finish time 10:45:00 and runner bib batch" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Overview tab — runners 300–303 visible after submission</p><img src="assets/enters-a-common-time-and-runner-batch-then-verifies-in-overview-step-03.png" alt="Overview tab — runners 300–303 visible after submission" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Records a DNF via the withdrawal dialog</h3>
+<p class="description">When a runner drops out of the race and does not finish (DNF), the base station operator needs to record this. This test opens the withdrawal dialog, enters a runner's bib number and a reason such as &quot;Injured ankle&quot;, confirms the entry, and checks that the runner now shows a DNF status in the overview.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Base Station — Data Entry tab: form ready</p><img src="assets/records-a-dnf-via-the-withdrawal-dialog-step-01.png" alt="Base Station — Data Entry tab: form ready" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Data Entry — open DNF withdrawal dialog</p><img src="assets/records-a-dnf-via-the-withdrawal-dialog-step-02.png" alt="Data Entry — open DNF withdrawal dialog" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Withdrawal Dialog — enter runner 310 and reason, then submit</p><img src="assets/records-a-dnf-via-the-withdrawal-dialog-step-03.png" alt="Withdrawal Dialog — enter runner 310 and reason, then submit" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Overview tab — runner 310 shows DNF status</p><img src="assets/records-a-dnf-via-the-withdrawal-dialog-step-04.png" alt="Overview tab — runner 310 shows DNF status" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Opens the Checkpoint Matrix tab</h3>
+<p class="description">The Checkpoint Matrix gives a bird's-eye view of where all runners are across every checkpoint in the race. This test checks that switching to the Checkpoint Matrix tab loads and displays checkpoint information correctly.</p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Switches to Reports tab and renders a report</h3>
+<p class="description">The Reports tab lets the operator generate a printed summary of race results. This test switches to the tab and checks that the report content — runner totals, times, and status counts — is visible.</p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Exports base station data</h3>
+<p class="description">The base station operator may need to export all their recorded data for backup or to share with the race director. This test checks that the import/export tool can be opened from the base station screen.</p>
+<div class="steps">
+</div>
+</section>
+</div>
+<div id="import-export">
+<h2>Importing & Exporting Data</h2>
+<p class="chapter-intro">Transfer race configurations and results between devices. Export from the base station header or race management page; import to restore a race.</p>
+<section class="task">
+<h3>Export modal opens from base station header</h3>
+<p class="description">The base station screen has an import/export button in the header. This test confirms that tapping it opens the data portability dialog where the operator can choose what to export.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Base Station — operations screen with created race</p><img src="assets/export-modal-opens-from-base-station-header-step-01.png" alt="Base Station — operations screen with created race" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Base Station header — tap Import/Export button</p><img src="assets/export-modal-opens-from-base-station-header-step-02.png" alt="Base Station header — tap Import/Export button" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Data portability dialog — export options visible</p><img src="assets/export-modal-opens-from-base-station-header-step-03.png" alt="Data portability dialog — export options visible" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Downloads a race configuration JSON file</h3>
+<p class="description">This test triggers the export function and confirms that a JSON file is actually downloaded to the device. The file should contain the race configuration — name, checkpoints, runner numbers — that can be used to restore the race on another device.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Race Management — page with created race listed</p><img src="assets/downloads-a-race-configuration-json-file-step-01.png" alt="Race Management — page with created race listed" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Race card — open dropdown then click Export</p><img src="assets/downloads-a-race-configuration-json-file-step-02.png" alt="Race card — open dropdown then click Export" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Download triggered — JSON file confirmed in temp folder</p><img src="assets/downloads-a-race-configuration-json-file-step-03.png" alt="Download triggered — JSON file confirmed in temp folder" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Imports a race configuration and restores data</h3>
+<p class="description">After wiping all data from the app, this test uploads a previously exported race file and confirms the race is fully restored — the race name, checkpoints, and runner numbers all come back exactly as they were before the data was cleared.</p>
 <div class="steps">
 </div>
 </section>
@@ -256,6 +382,70 @@
 <div class="step"><p class="step-instruction">Settings modal — enable dark mode and save</p><img src="assets/settings-persist-after-closing-and-reopening-the-modal-step-02.png" alt="Settings modal — enable dark mode and save" loading="lazy"></div>
 <div class="step"><p class="step-instruction">Home — reopen Settings modal</p><img src="assets/settings-persist-after-closing-and-reopening-the-modal-step-03.png" alt="Home — reopen Settings modal" loading="lazy"></div>
 <div class="step"><p class="step-instruction">Settings modal — dark mode toggle persists as checked</p><img src="assets/settings-persist-after-closing-and-reopening-the-modal-step-04.png" alt="Settings modal — dark mode toggle persists as checked" loading="lazy"></div>
+</div>
+</section>
+</div>
+<div id="simulation">
+<h2>Complete Race Walkthrough</h2>
+<p class="chapter-intro">A full end-to-end race simulation: race director creates the race, checkpoint volunteers mark off runners, and the base station records finish times and statuses.</p>
+<section class="task">
+<h3>Phase 1 — Race Director creates race with 10 runners and 2 checkpoints</h3>
+<p class="description"></p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Phase 2 — CP1 Volunteer marks runners 101–109 passed via quick entry</h3>
+<p class="description"></p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Phase 3 — CP2 Volunteer marks runners 101, 103–109 passed (102 absent)</h3>
+<p class="description"></p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Phase 4a — Base Station initialises and runner list loads (10 runners)</h3>
+<p class="description"></p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Phase 4b — Records finish time 10:45:00 for batch 103–108</h3>
+<p class="description"></p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Phase 4c — Records DNF for runner 102 (heat exhaustion)</h3>
+<p class="description"></p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Phase 4d — Marks runner 110 as DNS (non-starter)</h3>
+<p class="description"></p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Phase 4e — Records DNF for runner 101 (injured knee)</h3>
+<p class="description"></p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Phase 4f — Overview tab shows correct runner statuses</h3>
+<p class="description"></p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Phase 4g — Reports tab renders race summary</h3>
+<p class="description"></p>
+<div class="steps">
 </div>
 </section>
 </div>

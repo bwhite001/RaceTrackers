@@ -6,7 +6,7 @@
 
 ## Setting Up a Race
 
-Use these steps to create and manage races. This section covers the full setup wizard, runner ranges, checkpoints, and the race overview.
+Use these steps to create and manage races. This section covers the full setup wizard, runner ranges, checkpoints, waves, and the race overview.
 
 ### Creates a new race from scratch and verifies the overview
 
@@ -140,6 +140,66 @@ After creating a race with runner bib numbers 400 to 405 (6 runners) and 2 check
 
 ![Race overview — runner count 6 and checkpoint count 2 shown](assets/race-overview-shows-correct-runner-and-checkpoint-counts-step-01.png)
 
+### Runner name/gender section appears after adding a range
+
+After a race director adds a bib number range on Step 3 of the setup wizard, an optional section appears for entering runner first names, last names, and gender. This is purely optional — races can be tracked without personal data.
+
+**Navigate to race setup wizard**
+
+![Navigate to race setup wizard](assets/runner-name-gender-section-appears-after-adding-a-range-step-01.png)
+
+**Fill in Race Details and advance to Step 3**
+
+![Fill in Race Details and advance to Step 3](assets/runner-name-gender-section-appears-after-adding-a-range-step-02.png)
+
+**Remove default range and add range 200-205**
+
+![Remove default range and add range 200-205](assets/runner-name-gender-section-appears-after-adding-a-range-step-03.png)
+
+**Check that optional names section toggle is visible**
+
+![Check that optional names section toggle is visible](assets/runner-name-gender-section-appears-after-adding-a-range-step-04.png)
+
+### Waves step shows default wave and allows adding more
+
+Step 4 of the race setup wizard is the Waves step, which groups runners into separate start batches. By default one wave is provided. A race director can add a second wave using the Add Wave button.
+
+**Navigate through setup wizard to the Waves step**
+
+![Navigate through setup wizard to the Waves step](assets/waves-step-shows-default-wave-and-allows-adding-more-step-01.png)
+
+**Confirm Waves step heading and at least one wave row**
+
+![Confirm Waves step heading and at least one wave row](assets/waves-step-shows-default-wave-and-allows-adding-more-step-02.png)
+
+**Click "+ Add Wave" to add a second wave**
+
+![Click "+ Add Wave" to add a second wave](assets/waves-step-shows-default-wave-and-allows-adding-more-step-03.png)
+
+### Wave name and time fields are editable and save
+
+A race director can give each wave a custom name (e.g. "Wave B") and a specific start time (e.g. "07:30"). These are saved to the database so checkpoint volunteers know when each wave started.
+
+**Navigate through setup wizard to the Waves step**
+
+![Navigate through setup wizard to the Waves step](assets/wave-name-and-time-fields-are-editable-and-save-step-01.png)
+
+**Confirm "+ Add Wave" button is available**
+
+![Confirm "+ Add Wave" button is available](assets/wave-name-and-time-fields-are-editable-and-save-step-02.png)
+
+**Add a second wave**
+
+![Add a second wave](assets/wave-name-and-time-fields-are-editable-and-save-step-03.png)
+
+**Set second wave name to "Wave B" and start time to "07:30"**
+
+![Set second wave name to "Wave B" and start time to "07:30"](assets/wave-name-and-time-fields-are-editable-and-save-step-04.png)
+
+**Verify "Wave B" appears in the wave name input**
+
+![Verify "Wave B" appears in the wave name input](assets/wave-name-and-time-fields-are-editable-and-save-step-05.png)
+
 ## Running a Checkpoint
 
 Steps for checkpoint volunteers. Covers opening a checkpoint, marking off runners individually and in bulk, reviewing counts, and exporting data.
@@ -152,9 +212,13 @@ A checkpoint volunteer opens the app, taps "Checkpoint Operations", selects thei
 
 ![Home — tap Checkpoint Operations module card](assets/navigates-to-checkpoint-and-sees-runner-grid-step-01.png)
 
+**Select Race modal — choose race from list**
+
+![Select Race modal — choose race from list](assets/navigates-to-checkpoint-and-sees-runner-grid-step-02.png)
+
 **Checkpoint view — runner grid loaded with bib numbers 200–210**
 
-![Checkpoint view — runner grid loaded with bib numbers 200–210](assets/navigates-to-checkpoint-and-sees-runner-grid-step-02.png)
+![Checkpoint view — runner grid loaded with bib numbers 200–210](assets/navigates-to-checkpoint-and-sees-runner-grid-step-03.png)
 
 ### Marks off a single runner via the runner grid
 
@@ -232,17 +296,141 @@ At the end of a checkpoint shift, a volunteer may need to export their recorded 
 
 ![Checkpoint view — navigate to checkpoint](assets/can-export-checkpoint-results-step-01.png)
 
-**Export dialog — checkpoint results export options shown**
+**Export option — triggers JSON download**
 
-![Export dialog — checkpoint results export options shown](assets/can-export-checkpoint-results-step-02.png)
-
-**Export option — open export dialog**
-
-![Export option — open export dialog](assets/can-export-checkpoint-results-step-03.png)
+![Export option — triggers JSON download](assets/can-export-checkpoint-results-step-02.png)
 
 ### Navigates from race overview to a checkpoint
 
 From the race overview, a race director can jump straight to any checkpoint's live mark-off screen. This test clicks the Checkpoint 1 link and confirms the checkpoint mark-off screen opens.
+
+### Callout sheet tab shows runners who passed but not called in
+
+The Callout Sheet tab lists all runners who have been marked as passed at the checkpoint but have not yet been confirmed as called in to base station. Checkpoint volunteers use this list to make radio calls.
+
+**Mark Off tab — mark two runners as passed**
+
+![Mark Off tab — mark two runners as passed](assets/callout-sheet-tab-shows-runners-who-passed-but-not-called-in-step-01.png)
+
+**Callout Sheet tab — click to switch**
+
+![Callout Sheet tab — click to switch](assets/callout-sheet-tab-shows-runners-who-passed-but-not-called-in-step-02.png)
+
+**Callout Sheet — verify content is visible**
+
+![Callout Sheet — verify content is visible](assets/callout-sheet-tab-shows-runners-who-passed-but-not-called-in-step-03.png)
+
+### Pending count badge decrements when runner is called in
+
+When a checkpoint volunteer marks a runner as called in, the pending count badge on the Callout Sheet tab decreases by one. If all runners have been called in the badge disappears.
+
+**Mark Off tab — mark a runner to create a callout segment**
+
+![Mark Off tab — mark a runner to create a callout segment](assets/pending-count-badge-decrements-when-runner-is-called-in-step-01.png)
+
+**Tab bar — check for pending count badge**
+
+![Tab bar — check for pending count badge](assets/pending-count-badge-decrements-when-runner-is-called-in-step-02.png)
+
+**Callout Sheet — click Mark Called if a pending segment exists**
+
+![Callout Sheet — click Mark Called if a pending segment exists](assets/pending-count-badge-decrements-when-runner-is-called-in-step-03.png)
+
+## Operating the Base Station
+
+Steps for the base station operator. Record finish times, mark DNF/DNS runners, and review race-wide status from the Overview and Reports tabs.
+
+### Navigates to base station and sees data entry form
+
+A base station operator opens the app, taps "Base Station Operations", selects their race, and lands on the data entry screen. This test confirms the form for entering finish times and runner bib numbers is ready to use.
+
+### Enters a common time and runner batch, then verifies in overview
+
+The most common base station task: the operator types in a finish time (for example 10:45:00) then lists all the runner bib numbers who crossed the finish line at that time. After submitting, those runners should appear in the overview with their recorded finish time.
+
+**Base Station — Data Entry tab: form ready**
+
+![Base Station — Data Entry tab: form ready](assets/enters-a-common-time-and-runner-batch-then-verifies-in-overview-step-01.png)
+
+**Data Entry — type finish time 10:45:00 and runner bib batch**
+
+![Data Entry — type finish time 10:45:00 and runner bib batch](assets/enters-a-common-time-and-runner-batch-then-verifies-in-overview-step-02.png)
+
+**Overview tab — runners 300–303 visible after submission**
+
+![Overview tab — runners 300–303 visible after submission](assets/enters-a-common-time-and-runner-batch-then-verifies-in-overview-step-03.png)
+
+### Records a DNF via the withdrawal dialog
+
+When a runner drops out of the race and does not finish (DNF), the base station operator needs to record this. This test opens the withdrawal dialog, enters a runner's bib number and a reason such as "Injured ankle", confirms the entry, and checks that the runner now shows a DNF status in the overview.
+
+**Base Station — Data Entry tab: form ready**
+
+![Base Station — Data Entry tab: form ready](assets/records-a-dnf-via-the-withdrawal-dialog-step-01.png)
+
+**Data Entry — open DNF withdrawal dialog**
+
+![Data Entry — open DNF withdrawal dialog](assets/records-a-dnf-via-the-withdrawal-dialog-step-02.png)
+
+**Withdrawal Dialog — enter runner 310 and reason, then submit**
+
+![Withdrawal Dialog — enter runner 310 and reason, then submit](assets/records-a-dnf-via-the-withdrawal-dialog-step-03.png)
+
+**Overview tab — runner 310 shows DNF status**
+
+![Overview tab — runner 310 shows DNF status](assets/records-a-dnf-via-the-withdrawal-dialog-step-04.png)
+
+### Opens the Checkpoint Matrix tab
+
+The Checkpoint Matrix gives a bird's-eye view of where all runners are across every checkpoint in the race. This test checks that switching to the Checkpoint Matrix tab loads and displays checkpoint information correctly.
+
+### Switches to Reports tab and renders a report
+
+The Reports tab lets the operator generate a printed summary of race results. This test switches to the tab and checks that the report content — runner totals, times, and status counts — is visible.
+
+### Exports base station data
+
+The base station operator may need to export all their recorded data for backup or to share with the race director. This test checks that the import/export tool can be opened from the base station screen.
+
+## Importing & Exporting Data
+
+Transfer race configurations and results between devices. Export from the base station header or race management page; import to restore a race.
+
+### Export modal opens from base station header
+
+The base station screen has an import/export button in the header. This test confirms that tapping it opens the data portability dialog where the operator can choose what to export.
+
+**Base Station — operations screen with created race**
+
+![Base Station — operations screen with created race](assets/export-modal-opens-from-base-station-header-step-01.png)
+
+**Base Station header — tap Import/Export button**
+
+![Base Station header — tap Import/Export button](assets/export-modal-opens-from-base-station-header-step-02.png)
+
+**Data portability dialog — export options visible**
+
+![Data portability dialog — export options visible](assets/export-modal-opens-from-base-station-header-step-03.png)
+
+### Downloads a race configuration JSON file
+
+This test triggers the export function and confirms that a JSON file is actually downloaded to the device. The file should contain the race configuration — name, checkpoints, runner numbers — that can be used to restore the race on another device.
+
+**Race Management — page with created race listed**
+
+![Race Management — page with created race listed](assets/downloads-a-race-configuration-json-file-step-01.png)
+
+**Race card — open dropdown then click Export**
+
+![Race card — open dropdown then click Export](assets/downloads-a-race-configuration-json-file-step-02.png)
+
+**Download triggered — JSON file confirmed in temp folder**
+
+![Download triggered — JSON file confirmed in temp folder](assets/downloads-a-race-configuration-json-file-step-03.png)
+
+### Imports a race configuration and restores data
+
+After wiping all data from the app, this test uploads a previously exported race file and confirms the race is fully restored — the race name, checkpoints, and runner numbers all come back exactly as they were before the data was cleared.
 
 ## Navigating the App
 
@@ -359,3 +547,47 @@ Changes made in settings should be saved and remembered. If dark mode is turned 
 **Settings modal — dark mode toggle persists as checked**
 
 ![Settings modal — dark mode toggle persists as checked](assets/settings-persist-after-closing-and-reopening-the-modal-step-04.png)
+
+## Complete Race Walkthrough
+
+A full end-to-end race simulation: race director creates the race, checkpoint volunteers mark off runners, and the base station records finish times and statuses.
+
+### Phase 1 — Race Director creates race with 10 runners and 2 checkpoints
+
+
+
+### Phase 2 — CP1 Volunteer marks runners 101–109 passed via quick entry
+
+
+
+### Phase 3 — CP2 Volunteer marks runners 101, 103–109 passed (102 absent)
+
+
+
+### Phase 4a — Base Station initialises and runner list loads (10 runners)
+
+
+
+### Phase 4b — Records finish time 10:45:00 for batch 103–108
+
+
+
+### Phase 4c — Records DNF for runner 102 (heat exhaustion)
+
+
+
+### Phase 4d — Marks runner 110 as DNS (non-starter)
+
+
+
+### Phase 4e — Records DNF for runner 101 (injured knee)
+
+
+
+### Phase 4f — Overview tab shows correct runner statuses
+
+
+
+### Phase 4g — Reports tab renders race summary
+
+

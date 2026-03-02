@@ -4,6 +4,7 @@ import useRaceMaintenanceStore from '../../modules/race-maintenance/store/raceMa
 import { useRaceStore } from '../../store/useRaceStore.js';
 import { ExportService } from '../../services/import-export/ExportService.js';
 import { ImportService } from '../../services/import-export/ImportService.js';
+import StorageService from '../../services/storage.js';
 import ConflictResolutionDialog from './ConflictResolutionDialog.jsx';
 import QRScannerModal from '../Shared/QRScannerModal.jsx';
 
@@ -98,6 +99,17 @@ const ImportExportModal = ({ isOpen, onClose }) => {
       // Parse the JSON data
       const data = JSON.parse(importText.trim());
       
+      // Try new ImportService format first; fall back to legacy flat format
+      const isLegacyFormat = !data.checksum && data.raceConfig;
+      
+      if (isLegacyFormat) {
+        await StorageService.importRaceConfig(data);
+        setSuccess('Import successful! Race configuration imported.');
+        setImportText('');
+        setTimeout(() => { onClose(); }, 2000);
+        return;
+      }
+
       // Preview the import using the new ImportService
       const preview = await ImportService.previewImport(data);
       
