@@ -308,10 +308,35 @@ export class ExportService {
    */
   static async exportCheckpointResults(raceId, checkpointNumber) {
     try {
-      const runners = await db.checkpoint_runners
+      // Get ALL race runners
+      const allRunners = await db.runners
+        .where('raceId').equals(raceId)
+        .toArray();
+
+      // Get checkpoint-specific tracking data for this checkpoint only
+      const cpRunners = await db.checkpoint_runners
         .where(['raceId', 'checkpointNumber'])
         .equals([raceId, checkpointNumber])
         .toArray();
+
+      // Index checkpoint runners by number for fast lookup
+      const cpIndex = Object.fromEntries(cpRunners.map(r => [r.number, r]));
+
+      // Merge: every race runner gets a row, with checkpoint data if available
+      const runners = allRunners.map(runner => {
+        const cp = cpIndex[runner.number];
+        return {
+          number: runner.number,
+          firstName: runner.firstName ?? null,
+          lastName: runner.lastName ?? null,
+          gender: runner.gender ?? null,
+          batchNumber: runner.batchNumber ?? null,
+          status: cp?.status ?? runner.status ?? 'not-started',
+          markOffTime: cp?.markOffTime ?? null,
+          callInTime: cp?.callInTime ?? null,
+          notes: cp?.notes ?? runner.notes ?? null,
+        };
+      });
 
       const exportData = {
         raceId,
