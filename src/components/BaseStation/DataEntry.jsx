@@ -128,7 +128,7 @@ const DataEntry = ({ onUnsavedChanges }) => {
               step="1"
               value={commonTime}
               onChange={handleTimeChange}
-              className={`block w-full rounded-md shadow-sm 
+              className={`block w-full rounded-md border shadow-sm 
                 ${validationErrors.time 
                   ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
                   : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
@@ -170,7 +170,7 @@ const DataEntry = ({ onUnsavedChanges }) => {
               value={runnerInput}
               onChange={handleRunnerInputChange}
               rows={4}
-              className={`block w-full rounded-md shadow-sm 
+              className={`block w-full rounded-md border shadow-sm 
                 ${validationErrors.runners 
                   ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
                   : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'

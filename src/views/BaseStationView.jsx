@@ -174,7 +174,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
               ))}
             </div>
             {/* Extra route shortcuts — desktop only */}
-            <div className="hidden md:flex items-center gap-1 pb-1">
+            <div className="hidden lg:flex items-center gap-1 pb-1">
               <button
                 onClick={() => navigate('/base-station/dashboard')}
                 className="px-3 py-1.5 text-xs font-medium rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
@@ -198,7 +198,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         </nav>
 
         {/* Main content — bottom padding prevents overlap with mobile tab bar */}
-        <main className="flex-1 container mx-auto px-4 py-6 pb-24 md:pb-6">
+        <main className="flex-1 container mx-auto px-4 py-6 pb-24 md:pb-20">
           <div
             role="tabpanel"
             id={`tabpanel-${activeTab}`}
