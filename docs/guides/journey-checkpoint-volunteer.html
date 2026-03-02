@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkpoint Volunteer Journey — RaceTracker Pro</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+
+.page-header { background: #1e3a5f; color: #fff; padding: 28px 32px; }
+.role-badge { display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; margin-bottom: 10px; }
+.page-header h1 { font-size: 1.6rem; font-weight: 700; }
+.page-header p { font-size: .95rem; opacity: .85; margin-top: 6px; max-width: 640px; }
+
+nav.toc { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 12px 32px; display: flex; gap: 6px 20px; flex-wrap: wrap; align-items: center; }
+nav.toc a { color: #1e3a5f; text-decoration: none; font-size: .9rem; font-weight: 500; }
+nav.toc a:hover { text-decoration: underline; }
+.other-guides { margin-left: auto; color: #64748b; font-size: .85rem; }
+.other-guides a { color: #64748b; font-weight: 400; }
+
+main { max-width: 860px; margin: 0 auto; padding: 40px 24px 60px; }
+
+.persona-card { background: #fff; border: 1px solid #e2e8f0; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 20px 24px; margin-bottom: 40px; }
+.persona-card h2 { font-size: .9rem; color: #92400e; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .04em; }
+.persona-card p { font-size: .9rem; color: #475569; }
+
+.phase { margin-bottom: 56px; }
+.phase-header { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; }
+.phase-number { width: 34px; height: 34px; background: #1e3a5f; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .9rem; flex-shrink: 0; }
+.phase-header h2 { font-size: 1.1rem; color: #1e3a5f; font-weight: 700; }
+
+.test-block { margin-bottom: 32px; }
+.test-title { font-size: 1rem; color: #0f172a; margin-bottom: 6px; font-weight: 600; }
+.test-desc { font-size: .85rem; color: #64748b; margin-bottom: 20px; font-style: italic; line-height: 1.5; }
+
+.step { margin-bottom: 28px; }
+.step-label { font-weight: 600; font-size: .95rem; color: #1e293b; margin-bottom: 10px; }
+.step img { max-width: 100%; width: 720px; border-radius: 8px; border: 1px solid #e2e8f0; display: block; box-shadow: 0 1px 6px rgba(0,0,0,.07); margin-bottom: 12px; }
+
+/* Annotation callout */
+.annotation {
+  display: flex;
+  gap: 12px;
+  background: var(--ann-bg);
+  border: 1px solid var(--ann-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  max-width: 720px;
+}
+.ann-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  min-width: 56px;
+  padding-top: 2px;
+}
+.ann-icon { font-size: 1.3rem; line-height: 1; }
+.ann-action-label {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--ann-color);
+  white-space: nowrap;
+}
+.ann-body { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.ann-row { font-size: .875rem; color: #1e293b; display: flex; gap: 6px; align-items: baseline; }
+.ann-key { font-weight: 700; color: var(--ann-color); flex-shrink: 0; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+.ann-val-text { font-family: ui-monospace, monospace; font-size: .8rem; background: rgba(0,0,0,.05); padding: 1px 6px; border-radius: 4px; color: #374151; }
+.ann-why .ann-key { color: #64748b; }
+.ann-why span:last-child { color: #475569; font-style: italic; }
+
+.missing-test { color: #b91c1c; background: #fee2e2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px 14px; font-size: .85rem; margin-bottom: 16px; }
+.missing-test code { font-family: ui-monospace, monospace; }
+
+.page-footer { text-align: center; padding: 24px; font-size: .75rem; color: #94a3b8; border-top: 1px solid #e2e8f0; margin-top: 40px; }
+.page-footer code { font-family: ui-monospace, monospace; }
+
+@media (max-width: 640px) {
+  .step img { width: 100%; }
+  main { padding: 16px; }
+  .annotation { flex-direction: column; gap: 8px; }
+  .ann-action { flex-direction: row; min-width: auto; }
+}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="role-badge" style="background:#3b82f6;color:#ffffff;">Checkpoint Volunteer</div>
+  <h1>Running a Checkpoint</h1>
+  <p>Everything a checkpoint volunteer does on race day — from opening the app to marking off runners and calling in numbers to base station.</p>
+</header>
+
+<nav class="toc">
+  <a href="#open-checkpoint">Open the Checkpoint Screen</a>
+  <a href="#mark-off">Mark Off Runners</a>
+  <a href="#callout-overview">Call Out Missing Runners</a>
+  <a href="#export">Export Results</a>
+  <span class="other-guides">Other journeys: <a href="journey-race-director.html">Race Director</a> · <a href="journey-base-station.html">Base Station Operator</a> · <a href="user-guide.html">Full Guide</a></span>
+</nav>
+
+<main>
+  <div class="persona-card">
+    <h2>👤 About this journey</h2>
+    <p><strong>Sam</strong> — Sam is a checkpoint volunteer stationed at Checkpoint 1. Sam arrives before the first runner, opens RaceTracker Pro on a tablet, and is responsible for recording every runner who passes through and calling in missing numbers to the base station operator.</p>
+  </div>
+
+  
+<section class="phase" id="open-checkpoint">
+  <div class="phase-header">
+    <div class="phase-number">1</div>
+    <h2>Open the Checkpoint Screen</h2>
+  </div>
+  <div class="phase-steps">
+    <div class="test-block">
+<h3 class="test-title">navigates to checkpoint and sees runner grid</h3>
+<p class="test-desc">A checkpoint volunteer opens the app, taps &quot;Checkpoint Operations&quot;, selects their race, and arrives at the correct checkpoint screen. This test confirms that the grid of runner bib numbers — the list of every runner they need to watch for — is visible and fully loaded.</p>
+
+<div class="step">
+  <p class="step-label">Home — tap Checkpoint Operations module card</p>
+  <img src="assets/navigates-to-checkpoint-and-sees-runner-grid-home-tap-checkpoint-operations-module-card.png" alt="Home — tap Checkpoint Operations module card" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Checkpoint Operations&quot; card → &quot;Get Started&quot; link</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Takes you to the race selector. The app shows all available races so the volunteer can pick the correct one.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Select Race modal — choose race from list</p>
+  <img src="assets/navigates-to-checkpoint-and-sees-runner-grid-select-race-modal-choose-race-from-list.png" alt="Select Race modal — choose race from list" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The correct race in the race selection list, then choose your checkpoint</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Each volunteer must select both the race and their specific checkpoint. This ensures their mark-offs go into the right data bucket.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Checkpoint view — runner grid loaded with bib numbers 200–210</p>
+  <img src="assets/navigates-to-checkpoint-and-sees-runner-grid-checkpoint-view-runner-grid-loaded-with-bib-numbers-200-210.png" alt="Checkpoint view — runner grid loaded with bib numbers 200–210" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The runner grid tiles and the stats bar at the top (Not Started / Called In / Passed / Total)</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Confirm the correct runner range is loaded. The &quot;Not Started&quot; count should equal the total number of runners at the start of the session.</span></div>
+  </div>
+</div>
+</div>
+</div>
+
+  </div>
+</section>
+
+<section class="phase" id="mark-off">
+  <div class="phase-header">
+    <div class="phase-number">2</div>
+    <h2>Mark Off Runners</h2>
+  </div>
+  <div class="phase-steps">
+    <div class="test-block">
+<h3 class="test-title">marks off a single runner via the runner grid</h3>
+<p class="test-desc">A checkpoint volunteer clicks on a single runner's bib number tile in the grid to record that the runner passed through. The tile should change colour or appearance to make it obvious that runner has been marked as &quot;through&quot;.</p>
+
+<div class="step">
+  <p class="step-label">Checkpoint view — runner grid visible</p>
+  <img src="assets/marks-off-a-single-runner-via-the-runner-grid-checkpoint-view-runner-grid-visible.png" alt="Checkpoint view — runner grid visible" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The grid of bib number tiles</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Each tile represents one runner. Tiles are white (not yet recorded) or coloured (marked off). Find the runner you need to mark.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Runner grid — tap first runner tile (200s range)</p>
+  <img src="assets/marks-off-a-single-runner-via-the-runner-grid-runner-grid-tap-first-runner-tile-200s-range.png" alt="Runner grid — tap first runner tile (200s range)" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The bib number tile for the runner who just passed (e.g. tile &quot;200&quot;)</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>A single tap marks the runner as &quot;Passed&quot; and records the current time automatically. The tile colour changes to confirm the mark.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Runner tile — marked state applied</p>
+  <img src="assets/marks-off-a-single-runner-via-the-runner-grid-runner-tile-marked-state-applied.png" alt="Runner tile — marked state applied" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The tile for the marked runner and the &quot;Passed&quot; counter in the stats bar</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>The tile should now appear highlighted/coloured and the Passed count should increase by 1. Double-tap a tile to undo a mark if you made an error.</span></div>
+  </div>
+</div>
+</div>
+</div>
+<div class="test-block">
+<h3 class="test-title">marks off multiple runners via Quick Entry</h3>
+<p class="test-desc">Instead of finding runners in the grid, a volunteer can just type a bib number and press Enter to record it quickly. This test enters two bib numbers one after the other using the quick-entry shortcut and confirms both runners are marked off.</p>
+
+<div class="step">
+  <p class="step-label">Checkpoint view — Quick Entry bar visible</p>
+  <img src="assets/marks-off-multiple-runners-via-quick-entry-checkpoint-view-quick-entry-bar-visible.png" alt="Checkpoint view — Quick Entry bar visible" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The search/quick-entry bar at the top of the runner grid</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Quick Entry is faster than finding tiles in the grid — ideal when runners arrive in groups. Tap the search bar to start typing.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Quick Entry — type first bib number and press Enter</p>
+  <img src="assets/marks-off-multiple-runners-via-quick-entry-quick-entry-type-first-bib-number-and-press-enter.png" alt="Quick Entry — type first bib number and press Enter" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#9a3412;--ann-bg:#fff7ed;--ann-border:#fed7aa;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">⌨</span>
+    <span class="ann-action-label">Type + Enter</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The search bar at the top of the screen</span></div>
+    <div class="ann-row ann-value"><span class="ann-key">Enter:</span> <span class="ann-val-text">Type the bib number (e.g. 201), then press Enter</span></div>
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Pressing Enter immediately marks the runner and clears the field, so you can type the next number without lifting your eyes from the paper list.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Quick Entry — type second bib number and press Enter</p>
+  <img src="assets/marks-off-multiple-runners-via-quick-entry-quick-entry-type-second-bib-number-and-press-enter.png" alt="Quick Entry — type second bib number and press Enter" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#9a3412;--ann-bg:#fff7ed;--ann-border:#fed7aa;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">⌨</span>
+    <span class="ann-action-label">Type + Enter</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The search bar (still focused after the first entry)</span></div>
+    <div class="ann-row ann-value"><span class="ann-key">Enter:</span> <span class="ann-val-text">Type the next bib number (e.g. 202), then press Enter</span></div>
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>You can mark as many runners as needed in rapid succession — just keep typing numbers and pressing Enter.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Runner grid — both runners marked off</p>
+  <img src="assets/marks-off-multiple-runners-via-quick-entry-runner-grid-both-runners-marked-off.png" alt="Runner grid — both runners marked off" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The tiles for the runners you just entered and the updated &quot;Passed&quot; counter</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Both tiles should now be highlighted. The Passed counter should have increased by 2.</span></div>
+  </div>
+</div>
+</div>
+</div>
+
+  </div>
+</section>
+
+<section class="phase" id="callout-overview">
+  <div class="phase-header">
+    <div class="phase-number">3</div>
+    <h2>Call Out Missing Runners</h2>
+  </div>
+  <div class="phase-steps">
+    <div class="test-block">
+<h3 class="test-title">switches to Callout Sheet tab</h3>
+<p class="test-desc">The Callout Sheet tab shows the list of runners who have not yet been recorded at this checkpoint. Volunteers read these numbers out over the radio to base station. This test checks the tab loads correctly and the list is visible.</p>
+
+<div class="step">
+  <p class="step-label">Checkpoint view — Mark Off tab active</p>
+  <img src="assets/switches-to-callout-sheet-tab-checkpoint-view-mark-off-tab-active.png" alt="Checkpoint view — Mark Off tab active" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The three tabs: Mark Off | Callout Sheet | Overview</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>The default view is Mark Off. When you need to read out missing runners to base station, switch to the Callout Sheet tab.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Callout Sheet tab — tap to switch</p>
+  <img src="assets/switches-to-callout-sheet-tab-callout-sheet-tab-tap-to-switch.png" alt="Callout Sheet tab — tap to switch" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Callout Sheet&quot; tab in the navigation bar</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>The Callout Sheet lists every runner who has NOT yet been recorded at this checkpoint — these are the numbers to read over the radio.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Callout Sheet — unrecorded runners listed</p>
+  <img src="assets/switches-to-callout-sheet-tab-callout-sheet-unrecorded-runners-listed.png" alt="Callout Sheet — unrecorded runners listed" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The list of outstanding runner bib numbers</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Read these numbers out to base station so they can flag missing runners. The list updates in real time as you mark off more runners on the Mark Off tab.</span></div>
+  </div>
+</div>
+</div>
+</div>
+<div class="test-block">
+<h3 class="test-title">switches to Overview tab and shows runner counts</h3>
+<p class="test-desc">The Overview tab shows a summary — how many runners have been through, how many are still expected, and other totals. This test confirms those summary numbers appear correctly when the tab is selected.</p>
+
+<div class="step">
+  <p class="step-label">Checkpoint view — navigate to checkpoint</p>
+  <img src="assets/switches-to-overview-tab-and-shows-runner-counts-checkpoint-view-navigate-to-checkpoint.png" alt="Checkpoint view — navigate to checkpoint" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The checkpoint screen header showing the race and checkpoint name</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Confirm you are on the right checkpoint before reading summary figures.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Overview tab — tap to switch</p>
+  <img src="assets/switches-to-overview-tab-and-shows-runner-counts-overview-tab-tap-to-switch.png" alt="Overview tab — tap to switch" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Overview&quot; tab in the navigation bar</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>The Overview tab shows totals — how many runners have passed, how many are still outstanding, and any DNFs or non-starters recorded at this point.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Overview — runner count summary visible</p>
+  <img src="assets/switches-to-overview-tab-and-shows-runner-counts-overview-runner-count-summary-visible.png" alt="Overview — runner count summary visible" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The summary statistics (Passed, Not Started, Total)</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Use these totals to confirm your call-out numbers before radioing base station. If Passed + Not Started does not equal Total, a record may be missing.</span></div>
+  </div>
+</div>
+</div>
+</div>
+
+  </div>
+</section>
+
+<section class="phase" id="export">
+  <div class="phase-header">
+    <div class="phase-number">4</div>
+    <h2>Export Results</h2>
+  </div>
+  <div class="phase-steps">
+    <div class="test-block">
+<h3 class="test-title">can export checkpoint results</h3>
+<p class="test-desc">At the end of a checkpoint shift, a volunteer may need to export their recorded data to share with base station or keep as a backup. This test checks that the export option can be opened from the checkpoint screen.</p>
+
+<div class="step">
+  <p class="step-label">Checkpoint view — navigate to checkpoint</p>
+  <img src="assets/can-export-checkpoint-results-checkpoint-view-navigate-to-checkpoint.png" alt="Checkpoint view — navigate to checkpoint" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The checkpoint screen</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Make sure all runners have been recorded before exporting — exports capture the current state.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Export dialog — checkpoint results export options shown</p>
+  <img src="assets/can-export-checkpoint-results-export-dialog-checkpoint-results-export-options-shown.png" alt="Export dialog — checkpoint results export options shown" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The export format options in the dialog</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Choose the format you need — JSON for sharing with base station digitally, or use the print option for a paper record. Tap the format button to trigger the download.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Export option — open export dialog</p>
+  <img src="assets/can-export-checkpoint-results-export-option-open-export-dialog.png" alt="Export option — open export dialog" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The download icon (↓) in the top-right corner of the checkpoint header</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Opens the export dialog so you can save or share your checkpoint data.</span></div>
+  </div>
+</div>
+</div>
+</div>
+
+  </div>
+</section>
+
+</main>
+
+<footer class="page-footer">
+  RaceTracker Pro — Checkpoint Volunteer Journey &bull; Auto-generated from Playwright journey tests &bull; Regenerate with <code>make generate-journeys</code>
+</footer>
+</body>
+</html>

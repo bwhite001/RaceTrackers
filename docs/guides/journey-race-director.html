@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Race Director Journey — RaceTracker Pro</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+
+.page-header { background: #1e3a5f; color: #fff; padding: 28px 32px; }
+.role-badge { display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; margin-bottom: 10px; }
+.page-header h1 { font-size: 1.6rem; font-weight: 700; }
+.page-header p { font-size: .95rem; opacity: .85; margin-top: 6px; max-width: 640px; }
+
+nav.toc { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 12px 32px; display: flex; gap: 6px 20px; flex-wrap: wrap; align-items: center; }
+nav.toc a { color: #1e3a5f; text-decoration: none; font-size: .9rem; font-weight: 500; }
+nav.toc a:hover { text-decoration: underline; }
+.other-guides { margin-left: auto; color: #64748b; font-size: .85rem; }
+.other-guides a { color: #64748b; font-weight: 400; }
+
+main { max-width: 860px; margin: 0 auto; padding: 40px 24px 60px; }
+
+.persona-card { background: #fff; border: 1px solid #e2e8f0; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 20px 24px; margin-bottom: 40px; }
+.persona-card h2 { font-size: .9rem; color: #92400e; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .04em; }
+.persona-card p { font-size: .9rem; color: #475569; }
+
+.phase { margin-bottom: 56px; }
+.phase-header { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; }
+.phase-number { width: 34px; height: 34px; background: #1e3a5f; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .9rem; flex-shrink: 0; }
+.phase-header h2 { font-size: 1.1rem; color: #1e3a5f; font-weight: 700; }
+
+.test-block { margin-bottom: 32px; }
+.test-title { font-size: 1rem; color: #0f172a; margin-bottom: 6px; font-weight: 600; }
+.test-desc { font-size: .85rem; color: #64748b; margin-bottom: 20px; font-style: italic; line-height: 1.5; }
+
+.step { margin-bottom: 28px; }
+.step-label { font-weight: 600; font-size: .95rem; color: #1e293b; margin-bottom: 10px; }
+.step img { max-width: 100%; width: 720px; border-radius: 8px; border: 1px solid #e2e8f0; display: block; box-shadow: 0 1px 6px rgba(0,0,0,.07); margin-bottom: 12px; }
+
+/* Annotation callout */
+.annotation {
+  display: flex;
+  gap: 12px;
+  background: var(--ann-bg);
+  border: 1px solid var(--ann-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  max-width: 720px;
+}
+.ann-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  min-width: 56px;
+  padding-top: 2px;
+}
+.ann-icon { font-size: 1.3rem; line-height: 1; }
+.ann-action-label {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--ann-color);
+  white-space: nowrap;
+}
+.ann-body { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.ann-row { font-size: .875rem; color: #1e293b; display: flex; gap: 6px; align-items: baseline; }
+.ann-key { font-weight: 700; color: var(--ann-color); flex-shrink: 0; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+.ann-val-text { font-family: ui-monospace, monospace; font-size: .8rem; background: rgba(0,0,0,.05); padding: 1px 6px; border-radius: 4px; color: #374151; }
+.ann-why .ann-key { color: #64748b; }
+.ann-why span:last-child { color: #475569; font-style: italic; }
+
+.missing-test { color: #b91c1c; background: #fee2e2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px 14px; font-size: .85rem; margin-bottom: 16px; }
+.missing-test code { font-family: ui-monospace, monospace; }
+
+.page-footer { text-align: center; padding: 24px; font-size: .75rem; color: #94a3b8; border-top: 1px solid #e2e8f0; margin-top: 40px; }
+.page-footer code { font-family: ui-monospace, monospace; }
+
+@media (max-width: 640px) {
+  .step img { width: 100%; }
+  main { padding: 16px; }
+  .annotation { flex-direction: column; gap: 8px; }
+  .ann-action { flex-direction: row; min-width: auto; }
+}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="role-badge" style="background:#f59e0b;color:#1e293b;">Race Director</div>
+  <h1>Setting Up &amp; Managing a Race</h1>
+  <p>Everything a race director does — from first opening the app to launching checkpoint and base station modules for volunteers.</p>
+</header>
+
+<nav class="toc">
+  <a href="#open-app">Open the App</a>
+  <a href="#settings">Configure Settings</a>
+  <a href="#create-race">Create a Race</a>
+  <a href="#manage-races">Manage Races</a>
+  <a href="#launch-modules">Launch Checkpoint &amp; Base Station Modules</a>
+  <span class="other-guides">Other journeys: <a href="journey-checkpoint-volunteer.html">Checkpoint Volunteer</a> · <a href="journey-base-station.html">Base Station Operator</a> · <a href="user-guide.html">Full Guide</a></span>
+</nav>
+
+<main>
+  <div class="persona-card">
+    <h2>👤 About this journey</h2>
+    <p><strong>Alex</strong> — Alex is a race director preparing for a trail running event with 15 runners and 3 checkpoints. Alex sets up the race the day before, then on race morning opens the app to confirm everything is in order before handing devices to the volunteer teams.</p>
+  </div>
+
+  
+<section class="phase" id="open-app">
+  <div class="phase-header">
+    <div class="phase-number">1</div>
+    <h2>Open the App</h2>
+  </div>
+  <div class="phase-steps">
+    <div class="test-block">
+<h3 class="test-title">home page module cards are all accessible when no operation is active</h3>
+<p class="test-desc">When the app is idle on the home screen and no operation is in progress, all three module cards — Checkpoint Operations, Base Station, and Race Maintenance — should be enabled and ready to tap. This test confirms none of them are accidentally disabled.</p>
+
+<div class="step">
+  <p class="step-label">Home page — all module cards visible and enabled</p>
+  <img src="assets/home-page-module-cards-are-all-accessible-when-no-operation-is-active-home-page-all-module-cards-visible-and-enabled.png" alt="Home page — all module cards visible and enabled" loading="lazy">
+  
+</div>
+</div>
+
+  </div>
+</section>
+
+<section class="phase" id="settings">
+  <div class="phase-header">
+    <div class="phase-number">2</div>
+    <h2>Configure Settings</h2>
+  </div>
+  <div class="phase-steps">
+    <div class="test-block">
+<h3 class="test-title">opens and closes the Settings modal</h3>
+<p class="test-desc">Tapping the settings cog in the top-right corner should open the settings panel. Pressing the Escape key (or tapping close) should dismiss it cleanly. This test confirms both actions work.</p>
+
+<div class="step">
+  <p class="step-label">Home — tap Settings cog button (aria-label Settings)</p>
+  <img src="assets/opens-and-closes-the-settings-modal-home-tap-settings-cog-button-aria-label-settings.png" alt="Home — tap Settings cog button (aria-label Settings)" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The cog (⚙) icon in the top-right corner of the screen</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Opens the Settings panel where you can personalise the display — dark mode, font size, and status colours.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Settings modal — panel open with customisation options</p>
+  <img src="assets/opens-and-closes-the-settings-modal-settings-modal-panel-open-with-customisation-options.png" alt="Settings modal — panel open with customisation options" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The settings options: Dark Mode toggle, font size slider, and colour pickers</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>All preferences are saved automatically. Changes take effect immediately so you can preview them before closing.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Settings modal — closed after pressing X button</p>
+  <img src="assets/opens-and-closes-the-settings-modal-settings-modal-closed-after-pressing-x-button.png" alt="Settings modal — closed after pressing X button" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The × (close) button at the top-right of the Settings panel, or press Escape</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Closes the panel. Your preferences are already saved — there is no separate Save button.</span></div>
+  </div>
+</div>
+</div>
+</div>
+<div class="test-block">
+<h3 class="test-title">toggles dark mode on and off</h3>
+<p class="test-desc">The dark mode toggle in settings switches the app between a light colour scheme and a dark one. This test turns dark mode on, confirms the dark theme is applied, then turns it back off and confirms the light theme is restored.</p>
+
+<div class="step">
+  <p class="step-label">Home — open Settings modal</p>
+  <img src="assets/toggles-dark-mode-on-and-off-home-open-settings-modal.png" alt="Home — open Settings modal" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The cog (⚙) icon in the top-right corner</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Open settings to access the Dark Mode toggle.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Settings modal — locate Dark Mode toggle switch</p>
+  <img src="assets/toggles-dark-mode-on-and-off-settings-modal-locate-dark-mode-toggle-switch.png" alt="Settings modal — locate Dark Mode toggle switch" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The &quot;Dark Mode&quot; toggle switch in the Settings panel</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Dark mode reduces screen glare in low-light conditions — useful for early-morning race starts or indoor briefings.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Dark mode ON — html element gains &quot;dark&quot; class</p>
+  <img src="assets/toggles-dark-mode-on-and-off-dark-mode-on-html-element-gains-dark-class.png" alt="Dark mode ON — html element gains &quot;dark&quot; class" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The Dark Mode toggle switch to enable it</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>The app immediately switches to the dark colour scheme. All screens — not just the home screen — use the dark theme.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Dark mode OFF — &quot;dark&quot; class removed from html element</p>
+  <img src="assets/toggles-dark-mode-on-and-off-dark-mode-off-dark-class-removed-from-html-element.png" alt="Dark mode OFF — &quot;dark&quot; class removed from html element" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The Dark Mode toggle again to disable it</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Switches back to the light theme. Toggle at any time — the preference is saved between sessions.</span></div>
+  </div>
+</div>
+</div>
+</div>
+<div class="test-block">
+<h3 class="test-title">settings persist after closing and reopening the modal</h3>
+<p class="test-desc">Changes made in settings should be saved and remembered. If dark mode is turned on and the settings panel is closed then reopened, dark mode should still be on — the preference should not reset.</p>
+
+<div class="step">
+  <p class="step-label">Home — open Settings modal</p>
+  <img src="assets/settings-persist-after-closing-and-reopening-the-modal-home-open-settings-modal.png" alt="Home — open Settings modal" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The cog (⚙) icon</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Open settings to make a change that should persist.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Settings modal — enable dark mode and save</p>
+  <img src="assets/settings-persist-after-closing-and-reopening-the-modal-settings-modal-enable-dark-mode-and-save.png" alt="Settings modal — enable dark mode and save" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The Dark Mode toggle to enable it</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Setting a preference here should survive closing and reopening the modal — preferences are written to local storage immediately.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Home — reopen Settings modal</p>
+  <img src="assets/settings-persist-after-closing-and-reopening-the-modal-home-reopen-settings-modal.png" alt="Home — reopen Settings modal" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The cog (⚙) icon again</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Reopen settings to verify the preference was not lost when the panel closed.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Settings modal — dark mode toggle persists as checked</p>
+  <img src="assets/settings-persist-after-closing-and-reopening-the-modal-settings-modal-dark-mode-toggle-persists-as-checked.png" alt="Settings modal — dark mode toggle persists as checked" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The Dark Mode toggle — it should still be ON</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Confirms preferences are stored correctly. If the toggle reset, settings are not being saved — contact support.</span></div>
+  </div>
+</div>
+</div>
+</div>
+
+  </div>
+</section>
+
+<section class="phase" id="create-race">
+  <div class="phase-header">
+    <div class="phase-number">3</div>
+    <h2>Create a Race</h2>
+  </div>
+  <div class="phase-steps">
+    <div class="test-block">
+<h3 class="test-title">creates a new race from scratch and verifies the overview</h3>
+<p class="test-desc">A race director fills in all the details needed to create a brand-new race — the race name, date, start time, how many checkpoints there are, and the range of runner bib numbers. Once saved, the race overview page should correctly display the race name, list every checkpoint, and show the right number of registered runners.</p>
+
+<div class="step">
+  <p class="step-label">Home — Welcome Back screen with 3 module cards</p>
+  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-home-welcome-back-screen-with-3-module-cards.png" alt="Home — Welcome Back screen with 3 module cards" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The three module cards on the home screen</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>The home screen shows the three roles available. As a race director, you will use Race Maintenance to set up the race.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Race Maintenance → Create New Race — setup wizard opens</p>
+  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-race-maintenance-create-new-race-setup-wizard-opens.png" alt="Race Maintenance → Create New Race — setup wizard opens" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Race Maintenance&quot; card → &quot;Get Started&quot; link</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Opens the Race Management screen where all your races are listed and new ones can be created.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Step 1 of 4 — Template: choose Start from Scratch</p>
+  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-1-of-4-template-choose-start-from-scratch.png" alt="Step 1 of 4 — Template: choose Start from Scratch" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Start from Scratch&quot; card at the top of the template list</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Start from Scratch gives you a blank race. Choose a pre-built template only if the course and runner ranges already match your event.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Step 2 of 4 — Race Details: enter name, date, start time and checkpoints</p>
+  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-2-of-4-race-details-enter-name-date-start-time-and-checkpoints.png" alt="Step 2 of 4 — Race Details: enter name, date, start time and checkpoints" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#166534;--ann-bg:#f0fdf4;--ann-border:#bbf7d0;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">✏️</span>
+    <span class="ann-action-label">Fill in</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>Race Name field, Race Date field, Start Time field, Number of Checkpoints dropdown</span></div>
+    <div class="ann-row ann-value"><span class="ann-key">Enter:</span> <span class="ann-val-text">e.g. Mountain Ultra 2025 / 2025-09-20 / 06:30 / 3 checkpoints</span></div>
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>These details appear on the race overview and are used to calculate elapsed times. The checkpoint count determines how many mark-off screens are created.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Step 3 of 4 — Runner Setup: add bib number range 101–115</p>
+  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-3-of-4-runner-setup-add-bib-number-range-101-115.png" alt="Step 3 of 4 — Runner Setup: add bib number range 101–115" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#166534;--ann-bg:#f0fdf4;--ann-border:#bbf7d0;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">✏️</span>
+    <span class="ann-action-label">Fill in</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Start Number&quot; field and &quot;End Number&quot; field, then click &quot;Add Range&quot;</span></div>
+    <div class="ann-row ann-value"><span class="ann-key">Enter:</span> <span class="ann-val-text">Start: 101 — End: 115</span></div>
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Runner ranges define which bib numbers are registered. Every number in the range gets its own tile in the checkpoint grid. You can add multiple ranges if bib numbers are not sequential.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Step 4 of 4 — Waves: confirm wave and save race</p>
+  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-4-of-4-waves-confirm-wave-and-save-race.png" alt="Step 4 of 4 — Waves: confirm wave and save race" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Create Race&quot; button (bottom-right)</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Waves set the official start time used to calculate elapsed times per runner. Once you click Create Race the race is saved and you land on the Race Overview.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Race overview — name, 3 checkpoints and 15 runners correct</p>
+  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-race-overview-name-3-checkpoints-and-15-runners-correct.png" alt="Race overview — name, 3 checkpoints and 15 runners correct" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The race summary panel at the top of the overview</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Verify that the checkpoint count and total runner count match what you entered. If they are wrong, edit the race before handing devices to volunteers.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Home — new race listed under module cards</p>
+  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-home-new-race-listed-under-module-cards.png" alt="Home — new race listed under module cards" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The race card below the module cards on the home screen</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>The home screen now shows your race so any volunteer who opens the app can find it immediately.</span></div>
+  </div>
+</div>
+</div>
+</div>
+<div class="test-block">
+<h3 class="test-title">step indicator advances correctly through setup wizard</h3>
+<p class="test-desc">The race creation wizard has four steps: Template, Race Details, Runner Setup, and Waves. This test checks that the progress indicator at the top updates as you advance through each step, so the race director always knows where they are in the setup process.</p>
+
+<div class="step">
+  <p class="step-label">Step 1 of 4 — Template: setup wizard opens</p>
+  <img src="assets/step-indicator-advances-correctly-through-setup-wizard-step-1-of-4-template-setup-wizard-opens.png" alt="Step 1 of 4 — Template: setup wizard opens" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The step progress indicator at the top of the wizard</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>The indicator shows you exactly where you are in the four-step process. Step 1 (Template) should be highlighted.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Step 2 of 4 — Race Details: step indicator shows step 2</p>
+  <img src="assets/step-indicator-advances-correctly-through-setup-wizard-step-2-of-4-race-details-step-indicator-shows-step-2.png" alt="Step 2 of 4 — Race Details: step indicator shows step 2" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>Step indicator — step 2 now active</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>After choosing a template the indicator advances to Step 2. If you need to go back, your data is saved.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Step 3 of 4 — Runner Setup: step indicator advances to step 3</p>
+  <img src="assets/step-indicator-advances-correctly-through-setup-wizard-step-3-of-4-runner-setup-step-indicator-advances-to-step-3.png" alt="Step 3 of 4 — Runner Setup: step indicator advances to step 3" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>Step indicator — step 3 now active</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Confirms you are on the Runner Setup step. Add bib ranges here before moving on to Waves.</span></div>
+  </div>
+</div>
+</div>
+</div>
+<div class="test-block">
+<h3 class="test-title">back button on step 2 returns to race details with data preserved</h3>
+<p class="test-desc">If a race director fills in the race name and other details on Step 2 of 4 (Race Details), moves on to Step 3 of 4 (Runner Setup), then clicks Back, all their work should still be there — the race name and other fields must not be wiped out. Nobody should have to retype information just because they went back a step.</p>
+
+<div class="step">
+  <p class="step-label">Step 1 of 4 — Template: choose Start from Scratch</p>
+  <img src="assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-1-of-4-template-choose-start-from-scratch.png" alt="Step 1 of 4 — Template: choose Start from Scratch" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Start from Scratch&quot; card</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Begin the wizard to demonstrate that going back does not wipe your work.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Step 2 of 4 — Race Details: fill in race name and details</p>
+  <img src="assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-2-of-4-race-details-fill-in-race-name-and-details.png" alt="Step 2 of 4 — Race Details: fill in race name and details" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#166534;--ann-bg:#f0fdf4;--ann-border:#bbf7d0;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">✏️</span>
+    <span class="ann-action-label">Fill in</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>Race Name, Race Date, Start Time fields</span></div>
+    <div class="ann-row ann-value"><span class="ann-key">Enter:</span> <span class="ann-val-text">Any values — these should survive a Back navigation</span></div>
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Fill in the details to prove they are preserved when you navigate back from Step 3.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Step 3 of 4 — Runner Setup: navigate forward then press Back</p>
+  <img src="assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-3-of-4-runner-setup-navigate-forward-then-press-back.png" alt="Step 3 of 4 — Runner Setup: navigate forward then press Back" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Back: Race Details&quot; button (bottom-left)</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Simulates a race director who wants to correct a detail after moving forward.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Step 2 of 4 — Race Details: data preserved after Back</p>
+  <img src="assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-2-of-4-race-details-data-preserved-after-back.png" alt="Step 2 of 4 — Race Details: data preserved after Back" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>Race Name, Race Date, Start Time fields</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>All the values entered in Step 2 must still be there. Nothing should be lost by navigating back.</span></div>
+  </div>
+</div>
+</div>
+</div>
+
+  </div>
+</section>
+
+<section class="phase" id="manage-races">
+  <div class="phase-header">
+    <div class="phase-number">4</div>
+    <h2>Manage Races</h2>
+  </div>
+  <div class="phase-steps">
+    <div class="test-block">
+<h3 class="test-title">race management page lists created races</h3>
+<p class="test-desc">The Race Management page is the race director's central hub where all races are listed. This test confirms that a race created earlier in the test suite appears on that page.</p>
+
+<div class="step">
+  <p class="step-label">Race Management — page lists all created races</p>
+  <img src="assets/race-management-page-lists-created-races-race-management-page-lists-all-created-races.png" alt="Race Management — page lists all created races" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The list of race cards on the Race Management page</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Every race you have created appears here. Tap a race name to open its overview, or tap &quot;Create New Race&quot; to add another.</span></div>
+  </div>
+</div>
+</div>
+</div>
+<div class="test-block">
+<h3 class="test-title">clicking a race opens its overview</h3>
+<p class="test-desc">When the race director clicks on a race in the management list, they should be taken to that race's overview page where they can see all the details. This test confirms that navigation works correctly.</p>
+
+<div class="step">
+  <p class="step-label">Race Management — page with race listed</p>
+  <img src="assets/clicking-a-race-opens-its-overview-race-management-page-with-race-listed.png" alt="Race Management — page with race listed" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The race card in the list</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Identify the race you want to manage.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Race card — click race name to open overview</p>
+  <img src="assets/clicking-a-race-opens-its-overview-race-card-click-race-name-to-open-overview.png" alt="Race card — click race name to open overview" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The race name or the &quot;›&quot; arrow on the race card</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Opens the Race Overview for that race — shows checkpoints, runner counts, and quick-launch buttons for each module.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Race overview — name and details visible</p>
+  <img src="assets/clicking-a-race-opens-its-overview-race-overview-name-and-details-visible.png" alt="Race overview — name and details visible" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>Race name, date, start time, and the checkpoint / runner summary</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Confirm all details are correct before race day. This is also where you launch Checkpoint or Base Station operations.</span></div>
+  </div>
+</div>
+</div>
+</div>
+<div class="test-block">
+<h3 class="test-title">creates a second race from the management page</h3>
+<p class="test-desc">A race director creates a second race directly from the management screen, going through the full two-step setup wizard (race details, then runner ranges) and landing on the new race's overview page.</p>
+
+<div class="step">
+  <p class="step-label">Race Management — tap Create New Race button</p>
+  <img src="assets/creates-a-second-race-from-the-management-page-race-management-tap-create-new-race-button.png" alt="Race Management — tap Create New Race button" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Create New Race&quot; button at the top of the Race Management screen</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>You can run multiple races in the same app instance. Each race is fully independent.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Step 1 of 4 — Template: choose Start from Scratch</p>
+  <img src="assets/creates-a-second-race-from-the-management-page-step-1-of-4-template-choose-start-from-scratch.png" alt="Step 1 of 4 — Template: choose Start from Scratch" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Start from Scratch&quot; card</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Begin a fresh race configuration.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Step 2 of 4 — Race Details: enter name, date, start time</p>
+  <img src="assets/creates-a-second-race-from-the-management-page-step-2-of-4-race-details-enter-name-date-start-time.png" alt="Step 2 of 4 — Race Details: enter name, date, start time" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#166534;--ann-bg:#f0fdf4;--ann-border:#bbf7d0;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">✏️</span>
+    <span class="ann-action-label">Fill in</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>Race Name, Race Date, Start Time fields</span></div>
+    <div class="ann-row ann-value"><span class="ann-key">Enter:</span> <span class="ann-val-text">e.g. Valley Sprint 2025 / 2025-10-05 / 07:00</span></div>
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Each race needs its own name so volunteers and the race director can distinguish them at a glance.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Step 3 of 4 — Runner Setup: add bib range 500–503</p>
+  <img src="assets/creates-a-second-race-from-the-management-page-step-3-of-4-runner-setup-add-bib-range-500-503.png" alt="Step 3 of 4 — Runner Setup: add bib range 500–503" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#166534;--ann-bg:#f0fdf4;--ann-border:#bbf7d0;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">✏️</span>
+    <span class="ann-action-label">Fill in</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Start Number&quot; and &quot;End Number&quot; fields, then &quot;Add Range&quot;</span></div>
+    <div class="ann-row ann-value"><span class="ann-key">Enter:</span> <span class="ann-val-text">Start: 500 — End: 503</span></div>
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>This race uses a different bib range so there is no overlap with the first race.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Step 4 of 4 — Waves: confirm and save</p>
+  <img src="assets/creates-a-second-race-from-the-management-page-step-4-of-4-waves-confirm-and-save.png" alt="Step 4 of 4 — Waves: confirm and save" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">🖱</span>
+    <span class="ann-action-label">Click</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Create Race&quot; button (bottom-right)</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Saves the second race. The app supports as many races as needed.</span></div>
+  </div>
+</div>
+</div>
+
+<div class="step">
+  <p class="step-label">Race overview — second race created successfully</p>
+  <img src="assets/creates-a-second-race-from-the-management-page-race-overview-second-race-created-successfully.png" alt="Race overview — second race created successfully" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The race summary panel</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Confirm the new race is set up correctly before distributing devices.</span></div>
+  </div>
+</div>
+</div>
+</div>
+<div class="test-block">
+<h3 class="test-title">race overview shows correct runner and checkpoint counts</h3>
+<p class="test-desc">After creating a race with runner bib numbers 400 to 405 (6 runners) and 2 checkpoints, the race overview page should display &quot;6&quot; as the runner count and &quot;2&quot; as the checkpoint count — no more, no less.</p>
+
+<div class="step">
+  <p class="step-label">Race overview — runner count 6 and checkpoint count 2 shown</p>
+  <img src="assets/race-overview-shows-correct-runner-and-checkpoint-counts-race-overview-runner-count-6-and-checkpoint-count-2-shown.png" alt="Race overview — runner count 6 and checkpoint count 2 shown" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The &quot;Total Runners&quot; and &quot;Checkpoints&quot; counters in the race summary</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>These must match your entry. If a runner range was wrong, the count will be off — fix it here before race day.</span></div>
+  </div>
+</div>
+</div>
+</div>
+
+  </div>
+</section>
+
+<section class="phase" id="launch-modules">
+  <div class="phase-header">
+    <div class="phase-number">5</div>
+    <h2>Launch Checkpoint &amp; Base Station Modules</h2>
+  </div>
+  <div class="phase-steps">
+    <div class="test-block">
+<h3 class="test-title">navigates from race overview to a checkpoint</h3>
+<p class="test-desc">From the race overview, a race director can jump straight to any checkpoint's live mark-off screen. This test clicks the Checkpoint 1 link and confirms the checkpoint mark-off screen opens.</p>
+</div>
+<div class="test-block">
+<h3 class="test-title">navigates from race overview to base station</h3>
+<p class="test-desc">From the race overview, a race director can jump straight to the base station. This test clicks the Base Station button on the overview page and confirms the base station operations screen opens.</p>
+</div>
+
+  </div>
+</section>
+
+</main>
+
+<footer class="page-footer">
+  RaceTracker Pro — Race Director Journey &bull; Auto-generated from Playwright journey tests &bull; Regenerate with <code>make generate-journeys</code>
+</footer>
+</body>
+</html>

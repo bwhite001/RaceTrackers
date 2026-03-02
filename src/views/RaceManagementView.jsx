@@ -379,6 +379,7 @@ const RaceListItem = ({ race, onView, onEdit, onDuplicate, onExport, onDelete })
   const status = getRaceStatus(race);
   const statusColor = getRaceStatusColor(race);
   const runnerRange = getRunnerRange(race);
+  const [showMenu, setShowMenu] = useState(false);
 
   return (
     <Card variant="elevated" hoverable>
@@ -435,9 +436,10 @@ const RaceListItem = ({ race, onView, onEdit, onDuplicate, onExport, onDelete })
             </Button>
             
             {/* Dropdown Menu */}
-            <div className="relative group">
+            <div className="relative">
               <button
                 aria-label="More options"
+                onClick={() => setShowMenu(m => !m)}
                 className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -446,7 +448,8 @@ const RaceListItem = ({ race, onView, onEdit, onDuplicate, onExport, onDelete })
               </button>
               
               {/* Dropdown Menu Items */}
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+              {showMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
                 <button
                   onClick={onDuplicate}
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg"
@@ -476,6 +479,7 @@ const RaceListItem = ({ race, onView, onEdit, onDuplicate, onExport, onDelete })
                   Delete
                 </button>
               </div>
+              )}
             </div>
           </div>
         </div>

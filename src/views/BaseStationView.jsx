@@ -272,9 +272,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
           onClose={() => setShowHelp(false)}
         />
 
-        {showImportExport && (
-          <ImportExportModal onClose={() => setShowImportExport(false)} />
-        )}
+        <ImportExportModal isOpen={showImportExport} onClose={() => setShowImportExport(false)} />
       </div>
     </HotkeysProvider>
   );

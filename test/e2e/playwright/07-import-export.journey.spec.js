@@ -12,7 +12,7 @@
  */
 
 import { test, expect } from './fixtures.js';
-import { createRace, goHome, clearAppData } from './helpers.js';
+import { createRace, goHome, clearAppData, selectModuleWithFirstRace } from './helpers.js';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
@@ -42,17 +42,13 @@ test.describe('Import / Export Journey', () => {
   test('export modal opens from base station header', async ({ page, step }) => {
     await step('Base Station — operations screen with created race', async () => {
       await createRace(page, RACE);
-      await page.goto('/base-station/operations');
-      await page.waitForSelector('#commonTime', { timeout: 5000 });
+      await selectModuleWithFirstRace(page, /base station/i);
+      await page.waitForURL(/base-station\/operations/, { timeout: 15000 });
+      await expect(page.locator('#commonTime')).toBeVisible({ timeout: 10000 });
     });
 
     await step('Base Station header — tap Import/Export button', async () => {
-      const exportBtn = page.getByRole('button', { name: /export|import.*export/i }).first();
-      if (await exportBtn.isVisible({ timeout: 2000 })) {
-        await exportBtn.click();
-      } else {
-        test.skip(true, 'No visible export button on base station view');
-      }
+      await page.getByRole('button', { name: /import.*export|import \/ export/i }).click();
     });
 
     await step('Data portability dialog — export options visible', async () => {
@@ -67,10 +63,10 @@ test.describe('Import / Export Journey', () => {
       await page.goto('/race-management');
     });
 
-    await step('Race card — hover More Options, then click Export', async () => {
+    await step('Race card — open dropdown then click Export', async () => {
       const moreBtn = page.getByRole('button', { name: /more options/i }).first();
       await expect(moreBtn).toBeVisible({ timeout: 5000 });
-      await moreBtn.hover();
+      await moreBtn.click();
       const exportBtn = page.getByRole('button', { name: /^export$/i }).first();
       await exportBtn.waitFor({ state: 'visible', timeout: 3000 });
       const [download] = await Promise.all([
@@ -84,8 +80,8 @@ test.describe('Import / Export Journey', () => {
       expect(fs.existsSync(exportFilePath)).toBe(true);
 
       const content = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'));
-      expect(content).toHaveProperty('races');
-      expect(Array.isArray(content.races)).toBe(true);
+      expect(content).toHaveProperty('raceConfig');
+      expect(content.raceConfig).toHaveProperty('name');
     });
   });
 
@@ -102,15 +98,19 @@ test.describe('Import / Export Journey', () => {
     const importBtn = page.getByRole('button', { name: /import race/i }).first();
     await expect(importBtn).toBeVisible({ timeout: 5000 });
     await importBtn.click();
-    const dialog = page.getByRole('dialog');
+    const dialog = page.getByRole('dialog', { name: /import.*export/i });
     await dialog.waitFor();
 
-    // Upload the file
+    // Switch to Import tab (modal defaults to Export)
+    await dialog.getByRole('button', { name: /import configuration/i }).click();
+
+    // Upload the file directly to the hidden file input
     const fileInput = dialog.locator('input[type="file"]');
     await fileInput.setInputFiles(exportFilePath);
 
-    await dialog.getByRole('button', { name: /import|confirm|proceed/i }).click();
-    await expect(dialog).toBeHidden({ timeout: 5000 });
+    // Click the Import Configuration submit button (not the tab)
+    await dialog.locator('button.btn-primary').click();
+    await expect(dialog).toBeHidden({ timeout: 10000 });
 
     // The race should now be visible
     await expect(page.getByText(RACE.name)).toBeVisible();

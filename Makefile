@@ -71,6 +71,12 @@ clear-data: ## Clear all test data from IndexedDB
 
 # ─── Docs ─────────────────────────────────────────────────────────────────────
 
+guide: ## Regenerate user guide + annotated journey docs from latest test run
+	npm run generate:guide && npm run generate:journeys
+
+generate-journeys: ## Generate annotated role journey docs (requires a prior test-e2e run)
+	npm run generate:journeys
+
 guide-pdfs: ## Generate PDFs from user guide (one per journey section)
 	npm run generate:guide:pdfs
 

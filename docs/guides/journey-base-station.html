@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base Station Operator Journey — RaceTracker Pro</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+
+.page-header { background: #1e3a5f; color: #fff; padding: 28px 32px; }
+.role-badge { display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; margin-bottom: 10px; }
+.page-header h1 { font-size: 1.6rem; font-weight: 700; }
+.page-header p { font-size: .95rem; opacity: .85; margin-top: 6px; max-width: 640px; }
+
+nav.toc { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 12px 32px; display: flex; gap: 6px 20px; flex-wrap: wrap; align-items: center; }
+nav.toc a { color: #1e3a5f; text-decoration: none; font-size: .9rem; font-weight: 500; }
+nav.toc a:hover { text-decoration: underline; }
+.other-guides { margin-left: auto; color: #64748b; font-size: .85rem; }
+.other-guides a { color: #64748b; font-weight: 400; }
+
+main { max-width: 860px; margin: 0 auto; padding: 40px 24px 60px; }
+
+.persona-card { background: #fff; border: 1px solid #e2e8f0; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 20px 24px; margin-bottom: 40px; }
+.persona-card h2 { font-size: .9rem; color: #92400e; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .04em; }
+.persona-card p { font-size: .9rem; color: #475569; }
+
+.phase { margin-bottom: 56px; }
+.phase-header { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; }
+.phase-number { width: 34px; height: 34px; background: #1e3a5f; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .9rem; flex-shrink: 0; }
+.phase-header h2 { font-size: 1.1rem; color: #1e3a5f; font-weight: 700; }
+
+.test-block { margin-bottom: 32px; }
+.test-title { font-size: 1rem; color: #0f172a; margin-bottom: 6px; font-weight: 600; }
+.test-desc { font-size: .85rem; color: #64748b; margin-bottom: 20px; font-style: italic; line-height: 1.5; }
+
+.step { margin-bottom: 28px; }
+.step-label { font-weight: 600; font-size: .95rem; color: #1e293b; margin-bottom: 10px; }
+.step img { max-width: 100%; width: 720px; border-radius: 8px; border: 1px solid #e2e8f0; display: block; box-shadow: 0 1px 6px rgba(0,0,0,.07); margin-bottom: 12px; }
+
+/* Annotation callout */
+.annotation {
+  display: flex;
+  gap: 12px;
+  background: var(--ann-bg);
+  border: 1px solid var(--ann-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  max-width: 720px;
+}
+.ann-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  min-width: 56px;
+  padding-top: 2px;
+}
+.ann-icon { font-size: 1.3rem; line-height: 1; }
+.ann-action-label {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--ann-color);
+  white-space: nowrap;
+}
+.ann-body { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.ann-row { font-size: .875rem; color: #1e293b; display: flex; gap: 6px; align-items: baseline; }
+.ann-key { font-weight: 700; color: var(--ann-color); flex-shrink: 0; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+.ann-val-text { font-family: ui-monospace, monospace; font-size: .8rem; background: rgba(0,0,0,.05); padding: 1px 6px; border-radius: 4px; color: #374151; }
+.ann-why .ann-key { color: #64748b; }
+.ann-why span:last-child { color: #475569; font-style: italic; }
+
+.missing-test { color: #b91c1c; background: #fee2e2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px 14px; font-size: .85rem; margin-bottom: 16px; }
+.missing-test code { font-family: ui-monospace, monospace; }
+
+.page-footer { text-align: center; padding: 24px; font-size: .75rem; color: #94a3b8; border-top: 1px solid #e2e8f0; margin-top: 40px; }
+.page-footer code { font-family: ui-monospace, monospace; }
+
+@media (max-width: 640px) {
+  .step img { width: 100%; }
+  main { padding: 16px; }
+  .annotation { flex-direction: column; gap: 8px; }
+  .ann-action { flex-direction: row; min-width: auto; }
+}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="role-badge" style="background:#8b5cf6;color:#ffffff;">Base Station Operator</div>
+  <h1>Operating the Base Station</h1>
+  <p>Everything the base station operator does — receiving call-ins from checkpoints, recording finish times, and managing the overall race picture.</p>
+</header>
+
+<nav class="toc">
+  <a href="#open-base-station">Open the Base Station</a>
+  <span class="other-guides">Other journeys: <a href="journey-race-director.html">Race Director</a> · <a href="journey-checkpoint-volunteer.html">Checkpoint Volunteer</a> · <a href="user-guide.html">Full Guide</a></span>
+</nav>
+
+<main>
+  <div class="persona-card">
+    <h2>👤 About this journey</h2>
+    <p><strong>Jordan</strong> — Jordan is the base station operator stationed at the finish line. Jordan receives radio call-ins from each checkpoint volunteer, records finish times for runners crossing the line, and keeps the race director informed of the overall race status.</p>
+  </div>
+
+  
+<section class="phase" id="open-base-station">
+  <div class="phase-header">
+    <div class="phase-number">1</div>
+    <h2>Open the Base Station</h2>
+  </div>
+  <div class="phase-steps">
+    <div class="test-block">
+<h3 class="test-title">navigates from race overview to base station</h3>
+<p class="test-desc">From the race overview, a race director can jump straight to the base station. This test clicks the Base Station button on the overview page and confirms the base station operations screen opens.</p>
+</div>
+
+  </div>
+</section>
+
+</main>
+
+<footer class="page-footer">
+  RaceTracker Pro — Base Station Operator Journey &bull; Auto-generated from Playwright journey tests &bull; Regenerate with <code>make generate-journeys</code>
+</footer>
+</body>
+</html>
