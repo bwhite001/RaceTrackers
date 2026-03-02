@@ -42,7 +42,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const navigate = useNavigate();
 
   // Store access
-  const { currentRaceId, loading, error, stats, runners, initialize } = useBaseOperationsStore();
+  const { currentRaceId, loading, error, stats, runners, initialize, refreshData } = useBaseOperationsStore();
   const { selectedRaceForMode, checkpoints } = useRaceStore();
   const { darkMode } = useSettingsStore();
   const initStarted = useRef(false);
@@ -57,14 +57,18 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
   // Initialize base station from selectedRaceForMode, or redirect if no race
   useEffect(() => {
-    if (currentRaceId) return; // already initialized
+    if (currentRaceId) {
+      // Re-hydrate runners from DB on page reload (runners are not persisted to localStorage)
+      refreshData();
+      return;
+    }
     if (selectedRaceForMode && !initStarted.current) {
       initStarted.current = true;
       initialize(selectedRaceForMode).catch(() => navigate('/'));
     } else if (!selectedRaceForMode) {
       navigate('/');
     }
-  }, [currentRaceId, selectedRaceForMode, initialize, navigate]);
+  }, [currentRaceId, selectedRaceForMode, initialize, navigate, refreshData]);
 
   // Handle tab change
   const handleTabChange = useCallback((tab) => {
@@ -158,7 +162,8 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
               {TABS.map(tab => (
                 <button
                   key={tab.id}
-                  aria-pressed={activeTab === tab.id}
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
                   aria-controls={`tabpanel-${tab.id}`}
                   aria-label={tab.label}
                   onClick={() => handleTabChange(tab.id)}
