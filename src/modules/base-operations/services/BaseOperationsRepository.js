@@ -811,6 +811,180 @@ export class BaseOperationsRepository extends BaseRepository {
       throw new Error('Failed to generate checkpoint log report');
     }
   }
+
+  /**
+   * Finisher List — runners who completed the race, sorted by finish time.
+   */
+  async generateFinisherListReport(raceId) {
+    try {
+      const race = await db.races.get(raceId);
+      const finishers = await db.base_station_runners
+        .where('raceId').equals(raceId)
+        .filter(r => r.status === 'passed' || r.status === 'finished')
+        .toArray();
+      finishers.sort((a, b) => new Date(a.commonTime) - new Date(b.commonTime));
+
+      const runnerDetails = await db.runners.where('raceId').equals(raceId).toArray();
+      const nameMap = Object.fromEntries(runnerDetails.map(r => [r.number, r]));
+
+      const headers = ['Runner #', 'First Name', 'Last Name', 'Finish Time', 'Notes'];
+      const rows = finishers.map(r => {
+        const info = nameMap[r.number] ?? {};
+        const finishTime = r.commonTime
+          ? new Date(r.commonTime).toLocaleTimeString()
+          : '';
+        return [r.number, info.firstName ?? '', info.lastName ?? '', finishTime, r.notes ?? ''];
+      });
+
+      const csvLines = [
+        `# Finisher List`,
+        `# Race: ${race.name}`,
+        `# Date: ${race.date}`,
+        `# Generated: ${new Date().toLocaleString()}`,
+        `# Total Finishers: ${finishers.length}`,
+        '',
+        headers.join(','),
+        ...rows.map(row => row.map(cell =>
+          typeof cell === 'string' && cell.includes(',') ? `"${cell}"` : cell
+        ).join(',')),
+      ].join('\n');
+
+      return {
+        content: csvLines,
+        filename: `finisher-list-${race.date}.csv`,
+        mimeType: 'text/csv',
+      };
+    } catch (error) {
+      console.error('Error generating finisher list report:', error);
+      throw new Error('Failed to generate finisher list report');
+    }
+  }
+
+  /**
+   * Full Officials Report — every runner × every checkpoint (the stewards sheet).
+   */
+  async generateOfficialsReport(raceId) {
+    try {
+      const race = await db.races.get(raceId);
+      const checkpoints = await db.checkpoints.where('raceId').equals(raceId).sortBy('number');
+      const runners = await db.runners.where('raceId').equals(raceId).sortBy('number');
+      const cpRunners = await db.checkpoint_runners.where('raceId').equals(raceId).toArray();
+      const bsRunners = await db.base_station_runners.where('raceId').equals(raceId).toArray();
+
+      const cpIndex = {};
+      for (const r of cpRunners) {
+        cpIndex[`${r.number}-${r.checkpointNumber}`] = r;
+      }
+      const bsIndex = Object.fromEntries(bsRunners.map(r => [r.number, r]));
+
+      const cpHeaders = checkpoints.map(cp => cp.name || `CP${cp.number}`);
+      const headers = ['Runner #', 'First Name', 'Last Name', 'Gender', 'Batch', ...cpHeaders, 'Finish Time', 'Status', 'Notes'];
+
+      const rows = runners.map(runner => {
+        const cpTimes = checkpoints.map(cp => {
+          const entry = cpIndex[`${runner.number}-${cp.number}`];
+          if (!entry) return '';
+          return entry.markOffTime
+            ? new Date(entry.markOffTime).toLocaleTimeString()
+            : (entry.status ?? '');
+        });
+        const bs = bsIndex[runner.number];
+        const finishTime = bs?.commonTime ? new Date(bs.commonTime).toLocaleTimeString() : '';
+        return [
+          runner.number,
+          runner.firstName ?? '',
+          runner.lastName ?? '',
+          runner.gender ?? '',
+          runner.batchNumber ?? '',
+          ...cpTimes,
+          finishTime,
+          bs?.status ?? runner.status ?? '',
+          runner.notes ?? '',
+        ];
+      });
+
+      const csvLines = [
+        `# Full Officials Report`,
+        `# Race: ${race.name}`,
+        `# Date: ${race.date}`,
+        `# Generated: ${new Date().toLocaleString()}`,
+        '',
+        headers.join(','),
+        ...rows.map(row => row.map(cell =>
+          typeof cell === 'string' && cell.includes(',') ? `"${cell}"` : cell
+        ).join(',')),
+      ].join('\n');
+
+      return {
+        content: csvLines,
+        filename: `officials-report-${race.date}.csv`,
+        mimeType: 'text/csv',
+      };
+    } catch (error) {
+      console.error('Error generating officials report:', error);
+      throw new Error('Failed to generate officials report');
+    }
+  }
+
+  /**
+   * Split Times — one row per runner, one column per checkpoint.
+   */
+  async generateSplitTimesReport(raceId) {
+    try {
+      const race = await db.races.get(raceId);
+      const checkpoints = await db.checkpoints.where('raceId').equals(raceId).sortBy('number');
+      const runners = await db.runners.where('raceId').equals(raceId).sortBy('number');
+      const cpRunners = await db.checkpoint_runners.where('raceId').equals(raceId).toArray();
+
+      const cpIndex = {};
+      for (const r of cpRunners) {
+        cpIndex[`${r.number}-${r.checkpointNumber}`] = r;
+      }
+
+      const cpHeaders = checkpoints.map(cp => cp.name || `CP${cp.number}`);
+      const headers = ['Runner #', 'First Name', 'Last Name', ...cpHeaders, 'Overall Status'];
+
+      const rows = runners.map(runner => {
+        const splits = checkpoints.map(cp => {
+          const entry = cpIndex[`${runner.number}-${cp.number}`];
+          if (!entry) return '—';
+          if (entry.status === 'dnf') return 'DNF';
+          if (entry.status === 'dns' || entry.status === 'non-starter') return 'DNS';
+          return entry.markOffTime
+            ? new Date(entry.markOffTime).toLocaleTimeString()
+            : '—';
+        });
+        return [
+          runner.number,
+          runner.firstName ?? '',
+          runner.lastName ?? '',
+          ...splits,
+          runner.status ?? '',
+        ];
+      });
+
+      const csvLines = [
+        `# Split Times Report`,
+        `# Race: ${race.name}`,
+        `# Date: ${race.date}`,
+        `# Generated: ${new Date().toLocaleString()}`,
+        '',
+        headers.join(','),
+        ...rows.map(row => row.map(cell =>
+          typeof cell === 'string' && cell.includes(',') ? `"${cell}"` : cell
+        ).join(',')),
+      ].join('\n');
+
+      return {
+        content: csvLines,
+        filename: `split-times-${race.date}.csv`,
+        mimeType: 'text/csv',
+      };
+    } catch (error) {
+      console.error('Error generating split times report:', error);
+      throw new Error('Failed to generate split times report');
+    }
+  }
 }
 
 export default new BaseOperationsRepository();
