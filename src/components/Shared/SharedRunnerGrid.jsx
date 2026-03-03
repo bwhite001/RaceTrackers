@@ -3,6 +3,7 @@ import { RUNNER_STATUSES, GROUP_SIZES } from "../../types/index.js";
 import TimeUtils from "../../services/timeUtils.js";
 import SearchInput from "./RunnerGrid/SearchInput";
 import ViewModeToggle from "./RunnerGrid/ViewModeToggle";
+import RunnerCell from "./RunnerGrid/RunnerCell";
 
 /**
  * Shared runner grid for tracking runner status.
@@ -386,22 +387,28 @@ const SharedRunnerGrid = ({
                                                     : "space-y-2"
                                             }
                                         >
-                                            {group.runners.map((runner) => (
-                                                <button
-                                                    key={`runner-${runner.number}-checkpoint-${currentCheckpoint || 1}`}
-                                                    onClick={() => handleRunnerClick(runner)}
-                                                    onDoubleClick={() => handleRunnerDoubleClick(runner)}
-                                                    disabled={isLoading}
-                                                    className={`
-                                                        ${getRunnerButtonClass(runner)}
-                                                        ${viewMode === "grid" ? "h-16 w-full" : "h-12 w-full px-4"}
-                                                        disabled:opacity-50
-                                                    `}
-                                                    title={`Runner ${runner.number} - ${runner.status.replace("-", " ")} - Double-click to uncheck`}
-                                                >
-                                                    {getRunnerContent(runner)}
-                                                </button>
-                                            ))}
+                                            {group.runners.map((runner) =>
+                                                viewMode === 'grid' ? (
+                                                    <RunnerCell
+                                                        key={`runner-${runner.number}-cp-${currentCheckpoint || 1}`}
+                                                        runner={runner}
+                                                        isLoading={isLoading}
+                                                        onMark={(num) => handleRunnerClick({ ...runner, number: num })}
+                                                        onUnmark={(num) => handleRunnerDoubleClick({ ...runner, number: num })}
+                                                    />
+                                                ) : (
+                                                    <button
+                                                        key={`runner-${runner.number}-cp-${currentCheckpoint || 1}`}
+                                                        onClick={() => handleRunnerClick(runner)}
+                                                        onDoubleClick={() => handleRunnerDoubleClick(runner)}
+                                                        disabled={isLoading}
+                                                        className={`${getRunnerButtonClass(runner)} h-12 w-full px-4 disabled:opacity-50`}
+                                                        title={`Runner ${runner.number} - ${runner.status.replace("-", " ")} - Double-click to uncheck`}
+                                                    >
+                                                        {getRunnerContent(runner)}
+                                                    </button>
+                                                )
+                                            )}
                                         </div>
                                     )}
                                 </div>
