@@ -1,10 +1,10 @@
 name: Generate User Guides
 
 on:
+  workflow_dispatch:
   push:
-    branches: [main]
-    paths-ignore:
-      - 'docs/guides/**'  # prevent loop when guide commit triggers workflow
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
