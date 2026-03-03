@@ -16,8 +16,8 @@ describe('Simple Database Test', () => {
     expect(db.tables.length).toBeGreaterThan(0);
   });
 
-  it('should have schema version 6', () => {
-    expect(db.verno).toBe(6);
+  it('should have schema version 8', () => {
+    expect(db.verno).toBe(8);
   });
 
   it('should have all expected tables', () => {

@@ -14,6 +14,7 @@ export default defineConfig({
     setupFiles: ['./test/setup.js'],
     include: [
       'test/database/**/*.test.{js,jsx}',
+      'test/database/**/*-test.{js,jsx}',
       'test/database/**/*.spec.{js,jsx}'
     ],
     exclude: [
