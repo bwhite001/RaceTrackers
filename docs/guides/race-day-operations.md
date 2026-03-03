@@ -42,6 +42,12 @@ Race Director     Checkpoint Volunteers           Each Checkpoint
    - **Step 4 — Waves:** Confirm wave start and save
 3. Verify the Race Overview shows the correct checkpoint count and runner total.
 
+![Race setup wizard](assets/creates-a-new-race-from-scratch-and-verifies-the-overview-race-maintenance-create-new-race-setup-wizard-opens.png)
+*The 4-step wizard walks you through all race configuration in one flow.*
+
+![Race overview](assets/creates-a-new-race-from-scratch-and-verifies-the-overview-race-overview-name-3-checkpoints-and-15-runners-correct.png)
+*Race overview confirms correct checkpoint and runner counts before distributing the config.*
+
 ### 1.2 Export Race Configuration
 
 1. From the Race Overview, press **Export → Race Config**
@@ -82,6 +88,9 @@ Each device operates **completely offline and independently**. No real-time data
 3. Select your checkpoint number (e.g. CP1)
 4. The runner grid shows all registered runners as **Not Started**
 
+![Checkpoint runner grid](assets/navigates-to-checkpoint-and-sees-runner-grid-checkpoint-view-runner-grid-loaded-with-bib-numbers-200-210.png)
+*Runner grid at CP1 — all bibs visible, colour-coded by status (grey = Not Started).*
+
 #### Marking Runners as They Pass
 
 As each runner passes through:
@@ -94,6 +103,10 @@ As each runner passes through:
 
 - **Batch time:** All runners passed at the same real-world time should share the same common time. The app automatically floors to the nearest **5-minute interval** (e.g. runners arriving at 10:47 get common time `10:45`).
 
+| Quick Entry bar | Runners marked off |
+|---|---|
+| ![Quick entry bar](assets/marks-off-multiple-runners-via-quick-entry-checkpoint-view-quick-entry-bar-visible.png) | ![Runners marked off in grid](assets/marks-off-multiple-runners-via-quick-entry-runner-grid-both-runners-marked-off.png) |
+
 #### The Callout Sheet
 
 The **Callout Sheet** tab groups passed runners by their 5-minute common time segment, ready to call in over radio. 
@@ -104,6 +117,9 @@ Each segment shows:
 - **Mark Called** button — press this after you have called the segment in over the radio
 
 Once a segment is marked called, it moves to the "Called Segments" history.
+
+![Callout sheet](assets/switches-to-callout-sheet-tab-callout-sheet-unrecorded-runners-listed.png)
+*Callout Sheet showing runners grouped by common time, ready to radio in to base.*
 
 ---
 
@@ -172,6 +188,9 @@ Each checkpoint operator:
 2. Select the race from the modal
 3. The Data Entry tab opens — ready to receive calls
 
+![Base station data entry](assets/enters-a-common-time-and-runner-batch-then-verifies-in-overview-step-02.png)
+*Base station data entry view — common time and runner bib fields ready to accept a radio call.*
+
 #### Entering Called Results
 
 When a checkpoint calls in scores:
@@ -199,6 +218,9 @@ When a checkpoint reports a runner has withdrawn:
 2. Select the checkpoint where they withdrew
 3. Press **Record Withdrawal**
 4. Broadcast the status to all checkpoints over radio
+
+![DNF withdrawal dialog](assets/records-a-dnf-via-the-withdrawal-dialog-step-04.png)
+*Withdrawal confirmation — runner marked DNF with checkpoint location recorded.*
 
 #### Viewing the Checkpoint Matrix
 

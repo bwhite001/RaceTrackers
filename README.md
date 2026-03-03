@@ -78,11 +78,23 @@
 ### Live Demo
 🔗 **[Try RaceTracker Pro](https://racetrackers.bwhite.id.au/)** *(Live App)*
 
-### Screenshots
+### App Screenshots
 
-Comming Soon
+| Home — Module Cards | Race Setup Wizard |
+|---|---|
+| ![Home screen with module cards](docs/guides/assets/creates-a-new-race-from-scratch-and-verifies-the-overview-home-welcome-back-screen-with-3-module-cards.png) | ![Race setup wizard](docs/guides/assets/creates-a-new-race-from-scratch-and-verifies-the-overview-race-maintenance-create-new-race-setup-wizard-opens.png) |
 
-📸 [View all screenshots](./screenshots)
+| Race Overview | Race Management |
+|---|---|
+| ![Race overview](docs/guides/assets/creates-a-new-race-from-scratch-and-verifies-the-overview-race-overview-name-3-checkpoints-and-15-runners-correct.png) | ![Race management](docs/guides/assets/race-management-page-lists-created-races-race-management-page-lists-all-created-races.png) |
+
+| Checkpoint — Runner Grid | Checkpoint — Quick Entry |
+|---|---|
+| ![Checkpoint runner grid](docs/guides/assets/navigates-to-checkpoint-and-sees-runner-grid-checkpoint-view-runner-grid-loaded-with-bib-numbers-200-210.png) | ![Quick entry bar](docs/guides/assets/marks-off-multiple-runners-via-quick-entry-checkpoint-view-quick-entry-bar-visible.png) |
+
+| Checkpoint — Callout Sheet | Settings Panel |
+|---|---|
+| ![Callout sheet](docs/guides/assets/switches-to-callout-sheet-tab-callout-sheet-unrecorded-runners-listed.png) | ![Settings modal](docs/guides/assets/opens-and-closes-the-settings-modal-settings-modal-panel-open-with-customisation-options.png) |
 
 ---
 
@@ -208,26 +220,31 @@ See [Deployment Guide](./docs/guides/deployment-guide.md) for detailed instructi
 
 ```
 RaceTrackers/
-├── config/              # Test configuration files
+├── config/              # Suite-specific Vitest configurations
 ├── docs/                # Documentation
-│   ├── guides/          # User and deployment guides
-│   ├── implementation/  # Technical documentation
-│   └── testing/         # Test reports and guides
-├── notes/               # Development notes and planning
+│   ├── guides/          # User guides, journey walkthroughs, PDFs
+│   └── plans/           # Local-only planning docs (gitignored)
 ├── public/              # Static assets
 ├── scripts/             # Build and utility scripts
-├── screenshots/         # Application screenshots
 ├── src/                 # Source code
-│   ├── components/      # React components
-│   ├── modules/         # Feature modules
-│   ├── services/        # Business logic
-│   ├── shared/          # Shared utilities
-│   └── store/           # State management
+│   ├── components/      # Shared React components
+│   ├── design-system/   # Design system (Button, Card, Modal, etc.)
+│   ├── modules/         # Feature modules (base-operations, checkpoint, race-maintenance)
+│   ├── services/        # Business logic and StorageService
+│   ├── shared/          # Shared utilities, DB schema, navigation store
+│   ├── store/           # Global Zustand stores (useRaceStore)
+│   ├── types/           # Constants, enums, JSDoc types
+│   ├── utils/           # Utility functions (csvImport, timeUtils, etc.)
+│   └── views/           # Top-level views (LiveDashboard, Leaderboard, etc.)
 ├── test/                # Test suites
 │   ├── base-operations/ # Base station tests
-│   ├── database/        # Database tests
-│   ├── e2e/             # End-to-end tests
-│   └── integration/     # Integration tests
+│   ├── checkpoint/      # Checkpoint module tests
+│   ├── components/      # Shared component tests
+│   ├── database/        # Database schema and migration tests
+│   ├── e2e/             # End-to-end Playwright/Puppeteer tests
+│   ├── integration/     # Cross-module integration tests
+│   ├── race-maintenance/# Race setup module tests
+│   └── services/        # Service layer tests
 └── index.html           # Entry point
 ```
 
@@ -371,7 +388,7 @@ make clear-data          # Clear all test data
 
 ### Test Coverage
 
-The project maintains **>85% test coverage** across all modules:
+The project maintains **>85% test coverage** across all modules (663+ tests):
 
 - **Unit Tests**: Component and utility testing
 - **Integration Tests**: Module interaction testing
@@ -446,7 +463,7 @@ PRs to `main` must pass two required status checks before merging:
 
 | Check | What it does |
 |-------|-------------|
-| **CI Gate** (`ci.yml`) | Runs all 546 tests split across **4 parallel shards** + build verification |
+| **CI Gate** (`ci.yml`) | Runs all 663+ tests split across **4 parallel shards** + build verification |
 | **Suites Gate** (`test-suites.yml`) | Runs `unit`, `base-operations`, `database`, `integration`, `services` suites **in parallel** |
 
 To enforce this, enable branch protection on `main` in repository Settings → Branches and add `CI Gate` and `Suites Gate` as required status checks.
@@ -474,33 +491,22 @@ VITE_API_URL=https://api.example.com  # Optional
 
 ## 📚 Documentation
 
-### User Documentation
-- 📖 [User Guide](./docs/guides/user-guide.md) - Complete user manual
-- 🎯 [Quick Start Guide](./docs/guides/quick-start.md) - Get started quickly
-- 🚀 [Deployment Guide](./docs/guides/deployment-guide.md) - Deployment instructions
+### User Guides
+- 📖 [User Guide](./docs/guides/user-guide.md) — Complete user manual
+- 🏁 [Race Day Operations](./docs/guides/race-day-operations.md) — Race day workflows and procedures
+- 🎯 [Race Director Journey](./docs/guides/journey-race-director.html) — Visual walkthrough for race directors
+- 📍 [Checkpoint Volunteer Journey](./docs/guides/journey-checkpoint-volunteer.html) — Checkpoint operator guide
+- 🏟️ [Base Station Journey](./docs/guides/journey-base-station.html) — Base station operator guide
 
-### Technical Documentation
-- 🏗️ [Solution Design](./notes/SolutionDesign.md) - Architecture and design decisions
-- 📋 [Implementation Summary](./docs/implementation/implementation-summary.md) - Feature implementation details
-- 🗄️ [Database Schema](./notes/Epic-01-Database-Foundation.md) - Database design and migrations
+### PDF Quick Reference
+- 📄 [Race Setup Guide (PDF)](./docs/guides/user-guide-setup.pdf)
+- 📄 [Checkpoint Operations (PDF)](./docs/guides/user-guide-checkpoint.pdf)
+- 📄 [Navigation Reference (PDF)](./docs/guides/user-guide-navigation.pdf)
+- 📄 [Settings Reference (PDF)](./docs/guides/user-guide-settings.pdf)
 
-### Development Documentation
-- 🧪 [Testing Guide](./docs/guides/testing-guide.md) - Testing strategies and procedures
-- 🐛 [Bug Fixes Report](./notes/BUG_FIXES_REPORT.md) - Known issues and resolutions
-- 📝 [TODO List](./notes/COMPREHENSIVE_TODO.md) - Development roadmap
-
-### Implementation Epics
-- [Epic 01: Database Foundation](./notes/Epic-01-Database-Foundation.md)
-- [Epic 02: Checkpoint Operations](./notes/Epic-02-Checkpoint-Operations.md)
-- [Epic 03: Base Station Operations](./notes/Epic-03-Base-Station-Operations.md)
-- [Epic 04: Data Import/Export](./notes/Epic-04-Data-Import-Export.md)
-- [Epic 05: PWA Deployment](./notes/Epic-05-PWA-Deployment.md)
-- [Epic 06: Race Setup & Configuration](./notes/Epic-06-Race-Setup-Configuration.md)
-- [Epic 07: Advanced Analytics](./notes/Epic-07-Advanced-Analytics.md)
-
-### Screenshots & Visual Guides
-- 📸 [Base Station Guide](./screenshots/base-station-guide/README.md) - Visual walkthrough
-- 🖼️ [All Screenshots](./screenshots/) - Application screenshots
+### Technical Reference
+- 🏗️ [App Architecture](./docs/RaceTrackerApp.md) — Architecture and design decisions
+- 📋 [Complete Journey Guide](./docs/RaceTrackerProCompleteUserJourneyGuide.md) — End-to-end race workflow
 
 ---
 
@@ -586,17 +592,14 @@ SOFTWARE.
 
 ## 🗺️ Roadmap
 
-### Current Version: v0.0.0
+### Current Version: v3.4.0
 
-### Upcoming Features
-- [ ] Real-time synchronization between devices
-- [ ] Advanced analytics and reporting
+### Possible Future Directions
+- [ ] Real-time synchronisation between devices
 - [ ] GPS tracking integration
 - [ ] Timing chip (RFID) support
 - [ ] Multi-language support
 - [ ] Mobile app versions (iOS/Android)
-
-📋 [Full Roadmap](./notes/Extended-Roadmap-Summary.md)
 
 ---
 
