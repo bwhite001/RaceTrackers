@@ -15,7 +15,7 @@ import CalloutSheet from '../components/Checkpoint/CalloutSheet';
 import RunnerOverview from '../components/Shared/RunnerOverview';
 import LoadingSpinner from '../components/Layout/LoadingSpinner';
 import ErrorMessage from '../components/Layout/ErrorMessage';
-import { ExportService } from '../services/import-export/ExportService';
+import ExportCheckpointResultsModal from '../modules/checkpoint-operations/components/ExportCheckpointResultsModal';
 
 const TABS = [
   { id: 'mark-off', label: 'Mark Off' },
@@ -27,6 +27,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const { checkpointId } = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('mark-off');
+  const [showExportModal, setShowExportModal] = useState(false);
   
   // Store hooks
   const { startOperation } = useNavigationStore();
@@ -105,21 +106,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     onExitAttempt(); // This will trigger the exit confirmation if needed
   };
 
-  const handleExportResults = async () => {
-    if (!currentRace) return;
-    try {
-      const pkg = await ExportService.exportCheckpointResults(
-        currentRace.id,
-        parseInt(checkpointId)
-      );
-      ExportService.downloadExport(
-        pkg,
-        `checkpoint-${checkpointId}-results-${Date.now()}.json`
-      );
-    } catch (err) {
-      console.error('Checkpoint export failed:', err);
-    }
-  };
+  const handleExportResults = () => setShowExportModal(true);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
@@ -202,6 +189,15 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
           <QuickEntryBar />
         </div>
       )}
+
+      <ExportCheckpointResultsModal
+        isOpen={showExportModal}
+        raceId={currentRace?.id}
+        checkpointNumber={parseInt(checkpointId)}
+        checkpointName={`Checkpoint ${checkpointId}`}
+        raceName={currentRace?.name ?? ''}
+        onClose={() => setShowExportModal(false)}
+      />
     </div>
   );
 };

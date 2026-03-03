@@ -1,16 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import useRaceMaintenanceStore from '../modules/race-maintenance/store/raceMaintenanceStore';
 import useNavigationStore, { MODULE_TYPES } from '../shared/store/navigationStore';
 import { useRaceStore } from '../store/useRaceStore.js';
 import RunnerOverview from '../components/Shared/RunnerOverview.jsx';
 import RosterImport from '../modules/race-maintenance/components/RosterImport.jsx';
+import DistributeRaceModal from '../modules/race-maintenance/components/DistributeRaceModal.jsx';
 import { Card, CardHeader, CardBody, Button } from '../design-system/components';
 
 const RaceOverview = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const raceId = searchParams.get('raceId');
+  const [showDistribute, setShowDistribute] = useState(false);
   
   const {
     currentRace: raceConfig,
@@ -288,13 +290,22 @@ const RaceOverview = () => {
                   </p>
                 </div>
               </div>
-              <Button
-                variant="primary"
-                onClick={handleGoToBaseStation}
-                className="sm:w-auto w-full"
-              >
-                Go to Base Station
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowDistribute(true)}
+                  className="sm:w-auto w-full"
+                >
+                  Distribute Race Setup
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleGoToBaseStation}
+                  className="sm:w-auto w-full"
+                >
+                  Go to Base Station
+                </Button>
+              </div>
             </div>
           </CardBody>
         </Card>
@@ -323,6 +334,13 @@ const RaceOverview = () => {
           </Card>
         </div>
       )}
+
+      <DistributeRaceModal
+        isOpen={showDistribute}
+        raceId={raceConfig?.id}
+        raceName={raceConfig?.name ?? ''}
+        onClose={() => setShowDistribute(false)}
+      />
     </div>
   );
 };

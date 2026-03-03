@@ -10,6 +10,24 @@ vi.mock('modules/base-operations/store/baseOperationsStore', () => ({
   })),
 }));
 
+vi.mock('store/useRaceStore', () => ({
+  useRaceStore: vi.fn(() => ({
+    checkpoints: [{ number: 3, name: 'CP3' }],
+  })),
+}));
+
+vi.mock('shared/services/database/schema', () => ({
+  default: {
+    imported_checkpoint_results: {
+      where: vi.fn().mockReturnValue({
+        equals: vi.fn().mockReturnValue({
+          toArray: vi.fn().mockResolvedValue([]),
+        }),
+      }),
+    },
+  },
+}));
+
 vi.mock('services/import-export/ImportService', () => ({
   ImportService: {
     importCheckpointResults: (...args) => mockImportCheckpointResults(...args),
@@ -40,9 +58,9 @@ describe('CheckpointImportPanel', () => {
     vi.clearAllMocks();
   });
 
-  it('renders "Select Checkpoint File" button', () => {
+  it('renders an import button per checkpoint', async () => {
     renderPanel();
-    expect(screen.getByRole('button', { name: /select checkpoint file/i })).toBeDefined();
+    expect(await screen.findByRole('button', { name: /import cp3/i })).toBeDefined();
   });
 
   it('shows success message after a successful import', async () => {
