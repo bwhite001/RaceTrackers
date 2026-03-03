@@ -38,7 +38,7 @@ test.describe('Heads-Up Grid (Overview Tab)', () => {
     });
 
     await step('Wait for Base Station view to load', async () => {
-      const loaded = await page.waitForURL(/base-station/, { timeout: 10000 }).catch(() => false);
+      const loaded = await page.waitForURL(/base-station/, { timeout: 10000 }).then(() => true).catch(() => false);
       if (!loaded) {
         test.skip(true, 'Base Station navigation did not occur — modal or routing may not be implemented');
         return;
@@ -46,7 +46,7 @@ test.describe('Heads-Up Grid (Overview Tab)', () => {
     });
 
     await step('Click the Overview tab', async () => {
-      const overviewTab = page.getByRole('button', { name: /overview/i }).first();
+      const overviewTab = page.getByRole('tab', { name: /overview/i }).first();
       const tabVisible = await overviewTab.isVisible({ timeout: 5000 }).catch(() => false);
       if (!tabVisible) {
         test.skip(true, 'Overview tab not found in Base Station view');
@@ -85,7 +85,7 @@ test.describe('Heads-Up Grid (Overview Tab)', () => {
       }
       await baseStationBtn.click();
       await pickFirstRaceInModal(page);
-      const loaded = await page.waitForURL(/base-station/, { timeout: 10000 }).catch(() => false);
+      const loaded = await page.waitForURL(/base-station/, { timeout: 10000 }).then(() => true).catch(() => false);
       if (!loaded) {
         test.skip(true, 'Base Station navigation did not occur');
         return;
@@ -94,7 +94,7 @@ test.describe('Heads-Up Grid (Overview Tab)', () => {
 
     await step('Submit a runner batch via Data Entry to create passed records', async () => {
       // Look for Data Entry tab
-      const dataEntryTab = page.getByRole('button', { name: /data entry/i }).first();
+      const dataEntryTab = page.getByRole('tab', { name: /data entry/i }).first();
       const tabVisible = await dataEntryTab.isVisible({ timeout: 5000 }).catch(() => false);
       if (!tabVisible) {
         test.skip(true, 'Data Entry tab not found — Base Station may not be fully loaded');
@@ -124,7 +124,7 @@ test.describe('Heads-Up Grid (Overview Tab)', () => {
     });
 
     await step('Switch to Overview tab and check for ✓ indicators', async () => {
-      const overviewTab = page.getByRole('button', { name: /overview/i }).first();
+      const overviewTab = page.getByRole('tab', { name: /overview/i }).first();
       const tabVisible = await overviewTab.isVisible({ timeout: 5000 }).catch(() => false);
       if (!tabVisible) {
         test.skip(true, 'Overview tab not found');

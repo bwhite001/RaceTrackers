@@ -329,116 +329,161 @@ export class BaseOperationsRepository extends BaseRepository {
   // ============================================================================
 
   async withdrawRunner(raceId, runnerNumber, checkpoint, reason, comments, withdrawalTime = null) {
-    try {
-      const timestamp = withdrawalTime || new Date().toISOString();
-      
-      await db.transaction('rw', db.withdrawal_records, db.base_station_runners, db.runners, async () => {
-        // Create withdrawal record
-        await db.withdrawal_records.add({
-          raceId,
-          runnerNumber,
-          checkpoint,
-          withdrawalTime: timestamp,
-          reason,
-          comments,
-          reversedAt: null,
-          reversedBy: null
-        });
+    const timestamp = withdrawalTime || new Date().toISOString();
+    const timeHHMM = timestamp.slice(11, 16);
 
-        // Update runner status
-        await this.updateRunner(raceId, checkpoint, runnerNumber, {
-          status: 'withdrawn',
-          commonTime: timestamp,
-          notes: `Withdrawn: ${reason}. ${comments || ''}`
-        });
-
-        // Log to audit trail
-        await this.logAudit(raceId, 'withdraw', 'runner', runnerNumber, {
-          checkpoint,
-          reason,
-          comments,
-          withdrawalTime: timestamp
-        });
+    await db.transaction('rw', db.withdrawal_records, db.checkpoint_runners, db.runners, async () => {
+      await db.withdrawal_records.add({
+        raceId, runnerNumber, checkpoint,
+        withdrawalTime: timestamp,
+        reason, comments,
+        reversedAt: null, reversedBy: null
       });
-    } catch (error) {
-      console.error('Error withdrawing runner:', error);
-      throw new Error('Failed to withdraw runner');
-    }
+
+      const existing = await db.checkpoint_runners
+        .where(['raceId', 'checkpointNumber', 'number'])
+        .equals([raceId, checkpoint, runnerNumber])
+        .first();
+
+      if (existing) {
+        await db.checkpoint_runners.update(existing.id, {
+          status: 'dnf',
+          markOffTime: timeHHMM,
+          callInTime: timeHHMM,
+          notes: `DNF: ${reason}. ${comments || ''}`
+        });
+      } else {
+        await db.checkpoint_runners.add({
+          raceId,
+          checkpointNumber: checkpoint,
+          number: runnerNumber,
+          status: 'dnf',
+          markOffTime: timeHHMM,
+          callInTime: timeHHMM,
+          notes: `DNF: ${reason}. ${comments || ''}`
+        });
+      }
+
+      await this.logAudit(raceId, 'withdraw', 'runner', runnerNumber, {
+        checkpoint, reason, comments, withdrawalTime: timestamp
+      });
+    });
   }
 
   async reverseWithdrawal(raceId, runnerNumber) {
-    try {
-      await db.transaction('rw', db.withdrawal_records, db.base_station_runners, async () => {
-        // Find the withdrawal record
-        const withdrawal = await db.withdrawal_records
-          .where(['raceId', 'runnerNumber'])
-          .equals([raceId, runnerNumber])
-          .and(record => record.reversedAt === null)
-          .first();
+    await db.transaction('rw', db.withdrawal_records, db.checkpoint_runners, async () => {
+      const withdrawal = await db.withdrawal_records
+        .where(['raceId', 'runnerNumber'])
+        .equals([raceId, runnerNumber])
+        .and(r => r.reversedAt === null)
+        .first();
 
-        if (!withdrawal) {
-          throw new Error('No active withdrawal found for this runner');
-        }
+      if (!withdrawal) throw new Error('No active withdrawal found for this runner');
 
-        // Mark withdrawal as reversed
-        await db.withdrawal_records.update(withdrawal.id, {
-          reversedAt: new Date().toISOString(),
-          reversedBy: 'system'
-        });
-
-        // Update runner status back to not-started
-        await this.updateRunner(raceId, withdrawal.checkpoint, runnerNumber, {
-          status: 'not-started',
-          commonTime: null,
-          notes: 'Withdrawal reversed'
-        });
-
-        // Log to audit trail
-        await this.logAudit(raceId, 'reverse-withdrawal', 'runner', runnerNumber, {
-          originalWithdrawalId: withdrawal.id
-        });
+      await db.withdrawal_records.update(withdrawal.id, {
+        reversedAt: new Date().toISOString(),
+        reversedBy: 'system'
       });
-    } catch (error) {
-      console.error('Error reversing withdrawal:', error);
-      throw new Error('Failed to reverse withdrawal');
-    }
+
+      const cpRecord = await db.checkpoint_runners
+        .where(['raceId', 'checkpointNumber', 'number'])
+        .equals([raceId, withdrawal.checkpoint, runnerNumber])
+        .first();
+
+      if (cpRecord && cpRecord.status === 'dnf') {
+        await db.checkpoint_runners.delete(cpRecord.id);
+      }
+
+      await this.logAudit(raceId, 'reverse-withdrawal', 'runner', runnerNumber, {
+        originalWithdrawalId: withdrawal.id
+      });
+    });
   }
 
   async vetOutRunner(raceId, runnerNumber, checkpoint, reason, medicalNotes, vetOutTime = null) {
-    try {
-      const timestamp = vetOutTime || new Date().toISOString();
-      
-      await db.transaction('rw', db.vet_out_records, db.base_station_runners, async () => {
-        // Create vet-out record
-        await db.vet_out_records.add({
-          raceId,
-          runnerNumber,
-          checkpoint,
-          vetOutTime: timestamp,
-          reason,
-          medicalNotes,
-          vetName: null
-        });
+    const timestamp = vetOutTime || new Date().toISOString();
+    const timeHHMM = timestamp.slice(11, 16);
 
-        // Update runner status
-        await this.updateRunner(raceId, checkpoint, runnerNumber, {
-          status: 'vet-out',
-          commonTime: timestamp,
+    await db.transaction('rw', db.vet_out_records, db.checkpoint_runners, async () => {
+      await db.vet_out_records.add({
+        raceId, runnerNumber, checkpoint,
+        vetOutTime: timestamp, reason, medicalNotes, vetName: null
+      });
+
+      const existing = await db.checkpoint_runners
+        .where(['raceId', 'checkpointNumber', 'number'])
+        .equals([raceId, checkpoint, runnerNumber])
+        .first();
+
+      if (existing) {
+        await db.checkpoint_runners.update(existing.id, {
+          status: 'dnf',
+          markOffTime: timeHHMM,
+          callInTime: timeHHMM,
           notes: `Vet Out: ${reason}. ${medicalNotes || ''}`
         });
-
-        // Log to audit trail
-        await this.logAudit(raceId, 'vet-out', 'runner', runnerNumber, {
-          checkpoint,
-          reason,
-          medicalNotes,
-          vetOutTime: timestamp
+      } else {
+        await db.checkpoint_runners.add({
+          raceId, checkpointNumber: checkpoint, number: runnerNumber,
+          status: 'dnf',
+          markOffTime: timeHHMM,
+          callInTime: timeHHMM,
+          notes: `Vet Out: ${reason}. ${medicalNotes || ''}`
         });
+      }
+
+      await this.logAudit(raceId, 'vet-out', 'runner', runnerNumber, {
+        checkpoint, reason, medicalNotes, vetOutTime: timestamp
       });
-    } catch (error) {
-      console.error('Error vetting out runner:', error);
-      throw new Error('Failed to vet out runner');
-    }
+    });
+  }
+
+  async markAsNonStarter(raceId, runnerNumber, reason = '') {
+    const checkpoints = await db.checkpoints.where('raceId').equals(raceId).toArray();
+    if (!checkpoints.length) throw new Error('No checkpoints found for race');
+
+    await db.transaction('rw', db.checkpoint_runners, db.audit_log, async () => {
+      for (const cp of checkpoints) {
+        const existing = await db.checkpoint_runners
+          .where(['raceId', 'checkpointNumber', 'number'])
+          .equals([raceId, cp.number, runnerNumber])
+          .first();
+
+        if (existing) {
+          await db.checkpoint_runners.update(existing.id, {
+            status: 'non-starter',
+            notes: reason || null
+          });
+        } else {
+          await db.checkpoint_runners.add({
+            raceId,
+            checkpointNumber: cp.number,
+            number: runnerNumber,
+            status: 'non-starter',
+            markOffTime: null,
+            callInTime: null,
+            notes: reason || null
+          });
+        }
+      }
+
+      await this.logAudit(raceId, 'dns', 'runner', runnerNumber, { reason });
+    });
+  }
+
+  async reverseNonStarter(raceId, runnerNumber) {
+    await db.transaction('rw', db.checkpoint_runners, db.audit_log, async () => {
+      const records = await db.checkpoint_runners
+        .where('raceId').equals(raceId)
+        .and(r => r.number === runnerNumber && r.status === 'non-starter')
+        .toArray();
+
+      for (const r of records) {
+        await db.checkpoint_runners.delete(r.id);
+      }
+
+      await this.logAudit(raceId, 'reverse-dns', 'runner', runnerNumber, {});
+    });
   }
 
   async getWithdrawnRunners(raceId) {

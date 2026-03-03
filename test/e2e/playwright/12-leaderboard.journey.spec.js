@@ -38,7 +38,7 @@ test.describe('Leaderboard Tab', () => {
     });
 
     await step('Wait for Base Station view to load', async () => {
-      const loaded = await page.waitForURL(/base-station/, { timeout: 10000 }).catch(() => false);
+      const loaded = await page.waitForURL(/base-station/, { timeout: 10000 }).then(() => true).catch(() => false);
       if (!loaded) {
         test.skip(true, 'Base Station navigation did not occur — modal or routing may not be implemented');
         return;
@@ -46,7 +46,7 @@ test.describe('Leaderboard Tab', () => {
     });
 
     await step('Click the Leaderboard tab', async () => {
-      const leaderboardTab = page.getByRole('button', { name: /leaderboard/i }).first();
+      const leaderboardTab = page.getByRole('tab', { name: /leaderboard/i }).first();
       const tabVisible = await leaderboardTab.isVisible({ timeout: 5000 }).catch(() => false);
       if (!tabVisible) {
         test.skip(true, 'Leaderboard tab not found in Base Station view');
@@ -86,7 +86,7 @@ test.describe('Leaderboard Tab', () => {
       }
       await baseStationBtn.click();
       await pickFirstRaceInModal(page);
-      const loaded = await page.waitForURL(/base-station/, { timeout: 10000 }).catch(() => false);
+      const loaded = await page.waitForURL(/base-station/, { timeout: 10000 }).then(() => true).catch(() => false);
       if (!loaded) {
         test.skip(true, 'Base Station navigation did not occur');
         return;
@@ -94,7 +94,7 @@ test.describe('Leaderboard Tab', () => {
     });
 
     await step('Record a DNF via the Data Entry tab or withdrawal dialog', async () => {
-      const dataEntryTab = page.getByRole('button', { name: /data entry/i }).first();
+      const dataEntryTab = page.getByRole('tab', { name: /data entry/i }).first();
       const tabVisible = await dataEntryTab.isVisible({ timeout: 5000 }).catch(() => false);
       if (!tabVisible) {
         test.skip(true, 'Data Entry tab not found — Base Station may not be fully loaded');
@@ -133,7 +133,7 @@ test.describe('Leaderboard Tab', () => {
     });
 
     await step('Switch to Leaderboard tab and check DNF section', async () => {
-      const leaderboardTab = page.getByRole('button', { name: /leaderboard/i }).first();
+      const leaderboardTab = page.getByRole('tab', { name: /leaderboard/i }).first();
       const tabVisible = await leaderboardTab.isVisible({ timeout: 5000 }).catch(() => false);
       if (!tabVisible) {
         test.skip(true, 'Leaderboard tab not found');

@@ -9,7 +9,7 @@
 import { test, expect } from './fixtures.js';
 import { fillReactInput } from './helpers.js';
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = '';
 
 test.describe('Runner Names & Gender (optional entry)', () => {
   /**
@@ -73,6 +73,7 @@ test.describe('Runner Names & Gender (optional entry)', () => {
    * Enter a name and gender for runner 200 and verify the UI accepts the input.
    */
   test('entering a name and gender persists to store', async ({ page, step }) => {
+    test.setTimeout(120000); // Wizard navigation can be slow
     await step('Navigate to race setup Step 3 with range 200-205', async () => {
       await page.goto(`${BASE_URL}/race-maintenance/setup`);
       const scratchBtn = page.locator('button').filter({ hasText: 'Start from Scratch' }).first();

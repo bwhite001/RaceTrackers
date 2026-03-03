@@ -11,6 +11,8 @@ describe('Base Operations Store', () => {
     await db.races.clear();
     await db.runners.clear();
     await db.base_station_runners.clear();
+    await db.checkpoints.clear();
+    await db.checkpoint_runners.clear();
   });
 
   afterEach(() => {
@@ -70,6 +72,8 @@ describe('Base Operations Store', () => {
   describe('Runner Management', () => {
     const setupTestRace = async () => {
       const raceId = await seedRace(1, 5);
+      // Seed a checkpoint so markAsNonStarter can write DNS records
+      await db.checkpoints.add({ raceId, number: 1, name: 'Start' });
       await useBaseOperationsStore.getState().initialize(raceId);
       return raceId;
     };
@@ -111,13 +115,16 @@ describe('Base Operations Store', () => {
     });
 
     test('marks runners as DNS', async () => {
-      await setupTestRace();
+      const raceId = await setupTestRace();
       await useBaseOperationsStore.getState().markAsDNS([1, 2], 'Test reason');
 
-      const dnsRunners = useBaseOperationsStore.getState().runners.filter(r => [1, 2].includes(r.number));
-      expect(dnsRunners).toHaveLength(2);
-      dnsRunners.forEach(runner => {
-        expect(runner.status).toBe(RUNNER_STATUSES.DNS);
+      const cpRecords = await db.checkpoint_runners
+        .where('raceId').equals(raceId)
+        .and(r => [1, 2].includes(r.number))
+        .toArray();
+      expect(cpRecords).toHaveLength(2);
+      cpRecords.forEach(r => {
+        expect(r.status).toBe(RUNNER_STATUSES.DNS);
       });
     });
   });

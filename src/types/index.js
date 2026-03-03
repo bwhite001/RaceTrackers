@@ -10,7 +10,6 @@ export const RUNNER_STATUSES = {
   NON_STARTER: 'non-starter',
   DNF: 'dnf', // Did Not Finish
   DNS: 'non-starter', // Did Not Start — aligns with DB value 'non-starter'
-  WITHDRAWN: 'withdrawn',
   DISQUALIFIED: 'disqualified',
   // Legacy aliases
   ACTIVE: 'active',
@@ -35,8 +34,7 @@ export const FILTER_STATUSES = {
   ACTIVE: 'active',
   FINISHED: 'finished',
   DNF: 'dnf',
-  DNS: 'dns',
-  WITHDRAWN: 'withdrawn'
+  DNS: 'dns'
 };
 
 /**
@@ -143,7 +141,6 @@ export const STATUS_COLORS = {
   [RUNNER_STATUSES.FINISHED]: 'green',
   [RUNNER_STATUSES.DNF]: 'red',
   [RUNNER_STATUSES.DNS]: 'yellow',
-  [RUNNER_STATUSES.WITHDRAWN]: 'orange',
   [RUNNER_STATUSES.DISQUALIFIED]: 'purple'
 };
 
@@ -153,7 +150,6 @@ export const STATUS_LABELS = {
   [RUNNER_STATUSES.FINISHED]: 'Finished',
   [RUNNER_STATUSES.DNF]: 'DNF',
   [RUNNER_STATUSES.DNS]: 'DNS',
-  [RUNNER_STATUSES.WITHDRAWN]: 'Withdrawn',
   [RUNNER_STATUSES.DISQUALIFIED]: 'Disqualified'
 };
 

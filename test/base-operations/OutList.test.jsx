@@ -19,7 +19,7 @@ describe('OutList', () => {
     {
       id: 1,
       number: 101,
-      status: 'withdrawn',
+      status: 'dnf',
       withdrawalDetails: {
         withdrawalTime: '2024-01-01T10:00:00Z',
         reason: 'Personal Emergency',
@@ -39,7 +39,7 @@ describe('OutList', () => {
     {
       id: 3,
       number: 103,
-      status: 'dnf',
+      status: 'non-starter',
       recordedTime: '2024-01-01T12:00:00Z',
       notes: 'Did not reach checkpoint in time'
     }
@@ -73,7 +73,7 @@ describe('OutList', () => {
   it('shows status summary cards', () => {
     render(<OutList />);
 
-    // Summary cards show counts — 1 withdrawn, 1 vet-out, 1 dnf, 0 non-starter
+    // Summary cards show counts — 1 dnf, 1 vet-out, 1 non-starter
     const ones = screen.getAllByText('1');
     expect(ones.length).toBeGreaterThanOrEqual(3); // at least 3 cards showing "1"
   });
@@ -81,12 +81,12 @@ describe('OutList', () => {
   it('filters by status', () => {
     render(<OutList />);
 
-    // Select withdrawn status
+    // Select dnf status
     fireEvent.change(screen.getByRole('combobox'), {
-      target: { value: 'withdrawn' }
+      target: { value: 'dnf' }
     });
 
-    // Should only show withdrawn runner
+    // Should only show dnf runner
     expect(screen.getByText('101')).toBeInTheDocument();
     expect(screen.queryByText('102')).not.toBeInTheDocument();
     expect(screen.queryByText('103')).not.toBeInTheDocument();
@@ -169,7 +169,6 @@ describe('OutList', () => {
   it('displays correct status badges', () => {
     render(<OutList />);
 
-    expect(screen.getByText('WITHDRAWN')).toHaveClass('bg-yellow-100');
     expect(screen.getByText('VET OUT')).toHaveClass('bg-orange-100');
     // "DNF" appears in both the summary card label and the row badge
     const dnfElements = screen.getAllByText('DNF');
@@ -213,9 +212,9 @@ describe('OutList', () => {
   it('shows correct filtered count', () => {
     render(<OutList />);
 
-    // Filter to withdrawn only
+    // Filter to dnf only
     fireEvent.change(screen.getByRole('combobox'), {
-      target: { value: 'withdrawn' }
+      target: { value: 'dnf' }
     });
 
     expect(screen.getByText('Showing 1 of 3 runners')).toBeInTheDocument();
@@ -226,13 +225,13 @@ describe('OutList', () => {
 
     // Set filter
     fireEvent.change(screen.getByRole('combobox'), {
-      target: { value: 'withdrawn' }
+      target: { value: 'dnf' }
     });
 
     // Refresh
     fireEvent.click(screen.getByTitle('Refresh list'));
 
-    // Should still show only withdrawn runner
+    // Should still show only dnf runner
     expect(screen.getByText('101')).toBeInTheDocument();
     expect(screen.queryByText('102')).not.toBeInTheDocument();
     expect(screen.queryByText('103')).not.toBeInTheDocument();

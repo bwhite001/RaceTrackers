@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 8,
+  "raceConfig": {
+    "name": "Test Race",
+    "date": "2025-06-15",
+    "startTime": "07:00",
+    "minRunner": 100,
+    "maxRunner": 110,
+    "runnerRanges": [
+      {
+        "min": 100,
+        "max": 110,
+        "description": "Runners 100-110",
+        "count": 11,
+        "individualNumbers": [
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110
+        ]
+      }
+    ],
+    "checkpoints": [
+      {
+        "number": 1,
+        "name": "Checkpoint 1"
+      },
+      {
+        "number": 2,
+        "name": "Checkpoint 2"
+      }
+    ]
+  },
+  "batches": [
+    {
+      "batchNumber": 1,
+      "batchName": "All Runners",
+      "startTime": "2025-06-15T07:00:00"
+    }
+  ],
+  "runners": [
+    {
+      "number": 100,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 101,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 102,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 103,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 104,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 105,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 106,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 107,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 108,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 109,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 110,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    }
+  ],
+  "checkpointRunners": [],
+  "exportedAt": "2026-03-02T13:02:15.919Z",
+  "version": "3.0.0",
+  "exportType": "full-race-data"
+}

@@ -11,7 +11,7 @@ const StatusCell = ({ status }) => {
   if (status === RUNNER_STATUSES.PASSED || status === RUNNER_STATUSES.MARKED_OFF || status === RUNNER_STATUSES.CALLED_IN) {
     return <span className="text-green-600 dark:text-green-400 font-bold text-sm" aria-label="passed">✓</span>;
   }
-  if (status === RUNNER_STATUSES.DNF || status === RUNNER_STATUSES.DNS || status === RUNNER_STATUSES.WITHDRAWN) {
+  if (status === RUNNER_STATUSES.DNF || status === RUNNER_STATUSES.DNS) {
     return <span className="text-red-500 dark:text-red-400 font-bold text-sm" aria-label="dnf">✗</span>;
   }
   return <span className="text-yellow-500 text-xs" aria-label={status}>?</span>;
@@ -146,7 +146,6 @@ const OverallStatusBadge = ({ status }) => {
     [RUNNER_STATUSES.PASSED]: { label: 'Passed', cls: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' },
     [RUNNER_STATUSES.DNF]: { label: 'DNF', cls: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' },
     [RUNNER_STATUSES.DNS]: { label: 'DNS', cls: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400' },
-    [RUNNER_STATUSES.WITHDRAWN]: { label: 'WD', cls: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' },
     [RUNNER_STATUSES.NON_STARTER]: { label: 'Non-Starter', cls: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400' },
   };
   const entry = map[status] ?? { label: status ?? '—', cls: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400' };

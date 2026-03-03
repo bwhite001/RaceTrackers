@@ -72,7 +72,6 @@ const OutList = () => {
 
   // Count by status
   const statusCounts = {
-    withdrawn: outList.filter(r => r.status === 'withdrawn').length,
     'vet-out': outList.filter(r => r.status === 'vet-out').length,
     dnf: outList.filter(r => r.status === 'dnf').length,
     'non-starter': outList.filter(r => r.status === 'non-starter').length
@@ -80,8 +79,6 @@ const OutList = () => {
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
-      case 'withdrawn':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200';
       case 'vet-out':
         return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-200';
       case 'dnf':
@@ -95,12 +92,6 @@ const OutList = () => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'withdrawn':
-        return (
-          <svg role="img" aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd" />
-          </svg>
-        );
       case 'vet-out':
         return (
           <svg role="img" aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -149,11 +140,7 @@ const OutList = () => {
       </div>
 
       {/* Status Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-          <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">Withdrawn</p>
-          <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{statusCounts.withdrawn}</p>
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
           <p className="text-sm font-medium text-orange-900 dark:text-orange-100">Vet Out</p>
           <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{statusCounts['vet-out']}</p>
@@ -185,7 +172,6 @@ const OutList = () => {
           className="form-input"
         >
           <option value="all">All Status ({outList.length})</option>
-          <option value="withdrawn">Withdrawn ({statusCounts.withdrawn})</option>
           <option value="vet-out">Vet Out ({statusCounts['vet-out']})</option>
           <option value="dnf">DNF ({statusCounts.dnf})</option>
           <option value="non-starter">Non-Starter ({statusCounts['non-starter']})</option>

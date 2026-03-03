@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { RUNNER_STATUSES, BASE_STATION_CP } from '../../../types';
 import db from '../../../shared/services/database/schema.js';
 import StorageService from '../../../services/storage.js';
-import BaseOperationsRepository from '../services/BaseOperationsRepository';
+import { BaseOperationsRepository } from '../services/BaseOperationsRepository';
 
 /**
  * Base Operations Store
@@ -206,10 +206,13 @@ const useBaseOperationsStore = create(
       },
 
       markAsDNS: async (runnerNumbers, reason = '') => {
-        await get().bulkUpdateRunners(runnerNumbers, {
-          status: RUNNER_STATUSES.DNS,
-          dnsReason: reason
-        });
+        const { currentRaceId } = get();
+        if (!currentRaceId) throw new Error('No active race');
+        const repo = new BaseOperationsRepository();
+        for (const num of runnerNumbers) {
+          await repo.markAsNonStarter(currentRaceId, Number(num), reason);
+        }
+        await get().refreshData();
       },
 
       // Actions - UI State

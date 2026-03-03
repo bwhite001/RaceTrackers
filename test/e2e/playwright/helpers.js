@@ -23,9 +23,9 @@ export async function fillReactInput(page, selector, value) {
  */
 export async function goHome(page) {
   await page.goto(BASE_URL);
-  // LandingPage starts with isLoading=true (spinner shown) until getAllRaces resolves.
-  // Use a longer timeout to accommodate the initial IndexedDB query.
-  await page.waitForSelector('h1:has-text("Race Tracker Pro")', { timeout: 30000 });
+  // LandingPage starts with isLoading=true (skeleton cards shown) until getAllRaces resolves.
+  // Wait for the module cards to appear (not just the heading, which is visible during loading too).
+  await page.waitForSelector('button:has-text("Base Station")', { timeout: 30000 });
 }
 
 /**

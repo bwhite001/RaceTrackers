@@ -155,7 +155,6 @@ function LiveDashboardView() {
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       runner.status === 'passed' ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' :
                       runner.status === 'dnf' ? 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300' :
-                      runner.status === 'withdrawn' ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300' :
                       'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                     }`}>
                       {runner.status || 'not-started'}

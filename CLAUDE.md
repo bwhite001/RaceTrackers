@@ -90,9 +90,9 @@ All routes must be wrapped in `<ProtectedRoute moduleType={MODULE_TYPES.X}>` (se
 Components → Zustand stores → StorageService → Dexie/IndexedDB
 ```
 
-`src/services/storage.js` (858 lines) is the **only** place for database operations. Never access Dexie directly from components or stores — go through `StorageService`.
+`src/services/storage.js` is the primary place for database operations. **Exception:** The base-operations module uses `BaseOperationsRepository.js` which accesses Dexie directly — this is intentional for isolation of the base station's complex audit/withdrawal logic.
 
-### Database Schema (Dexie v6)
+### Database Schema (Dexie v8)
 
 All runner tables use compound indexes that must be queried in exact order:
 
@@ -106,6 +106,8 @@ await db.checkpoint_runners
 
 Schema changes require `.version(N).stores({...})`. Provide an `.upgrade()` callback for data migrations — Dexie does not auto-migrate.
 
+**v8 schema highlights:** Runners have `firstName/lastName/gender/batchNumber` fields. Checkpoint runners have a 3-time model: `actualTime/commonTime/commonTimeLabel/calledIn`. Base station runners have `markOffEntryTime`. New tables: `race_batches`, `imported_checkpoint_results`.
+
 ### Runner Range System
 
 `runnerRanges` is a one-way transformation: `StorageService.saveRace()` expands `{min, max}` ranges into individual runner records at creation time. Never recompute ranges from runner numbers after creation.
@@ -115,14 +117,15 @@ Schema changes require `.version(N).stores({...})`. Provide an `.upgrade()` call
 - `src/App.jsx` — route definitions and ProtectedRoute patterns
 - `src/store/useRaceStore.js` — primary state store (read carefully before modifying)
 - `src/services/storage.js` — all database operations via StorageService
-- `src/shared/services/database/schema.js` — Dexie schema v6 and migration history
+- `src/shared/services/database/schema.js` — Dexie schema v8 and migration history
 - `src/shared/store/navigationStore.js` — operation lock enforcement
 - `src/types/index.js` — constants, enums, JSDoc type definitions (`BASE_STATION_CP`, `RUNNER_STATUSES`, etc.)
 - `src/modules/base-operations/views/BaseStationView.jsx` — base station entry view
 - `src/modules/base-operations/store/baseOperationsStore.js` — base station Zustand store (uses Dexie)
 - `src/modules/base-operations/services/BaseOperationsRepository.js` — base station DB queries
 - `vite.config.js` — PWA config and service worker caching strategy
-- `docs/` — Epic specs (01–07), gap analysis, guides
+- `docs/guides/` — User guides, journey walkthroughs (HTML/PDF), race day operations
+- `docs/RaceTrackerApp.md` — Architecture and design reference
 
 ## Testing Patterns
 
