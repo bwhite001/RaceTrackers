@@ -213,6 +213,13 @@
     @apply text-lg font-semibold;
   }
 
+  /* Checkpoint runner grid — auto-fill columns, thumb-sized cells */
+  .runner-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 0.5rem;
+  }
+
   /* Runner status badge styles */
   .status-badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
