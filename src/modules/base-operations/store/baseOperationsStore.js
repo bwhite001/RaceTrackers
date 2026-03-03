@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { RUNNER_STATUSES, BASE_STATION_CP } from '../../../types';
+import { RUNNER_STATUSES } from '../../../types';
 import db from '../../../shared/services/database/schema.js';
 import StorageService from '../../../services/storage.js';
 import { BaseOperationsRepository } from '../services/BaseOperationsRepository';
@@ -15,8 +15,8 @@ const useBaseOperationsStore = create(
       // State
       currentRaceId: null,
       currentRace: null,
-      checkpointNumber: BASE_STATION_CP,
       runners: [],
+      sessionBatches: [],
       loading: false,
       error: null,
       lastSync: null,
@@ -80,7 +80,7 @@ const useBaseOperationsStore = create(
 
       loadRunners: async (raceId) => {
         try {
-          return await StorageService.getBaseStationRunners(raceId, get().checkpointNumber);
+          return await StorageService.getCheckpointRunners(raceId);
         } catch (error) {
           console.error('Failed to load runners:', error);
           return [];
@@ -88,9 +88,7 @@ const useBaseOperationsStore = create(
       },
 
       initializeRunners: async (raceId) => {
-        const checkpointNumber = get().checkpointNumber;
-        await StorageService.initializeBaseStationRunners(raceId, checkpointNumber);
-        return await StorageService.getBaseStationRunners(raceId, checkpointNumber);
+        return await StorageService.getCheckpointRunners(raceId);
       },
 
       refreshData: async () => {
@@ -117,7 +115,7 @@ const useBaseOperationsStore = create(
 
       // Actions - Runner Management
       updateRunner: async (runnerNumber, updates) => {
-        const { currentRaceId, checkpointNumber } = get();
+        const { currentRaceId } = get();
         if (!currentRaceId) {
           const err = new Error('No active race');
           set({ error: err.message, loading: false });
@@ -127,7 +125,7 @@ const useBaseOperationsStore = create(
         try {
           set({ loading: true, error: null });
           await StorageService.updateBaseStationRunner(
-            currentRaceId, checkpointNumber, Number(runnerNumber), updates
+            currentRaceId, 0, Number(runnerNumber), updates
           );
           await get().refreshData();
         } catch (error) {
@@ -137,14 +135,14 @@ const useBaseOperationsStore = create(
       },
 
       bulkUpdateRunners: async (runnerNumbers, updates) => {
-        const { currentRaceId, checkpointNumber } = get();
+        const { currentRaceId } = get();
         if (!currentRaceId) throw new Error('No active race');
 
         try {
           set({ loading: true, error: null });
           for (const num of runnerNumbers) {
             await StorageService.updateBaseStationRunner(
-              currentRaceId, checkpointNumber, Number(num), updates
+              currentRaceId, 0, Number(num), updates
             );
           }
           await get().refreshData();
@@ -156,18 +154,16 @@ const useBaseOperationsStore = create(
 
       // Primary entry point for DataEntry and WithdrawalDialog
       bulkMarkRunners: async (runnerNumbers, timeOrOptions) => {
-        const { currentRaceId, checkpointNumber } = get();
+        const { currentRaceId } = get();
         if (!currentRaceId) throw new Error('No active race');
 
         let updates;
         if (typeof timeOrOptions === 'string') {
-          // Called from DataEntry: bulkMarkRunners(numbers, "HH:mm:ss")
           updates = {
             status: RUNNER_STATUSES.FINISHED,
             commonTime: timeOrOptions,
           };
         } else {
-          // Called from WithdrawalDialog: bulkMarkRunners(numbers, { status, reason, timestamp })
           updates = {
             status: timeOrOptions.status,
             notes: timeOrOptions.reason || null,
@@ -179,7 +175,7 @@ const useBaseOperationsStore = create(
           set({ loading: true, error: null });
           for (const num of runnerNumbers) {
             await StorageService.updateBaseStationRunner(
-              currentRaceId, checkpointNumber, Number(num), updates
+              currentRaceId, 0, Number(num), updates
             );
           }
           await get().refreshData();
@@ -307,24 +303,58 @@ const useBaseOperationsStore = create(
 
       // Utilities
       calculateStats: (runners) => {
-        return runners.reduce(
-          (stats, runner) => {
-            stats.total++;
+        const { currentRace } = get();
+        const total = currentRace ? (currentRace.maxRunner - currentRace.minRunner + 1) : 0;
+        const byNumber = new Map();
+        for (const runner of runners) {
+          const existing = byNumber.get(runner.number);
+          if (!existing || runner.checkpointNumber > existing.checkpointNumber) {
+            byNumber.set(runner.number, runner);
+          }
+        }
+        const counts = Array.from(byNumber.values()).reduce(
+          (acc, runner) => {
             const s = runner.status;
-            // Accept both new canonical values and legacy values for transition period
-            if (s === RUNNER_STATUSES.FINISHED || s === RUNNER_STATUSES.PASSED || s === 'finished') {
-              stats.finished++;
-            } else if (s === RUNNER_STATUSES.DNF) {
-              stats.dnf++;
-            } else if (s === RUNNER_STATUSES.DNS || s === RUNNER_STATUSES.NON_STARTER || s === 'dns') {
-              stats.dns++;
-            } else {
-              stats.active++;
-            }
-            return stats;
+            if (s === RUNNER_STATUSES.FINISHED || s === RUNNER_STATUSES.PASSED || s === 'finished') acc.finished++;
+            else if (s === RUNNER_STATUSES.DNF) acc.dnf++;
+            else if (s === RUNNER_STATUSES.DNS || s === RUNNER_STATUSES.NON_STARTER || s === 'dns') acc.dns++;
+            else acc.active++;
+            return acc;
           },
-          { total: 0, finished: 0, active: 0, dnf: 0, dns: 0 }
+          { finished: 0, active: 0, dnf: 0, dns: 0 }
         );
+        return { total, ...counts };
+      },
+
+      submitRadioBatch: async (runnerNumbers, time, checkpointNumber) => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) throw new Error('No active race');
+        if (checkpointNumber === undefined || checkpointNumber === null) throw new Error('checkpointNumber is required');
+        try {
+          set({ loading: true, error: null });
+          for (const num of runnerNumbers) {
+            await StorageService.updateCheckpointRunner(
+              currentRaceId, checkpointNumber, Number(num),
+              { status: RUNNER_STATUSES.PASSED, markOffTime: time, callInTime: time }
+            );
+          }
+          const newBatch = {
+            id: `batch-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            checkpointNumber, commonTime: time, bibs: [...runnerNumbers],
+            submittedAt: new Date().toISOString(), voided: false,
+          };
+          set(state => ({ sessionBatches: [newBatch, ...state.sessionBatches] }));
+          await get().refreshData();
+        } catch (error) {
+          set({ error: error.message, loading: false });
+          throw error;
+        }
+      },
+
+      voidSessionBatch: (batchId) => {
+        set(state => ({
+          sessionBatches: state.sessionBatches.map(b => b.id === batchId ? { ...b, voided: true } : b)
+        }));
       },
 
       // Reset store
@@ -332,8 +362,8 @@ const useBaseOperationsStore = create(
         set({
           currentRaceId: null,
           currentRace: null,
-          checkpointNumber: BASE_STATION_CP,
           runners: [],
+          sessionBatches: [],
           loading: false,
           error: null,
           lastSync: null,
