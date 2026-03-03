@@ -17,7 +17,7 @@ vi.mock('shared/services/database/schema', () => ({
   },
 }));
 
-import CheckpointGroupingView from 'components/BaseStation/CheckpointGroupingView.jsx';
+import CheckpointGroupingView from 'modules/base-operations/components/CheckpointGroupingView.jsx';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

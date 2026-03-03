@@ -3,7 +3,7 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format } from 'date-fns';
-import DataEntry from '../../src/components/BaseStation/DataEntry';
+import DataEntry from '../../src/modules/base-operations/components/DataEntry';
 import useBaseOperationsStore from '../../src/modules/base-operations/store/baseOperationsStore';
 import { HOTKEYS } from '../../src/types';
 

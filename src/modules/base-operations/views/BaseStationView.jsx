@@ -1,30 +1,30 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowDownTrayIcon, ArrowUpTrayIcon, ChartBarIcon } from '@heroicons/react/24/outline';
-import { withOperationExit } from '../shared/components/ExitOperationModal';
-import HotkeysProvider from '../shared/components/HotkeysProvider';
-import useNavigationStore, { MODULE_TYPES } from '../shared/store/navigationStore';
-import useBaseOperationsStore from '../modules/base-operations/store/baseOperationsStore';
-import { useRaceStore } from '../store/useRaceStore.js';
-import useSettingsStore from '../shared/store/settingsStore';
-import { HOTKEYS } from '../types';
-import PageHeader from '../shared/components/PageHeader';
-import ImportExportModal from '../components/ImportExport/ImportExportModal';
+import { withOperationExit } from '../../../shared/components/ExitOperationModal';
+import HotkeysProvider from '../../../shared/components/HotkeysProvider';
+import useNavigationStore, { MODULE_TYPES } from '../../../shared/store/navigationStore';
+import useBaseOperationsStore from '../store/baseOperationsStore';
+import { useRaceStore } from '../../../store/useRaceStore.js';
+import useSettingsStore from '../../../shared/store/settingsStore';
+import { HOTKEYS } from '../../../types';
+import PageHeader from '../../../shared/components/PageHeader';
+import ImportExportModal from '../../../components/ImportExport/ImportExportModal';
 
 // Components
-import DataEntry from '../components/BaseStation/DataEntry';
-import RaceOverview from '../components/BaseStation/RaceOverview';
-import ReportsPanel from '../components/BaseStation/ReportsPanel';
-import WithdrawalDialog from '../components/BaseStation/WithdrawalDialog';
-import CheckpointImportPanel from '../components/BaseStation/CheckpointImportPanel';
-import CheckpointGroupingView from '../components/BaseStation/CheckpointGroupingView';
-import LoadingSpinner from '../components/Layout/LoadingSpinner';
-import ErrorMessage from '../components/Layout/ErrorMessage';
-import StatusStrip from '../components/Layout/StatusStrip';
-import SettingsModal from '../components/Settings/SettingsModal';
-import HelpDialog from '../modules/base-operations/components/HelpDialog';
-import HeadsUpGrid from '../modules/base-operations/components/HeadsUpGrid';
-import Leaderboard from '../modules/base-operations/components/Leaderboard';
+import DataEntry from '../components/DataEntry';
+import RaceOverview from '../components/RaceOverview';
+import ReportsPanel from '../components/ReportsPanel';
+import WithdrawalDialog from '../components/WithdrawalDialog';
+import CheckpointImportPanel from '../components/CheckpointImportPanel';
+import CheckpointGroupingView from '../components/CheckpointGroupingView';
+import LoadingSpinner from '../../../components/Layout/LoadingSpinner';
+import ErrorMessage from '../../../components/Layout/ErrorMessage';
+import StatusStrip from '../../../components/Layout/StatusStrip';
+import SettingsModal from '../../../components/Settings/SettingsModal';
+import HelpDialog from '../components/HelpDialog';
+import HeadsUpGrid from '../components/HeadsUpGrid';
+import Leaderboard from '../components/Leaderboard';
 
 const TABS = [
   { id: 'data-entry', label: 'Data Entry' },
@@ -42,7 +42,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const navigate = useNavigate();
 
   // Store access
-  const { currentRaceId, loading, error, stats, runners, initialize, refreshData } = useBaseOperationsStore();
+  const { currentRaceId, currentRace, loading, error, stats, runners, initialize, refreshData } = useBaseOperationsStore();
   const { selectedRaceForMode, checkpoints } = useRaceStore();
   const { darkMode } = useSettingsStore();
   const initStarted = useRef(false);
@@ -133,7 +133,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         {/* Unified page header */}
         <PageHeader
           variant="operational"
-          title={selectedRaceForMode?.name ?? 'Base Station Operations'}
+          title={currentRace?.name ?? 'Base Station Operations'}
           moduleType={MODULE_TYPES.BASE_STATION}
           actions={[
             { icon: <ArrowUpTrayIcon className="w-5 h-5" />, label: 'Import / Export', onClick: () => setShowImportExport(true) },

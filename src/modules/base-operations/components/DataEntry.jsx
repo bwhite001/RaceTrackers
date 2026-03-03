@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { format } from 'date-fns';
-import useBaseOperationsStore from '../../modules/base-operations/store/baseOperationsStore';
-import { parseRunnerNumbers, formatRunnerNumber } from '../../utils/runnerNumberUtils';
-import { HOTKEYS } from '../../types';
-import useDeviceDetection from '../../shared/hooks/useDeviceDetection';
+import useBaseOperationsStore from '../store/baseOperationsStore';
+import { parseRunnerNumbers, formatRunnerNumber } from '../../../utils/runnerNumberUtils';
+import { HOTKEYS } from '../../../types';
+import useDeviceDetection from '../../../shared/hooks/useDeviceDetection';
 
 /**
  * DataEntry Component

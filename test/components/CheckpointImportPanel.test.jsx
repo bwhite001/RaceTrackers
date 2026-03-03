@@ -34,7 +34,7 @@ vi.mock('services/import-export/ImportService', () => ({
   },
 }));
 
-import CheckpointImportPanel from 'components/BaseStation/CheckpointImportPanel.jsx';
+import CheckpointImportPanel from 'modules/base-operations/components/CheckpointImportPanel.jsx';
 
 function renderPanel() {
   return render(<CheckpointImportPanel />);

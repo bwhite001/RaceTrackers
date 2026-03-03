@@ -1,16 +1,18 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import useBaseOperationsStore from '../../modules/base-operations/store/baseOperationsStore';
-import useDeviceDetection from '../../shared/hooks/useDeviceDetection';
-import { RUNNER_STATUSES, STATUS_LABELS } from '../../types';
-import { formatRunnerNumber } from '../../utils/runnerNumberUtils';
+import useBaseOperationsStore from '../store/baseOperationsStore';
+import useDeviceDetection from '../../../shared/hooks/useDeviceDetection';
+import { RUNNER_STATUSES, STATUS_LABELS } from '../../../types';
+import { formatRunnerNumber } from '../../../utils/runnerNumberUtils';
 
 // Static status colour classes (Tailwind JIT requires static strings)
 const STATUS_CLASS_MAP = {
-  active:    { badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-200',   accent: 'border-t-blue-500' },
-  finished:  { badge: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200', accent: 'border-t-green-500' },
-  dnf:       { badge: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200',       accent: 'border-t-red-500' },
-  dns:       { badge: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200', accent: 'border-t-yellow-500' },
-  total:     { badge: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200',      accent: 'border-t-navy-500' },
+  active:         { badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-200',   accent: 'border-t-blue-500' },
+  finished:       { badge: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200', accent: 'border-t-green-500' },
+  passed:         { badge: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200', accent: 'border-t-green-500' },
+  dnf:            { badge: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200',       accent: 'border-t-red-500' },
+  dns:            { badge: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200', accent: 'border-t-yellow-500' },
+  'non-starter':  { badge: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200', accent: 'border-t-yellow-500' },
+  total:          { badge: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200',      accent: 'border-t-navy-500' },
 };
 
 const STAT_LABELS = {

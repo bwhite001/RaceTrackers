@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { RUNNER_STATUSES } from '../../../types';
+import { RUNNER_STATUSES, BASE_STATION_CP } from '../../../types';
 import db from '../../../shared/services/database/schema.js';
 import StorageService from '../../../services/storage.js';
 import BaseOperationsRepository from '../services/BaseOperationsRepository';
@@ -14,7 +14,8 @@ const useBaseOperationsStore = create(
     (set, get) => ({
       // State
       currentRaceId: null,
-      checkpointNumber: 1,
+      currentRace: null,
+      checkpointNumber: BASE_STATION_CP,
       runners: [],
       loading: false,
       error: null,
@@ -54,6 +55,7 @@ const useBaseOperationsStore = create(
 
           set({
             currentRaceId: raceId,
+            currentRace: raceConfig,
             loading: false,
             lastSync: new Date().toISOString()
           });
@@ -305,18 +307,16 @@ const useBaseOperationsStore = create(
         return runners.reduce(
           (stats, runner) => {
             stats.total++;
-            switch (runner.status) {
-              case RUNNER_STATUSES.FINISHED:
-                stats.finished++;
-                break;
-              case RUNNER_STATUSES.DNF:
-                stats.dnf++;
-                break;
-              case RUNNER_STATUSES.DNS:
-                stats.dns++;
-                break;
-              default:
-                stats.active++;
+            const s = runner.status;
+            // Accept both new canonical values and legacy values for transition period
+            if (s === RUNNER_STATUSES.FINISHED || s === RUNNER_STATUSES.PASSED || s === 'finished') {
+              stats.finished++;
+            } else if (s === RUNNER_STATUSES.DNF) {
+              stats.dnf++;
+            } else if (s === RUNNER_STATUSES.DNS || s === RUNNER_STATUSES.NON_STARTER || s === 'dns') {
+              stats.dns++;
+            } else {
+              stats.active++;
             }
             return stats;
           },
@@ -328,7 +328,8 @@ const useBaseOperationsStore = create(
       reset: () => {
         set({
           currentRaceId: null,
-          checkpointNumber: 1,
+          currentRace: null,
+          checkpointNumber: BASE_STATION_CP,
           runners: [],
           loading: false,
           error: null,
@@ -351,9 +352,8 @@ const useBaseOperationsStore = create(
     }),
     {
       name: 'base-operations-storage',
+      // Only persist UI preferences — never race data (causes stale state across sessions)
       partialize: (state) => ({
-        currentRaceId: state.currentRaceId,
-        checkpointNumber: state.checkpointNumber,
         sortOrder: state.sortOrder,
         filterStatus: state.filterStatus
       })

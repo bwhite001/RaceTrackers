@@ -1,5 +1,6 @@
 import { BaseRepository } from '../../../shared/services/database/BaseRepository';
 import db from '../../../shared/services/database/schema';
+import { BASE_STATION_CP } from '../../../types/index.js';
 
 export class BaseOperationsRepository extends BaseRepository {
   constructor() {
@@ -10,8 +11,11 @@ export class BaseOperationsRepository extends BaseRepository {
     try {
       if (checkpointNumber !== null) {
         return await this.table
-          .where(['raceId', 'checkpointNumber'])
-          .equals([raceId, checkpointNumber])
+          .where('[raceId+checkpointNumber+number]')
+          .between(
+            [raceId, checkpointNumber, -Infinity],
+            [raceId, checkpointNumber, Infinity]
+          )
           .toArray();
       }
       return await this.table.where('raceId').equals(raceId).toArray();
@@ -21,7 +25,7 @@ export class BaseOperationsRepository extends BaseRepository {
     }
   }
 
-  async initializeBaseStation(raceId, checkpointNumber = 1) {
+  async initializeBaseStation(raceId, checkpointNumber = BASE_STATION_CP) {
     try {
       // Get all race runners and create base station-specific entries
       const raceRunners = await db.runners.where('raceId').equals(raceId).toArray();

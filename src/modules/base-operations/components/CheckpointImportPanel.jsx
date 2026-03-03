@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ImportService } from '../../services/import-export/ImportService';
-import useBaseOperationsStore from '../../modules/base-operations/store/baseOperationsStore';
-import { useRaceStore } from '../../store/useRaceStore';
-import db from '../../shared/services/database/schema';
+import { ImportService } from '../../../services/import-export/ImportService';
+import useBaseOperationsStore from '../store/baseOperationsStore';
+import { useRaceStore } from '../../../store/useRaceStore';
+import db from '../../../shared/services/database/schema';
 
 /**
  * CheckpointImportPanel

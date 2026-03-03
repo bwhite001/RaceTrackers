@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ReportBuilder from '../../src/components/BaseStation/ReportBuilder';
+import ReportBuilder from '../../src/modules/base-operations/components/ReportBuilder';
 import { REPORT_TYPES, REPORT_FORMATS, REPORT_TEMPLATES } from '../../src/utils/reportUtils';
 
 describe('ReportBuilder', () => {
