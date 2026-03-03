@@ -344,21 +344,17 @@ Steps for the base station operator. Record finish times, mark DNF/DNS runners, 
 
 A base station operator opens the app, taps "Base Station Operations", selects their race, and lands on the data entry screen. This test confirms the form for entering finish times and runner bib numbers is ready to use.
 
-### Enters a common time and runner batch, then verifies in overview
+### Selects a checkpoint and records a radio batch
 
-The most common base station task: the operator types in a finish time (for example 10:45:00) then lists all the runner bib numbers who crossed the finish line at that time. After submitting, those runners should appear in the overview with their recorded finish time.
+The radio operator receives a call from a field checkpoint. They select that checkpoint from the dropdown (e.g. "CP3 — Ridgeline"), enter the time the runners were observed — typically a few minutes in the past, since the field volunteer waits until a group has passed before calling in. The operator enters each bib number one at a time and presses Enter after each. Each bib appears as a chip: green for a valid new entry, amber if that runner is already recorded at this checkpoint or has a DNF/DNS status, red if the bib is not in the race. The operator can remove a chip before submitting. Pressing "Record Batch" writes all bibs to that checkpoint's records with the same common time. The checkpoint and time fields stay filled for the next batch; only the chips clear.
 
-**Base Station — Data Entry tab: form ready**
+### Reviews session history and voids a batch
 
-![Base Station — Data Entry tab: form ready](assets/enters-a-common-time-and-runner-batch-then-verifies-in-overview-step-01.png)
+The right-hand panel shows all batches submitted in the current session, most recent first. Each card shows the checkpoint name, common time, and runner bibs. Expanding a card reveals a "Void batch" option. Voiding marks the batch as voided in the session log.
 
-**Data Entry — type finish time 10:45:00 and runner bib batch**
+### Edits a single runner's time from the checkpoint grid
 
-![Data Entry — type finish time 10:45:00 and runner bib batch](assets/enters-a-common-time-and-runner-batch-then-verifies-in-overview-step-02.png)
-
-**Overview tab — runners 300–303 visible after submission**
-
-![Overview tab — runners 300–303 visible after submission](assets/enters-a-common-time-and-runner-batch-then-verifies-in-overview-step-03.png)
+From the Checkpoint Grid tab, the operator can click any runner cell to open a small edit modal. The modal shows the runner number and checkpoint pre-filled. The operator enters the correct time and saves. If that runner already has a recorded time at that checkpoint, an amber warning is shown — the operator can still save to override.
 
 ### Records a DNF via the withdrawal dialog
 

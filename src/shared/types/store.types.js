@@ -31,7 +31,6 @@ export const Runner = {
 export const CheckpointRunner = {
   id: 0,
   raceId: 0,
-  checkpointNumber: 0,
   number: 0,
   status: RUNNER_STATUS.NOT_STARTED,
   markOffTime: null,
@@ -43,7 +42,6 @@ export const CheckpointRunner = {
 export const BaseStationRunner = {
   id: 0,
   raceId: 0,
-  checkpointNumber: 0,
   number: 0,
   status: RUNNER_STATUS.NOT_STARTED,
   commonTime: null,

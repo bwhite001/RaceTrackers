@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import useBaseOperationsStore from '../../../src/modules/base-operations/store/baseOperationsStore';
-import { RUNNER_STATUSES, BASE_STATION_CP } from '../../../src/types';
+import { RUNNER_STATUSES } from '../../../src/types';
 import db from '../../../src/shared/services/database/schema';
 
 describe('Base Operations Store', () => {
@@ -44,7 +44,6 @@ describe('Base Operations Store', () => {
       const state = useBaseOperationsStore.getState();
 
       expect(state.currentRaceId).toBeNull();
-      expect(state.checkpointNumber).toBe(BASE_STATION_CP);
       expect(state.runners).toEqual([]);
       expect(state.loading).toBe(false);
       expect(state.error).toBeNull();
@@ -79,37 +78,45 @@ describe('Base Operations Store', () => {
     };
 
     test('updates single runner', async () => {
-      await setupTestRace();
+      const raceId = await setupTestRace();
       await useBaseOperationsStore.getState().updateRunner(1, {
         status: RUNNER_STATUSES.FINISHED,
         finishTime: '2023-01-01T12:00:00Z'
       });
 
-      const updatedRunner = useBaseOperationsStore.getState().runners.find(r => r.number === 1);
-      expect(updatedRunner.status).toBe(RUNNER_STATUSES.FINISHED);
+      // updateRunner writes to base_station_runners; verify in DB directly
+      const bsr = await db.base_station_runners.where('raceId').equals(raceId).and(r => r.number === 1).first();
+      expect(bsr).toBeDefined();
+      expect(bsr.status).toBe(RUNNER_STATUSES.FINISHED);
     });
 
     test('bulk updates runners', async () => {
-      await setupTestRace();
+      const raceId = await setupTestRace();
       await useBaseOperationsStore.getState().bulkUpdateRunners([1, 2], {
         status: RUNNER_STATUSES.FINISHED,
         finishTime: '2023-01-01T12:00:00Z'
       });
 
-      const updatedRunners = useBaseOperationsStore.getState().runners.filter(r => [1, 2].includes(r.number));
-      expect(updatedRunners).toHaveLength(2);
-      updatedRunners.forEach(runner => {
+      const bsRecords = await db.base_station_runners
+        .where('raceId').equals(raceId)
+        .and(r => [1, 2].includes(r.number))
+        .toArray();
+      expect(bsRecords).toHaveLength(2);
+      bsRecords.forEach(runner => {
         expect(runner.status).toBe(RUNNER_STATUSES.FINISHED);
       });
     });
 
     test('marks runners as DNF', async () => {
-      await setupTestRace();
+      const raceId = await setupTestRace();
       await useBaseOperationsStore.getState().markAsDNF([1, 2], 'Test reason');
 
-      const dnfRunners = useBaseOperationsStore.getState().runners.filter(r => [1, 2].includes(r.number));
-      expect(dnfRunners).toHaveLength(2);
-      dnfRunners.forEach(runner => {
+      const bsRecords = await db.base_station_runners
+        .where('raceId').equals(raceId)
+        .and(r => [1, 2].includes(r.number))
+        .toArray();
+      expect(bsRecords).toHaveLength(2);
+      bsRecords.forEach(runner => {
         expect(runner.status).toBe(RUNNER_STATUSES.DNF);
       });
     });
@@ -131,12 +138,13 @@ describe('Base Operations Store', () => {
 
   describe('Statistics', () => {
     test('calculates correct statistics', async () => {
+      useBaseOperationsStore.setState({ currentRace: { minRunner: 1, maxRunner: 5 } });
       const runners = [
-        { number: 1, status: RUNNER_STATUSES.FINISHED },
-        { number: 2, status: RUNNER_STATUSES.FINISHED },
-        { number: 3, status: RUNNER_STATUSES.DNF },
-        { number: 4, status: RUNNER_STATUSES.DNS },
-        { number: 5, status: RUNNER_STATUSES.NOT_STARTED },
+        { number: 1, checkpointNumber: 1, status: RUNNER_STATUSES.FINISHED },
+        { number: 2, checkpointNumber: 1, status: RUNNER_STATUSES.FINISHED },
+        { number: 3, checkpointNumber: 1, status: RUNNER_STATUSES.DNF },
+        { number: 4, checkpointNumber: 1, status: RUNNER_STATUSES.DNS },
+        { number: 5, checkpointNumber: 1, status: RUNNER_STATUSES.NOT_STARTED },
       ];
 
       const stats = useBaseOperationsStore.getState().calculateStats(runners);

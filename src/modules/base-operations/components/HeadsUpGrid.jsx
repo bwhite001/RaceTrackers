@@ -1,5 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { RUNNER_STATUSES } from '../../../types';
+import useBaseOperationsStore from '../store/baseOperationsStore';
+import RunnerTimeEditModal from './RunnerTimeEditModal';
 
 /**
  * Status indicator cell for a single runner/checkpoint intersection.
@@ -24,6 +26,9 @@ const StatusCell = ({ status }) => {
  * @param {Object[]} checkpoints - Array of { number, name }
  */
 const HeadsUpGrid = ({ runners = [], checkpoints = [] }) => {
+  const { submitRadioBatch } = useBaseOperationsStore();
+  const [editTarget, setEditTarget] = useState(null);
+
   const sortedRunners = useMemo(
     () => [...runners].sort((a, b) => a.number - b.number),
     [runners]
@@ -55,6 +60,7 @@ const HeadsUpGrid = ({ runners = [], checkpoints = [] }) => {
   }
 
   return (
+    <>
     <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
       <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
         <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
@@ -109,7 +115,8 @@ const HeadsUpGrid = ({ runners = [], checkpoints = [] }) => {
                 {sortedCheckpoints.map(cp => (
                   <td
                     key={cp.number}
-                    className="px-3 py-1.5 text-center border-b border-gray-100 dark:border-gray-700/50"
+                    className="px-3 py-1.5 text-center border-b border-gray-100 dark:border-gray-700/50 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                    onClick={() => setEditTarget({ runnerNumber: runner.number, checkpointNumber: cp.number })}
                   >
                     <StatusCell status={runner.checkpointStatuses?.[cp.number]} />
                   </td>
@@ -137,6 +144,21 @@ const HeadsUpGrid = ({ runners = [], checkpoints = [] }) => {
         </table>
       </div>
     </div>
+    {editTarget && (
+      <RunnerTimeEditModal
+        isOpen={true}
+        runnerNumber={editTarget.runnerNumber}
+        checkpointNumber={editTarget.checkpointNumber}
+        existingTime={runners?.find(r => r.number === editTarget.runnerNumber && r.checkpointNumber === editTarget.checkpointNumber)?.markOffTime ?? null}
+        isDuplicate={runners?.some(r => r.number === editTarget.runnerNumber && r.checkpointNumber === editTarget.checkpointNumber && r.markOffTime) ?? false}
+        onClose={() => setEditTarget(null)}
+        onSave={async ({ runnerNumber, time }) => {
+          await submitRadioBatch([runnerNumber], time, editTarget.checkpointNumber);
+          setEditTarget(null);
+        }}
+      />
+    )}
+    </>
   );
 };
 

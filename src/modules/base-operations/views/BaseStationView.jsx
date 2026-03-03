@@ -12,7 +12,7 @@ import PageHeader from '../../../shared/components/PageHeader';
 import ImportExportModal from '../../../components/ImportExport/ImportExportModal';
 
 // Components
-import DataEntry from '../components/DataEntry';
+import BatchEntryLayout from '../components/BatchEntryLayout';
 import RaceOverview from '../components/RaceOverview';
 import ReportsPanel from '../components/ReportsPanel';
 import WithdrawalDialog from '../components/WithdrawalDialog';
@@ -217,10 +217,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             data-screenshot-target
           >
             {activeTab === 'data-entry' && (
-              <DataEntry
-                onWithdrawal={handleWithdrawal}
-                onUnsavedChanges={setHasUnsavedChanges}
-              />
+              <BatchEntryLayout onUnsavedChanges={setHasUnsavedChanges} />
             )}
 
             {activeTab === 'overview' && (

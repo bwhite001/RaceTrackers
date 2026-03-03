@@ -53,6 +53,10 @@ vi.mock('../../src/modules/base-operations/components/DataEntry', () => ({
   default: () => <div data-testid="data-entry">Data Entry</div>
 }));
 
+vi.mock('../../src/modules/base-operations/components/BatchEntryLayout', () => ({
+  default: () => <div data-testid="data-entry">Batch Entry</div>
+}));
+
 vi.mock('../../src/modules/base-operations/components/RaceOverview', () => ({
   default: () => <div data-testid="race-overview">Race Overview</div>
 }));
