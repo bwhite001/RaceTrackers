@@ -117,13 +117,16 @@ Schema changes require `.version(N).stores({...})`. Provide an `.upgrade()` call
 - `src/services/storage.js` — all database operations via StorageService
 - `src/shared/services/database/schema.js` — Dexie schema v6 and migration history
 - `src/shared/store/navigationStore.js` — operation lock enforcement
-- `src/types/index.js` — constants, enums, JSDoc type definitions
+- `src/types/index.js` — constants, enums, JSDoc type definitions (`BASE_STATION_CP`, `RUNNER_STATUSES`, etc.)
+- `src/modules/base-operations/views/BaseStationView.jsx` — base station entry view
+- `src/modules/base-operations/store/baseOperationsStore.js` — base station Zustand store (uses Dexie)
+- `src/modules/base-operations/services/BaseOperationsRepository.js` — base station DB queries
 - `vite.config.js` — PWA config and service worker caching strategy
-- `notes/` — Epic specs (01–07), implementation guides, active TODO
+- `docs/` — Epic specs (01–07), gap analysis, guides
 
 ## Testing Patterns
 
-Tests use `fake-indexeddb` for in-memory IndexedDB — configured in `src/test/setup.js`. Mock `navigationStore` to simulate operation locks:
+Tests use `fake-indexeddb` for in-memory IndexedDB — configured in `test/setup.js`. Mock `navigationStore` to simulate operation locks:
 
 ```javascript
 vi.mock('../../shared/store/navigationStore');
