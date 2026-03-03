@@ -27,7 +27,7 @@ vi.mock('shared/services/database/schema', () => ({
   },
 }));
 
-import CheckpointImportPanel from 'components/BaseStation/CheckpointImportPanel';
+import CheckpointImportPanel from 'modules/base-operations/components/CheckpointImportPanel';
 import useBaseOperationsStore from 'modules/base-operations/store/baseOperationsStore';
 import { useRaceStore } from 'store/useRaceStore';
 
