@@ -37,6 +37,9 @@ vi.mock('modules/race-maintenance/store/raceMaintenanceStore', () => ({
     currentRace: { id: 'race-1', name: 'Test Race' },
     loadCurrentRace: vi.fn(),
   })),
+  raceMaintenanceStore: {
+    getState: vi.fn(() => ({ currentRace: { id: 'race-1', name: 'Test Race' } })),
+  },
 }));
 
 vi.mock('components/Checkpoint/RunnerGrid', () => ({

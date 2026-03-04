@@ -50,6 +50,7 @@ vi.mock('store/useRaceStore', () => ({
   useRaceStore: vi.fn(() => ({
     selectedRaceForMode: 'race-1',
     checkpoints: [],
+    loadRace: vi.fn().mockResolvedValue(undefined),
   })),
 }));
 
