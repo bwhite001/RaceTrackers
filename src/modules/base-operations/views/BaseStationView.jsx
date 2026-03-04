@@ -57,7 +57,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
   // Initialize base station from selectedRaceForMode, or redirect if no race
   useEffect(() => {
-    if (currentRaceId) {
+    if (currentRaceId && currentRaceId === selectedRaceForMode) {
       // Re-hydrate runners from DB on page reload (runners are not persisted to localStorage)
       refreshData();
       // Ensure checkpoints are loaded into useRaceStore (needed by BatchEntryLayout)
@@ -66,6 +66,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
       }
       return;
     }
+    // New or different race selected: initialize (guard against StrictMode double-fire)
     if (selectedRaceForMode && !initStarted.current) {
       initStarted.current = true;
       initialize(selectedRaceForMode)
