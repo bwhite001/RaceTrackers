@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   BoltIcon, 
@@ -19,6 +19,7 @@ import EmptyState from '../../shared/components/ui/EmptyState';
 import { StandardModal } from '../../shared/components/ui';
 import { categorizeRaces } from '../../utils/raceStatistics';
 import { useRaceStore } from '../../store/useRaceStore';
+import StorageService from '../../services/storage';
 import useNavigationStore, { MODULE_TYPES } from '../../shared/store/navigationStore';
 
 /**
@@ -42,6 +43,8 @@ const LandingPage = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: null });
+  const [pendingRaceForCheckpoint, setPendingRaceForCheckpoint] = useState(null);
+  const [checkpointChoices, setCheckpointChoices] = useState([]);
 
   // Load all races on mount
   useEffect(() => {
@@ -104,7 +107,7 @@ const LandingPage = () => {
   };
 
   // Handle race selection from modal
-  const handleRaceSelect = (race) => {
+  const handleRaceSelect = useCallback(async (race) => {
     if (!selectedModuleType) return;
 
     // Haptic feedback
@@ -112,10 +115,36 @@ const LandingPage = () => {
       navigator.vibrate(10);
     }
 
+    // Checkpoint Operations: ask which checkpoint before navigating
+    if (selectedModuleType.type === MODULE_TYPES.CHECKPOINT) {
+      setShowRaceModal(false);
+      const cps = await StorageService.getCheckpoints(race.id);
+      if (cps.length === 1) {
+        // Single checkpoint — skip picker
+        setSelectedRaceForMode(race.id);
+        startOperation(MODULE_TYPES.CHECKPOINT);
+        navigate(`/checkpoint/${cps[0].number}`);
+      } else {
+        setPendingRaceForCheckpoint(race);
+        setCheckpointChoices(cps);
+      }
+      return;
+    }
+
     setSelectedRaceForMode(race.id);
     startOperation(selectedModuleType.type);
     navigate(selectedModuleType.path);
-  };
+  }, [selectedModuleType, settings.hapticsEnabled, setSelectedRaceForMode, startOperation, navigate]);
+
+  // Handle checkpoint selection (second step for Checkpoint Operations)
+  const handleCheckpointSelect = useCallback((checkpoint) => {
+    if (!pendingRaceForCheckpoint) return;
+    setSelectedRaceForMode(pendingRaceForCheckpoint.id);
+    startOperation(MODULE_TYPES.CHECKPOINT);
+    setPendingRaceForCheckpoint(null);
+    setCheckpointChoices([]);
+    navigate(`/checkpoint/${checkpoint.number}`);
+  }, [pendingRaceForCheckpoint, setSelectedRaceForMode, startOperation, navigate]);
 
   // Handle direct race management navigation
   const handleGoToRaceManagement = () => {
@@ -341,6 +370,30 @@ const LandingPage = () => {
         onSelectRace={handleRaceSelect}
         moduleType={selectedModuleType?.type}
       />
+
+      {/* Checkpoint selector — second step for Checkpoint Operations */}
+      <StandardModal
+        isOpen={checkpointChoices.length > 0}
+        onClose={() => { setPendingRaceForCheckpoint(null); setCheckpointChoices([]); }}
+        title="Select Your Checkpoint"
+        size="sm"
+      >
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          Which checkpoint are you operating for <strong>{pendingRaceForCheckpoint?.name}</strong>?
+        </p>
+        <div className="space-y-2">
+          {checkpointChoices.map((cp) => (
+            <button
+              key={cp.number}
+              onClick={() => handleCheckpointSelect(cp)}
+              className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-navy-50 dark:hover:bg-navy-900/30 focus:outline-none focus:ring-2 focus:ring-navy-500 transition-colors"
+            >
+              <span className="font-semibold text-gray-900 dark:text-white">CP{cp.number}</span>
+              {cp.name && <span className="ml-2 text-gray-600 dark:text-gray-400">— {cp.name}</span>}
+            </button>
+          ))}
+        </div>
+      </StandardModal>
 
       {/* Navigation confirmation modal */}
       <ConfirmModal
