@@ -44,8 +44,7 @@ export const runnerSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
   number: z.number().int().positive('Runner number must be positive'),
-  status: z.enum(['not-started', 'passed', 'dnf', 'non-starter', 'vet-out']),
-  recordedTime: z.string().nullable().optional(),
+  status: z.enum(['not-started', 'passed', 'dnf', 'non-starter', 'vet-out', 'withdrawn']),
   notes: z.string().nullable().optional(),
   // Optional fields for extended runner data
   firstName: z.string().optional(),
@@ -82,7 +81,7 @@ export const checkpointRunnerSchema = z.object({
   raceId: z.union([z.string(), z.number()]),
   checkpointNumber: z.number().int().positive(),
   number: z.number().int().positive('Runner number must be positive'),
-  status: z.enum(['not-started', 'passed', 'dnf', 'non-starter', 'vet-out']),
+  status: z.enum(['not-started', 'passed', 'dnf', 'non-starter', 'vet-out', 'withdrawn']),
   markOffTime: z.string().nullable().optional(),
   callInTime: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
@@ -97,7 +96,7 @@ export const baseStationRunnerSchema = z.object({
   raceId: z.union([z.string(), z.number()]),
   checkpointNumber: z.number().int().positive(),
   number: z.number().int().positive('Runner number must be positive'),
-  status: z.enum(['not-started', 'passed', 'dnf', 'non-starter', 'vet-out']),
+  status: z.enum(['not-started', 'passed', 'dnf', 'non-starter', 'vet-out', 'withdrawn']),
   commonTime: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
 });
