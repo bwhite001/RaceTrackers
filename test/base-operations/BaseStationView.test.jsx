@@ -13,7 +13,7 @@ vi.mock('../../src/modules/base-operations/store/baseOperationsStore');
 vi.mock('../../src/shared/store/navigationStore');
 vi.mock('../../src/shared/store/settingsStore');
 vi.mock('../../src/store/useRaceStore', () => ({
-  useRaceStore: vi.fn(() => ({ selectedRaceForMode: 'test-race-1', checkpoints: [] })),
+  useRaceStore: vi.fn(() => ({ selectedRaceForMode: 'test-race-1', checkpoints: [], loadRace: vi.fn().mockResolvedValue(undefined) })),
 }));
 
 // Shared component mocks
