@@ -71,8 +71,8 @@ const RaceSelectionModal = ({
   const getModuleName = () => {
     const names = {
       checkpoint: 'Checkpoint Operations',
-      base_station: 'Base Station Operations',
-      race_maintenance: 'Race Maintenance',
+      'base-station': 'Base Station Operations',
+      'race-maintenance': 'Race Maintenance',
     };
     return names[moduleType] || 'Module';
   };
