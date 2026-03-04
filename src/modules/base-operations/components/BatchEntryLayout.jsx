@@ -16,7 +16,11 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
 
   const existingRecords = useMemo(() => {
     if (selectedCheckpoint === null) return [];
-    return runners.filter(r => r.checkpointNumber === selectedCheckpoint).map(r => r.number);
+    // Only flag runners that have actually been recorded (not-started records are pre-created
+    // for all runners when a checkpoint is initialised and must not trigger a duplicate warning).
+    return runners
+      .filter(r => r.checkpointNumber === selectedCheckpoint && r.status !== 'not-started')
+      .map(r => r.number);
   }, [runners, selectedCheckpoint]);
 
   const statusWarnings = useMemo(() => {

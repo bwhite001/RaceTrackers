@@ -70,14 +70,34 @@ export const applySunlightModeToDOM = (enabled) => {
 };
 
 /**
- * Apply status colors to DOM as CSS custom properties
+ * Convert a hex color (#rrggbb or #rgb) to space-separated RGB channels ("r g b")
+ * required by the CSS rgb(var(--x) / alpha) pattern used in index.css.
+ * @param {string} hex
+ * @returns {string} e.g. "34 197 94"
+ */
+const hexToChannels = (hex) => {
+  const h = hex.replace('#', '');
+  const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  return `${r} ${g} ${b}`;
+};
+
+/**
+ * Apply status colors to DOM as CSS custom properties.
+ * Converts hex values to space-separated RGB channels so that the
+ * `rgb(var(--color-status-*) / alpha)` pattern in index.css works correctly.
  * @param {Object} statusColors - Object with status color mappings
  */
 export const applyStatusColorsToDOM = (statusColors) => {
   Object.entries(statusColors).forEach(([status, color]) => {
+    const value = typeof color === 'string' && color.startsWith('#')
+      ? hexToChannels(color)
+      : color;
     document.documentElement.style.setProperty(
       `--color-status-${status}`,
-      color
+      value
     );
   });
 };

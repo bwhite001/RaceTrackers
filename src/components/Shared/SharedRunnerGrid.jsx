@@ -300,7 +300,7 @@ const SharedRunnerGrid = ({
                                     }
                                     className="form-input py-1 text-sm"
                                 >
-                                    {GROUP_SIZES.map((size) => (
+                                    {Object.values(GROUP_SIZES).map((size) => (
                                         <option key={size} value={size}>
                                             {size}
                                         </option>
