@@ -13,7 +13,7 @@
  */
 
 import { test, expect } from './fixtures.js';
-import { goHome, createRace, pickFirstRaceInModal } from './helpers.js';
+import { goHome, seedRace, pickFirstRaceInModal } from './helpers.js';
 
 const RACE = {
   name: 'Checkpoint Journey Race',
@@ -25,8 +25,7 @@ const RACE = {
 
 test.describe('Checkpoint Volunteer – Mark-Off Journey', () => {
   test.beforeEach(async ({ page }) => {
-    // Seed a race in this test's browser context
-    await createRace(page, RACE);
+    await seedRace(page, RACE);
   });
 
   test('navigates to checkpoint and sees runner grid', async ({ page, step }) => {
@@ -144,9 +143,12 @@ test.describe('Checkpoint Volunteer – Mark-Off Journey', () => {
     await step('Export option — triggers JSON download', async () => {
       const exportBtn = page.getByRole('button', { name: /export|share|download/i }).first();
       await expect(exportBtn).toBeVisible({ timeout: 5000 });
+      await exportBtn.click();
+      // ExportCheckpointResultsModal — wait for the modal heading, then download JSON
+      await page.getByText(/end of day export/i).waitFor({ state: 'visible', timeout: 5000 });
       const [download] = await Promise.all([
         page.waitForEvent('download', { timeout: 10000 }),
-        exportBtn.click(),
+        page.getByRole('button', { name: /download json/i }).click(),
       ]);
       expect(download.suggestedFilename()).toMatch(/\.json$/);
     });

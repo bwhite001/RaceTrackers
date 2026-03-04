@@ -12,7 +12,7 @@
  */
 
 import { test, expect } from './fixtures.js';
-import { createRace, goHome, pickFirstRaceInModal } from './helpers.js';
+import { seedRace, goHome, pickFirstRaceInModal } from './helpers.js';
 
 const RACE = {
   name: 'Callout Sheet Journey Race',
@@ -24,7 +24,7 @@ const RACE = {
 
 test.describe('Callout Sheet', () => {
   test.beforeEach(async ({ page }) => {
-    await createRace(page, RACE);
+    await seedRace(page, RACE);
     await page.goto('/checkpoint/1');
     await page.waitForSelector('nav[aria-label="Checkpoint tabs"]', { timeout: 15000 });
   });

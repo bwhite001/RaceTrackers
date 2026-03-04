@@ -3,10 +3,13 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './test/e2e/playwright',
-  fullyParallel: false, // journeys share IndexedDB state; run sequentially
+  // Tests within a file run sequentially (required by 08-complete-race-simulation
+  // which shares _page across tests). Files run in parallel — each worker gets
+  // its own Chromium context with isolated IndexedDB.
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 1, // 1 retry locally to handle timing flakiness
-  workers: 1,
+  retries: process.env.CI ? 2 : 1,
+  workers: process.env.CI ? 2 : 4,
   reporter: [
     ['list'],
     ['./test/e2e/playwright/reporter.js', { outputFile: 'playwright-report/journey-report.html' }],

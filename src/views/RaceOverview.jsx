@@ -23,11 +23,11 @@ const RaceOverview = () => {
   } = useRaceMaintenanceStore();
   
   const { endOperation, startOperation } = useNavigationStore();
-  
-  // Get runners from the race store
-  const { runners, initializeRunnersFromRace, getRunnerCounts } = useRaceStore();
-  
-  // Load race data on mount
+
+  // Load race data on mount — both raceMaintenanceStore (for checkpoints/config)
+  // and useRaceStore (for runner list used by RunnerOverview).
+  const { runners, getRunnerCounts, loadRace: loadRaceLegacy } = useRaceStore();
+
   useEffect(() => {
     const loadRaceData = async () => {
       try {
@@ -44,14 +44,24 @@ const RaceOverview = () => {
     loadRaceData();
   }, [raceId, loadRace, loadCurrentRace]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Initialize runners when race config is loaded
+  // Load runners into the legacy store whenever raceConfig is available.
   useEffect(() => {
-    if (raceConfig && raceConfig.runnerRanges && runners.length === 0) {
-      initializeRunnersFromRace(raceConfig);
+    if (raceConfig?.id) {
+      loadRaceLegacy(raceConfig.id).catch(() => {});
     }
-  }, [raceConfig, runners.length, initializeRunnersFromRace]);
+  }, [raceConfig?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const counts = getRunnerCounts();
+  // Compute runner counts from raceConfig fields (minRunner/maxRunner)
+  // when runners are not yet loaded into the legacy store.
+  const counts = (() => {
+    const base = getRunnerCounts();
+    if (base.total > 0) return base;
+    // Fall back to computing from race config range fields
+    if (raceConfig?.maxRunner != null && raceConfig?.minRunner != null) {
+      return { ...base, total: raceConfig.maxRunner - raceConfig.minRunner + 1 };
+    }
+    return base;
+  })();
 
   const handleGoToCheckpoint = (checkpointNumber) => {
     endOperation(); // End current operation

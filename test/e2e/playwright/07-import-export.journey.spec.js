@@ -12,7 +12,7 @@
  */
 
 import { test, expect } from './fixtures.js';
-import { createRace, goHome, clearAppData, selectModuleWithFirstRace } from './helpers.js';
+import { seedRace, goHome, clearAppData, selectModuleWithFirstRace } from './helpers.js';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
@@ -41,10 +41,10 @@ test.describe('Import / Export Journey', () => {
 
   test('export modal opens from base station header', async ({ page, step }) => {
     await step('Base Station — operations screen with created race', async () => {
-      await createRace(page, RACE);
+      await seedRace(page, RACE);
       await selectModuleWithFirstRace(page, /base station/i);
       await page.waitForURL(/base-station\/operations/, { timeout: 15000 });
-      await expect(page.locator('#commonTime')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('#commonTime').first()).toBeVisible({ timeout: 10000 });
     });
 
     await step('Base Station header — tap Import/Export button', async () => {
@@ -59,7 +59,7 @@ test.describe('Import / Export Journey', () => {
 
   test('downloads a race configuration JSON file', async ({ page, step }) => {
     await step('Race Management — page with created race listed', async () => {
-      await createRace(page, RACE);
+      await seedRace(page, RACE);
       await page.goto('/race-management');
     });
 

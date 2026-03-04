@@ -162,7 +162,7 @@ const WithdrawalDialog = ({ isOpen, onClose, runnerNumber: initialRunnerNumber =
         </div>
 
         {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form id="withdrawal-form" onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Runner Number */}
           <div>
             <label htmlFor="runnerNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -314,7 +314,7 @@ const WithdrawalDialog = ({ isOpen, onClose, runnerNumber: initialRunnerNumber =
           </button>
           <button
             type="submit"
-            onClick={handleSubmit}
+            form="withdrawal-form"
             className="btn-primary"
             disabled={isSubmitting || loading}
           >

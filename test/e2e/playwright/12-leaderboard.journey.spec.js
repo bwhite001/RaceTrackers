@@ -9,7 +9,7 @@
  */
 
 import { test, expect } from './fixtures.js';
-import { createRace, goHome, pickFirstRaceInModal } from './helpers.js';
+import { seedRace, goHome, pickFirstRaceInModal } from './helpers.js';
 
 const RACE = {
   name: 'Leaderboard Journey Race',
@@ -21,7 +21,7 @@ const RACE = {
 
 test.describe('Leaderboard Tab', () => {
   test.beforeEach(async ({ page }) => {
-    await createRace(page, RACE);
+    await seedRace(page, RACE);
   });
 
   test('leaderboard tab shows runners sorted by finish time', async ({ page, step }) => {

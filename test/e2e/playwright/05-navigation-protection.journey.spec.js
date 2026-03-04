@@ -13,7 +13,7 @@
  */
 
 import { test, expect } from './fixtures.js';
-import { createRace } from './helpers.js';
+import { seedRace } from './helpers.js';
 
 const RACE = {
   name: 'NavProtect Race',
@@ -25,7 +25,7 @@ const RACE = {
 
 test.describe('Navigation Protection Journey', () => {
   test.beforeEach(async ({ page }) => {
-    await createRace(page, RACE);
+    await seedRace(page, RACE);
   });
 
   test('shows protection modal when leaving active checkpoint operation', async ({ page, step }) => {

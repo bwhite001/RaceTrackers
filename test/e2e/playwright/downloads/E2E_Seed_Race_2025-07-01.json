@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 8,
+  "raceConfig": {
+    "name": "E2E Seed Race",
+    "date": "2025-07-01",
+    "startTime": "07:00",
+    "minRunner": 100,
+    "maxRunner": 115,
+    "runnerRanges": [],
+    "checkpoints": [
+      {
+        "number": 1,
+        "name": "Checkpoint 1"
+      },
+      {
+        "number": 2,
+        "name": "Checkpoint 2"
+      }
+    ]
+  },
+  "batches": [
+    {
+      "batchNumber": 1,
+      "batchName": "All Runners",
+      "startTime": "2025-07-01T07:00:00"
+    }
+  ],
+  "runners": [
+    {
+      "number": 100,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 101,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 102,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 103,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 104,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 105,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 106,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 107,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 108,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 109,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 110,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 111,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 112,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 113,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 114,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    },
+    {
+      "number": 115,
+      "firstName": null,
+      "lastName": null,
+      "gender": "X",
+      "batchNumber": 1,
+      "status": "not-started",
+      "recordedTime": null,
+      "notes": null
+    }
+  ],
+  "checkpointRunners": [],
+  "exportedAt": "2026-03-04T04:34:31.807Z",
+  "version": "3.0.0",
+  "exportType": "full-race-data"
+}

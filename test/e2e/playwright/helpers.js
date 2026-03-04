@@ -8,6 +8,141 @@ import { expect } from '@playwright/test';
 const BASE_URL = 'http://localhost:3000';
 
 /**
+ * Seed a race directly into IndexedDB without going through the setup wizard.
+ *
+ * ~200 ms vs ~30 s for createRace(). Safe for parallel workers because each
+ * Playwright worker gets its own browser context with isolated IndexedDB.
+ *
+ * After seeding it navigates to the race overview so the Zustand store has
+ * the race loaded — identical end-state to createRace().
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {object} opts
+ * @param {string}  opts.name
+ * @param {string}  opts.date          yyyy-MM-dd
+ * @param {string}  opts.startTime     HH:mm
+ * @param {number}  opts.numCheckpoints
+ * @param {{ min: number, max: number }} opts.runnerRange
+ * @returns {Promise<number>} raceId
+ */
+export async function seedRace(page, {
+  name = 'E2E Seed Race',
+  date = '2025-07-01',
+  startTime = '07:00',
+  numCheckpoints = 2,
+  runnerRange = { min: 100, max: 115 },
+} = {}) {
+  // Navigate to app so Dexie initialises the schema before we touch the DB.
+  await page.goto(BASE_URL);
+  await page.waitForSelector('h1', { timeout: 15000 });
+
+  const raceId = await page.evaluate(async (cfg) => {
+    const { name, date, startTime, numCheckpoints, runnerRange } = cfg;
+
+    const openDB = () => new Promise((res, rej) => {
+      const req = indexedDB.open('RaceTrackerDB');
+      req.onsuccess = e => res(e.target.result);
+      req.onerror = () => rej(new Error('Cannot open RaceTrackerDB'));
+    });
+
+    const db = await openDB();
+
+    // Clear all race-related tables so each test starts clean.
+    const tablesToClear = [
+      'races', 'runners', 'checkpoints', 'race_batches',
+      'checkpoint_runners', 'base_station_runners',
+      'withdrawal_records', 'audit_log',
+    ];
+    await new Promise((res, rej) => {
+      const tx = db.transaction(tablesToClear, 'readwrite');
+      tablesToClear.forEach(t => tx.objectStore(t).clear());
+      tx.oncomplete = res;
+      tx.onerror = () => rej(tx.error);
+    });
+
+    // Insert race row.
+    const raceId = await new Promise((res, rej) => {
+      const tx = db.transaction('races', 'readwrite');
+      const req = tx.objectStore('races').add({
+        name, date, startTime,
+        minRunner: runnerRange.min,
+        maxRunner: runnerRange.max,
+        createdAt: new Date().toISOString(),
+      });
+      req.onsuccess = e => res(e.target.result);
+      req.onerror = () => rej(req.error);
+    });
+
+    // Insert default batch.
+    await new Promise((res, rej) => {
+      const tx = db.transaction('race_batches', 'readwrite');
+      const req = tx.objectStore('race_batches').add({
+        raceId,
+        batchNumber: 1,
+        batchName: 'All Runners',
+        startTime: `${date}T${startTime}:00`,
+      });
+      req.onsuccess = res;
+      req.onerror = () => rej(req.error);
+    });
+
+    // Insert runners.
+    await new Promise((res, rej) => {
+      const tx = db.transaction('runners', 'readwrite');
+      const store = tx.objectStore('runners');
+      for (let n = runnerRange.min; n <= runnerRange.max; n++) {
+        store.add({
+          raceId, number: n, status: 'not-started',
+          firstName: null, lastName: null, gender: 'X',
+          batchNumber: 1, recordedTime: null, notes: null,
+        });
+      }
+      tx.oncomplete = res;
+      tx.onerror = () => rej(tx.error);
+    });
+
+    // Insert checkpoints.
+    await new Promise((res, rej) => {
+      const tx = db.transaction('checkpoints', 'readwrite');
+      const store = tx.objectStore('checkpoints');
+      for (let i = 1; i <= numCheckpoints; i++) {
+        store.add({ raceId, number: i, name: `Checkpoint ${i}` });
+      }
+      tx.oncomplete = res;
+      tx.onerror = () => rej(tx.error);
+    });
+
+    // Store currentRaceId in settings so CheckpointView/BaseStationView can load it.
+    await new Promise((res, rej) => {
+      const tx = db.transaction('settings', 'readwrite');
+      tx.objectStore('settings').put({ key: 'currentRaceId', value: raceId });
+      tx.oncomplete = res;
+      tx.onerror = () => rej(tx.error);
+    });
+
+    return raceId;
+  }, { name, date, startTime, numCheckpoints, runnerRange });
+
+  // Set selectedRaceForMode + currentRaceId in Zustand's persisted localStorage so
+  // BaseStationView doesn't redirect to "/" when no race is selected.
+  await page.evaluate((rid) => {
+    const key = 'race-tracker-storage';
+    const stored = JSON.parse(localStorage.getItem(key) || '{"state":{}}');
+    stored.state = { ...stored.state, selectedRaceForMode: rid, currentRaceId: rid };
+    localStorage.setItem(key, JSON.stringify(stored));
+  }, raceId);
+
+  // Navigate to race overview so the Zustand store loads this race —
+  // same end-state as createRace() which also lands on overview.
+  await page.goto(`${BASE_URL}/race-maintenance/overview?raceId=${raceId}`);
+  await page.waitForURL(/race-maintenance\/overview/);
+  // Wait for the race data to render (confirms loadRace() completed).
+  await page.waitForSelector(`text=${name}`, { timeout: 10000 });
+
+  return raceId;
+}
+
+/**
  * Set the value of a React-controlled input element.
  * Uses pressSequentially which types character-by-character with appropriate
  * delays, allowing React to process onChange between keystrokes.

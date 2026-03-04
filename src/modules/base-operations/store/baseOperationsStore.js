@@ -211,6 +211,22 @@ const useBaseOperationsStore = create(
         await get().refreshData();
       },
 
+      withdrawRunner: async (runnerNumber, reason, comments, checkpoint, withdrawalTime) => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) throw new Error('No active race');
+        const repo = new BaseOperationsRepository();
+        await repo.withdrawRunner(currentRaceId, Number(runnerNumber), checkpoint, reason, comments, withdrawalTime);
+        await get().refreshData();
+      },
+
+      reverseWithdrawal: async (runnerNumber) => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) throw new Error('No active race');
+        const repo = new BaseOperationsRepository();
+        await repo.reverseWithdrawal(currentRaceId, Number(runnerNumber));
+        await get().refreshData();
+      },
+
       // Actions - UI State
       setSelectedRunners: (numbers) => {
         set({ selectedRunners: numbers });

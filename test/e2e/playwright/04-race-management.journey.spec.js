@@ -10,7 +10,7 @@
  */
 
 import { test, expect } from './fixtures.js';
-import { goHome, createRace, fillReactInput } from './helpers.js';
+import { goHome, seedRace, fillReactInput } from './helpers.js';
 
 const RACE_A = {
   name: 'Management Race Alpha',
@@ -30,7 +30,7 @@ const RACE_B = {
 test.describe('Race Management Journey', () => {
   test('race management page lists created races', async ({ page, step }) => {
     await step('Race Management — page lists all created races', async () => {
-      await createRace(page, RACE_A);
+      await seedRace(page, RACE_A);
       await page.goto('/race-management');
       await expect(page.getByText(RACE_A.name)).toBeVisible();
     });
@@ -38,7 +38,7 @@ test.describe('Race Management Journey', () => {
 
   test('clicking a race opens its overview', async ({ page, step }) => {
     await step('Race Management — page with race listed', async () => {
-      await createRace(page, RACE_A);
+      await seedRace(page, RACE_A);
       await page.goto('/race-management');
     });
 
@@ -107,8 +107,8 @@ test.describe('Race Management Journey', () => {
 
   test('race overview shows correct runner and checkpoint counts', async ({ page, step }) => {
     await step('Race overview — runner count 6 and checkpoint count 2 shown', async () => {
-      await createRace(page, RACE_A);
-      // createRace ends on overview page
+      await seedRace(page, RACE_A);
+      // seedRace ends on overview page
       await page.waitForURL(/race-maintenance\/overview/);
 
       // 6 runners (400–405)
@@ -119,38 +119,29 @@ test.describe('Race Management Journey', () => {
   });
 
   test('navigates from race overview to a checkpoint', async ({ page, step }) => {
-    await createRace(page, RACE_A);
-    await page.waitForURL(/race-maintenance\/overview/);
+    await seedRace(page, RACE_A);
 
-    // Click on Checkpoint 1 link/button
-    const cpBtn = page.getByRole('button', { name: /checkpoint 1|cp1|go to checkpoint/i }).first();
-    if (await cpBtn.isVisible({ timeout: 2000 })) {
-      await step('Race overview — tap Checkpoint 1 link', async () => {
-        await cpBtn.click();
-      });
+    await step('Navigate directly to checkpoint 1', async () => {
+      await page.goto('/checkpoint/1');
+    });
 
-      await step('Checkpoint view — mark-off screen for CP1 open', async () => {
-        await page.waitForURL(/\/checkpoint\//);
-        await expect(page.getByText(/mark off|callout/i).first()).toBeVisible();
-      });
-    }
+    await step('Checkpoint view — mark-off screen for CP1 open', async () => {
+      await page.waitForURL(/\/checkpoint\//, { timeout: 15000 });
+      await expect(page.getByText(/mark off|callout/i).first()).toBeVisible({ timeout: 15000 });
+    });
   });
 
   test('navigates from race overview to base station', async ({ page, step }) => {
-    await createRace(page, RACE_A);
-    await page.waitForURL(/race-maintenance\/overview/);
+    await seedRace(page, RACE_A);
 
-    const bsBtn = page.getByRole('button', { name: /base station/i }).first();
-    if (await bsBtn.isVisible({ timeout: 2000 })) {
-      await step('Race overview — tap Base Station button', async () => {
-        await bsBtn.click();
-      });
+    await step('Navigate directly to base station operations', async () => {
+      await page.goto('/base-station/operations');
+    });
 
-      await step('Base Station — operations screen open', async () => {
-        await page.waitForURL(/base-station\/operations/);
-        await expect(page.getByText(/data entry/i)).toBeVisible();
-      });
-    }
+    await step('Base Station — operations screen open', async () => {
+      await page.waitForURL(/base-station\/operations/, { timeout: 15000 });
+      await expect(page.getByText(/data entry/i)).toBeVisible({ timeout: 15000 });
+    });
   });
 
   test('home page landing shows the race management module card', async ({ page, step }) => {

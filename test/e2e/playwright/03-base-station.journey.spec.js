@@ -14,7 +14,7 @@
  */
 
 import { test, expect } from './fixtures.js';
-import { createRace, selectModuleWithFirstRace } from './helpers.js';
+import { seedRace, selectModuleWithFirstRace } from './helpers.js';
 
 const RACE = {
   name: 'Base Station Journey Race',
@@ -26,9 +26,7 @@ const RACE = {
 
 test.describe('Base Station Operator – Full Operations Journey', () => {
   test.beforeEach(async ({ page }) => {
-    // Create the race then navigate through the modal so selectedRaceForMode is set
-    // in the persisted Zustand store — direct URL navigations in each test rely on this
-    await createRace(page, RACE);
+    await seedRace(page, RACE);
     await selectModuleWithFirstRace(page, /base station/i);
     await page.waitForURL(/base-station\/operations/, { timeout: 15000 });
   });
@@ -41,14 +39,22 @@ test.describe('Base Station Operator – Full Operations Journey', () => {
 
   test('enters a common time and runner batch, then verifies in overview', async ({ page, step }) => {
     await step('Base Station — Data Entry tab: form ready', async () => {
-      await expect(page.locator('#commonTime')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('#commonTime').first()).toBeVisible({ timeout: 10000 });
     });
 
     await step('Data Entry — type finish time 10:45:00 and runner bib batch', async () => {
-      await page.fill('#commonTime', '10:45:00');
-      await page.fill('#runnerInput', '300, 301, 302, 303');
-      await page.getByRole('button', { name: /submit|record|save|log/i }).click();
-      await expect(page.locator('#runnerInput')).toHaveValue('');
+      // Select a checkpoint first (required before Record Batch is enabled)
+      await page.locator('#cpSelect').first().selectOption({ index: 1 });
+      await page.locator('#commonTime').first().fill('10:45:00');
+      // BibChipInput: type each bib and press Enter to add it as a chip
+      const bibInput = page.getByLabel('Bib number input').first();
+      for (const bib of ['300', '301', '302', '303']) {
+        await bibInput.fill(bib);
+        await bibInput.press('Enter');
+      }
+      await page.getByRole('button', { name: /record batch/i }).first().click();
+      // After submission the chips are cleared
+      await expect(bibInput).toHaveValue('');
     });
 
     await step('Overview tab — runners 300–303 visible after submission', async () => {
@@ -60,21 +66,22 @@ test.describe('Base Station Operator – Full Operations Journey', () => {
 
   test('records a DNF via the withdrawal dialog', async ({ page, step }) => {
     await step('Base Station — Data Entry tab: form ready', async () => {
-      await expect(page.locator('#commonTime')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('#commonTime').first()).toBeVisible({ timeout: 10000 });
     });
 
     await step('Data Entry — open DNF withdrawal dialog', async () => {
+      // Blur any focused input before pressing the 'd' hotkey
+      await page.evaluate(() => document.activeElement?.blur());
       // DNF is triggered via keyboard shortcut 'd' (HOTKEYS.DROPOUT)
       await page.keyboard.press('d');
-      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: 5000 });
+      await page.locator('input#runnerNumber').waitFor({ state: 'visible', timeout: 5000 });
     });
 
     await step('Withdrawal Dialog — enter runner 310 and reason, then submit', async () => {
-      const dialog = page.getByRole('dialog');
-      await dialog.locator('textarea#runnerInput').fill('310');
-      await dialog.locator('input#reason').fill('Injured ankle');
-      await dialog.getByRole('button', { name: /mark as/i }).click();
-      await expect(dialog).toBeHidden({ timeout: 5000 });
+      await page.locator('input#runnerNumber').fill('310');
+      await page.locator('select#reason').selectOption('Injury');
+      await page.getByRole('button', { name: /withdraw runner/i }).click();
+      await page.locator('input#runnerNumber').waitFor({ state: 'hidden', timeout: 5000 });
     });
 
     await step('Overview tab — runner 310 shows DNF status', async () => {
@@ -104,7 +111,7 @@ test.describe('Base Station Operator – Full Operations Journey', () => {
   });
 
   test('exports base station data', async ({ page }) => {
-    await expect(page.locator('#commonTime')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('#commonTime').first()).toBeVisible({ timeout: 10000 });
 
     // The Import/Export button in the PageHeader actions opens ImportExportModal
     const exportBtn = page.getByRole('button', { name: 'Import / Export' });

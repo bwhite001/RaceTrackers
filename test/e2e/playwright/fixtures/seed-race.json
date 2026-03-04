@@ -1,0 +1,15 @@
+{
+  "_comment": "Default seed fixture for E2E tests. Inserted directly into IndexedDB by seedRace() — no UI wizard needed.",
+  "name": "E2E Seed Race",
+  "date": "2025-07-01",
+  "startTime": "07:00",
+  "numCheckpoints": 2,
+  "runnerRange": { "min": 100, "max": 115 },
+  "checkpoints": [
+    { "number": 1, "name": "Checkpoint 1" },
+    { "number": 2, "name": "Checkpoint 2" }
+  ],
+  "batches": [
+    { "batchNumber": 1, "batchName": "All Runners", "startTimeOffset": "00:00" }
+  ]
+}

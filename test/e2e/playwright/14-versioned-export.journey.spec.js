@@ -1,11 +1,11 @@
 import { test, expect } from './fixtures.js';
-import { createRace } from './helpers.js';
+import { seedRace } from './helpers.js';
 import path from 'path';
 import fs from 'fs';
 
 test.describe('Versioned Export', () => {
   test.beforeEach(async ({ page }) => {
-    await createRace(page);
+    await seedRace(page);
     await page.goto('/');
   });
 

@@ -43,7 +43,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
   // Store access
   const { currentRaceId, currentRace, loading, error, stats, runners, initialize, refreshData } = useBaseOperationsStore();
-  const { selectedRaceForMode, checkpoints } = useRaceStore();
+  const { selectedRaceForMode, checkpoints, loadRace: loadRaceIntoStore } = useRaceStore();
   const { darkMode } = useSettingsStore();
   const initStarted = useRef(false);
 
@@ -60,15 +60,21 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     if (currentRaceId) {
       // Re-hydrate runners from DB on page reload (runners are not persisted to localStorage)
       refreshData();
+      // Ensure checkpoints are loaded into useRaceStore (needed by BatchEntryLayout)
+      if (checkpoints.length === 0) {
+        loadRaceIntoStore(currentRaceId).catch(() => {});
+      }
       return;
     }
     if (selectedRaceForMode && !initStarted.current) {
       initStarted.current = true;
-      initialize(selectedRaceForMode).catch(() => navigate('/'));
+      initialize(selectedRaceForMode)
+        .then(() => loadRaceIntoStore(selectedRaceForMode).catch(() => {}))
+        .catch(() => navigate('/'));
     } else if (!selectedRaceForMode) {
       navigate('/');
     }
-  }, [currentRaceId, selectedRaceForMode, initialize, navigate, refreshData]);
+  }, [currentRaceId, selectedRaceForMode, initialize, navigate, refreshData, loadRaceIntoStore, checkpoints.length]);
 
   // Handle tab change
   const handleTabChange = useCallback((tab) => {

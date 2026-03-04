@@ -12,11 +12,8 @@ test.describe('CSV Runner Import', () => {
 
   test('opens CSV import panel and shows preview table', async ({ page, step }) => {
     await step('Navigate to Race Setup wizard', async () => {
-      // Look for "Race Maintenance" or "Create Race" button
-      const setupBtn = page.getByRole('link', { name: /race maintenance/i })
-        .or(page.getByRole('button', { name: /race maintenance/i }))
-        .or(page.getByText(/race maintenance/i))
-        .first();
+      // Look for "Race Maintenance" card button (avoid strict mode violation from h3 inside button)
+      const setupBtn = page.locator('button').filter({ hasText: /race maintenance/i }).first();
       await setupBtn.click();
       await page.waitForURL(/race-manage/);
     });

@@ -52,13 +52,24 @@ function extractStyles(html) {
   return m ? m[1] : '';
 }
 
+/** Inline all src="assets/..." images as base64 data URIs so PDFs are self-contained */
+function inlineImages(html, assetsDir) {
+  return html.replace(/src="assets\/([^"]+)"/g, (match, filename) => {
+    const imgPath = path.join(assetsDir, filename);
+    if (!fs.existsSync(imgPath)) return match;
+    const ext = path.extname(filename).slice(1).toLowerCase();
+    const mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg'
+               : ext === 'svg' ? 'image/svg+xml'
+               : 'image/png';
+    const data = fs.readFileSync(imgPath).toString('base64');
+    return `src="data:${mime};base64,${data}"`;
+  });
+}
+
 /** Build a standalone HTML document for a single section */
 function buildSectionHtml(chapterTitle, sectionContent, styles, assetsDir) {
-  // Make image paths absolute so Playwright can resolve them from a data URL context
-  const absoluteContent = sectionContent.replace(
-    /src="assets\//g,
-    `src="${assetsDir}/`
-  );
+  // Embed images as data URIs — guarantees they appear in the PDF regardless of context
+  const inlinedContent = inlineImages(sectionContent, assetsDir);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -83,7 +94,7 @@ ${styles}
   <p>${chapterTitle}</p>
 </header>
 <main>
-${absoluteContent}
+${inlinedContent}
 </main>
 <footer class="page-footer">RaceTracker Pro &bull; ${chapterTitle}</footer>
 </body>
@@ -110,17 +121,9 @@ async function main() {
       continue;
     }
 
+    // Images are inlined as base64 — no network requests needed
     const sectionHtml = buildSectionHtml(title, section, styles, assetsDir);
-    await page.setContent(sectionHtml, { waitUntil: 'networkidle' });
-
-    // Wait for images to load
-    await page.evaluate(() =>
-      Promise.all(
-        [...document.querySelectorAll('img')].map(img =>
-          img.complete ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r; })
-        )
-      )
-    );
+    await page.setContent(sectionHtml, { waitUntil: 'load' });
 
     const outFile = path.join(OUT_DIR, `user-guide-${key}.pdf`);
     await page.pdf({

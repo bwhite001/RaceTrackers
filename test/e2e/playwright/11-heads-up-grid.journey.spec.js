@@ -9,7 +9,7 @@
  */
 
 import { test, expect } from './fixtures.js';
-import { createRace, goHome, pickFirstRaceInModal } from './helpers.js';
+import { seedRace, goHome, pickFirstRaceInModal } from './helpers.js';
 
 const RACE = {
   name: 'Heads-Up Grid Journey Race',
@@ -21,7 +21,7 @@ const RACE = {
 
 test.describe('Heads-Up Grid (Overview Tab)', () => {
   test.beforeEach(async ({ page }) => {
-    await createRace(page, RACE);
+    await seedRace(page, RACE);
   });
 
   test('overview tab shows heads-up grid with checkpoint columns', async ({ page, step }) => {
