@@ -50,20 +50,19 @@ describe('submitRadioBatch', () => {
   });
 });
 
-describe('loadRunners reads from checkpoint_runners', () => {
-  it('calls getCheckpointRunners with raceId only', async () => {
+describe('loadRunners reads from checkpoint_runners and base_station_runners', () => {
+  it('calls getCheckpointRunners and getBaseStationRunners with raceId', async () => {
     act(() => useBaseOperationsStore.setState({ currentRaceId: 'r1' }));
     await act(() => useBaseOperationsStore.getState().loadRunners('r1'));
     expect(StorageService.getCheckpointRunners).toHaveBeenCalledWith('r1');
-    expect(StorageService.getCheckpointRunners.mock.calls[0].length).toBe(1);
+    expect(StorageService.getBaseStationRunners).toHaveBeenCalledWith('r1');
   });
 });
 
 describe('calculateStats deduplication', () => {
-  it('counts unique runner numbers, total from race config', () => {
+  it('counts base station (CP 0) records as finished, not checkpoint passes', () => {
     const runners = [
-      { number: 42, checkpointNumber: 1, status: 'passed' },
-      { number: 42, checkpointNumber: 3, status: 'passed' },
+      { number: 42, checkpointNumber: 0, status: 'passed' }, // base station = finished
       { number: 7,  checkpointNumber: 1, status: 'dnf' },
     ];
     act(() => useBaseOperationsStore.setState({ currentRace: { minRunner: 1, maxRunner: 10 } }));
@@ -82,5 +81,16 @@ describe('calculateStats deduplication', () => {
     const stats = useBaseOperationsStore.getState().calculateStats(runners);
     expect(stats.dnf).toBe(1);
     expect(stats.finished).toBe(0);
+  });
+
+  it('does not count checkpoint passes as finished', () => {
+    const runners = [
+      { number: 42, checkpointNumber: 1, status: 'passed' },
+      { number: 42, checkpointNumber: 3, status: 'passed' },
+    ];
+    act(() => useBaseOperationsStore.setState({ currentRace: { minRunner: 1, maxRunner: 10 } }));
+    const stats = useBaseOperationsStore.getState().calculateStats(runners);
+    expect(stats.finished).toBe(0);
+    expect(stats.active).toBe(1);
   });
 });

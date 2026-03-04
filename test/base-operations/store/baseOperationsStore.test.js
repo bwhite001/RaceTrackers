@@ -140,8 +140,8 @@ describe('Base Operations Store', () => {
     test('calculates correct statistics', async () => {
       useBaseOperationsStore.setState({ currentRace: { minRunner: 1, maxRunner: 5 } });
       const runners = [
-        { number: 1, checkpointNumber: 1, status: RUNNER_STATUSES.FINISHED },
-        { number: 2, checkpointNumber: 1, status: RUNNER_STATUSES.FINISHED },
+        { number: 1, checkpointNumber: 0, status: RUNNER_STATUSES.FINISHED }, // base station = finished
+        { number: 2, checkpointNumber: 0, status: RUNNER_STATUSES.FINISHED }, // base station = finished
         { number: 3, checkpointNumber: 1, status: RUNNER_STATUSES.DNF },
         { number: 4, checkpointNumber: 1, status: RUNNER_STATUSES.DNS },
         { number: 5, checkpointNumber: 1, status: RUNNER_STATUSES.NOT_STARTED },

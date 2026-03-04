@@ -80,7 +80,11 @@ const useBaseOperationsStore = create(
 
       loadRunners: async (raceId) => {
         try {
-          return await StorageService.getCheckpointRunners(raceId);
+          const [checkpointRunners, baseStationRunners] = await Promise.all([
+            StorageService.getCheckpointRunners(raceId),
+            StorageService.getBaseStationRunners(raceId),
+          ]);
+          return [...checkpointRunners, ...baseStationRunners];
         } catch (error) {
           console.error('Failed to load runners:', error);
           return [];
@@ -321,24 +325,33 @@ const useBaseOperationsStore = create(
       calculateStats: (runners) => {
         const { currentRace } = get();
         const total = currentRace ? (currentRace.maxRunner - currentRace.minRunner + 1) : 0;
-        const byNumber = new Map();
+
+        // Runners with a base station record (checkpointNumber === 0, status 'passed') are finishers.
+        // All other records use the highest-checkpoint entry to determine current status.
+        const finishedAtBase = new Set(
+          runners
+            .filter(r => r.checkpointNumber === 0 && r.status === RUNNER_STATUSES.PASSED)
+            .map(r => r.number)
+        );
+
+        const byCheckpoint = new Map();
         for (const runner of runners) {
-          const existing = byNumber.get(runner.number);
+          if (runner.checkpointNumber === 0) continue; // base station handled above
+          const existing = byCheckpoint.get(runner.number);
           if (!existing || runner.checkpointNumber > existing.checkpointNumber) {
-            byNumber.set(runner.number, runner);
+            byCheckpoint.set(runner.number, runner);
           }
         }
-        const counts = Array.from(byNumber.values()).reduce(
-          (acc, runner) => {
-            const s = runner.status;
-            if (s === RUNNER_STATUSES.FINISHED || s === RUNNER_STATUSES.PASSED || s === 'finished') acc.finished++;
-            else if (s === RUNNER_STATUSES.DNF) acc.dnf++;
-            else if (s === RUNNER_STATUSES.DNS || s === RUNNER_STATUSES.NON_STARTER || s === 'dns') acc.dns++;
-            else acc.active++;
-            return acc;
-          },
-          { finished: 0, active: 0, dnf: 0, dns: 0 }
-        );
+
+        const counts = { finished: finishedAtBase.size, active: 0, dnf: 0, dns: 0 };
+        for (const runner of byCheckpoint.values()) {
+          if (finishedAtBase.has(runner.number)) continue;
+          const s = runner.status;
+          if (s === RUNNER_STATUSES.DNF) counts.dnf++;
+          else if (s === RUNNER_STATUSES.DNS || s === RUNNER_STATUSES.NON_STARTER || s === 'dns') counts.dns++;
+          else counts.active++;
+        }
+
         return { total, ...counts };
       },
 
