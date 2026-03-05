@@ -393,7 +393,7 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
       {/* Action Buttons */}
       <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
         <Button
-          variant="ghost"
+          variant="outline"
           onClick={onBack}
         >
           Back: Race Details
@@ -405,7 +405,7 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
             loading={isLoading}
             disabled={ranges.length === 0}
           >
-            Create Race
+            Next: Waves →
           </Button>
         </ButtonGroup>
       </div>
