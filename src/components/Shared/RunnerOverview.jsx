@@ -3,9 +3,9 @@ import { useRaceStore } from '../../store/useRaceStore.js';
 import { RUNNER_STATUSES, APP_MODES } from '../../types/index.js';
 import TimeUtils from '../../services/timeUtils.js';
 
-const RunnerOverview = () => {
+const RunnerOverview = ({ runners: runnersProp } = {}) => {
   const { 
-    runners, 
+    runners: storeRunners, 
     markRunnerStatus, 
     getRunnerCounts,
     isSegmentCalled,
@@ -13,6 +13,8 @@ const RunnerOverview = () => {
     raceConfig,
     isLoading 
   } = useRaceStore();
+
+  const runners = runnersProp ?? storeRunners;
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');

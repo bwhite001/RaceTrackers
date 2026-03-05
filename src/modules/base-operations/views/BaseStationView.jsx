@@ -230,11 +230,23 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             {activeTab === 'overview' && (
               <div className="space-y-6">
                 <HeadsUpGrid
-                  runners={(runners ?? []).map(r => ({
-                    number: r.number,
-                    status: r.status,
-                    checkpointStatuses: r.checkpoints ?? {},
-                  }))}
+                  runners={(() => {
+                    // Group flat checkpoint/base-station records by runner number
+                    const byRunner = new Map();
+                    for (const r of (runners ?? [])) {
+                      if (!byRunner.has(r.number)) {
+                        byRunner.set(r.number, { number: r.number, status: r.status, checkpointStatuses: {} });
+                      }
+                      const entry = byRunner.get(r.number);
+                      if (r.checkpointNumber !== 0) {
+                        entry.checkpointStatuses[r.checkpointNumber] = r.status;
+                      } else {
+                        // base station record — use as overall status
+                        entry.status = r.status;
+                      }
+                    }
+                    return Array.from(byRunner.values());
+                  })()}
                   checkpoints={checkpoints ?? []}
                 />
                 <RaceOverview />

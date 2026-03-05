@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Badge } from '../../../design-system/components/Badge';
 import { Card } from '../../../design-system/components/Card';
 import { RUNNER_STATUSES } from '../../../types';
+import TimeUtils from '../../../services/timeUtils.js';
 
 const statusVariant = {
   [RUNNER_STATUSES.FINISHED]: 'success',
@@ -77,7 +78,7 @@ const Leaderboard = ({ runners = [] }) => {
                       {runner.number}
                     </td>
                     <td className="px-4 py-3 text-sm font-mono text-gray-700 dark:text-gray-300">
-                      {runner.commonTime}
+                      {runner.commonTime ? TimeUtils.formatTime(runner.commonTime, 'HH:mm') : '—'}
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant={statusVariant[runner.status] ?? 'default'} size="sm">
