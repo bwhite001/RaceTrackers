@@ -741,7 +741,7 @@ export class BaseOperationsRepository extends BaseRepository {
   // REPORTS GENERATION
   // ============================================================================
 
-  async generateMissingNumbersReport(raceId, checkpoint) {
+  async generateMissingNumbersReport(raceId, checkpoint, format = 'csv') {
     try {
       const race = await db.races.get(raceId);
       const missingRunners = await this.getMissingRunners(raceId, checkpoint);
@@ -759,10 +759,11 @@ export class BaseOperationsRepository extends BaseRepository {
         missingRunners.map(r => r.number).join(', ')
       ].join('\n');
       
+      const ext = format === 'csv' ? 'csv' : 'txt';
       return {
         content,
-        filename: `missing-numbers-cp${checkpoint}-${race.date}.txt`,
-        mimeType: 'text/plain'
+        filename: `missing-numbers-cp${checkpoint}-${race.date}.${ext}`,
+        mimeType: format === 'csv' ? 'text/csv' : 'text/plain'
       };
     } catch (error) {
       console.error('Error generating missing numbers report:', error);

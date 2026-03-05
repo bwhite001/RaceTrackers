@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Card, CardBody, Badge } from '../design-system/components';
 import ImportExportModal from '../components/ImportExport/ImportExportModal';
 import { useRaceStore } from '../store/useRaceStore';
-import useNavigationStore from '../shared/store/navigationStore';
+import useNavigationStore, { MODULE_TYPES } from '../shared/store/navigationStore';
 import { useToast } from '../shared/components/ui/Toast';
+import PageHeader from '../shared/components/PageHeader';
 import {
   formatRaceDate,
   getRaceStatus,
@@ -190,7 +191,14 @@ const RaceManagementView = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+      <PageHeader
+        variant="operational"
+        title="Race Management"
+        moduleType={MODULE_TYPES.RACE_MAINTENANCE}
+        onExit={handleBackToHome}
+      />
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
@@ -202,12 +210,6 @@ const RaceManagementView = () => {
               Manage all your races - create, edit, duplicate, and export
             </p>
           </div>
-          <Button variant="secondary" onClick={handleBackToHome}>
-            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-            </svg>
-            Back to Home
-          </Button>
         </div>
 
         {/* Action Bar */}
@@ -367,6 +369,7 @@ const RaceManagementView = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

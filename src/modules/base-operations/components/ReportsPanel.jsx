@@ -160,7 +160,7 @@ const ReportsPanel = () => {
       </div>
 
       {/* Report Type Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {Object.entries(REPORT_TYPES).map(([type, { label, description, icon }]) => (
           <button
             key={type}
@@ -168,13 +168,13 @@ const ReportsPanel = () => {
             className={`p-4 rounded-lg border-2 text-left flex items-start space-x-4 ${
               selectedReport === type
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                : 'border-gray-200 dark:border-gray-700'
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
             }`}
           >
             <div className={`mt-1 ${
               selectedReport === type
                 ? 'text-primary-500'
-                : 'text-gray-400 dark:text-gray-500'
+                : 'text-gray-500 dark:text-gray-400'
             }`}>
               {icon}
             </div>
@@ -329,11 +329,11 @@ const ReportsPanel = () => {
       </div>
 
       {/* Info */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+      <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+        <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
           About Reports
         </h4>
-        <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+        <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
           <li>• <strong>Missing Numbers Report:</strong> Shows runners who haven't checked in</li>
           <li>• <strong>Out List Report:</strong> Lists withdrawn and vetted-out runners</li>
           <li>• <strong>Checkpoint Log:</strong> Detailed log of all checkpoint crossings</li>

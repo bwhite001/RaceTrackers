@@ -19,7 +19,7 @@ const MODULE_BADGE = {
   },
   [MODULE_TYPES.BASE_STATION]: {
     label: 'Base Station',
-    classes: 'bg-emerald-500/20 text-emerald-200 ring-1 ring-emerald-400/30',
+    classes: 'bg-blue-500/20 text-blue-200 ring-1 ring-blue-400/30',
   },
   [MODULE_TYPES.RACE_MAINTENANCE]: {
     label: 'Race Maintenance',

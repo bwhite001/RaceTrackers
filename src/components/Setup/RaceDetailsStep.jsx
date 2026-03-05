@@ -210,7 +210,7 @@ const RaceDetailsStep = ({ data = {}, onNext, onCancel, isLoading }) => {
 
         <div className="mt-4">
           <FormLabel>Checkpoint Names (Optional)</FormLabel>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+          <div className="grid grid-cols-1 gap-4 mt-2">
             {formData.checkpoints.map((checkpoint, index) => (
               <FormGroup key={checkpoint.number}>
                 <FormLabel htmlFor={`checkpoint-${index}`} className="sr-only">
