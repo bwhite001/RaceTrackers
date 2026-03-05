@@ -122,10 +122,10 @@ export const getRaceProgress = (race, runners = []) => {
   }
 
   const total = runners.length;
-  const notStarted = runners.filter(r => r.status === 'not_started').length;
+  const notStarted = runners.filter(r => !r.status || r.status === 'not-started' || r.status === 'not_started').length;
   const active = runners.filter(r => r.status === 'active').length;
   const completed = runners.filter(r => 
-    ['finished', 'dnf', 'dns', 'disqualified'].includes(r.status)
+    ['finished', 'dnf', 'dns', 'disqualified', 'passed'].includes(r.status)
   ).length;
 
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;

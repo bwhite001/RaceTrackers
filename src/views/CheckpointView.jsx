@@ -180,7 +180,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
           </div>
         )}
         {activeTab === 'callout' && <CalloutSheet />}
-        {activeTab === 'overview' && <RunnerOverview />}
+        {activeTab === 'overview' && <RunnerOverview runners={runners} />}
       </main>
 
       {/* QuickEntryBar — sticky above mobile tab bar, inline on desktop */}
