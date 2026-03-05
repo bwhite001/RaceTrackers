@@ -269,7 +269,7 @@ const useBaseOperationsStore = create(
         const repo = new BaseOperationsRepository();
         switch (reportType) {
           case 'missing':
-            return repo.generateMissingNumbersReport(currentRaceId, options.checkpoint ?? 1);
+            return repo.generateMissingNumbersReport(currentRaceId, options.checkpoint ?? 1, options.format ?? 'csv');
           case 'outList':
             return repo.generateOutListReport(currentRaceId);
           case 'checkpointLog':

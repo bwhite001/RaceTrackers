@@ -14,7 +14,7 @@ describe('SessionHistoryPane', () => {
     render(<SessionHistoryPane batches={batches} checkpoints={checkpoints} activeBib={null} onVoid={vi.fn()} />);
     expect(screen.getByText('Ridgeline')).toBeInTheDocument();
     expect(screen.getByText('Start')).toBeInTheDocument();
-    expect(screen.getByText('10:30')).toBeInTheDocument();
+    expect(screen.getByText(/10:30/)).toBeInTheDocument();
   });
 
   it('shows empty state when no batches', () => {

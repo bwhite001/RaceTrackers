@@ -12,8 +12,8 @@ const BatchCard = ({ batch, checkpointName, isHighlighted, onVoid }) => {
       <div className="flex items-center justify-between">
         <div>
           <span className="font-semibold text-sm">{checkpointName}</span>
-          <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">{batch.commonTime}</span>
-          <span className="ml-2 text-xs text-gray-400">entered {submittedAt}</span>
+          <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Common: {batch.commonTime}</span>
+          <span className="ml-2 text-xs text-gray-400">Recorded: {submittedAt}</span>
         </div>
         {!batch.voided && (
           <button type="button" aria-label="expand" onClick={() => setExpanded(v => !v)}

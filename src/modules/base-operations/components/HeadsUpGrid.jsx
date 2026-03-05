@@ -76,16 +76,16 @@ const HeadsUpGrid = ({ runners = [], checkpoints = [] }) => {
         <table className="w-full text-sm border-collapse" aria-label="Runner checkpoint grid">
           <thead>
             <tr className="bg-gray-50 dark:bg-gray-900/50">
-              <th className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
+              <th className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                 Bib #
               </th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                 Overall
               </th>
               {sortedCheckpoints.map(cp => (
                 <th
                   key={cp.number}
-                  className="px-3 py-2 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 whitespace-nowrap"
+                  className="px-3 py-2 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap"
                   title={cp.name}
                 >
                   <span className="hidden md:inline">{cp.name || `CP ${cp.number}`}</span>

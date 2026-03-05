@@ -13,6 +13,7 @@ const RaceOverview = () => {
   const [searchParams] = useSearchParams();
   const raceId = searchParams.get('raceId');
   const [showDistribute, setShowDistribute] = useState(false);
+  const [showSuccessBanner, setShowSuccessBanner] = useState(!!searchParams.get('raceId'));
   
   const {
     currentRace: raceConfig,
@@ -118,7 +119,7 @@ const RaceOverview = () => {
   return (
     <div className="max-w-7xl mx-auto p-6">
       {/* Success Message */}
-      {raceId && (
+      {showSuccessBanner && (
         <Card variant="elevated" className="mb-6 border-l-4 border-green-500">
           <CardBody>
             <div className="flex items-start">
@@ -135,6 +136,15 @@ const RaceOverview = () => {
                   Your race has been configured. Select an operation mode below to begin.
                 </p>
               </div>
+              <button
+                onClick={() => setShowSuccessBanner(false)}
+                className="ml-3 text-green-500 hover:text-green-700 dark:hover:text-green-300 flex-shrink-0"
+                aria-label="Dismiss"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
             </div>
           </CardBody>
         </Card>
@@ -144,7 +154,7 @@ const RaceOverview = () => {
       <Card variant="elevated" className="mb-6">
         <CardHeader
           title={raceConfig.name}
-          subtitle={`${raceConfig.date} • ${raceConfig.startTime || 'No start time set'}`}
+          subtitle={`${new Date(raceConfig.date).toLocaleDateString('en-AU')} • ${raceConfig.startTime || 'No start time set'}`}
         />
         <CardBody>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -224,7 +234,7 @@ const RaceOverview = () => {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Select Operation Mode
         </h1>
-        <Button variant="secondary" onClick={handleExitToHome}>
+        <Button variant="primary" onClick={handleExitToHome}>
           Exit to Homepage
         </Button>
       </div>

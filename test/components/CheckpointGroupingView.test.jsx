@@ -47,7 +47,7 @@ describe('CheckpointGroupingView', () => {
     mockDbQuery.mockResolvedValue([]);
     render(<CheckpointGroupingView />);
     await waitFor(() =>
-      expect(screen.getByText(/no checkpoint data imported yet/i)).toBeDefined()
+      expect(screen.getByText(/no checkpoint data/i)).toBeDefined()
     );
   });
 

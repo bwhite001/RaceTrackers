@@ -257,7 +257,7 @@ const DataEntry = ({ onUnsavedChanges }) => {
           </div>
           <div>
             <span className="text-gray-500 dark:text-gray-400">DNF/DNS:</span>
-            <span className="ml-2 font-medium text-red-600 dark:text-red-400">
+            <span className={`ml-2 font-medium ${stats.dnf + stats.dns > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
               {stats.dnf + stats.dns}
             </span>
           </div>

@@ -38,13 +38,7 @@ function normalizeRange(r) {
 const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCreate, isLoading }) => {
 
   // Initialize with default range if no initial ranges provided
-  const defaultRange = initialRanges.length === 0 ? [{
-    min: 100,
-    max: 200,
-    description: 'Runners 100-200',
-    count: 101,
-    individualNumbers: Array.from({ length: 101 }, (_, i) => 100 + i)
-  }] : [];
+  const defaultRange = [];
   
   const [ranges, setRanges] = useState(
     initialRanges.length > 0 ? initialRanges.map(normalizeRange) : defaultRange
