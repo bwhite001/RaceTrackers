@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { RUNNER_STATUSES, GROUP_SIZES } from "../../types/index.js";
 import TimeUtils from "../../services/timeUtils.js";
 import SearchInput from "./RunnerGrid/SearchInput";
@@ -37,6 +37,13 @@ const SharedRunnerGrid = ({
     const [editingTime, setEditingTime] = useState(null); // runnerNumber being edited
     const [editTimeValue, setEditTimeValue] = useState("");
     const [clickTimeout, setClickTimeout] = useState(null);
+
+    // Auto-expand the first group on initial load
+    useEffect(() => {
+        if (groupedRunners.length > 0) {
+            setExpandedGroups(prev => prev.size === 0 ? new Set([groupedRunners[0].start]) : prev);
+        }
+    }, [groupedRunners]);
 
     // Filter and deduplicate runners based on search term
     const filteredRunners = useMemo(() => {

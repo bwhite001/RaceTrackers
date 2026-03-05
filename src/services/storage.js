@@ -1,5 +1,6 @@
 import db from '../shared/services/database/schema.js';
 import { BASE_STATION_CP } from '../types/index.js';
+import TimeUtils from './timeUtils.js';
 
 // Storage service for managing race data
 export class StorageService {
@@ -684,22 +685,32 @@ export class StorageService {
 
   static async markCheckpointRunner(raceId, checkpointNumber, runnerNumber, callInTime = null, markOffTime = null, status = 'passed') {
     const timestamp = markOffTime || callInTime || new Date().toISOString();
+    const { commonTime, commonTimeLabel } = status === 'passed'
+      ? TimeUtils.getCommonTimeLabel(timestamp)
+      : { commonTime: null, commonTimeLabel: null };
     return this.updateCheckpointRunner(raceId, checkpointNumber, runnerNumber, {
       status,
       callInTime: callInTime || timestamp,
-      markOffTime: markOffTime || timestamp
+      markOffTime: markOffTime || timestamp,
+      commonTime,
+      commonTimeLabel,
     });
   }
 
   static async bulkMarkCheckpointRunners(raceId, checkpointNumber, runnerNumbers, callInTime = null, markOffTime = null, status = 'passed') {
     try {
       const timestamp = markOffTime || callInTime || new Date().toISOString();
-      
+      const { commonTime, commonTimeLabel } = status === 'passed'
+        ? TimeUtils.getCommonTimeLabel(timestamp)
+        : { commonTime: null, commonTimeLabel: null };
+
       for (const runnerNumber of runnerNumbers) {
         await this.updateCheckpointRunner(raceId, checkpointNumber, runnerNumber, {
           status,
           callInTime: callInTime || timestamp,
-          markOffTime: markOffTime || timestamp
+          markOffTime: markOffTime || timestamp,
+          commonTime,
+          commonTimeLabel,
         });
       }
     } catch (error) {

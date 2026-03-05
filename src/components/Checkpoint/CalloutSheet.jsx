@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import useCheckpointStore from '../../modules/checkpoint-operations/store/checkpointStore';
 import TimeUtils from '../../services/timeUtils.js';
 import { SEGMENT_DURATION_MINUTES } from '../../types/index.js';
+import Button from '../../design-system/components/Button/Button.jsx';
 
 const CalloutSheet = () => {
   const { 
@@ -55,17 +56,17 @@ const CalloutSheet = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div>
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           Callout Sheet
         </h3>
-        <div className="text-sm text-gray-600 dark:text-gray-300">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           {SEGMENT_DURATION_MINUTES}-minute segments
-        </div>
+        </p>
       </div>
 
       {/* Uncalled Segments */}
-      {uncalledSegments.length > 0 ? (
+      {uncalledSegments.length > 0 && (
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900 dark:text-white">
             Pending Callouts ({uncalledSegments.length})
@@ -95,10 +96,12 @@ const CalloutSheet = () => {
                         {formatRunnerList(segment.runners)}
                       </div>
                     </div>
-                    <button
+                    <Button
+                      variant="primary"
+                      size="sm"
                       onClick={() => handleMarkCalled(segment)}
                       disabled={loading || isProcessing}
-                      className="ml-4 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="ml-4"
                     >
                       {isProcessing ? (
                         <div className="flex items-center space-x-2">
@@ -108,14 +111,17 @@ const CalloutSheet = () => {
                       ) : (
                         'Mark Called'
                       )}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               );
             })}
           </div>
         </div>
-      ) : (
+      )}
+
+      {/* Empty state — only when no segments at all */}
+      {uncalledSegments.length === 0 && calledSegments.length === 0 && (
         <div className="card p-6 text-center">
           <div className="text-gray-500 dark:text-gray-400">
             <svg className="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
