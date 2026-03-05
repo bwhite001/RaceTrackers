@@ -25,11 +25,22 @@ const BASE_URL = 'http://localhost:3000';
  * @param {{ min: number, max: number }} opts.runnerRange
  * @returns {Promise<number>} raceId
  */
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {object} opts
+ * @param {string}  opts.name
+ * @param {string}  opts.date          yyyy-MM-dd
+ * @param {string}  opts.startTime     HH:mm
+ * @param {number}  [opts.numCheckpoints]
+ * @param {Array<{number: number, name: string}>} [opts.checkpoints]  Named checkpoints (overrides numCheckpoints)
+ * @param {{ min: number, max: number }} opts.runnerRange
+ */
 export async function seedRace(page, {
   name = 'E2E Seed Race',
   date = '2025-07-01',
   startTime = '07:00',
   numCheckpoints = 2,
+  checkpoints = null,
   runnerRange = { min: 100, max: 115 },
 } = {}) {
   // Navigate to app so Dexie initialises the schema before we touch the DB.
@@ -37,7 +48,7 @@ export async function seedRace(page, {
   await page.waitForSelector('h1', { timeout: 15000 });
 
   const raceId = await page.evaluate(async (cfg) => {
-    const { name, date, startTime, numCheckpoints, runnerRange } = cfg;
+    const { name, date, startTime, numCheckpoints, checkpoints: namedCps, runnerRange } = cfg;
 
     const openDB = () => new Promise((res, rej) => {
       const req = indexedDB.open('RaceTrackerDB');
@@ -101,12 +112,13 @@ export async function seedRace(page, {
       tx.onerror = () => rej(tx.error);
     });
 
-    // Insert checkpoints.
+    // Insert checkpoints (named if provided, else default "Checkpoint N").
     await new Promise((res, rej) => {
       const tx = db.transaction('checkpoints', 'readwrite');
       const store = tx.objectStore('checkpoints');
-      for (let i = 1; i <= numCheckpoints; i++) {
-        store.add({ raceId, number: i, name: `Checkpoint ${i}` });
+      const cpList = namedCps || Array.from({ length: numCheckpoints }, (_, i) => ({ number: i + 1, name: `Checkpoint ${i + 1}` }));
+      for (const cp of cpList) {
+        store.add({ raceId, number: cp.number, name: cp.name });
       }
       tx.oncomplete = res;
       tx.onerror = () => rej(tx.error);
@@ -121,7 +133,7 @@ export async function seedRace(page, {
     });
 
     return raceId;
-  }, { name, date, startTime, numCheckpoints, runnerRange });
+  }, { name, date, startTime, numCheckpoints, checkpoints, runnerRange });
 
   // Set selectedRaceForMode + currentRaceId in Zustand's persisted localStorage so
   // BaseStationView doesn't redirect to "/" when no race is selected.
