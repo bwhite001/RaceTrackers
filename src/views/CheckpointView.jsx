@@ -31,7 +31,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   
   // Store hooks
   const { startOperation } = useNavigationStore();
-  const { currentRace, loadCurrentRace } = useRaceMaintenanceStore();
+  const { currentRace, loadCurrentRace, checkpoints = [] } = useRaceMaintenanceStore();
   const { 
     runners, 
     loading, 
@@ -115,7 +115,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         variant="operational"
         title={currentRace?.name}
         moduleType={MODULE_TYPES.CHECKPOINT}
-        moduleLabel={`Checkpoint ${checkpointId}`}
+        moduleLabel={checkpoints.find(cp => cp.number === parseInt(checkpointId))?.name || `Checkpoint ${checkpointId}`}
         onExit={onExitAttempt}
         actions={[
           {
@@ -194,7 +194,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         isOpen={showExportModal}
         raceId={currentRace?.id}
         checkpointNumber={parseInt(checkpointId)}
-        checkpointName={`Checkpoint ${checkpointId}`}
+        checkpointName={checkpoints.find(cp => cp.number === parseInt(checkpointId))?.name || `Checkpoint ${checkpointId}`}
         raceName={currentRace?.name ?? ''}
         onClose={() => setShowExportModal(false)}
       />
