@@ -745,12 +745,14 @@ export class BaseOperationsRepository extends BaseRepository {
     try {
       const race = await db.races.get(raceId);
       const missingRunners = await this.getMissingRunners(raceId, checkpoint);
+      const cpRecord = await db.checkpoints.where(['raceId', 'number']).equals([raceId, checkpoint]).first();
+      const checkpointLabel = cpRecord?.name || `Checkpoint ${checkpoint}`;
       
       const content = [
         `Missing Numbers Report`,
         `Race: ${race.name}`,
         `Date: ${race.date}`,
-        `Checkpoint: ${checkpoint}`,
+        `Checkpoint: ${checkpointLabel}`,
         `Generated: ${new Date().toLocaleString()}`,
         ``,
         `Total Missing: ${missingRunners.length}`,
@@ -821,6 +823,8 @@ export class BaseOperationsRepository extends BaseRepository {
   async generateCheckpointLogReport(raceId, checkpoint) {
     try {
       const race = await db.races.get(raceId);
+      const cpRecord = await db.checkpoints.where(['raceId', 'number']).equals([raceId, checkpoint]).first();
+      const checkpointLabel = cpRecord?.name || `Checkpoint ${checkpoint}`;
       const entries = await db.base_station_runners
         .where(['raceId', 'checkpointNumber'])
         .equals([raceId, checkpoint])
@@ -839,7 +843,7 @@ export class BaseOperationsRepository extends BaseRepository {
       const csvContent = [
         `# Checkpoint Log Report`,
         `# Race: ${race.name}`,
-        `# Checkpoint: ${checkpoint}`,
+        `# Checkpoint: ${checkpointLabel}`,
         `# Date: ${race.date}`,
         `# Generated: ${new Date().toLocaleString()}`,
         `# Total Entries: ${entries.length}`,
