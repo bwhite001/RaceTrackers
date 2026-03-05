@@ -170,7 +170,7 @@ const RunnerOverview = ({ runners: runnersProp } = {}) => {
         </div>
         
         <div className="card p-4 text-center">
-          <div className="text-2xl font-bold text-red-500 dark:text-red-400">
+          <div className={`text-2xl font-bold ${counts.nonStarter + counts.dnf > 0 ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
             {counts.nonStarter + counts.dnf}
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-300">
@@ -284,19 +284,19 @@ const RunnerOverview = ({ runners: runnersProp } = {}) => {
             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
               {filteredAndSortedRunners.map((runner) => (
                 <tr key={runner.number} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                  <td className="px-6 py-1 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                     {runner.number}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-1 whitespace-nowrap">
                     <span className={getStatusBadgeClass(runner.status)}>
                       {getStatusLabel(runner.status)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    {runner.recordedTime ? TimeUtils.formatTime(runner.recordedTime) : '--:--:--'}
+                  <td className="px-6 py-1 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    {runner.recordedTime ? TimeUtils.formatTime(runner.recordedTime) : '—'}
                   </td>
                   {mode === APP_MODES.CHECKPOINT && (
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    <td className="px-6 py-1 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {runner.recordedTime ? (
                         isSegmentCalled(runner.recordedTime) ? (
                           <span className="text-green-600 dark:text-green-400">✓</span>
@@ -308,10 +308,10 @@ const RunnerOverview = ({ runners: runnersProp } = {}) => {
                       )}
                     </td>
                   )}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                  <td className="px-6 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     {getRaceElapsedTime(runner.recordedTime)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <td className="px-6 py-1 whitespace-nowrap text-right text-sm font-medium">
                     {canChangeStatus(runner) && (
                       <div className="flex items-center justify-end space-x-2">
                         {getAvailableStatuses(runner.status).map((status) => (
