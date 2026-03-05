@@ -122,7 +122,8 @@ const ReportsPanel = () => {
     generateReport,
     downloadReport,
     previewReport,
-    loading
+    loading,
+    checkpoints = []
   } = useBaseOperationsStore();
 
   const handleGenerate = async () => {
@@ -246,9 +247,9 @@ const ReportsPanel = () => {
                 onChange={(e) => setCheckpoint(parseInt(e.target.value))}
                 className="form-input w-full"
               >
-                {[1, 2, 3, 4, 5].map(cp => (
-                  <option key={cp} value={cp}>
-                    Checkpoint {cp}
+                {(checkpoints.length > 0 ? checkpoints : []).map(cp => (
+                  <option key={cp.number} value={cp.number}>
+                    {cp.name || `Checkpoint ${cp.number}`}
                   </option>
                 ))}
               </select>

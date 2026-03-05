@@ -15,6 +15,7 @@ const useBaseOperationsStore = create(
       // State
       currentRaceId: null,
       currentRace: null,
+      checkpoints: [],
       runners: [],
       sessionBatches: [],
       loading: false,
@@ -47,6 +48,9 @@ const useBaseOperationsStore = create(
           const raceConfig = await get().loadRaceConfig(raceId);
           if (!raceConfig) throw new Error('Race configuration not found');
 
+          // Load checkpoints
+          const checkpoints = await db.checkpoints.where('raceId').equals(parseInt(raceId, 10)).sortBy('number');
+
           // Initialize runners if needed
           const existingRunners = await get().loadRunners(raceId);
           if (existingRunners.length === 0) {
@@ -56,6 +60,7 @@ const useBaseOperationsStore = create(
           set({
             currentRaceId: raceId,
             currentRace: raceConfig,
+            checkpoints,
             loading: false,
             lastSync: new Date().toISOString()
           });

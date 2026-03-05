@@ -64,13 +64,11 @@ const RaceOverview = () => {
   })();
 
   const handleGoToCheckpoint = (checkpointNumber) => {
-    endOperation(); // End current operation
     startOperation(MODULE_TYPES.CHECKPOINT);
     navigate(`/checkpoint/${checkpointNumber}`);
   };
 
   const handleGoToBaseStation = () => {
-    endOperation(); // End current operation
     startOperation(MODULE_TYPES.BASE_STATION);
     navigate('/base-station/operations');
   };
@@ -176,32 +174,45 @@ const RaceOverview = () => {
                 Configured Runner Ranges:
               </p>
               <div className="flex flex-wrap gap-2">
-                {raceConfig.runnerRanges.map((range, index) => {
-                  // Handle both string format (e.g., "100-200") and object format
-                  let displayText;
-                  if (typeof range === 'string') {
-                    displayText = range;
-                  } else if (range && typeof range === 'object') {
-                    if (range.individualNumbers && range.individualNumbers.length > 0) {
-                      displayText = range.individualNumbers.join(', ');
-                    } else if (range.min !== undefined && range.max !== undefined) {
-                      displayText = `${range.min}-${range.max}`;
-                    } else {
-                      displayText = range.description || 'Range';
-                    }
-                  } else {
-                    displayText = 'Unknown';
+                {(() => {
+                  // Detect if runnerRanges is expanded individual runners (has .number field)
+                  const isExpandedRunners = raceConfig.runnerRanges.length > 0 && raceConfig.runnerRanges[0]?.number !== undefined;
+                  if (isExpandedRunners) {
+                    const nums = raceConfig.runnerRanges.map(r => r.number).sort((a, b) => a - b);
+                    const min = nums[0], max = nums[nums.length - 1];
+                    const total = nums.length;
+                    return (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-navy-100 text-navy-800 dark:bg-navy-900 dark:text-navy-200">
+                        {min}–{max} ({total} runners)
+                      </span>
+                    );
                   }
-                  
-                  return (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-navy-100 text-navy-800 dark:bg-navy-900 dark:text-navy-200"
-                    >
-                      {displayText}
-                    </span>
-                  );
-                })}
+                  return raceConfig.runnerRanges.map((range, index) => {
+                    // Handle both string format (e.g., "100-200") and object format
+                    let displayText;
+                    if (typeof range === 'string') {
+                      displayText = range;
+                    } else if (range && typeof range === 'object') {
+                      if (range.individualNumbers && range.individualNumbers.length > 0) {
+                        displayText = range.individualNumbers.join(', ');
+                      } else if (range.min !== undefined && range.max !== undefined) {
+                        displayText = `${range.min}-${range.max}`;
+                      } else {
+                        displayText = range.description || 'Range';
+                      }
+                    } else {
+                      displayText = 'Unknown';
+                    }
+                    return (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-navy-100 text-navy-800 dark:bg-navy-900 dark:text-navy-200"
+                      >
+                        {displayText}
+                      </span>
+                    );
+                  });
+                })()}
               </div>
             </div>
           )}
