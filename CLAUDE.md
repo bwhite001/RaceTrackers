@@ -152,3 +152,64 @@ Use `src/services/timeUtils.js` for all time/date operations — not raw `Date()
 ## PWA / Offline
 
 After changes affecting offline behavior, increment the version in `vite.config.js` PWA config to force service worker cache update.
+
+## Playwright Screenshot Guide (Required for All New Features)
+
+Every new feature **must** include a Playwright journey spec that captures screenshots for the user guide. This is non-negotiable — the guide is auto-generated from test output.
+
+### 1. Create a journey spec
+
+Add a numbered file in `test/e2e/playwright/` (e.g. `16-my-feature.journey.spec.js`):
+
+```javascript
+import { test, expect } from './fixtures.js';
+
+test.describe('My Feature Journey', () => {
+  test('describes the user action in plain language', async ({ page, step }) => {
+    await step('Screen label — becomes the screenshot caption', async () => {
+      // navigate / interact
+      await expect(page.getByRole('heading', { name: /my feature/i })).toBeVisible();
+    });
+
+    await step('Next meaningful state — another caption', async () => {
+      // ...
+    });
+  });
+});
+```
+
+- Use the `step(title, fn)` fixture from `fixtures.js` — it auto-captures a screenshot before and after each step.
+- Step titles become captions in the generated guide.
+- Test names (the string passed to `test(...)`) must be unique across all specs.
+
+### 2. Register in `generate-guide.js`
+
+Add an entry to `SECTION_MAP` in `test/e2e/playwright/generate-guide.js`:
+
+```javascript
+'describes the user action in plain language': 'my-section',
+```
+
+If this is a new section, also add to the `CHAPTERS` array:
+
+```javascript
+{ key: 'my-section', title: 'My Feature Title', intro: 'One sentence describing this section.' },
+```
+
+### 3. Regenerate the user guide
+
+```bash
+make build
+npx playwright test test/e2e/playwright/16-my-feature.journey.spec.js
+npm run generate:guide
+```
+
+Commit the updated `docs/guides/user-guide.md`, `docs/guides/user-guide.html`, and `docs/guides/assets/*.png` alongside the feature code.
+
+### Checklist for new features
+
+- [ ] Journey spec created in `test/e2e/playwright/`
+- [ ] Every user-visible step wrapped in `step(title, fn)`
+- [ ] Test name registered in `SECTION_MAP` in `generate-guide.js`
+- [ ] New chapter added to `CHAPTERS` if this is a new section
+- [ ] `npm run generate:guide` run and output committed

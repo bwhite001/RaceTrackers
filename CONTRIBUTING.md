@@ -245,6 +245,59 @@ npm run test:e2e
 - Clean up after tests
 - Use test data factories
 
+### Playwright Screenshot Guide (Required for All New Features)
+
+Every new user-facing feature **must** include a Playwright journey spec that captures screenshots for the auto-generated user guide. The guide at `docs/guides/user-guide.md` is built directly from these tests.
+
+#### Step 1 — Create a journey spec
+
+Add a numbered file in `test/e2e/playwright/` (e.g. `16-my-feature.journey.spec.js`):
+
+```javascript
+import { test, expect } from './fixtures.js';
+
+test.describe('My Feature Journey', () => {
+  test('describes the user action in plain language', async ({ page, step }) => {
+    await step('Screen label — becomes the screenshot caption', async () => {
+      // navigate / interact
+      await expect(page.getByRole('heading', { name: /my feature/i })).toBeVisible();
+    });
+
+    await step('Next meaningful state — another caption', async () => {
+      // ...
+    });
+  });
+});
+```
+
+- Use the `step(title, fn)` fixture from `fixtures.js` — it auto-captures a screenshot before and after each step.
+- Step titles become captions in the generated guide.
+- Test names (the string passed to `test(...)`) must be unique across all specs.
+
+#### Step 2 — Register in `generate-guide.js`
+
+Add an entry to `SECTION_MAP` in `test/e2e/playwright/generate-guide.js`:
+
+```javascript
+'describes the user action in plain language': 'my-section',
+```
+
+If this is a new section, also add an entry to `CHAPTERS`:
+
+```javascript
+{ key: 'my-section', title: 'My Feature Title', intro: 'One sentence describing this section.' },
+```
+
+#### Step 3 — Regenerate and commit the guide
+
+```bash
+make build
+npx playwright test test/e2e/playwright/16-my-feature.journey.spec.js
+npm run generate:guide
+```
+
+Commit the updated `docs/guides/user-guide.md`, `docs/guides/user-guide.html`, and `docs/guides/assets/*.png` alongside the feature code. PRs that add a user-facing feature without the updated guide will not be merged.
+
 ## Submitting Changes
 
 ### Before Submitting

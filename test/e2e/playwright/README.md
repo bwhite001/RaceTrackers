@@ -2,6 +2,9 @@
 
 End-to-end tests that simulate real operator workflows using [Playwright](https://playwright.dev).
 
+> **Required for all new features:** Every user-facing feature must ship with a journey spec here
+> and an updated `docs/guides/user-guide.md`. See [Adding a New Feature Journey](#adding-a-new-feature-journey) below.
+
 ## Journeys Covered
 
 | File | Journey | Who | Status |
@@ -140,3 +143,58 @@ The following real bugs were discovered and fixed while developing these tests:
 | Tests fail after app UI changes | Update role/text selectors in the relevant spec file |
 | Flaky timing failures | Increase `timeout` in the failing `waitFor` call |
 | Spec 03 all skip | Known gap — base station module not integrated with Dexie |
+
+## Adding a New Feature Journey
+
+All new user-facing features must include a journey spec and an updated user guide. Follow these steps:
+
+### 1. Create the spec
+
+Add a numbered file: `test/e2e/playwright/NN-feature-name.journey.spec.js`
+
+```javascript
+import { test, expect } from './fixtures.js';
+
+test.describe('Feature Name Journey', () => {
+  test('describes the user action in plain language', async ({ page, step }) => {
+    await step('Screen label — becomes the screenshot caption', async () => {
+      // navigate and interact
+      await expect(page.getByRole('heading', { name: /feature/i })).toBeVisible();
+    });
+
+    await step('Next meaningful state', async () => {
+      // ...
+    });
+  });
+});
+```
+
+- Wrap every user-visible step in `step(title, fn)` — the fixture auto-captures a screenshot before and after each step.
+- Step titles become captions in the user guide.
+- Test names must be unique across all spec files.
+
+### 2. Register in `generate-guide.js`
+
+Add to `SECTION_MAP`:
+
+```javascript
+'describes the user action in plain language': 'my-section',
+```
+
+Add to `CHAPTERS` if this is a new section:
+
+```javascript
+{ key: 'my-section', title: 'My Feature', intro: 'One sentence describing this guide section.' },
+```
+
+### 3. Run the spec and regenerate the guide
+
+```bash
+make build
+npx playwright test test/e2e/playwright/NN-feature-name.journey.spec.js
+npm run generate:guide
+```
+
+### 4. Commit everything together
+
+Include the spec file, any `generate-guide.js` changes, and the updated `docs/guides/` output (`.md`, `.html`, `assets/*.png`) in the same PR as the feature code. PRs without an updated guide will not be merged.
