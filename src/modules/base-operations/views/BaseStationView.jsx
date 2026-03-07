@@ -236,16 +236,26 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
                   runners={(() => {
                     // Group flat checkpoint/base-station records by runner number
                     const byRunner = new Map();
+                    const PASSED_STATUSES = new Set([RUNNER_STATUSES.PASSED, RUNNER_STATUSES.MARKED_OFF, RUNNER_STATUSES.CALLED_IN]);
                     for (const r of (runners ?? [])) {
                       if (!byRunner.has(r.number)) {
-                        byRunner.set(r.number, { number: r.number, status: RUNNER_STATUSES.NOT_STARTED, checkpointStatuses: {} });
+                        byRunner.set(r.number, { number: r.number, status: RUNNER_STATUSES.NOT_STARTED, checkpointStatuses: {}, checkpointTimes: {}, hasBaseRecord: false });
                       }
                       const entry = byRunner.get(r.number);
                       if (r.checkpointNumber !== 0) {
                         entry.checkpointStatuses[r.checkpointNumber] = r.status;
+                        const t = r.commonTime || r.markOffTime || r.callInTime;
+                        if (t) entry.checkpointTimes[r.checkpointNumber] = t;
                       } else {
                         // base station record — use as overall status
                         entry.status = r.status;
+                        entry.hasBaseRecord = true;
+                      }
+                    }
+                    // Derive overall status from checkpoint activity when no base-station record exists
+                    for (const entry of byRunner.values()) {
+                      if (!entry.hasBaseRecord && Object.values(entry.checkpointStatuses).some(s => PASSED_STATUSES.has(s))) {
+                        entry.status = RUNNER_STATUSES.ACTIVE;
                       }
                     }
                     return Array.from(byRunner.values());

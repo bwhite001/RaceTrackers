@@ -6,12 +6,18 @@ import RunnerTimeEditModal from './RunnerTimeEditModal';
 /**
  * Status indicator cell for a single runner/checkpoint intersection.
  */
-const StatusCell = ({ status }) => {
+const StatusCell = ({ status, time }) => {
   if (!status || status === RUNNER_STATUSES.NOT_STARTED) {
     return <span className="text-gray-300 dark:text-gray-600 text-xs">—</span>;
   }
   if (status === RUNNER_STATUSES.PASSED || status === RUNNER_STATUSES.MARKED_OFF || status === RUNNER_STATUSES.CALLED_IN) {
-    return <span className="text-green-600 dark:text-green-400 font-bold text-sm" aria-label="passed">✓</span>;
+    const timeLabel = time ? new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null;
+    return (
+      <span className="inline-flex flex-col items-center leading-tight" aria-label="passed">
+        <span className="text-green-600 dark:text-green-400 font-bold text-sm">✓</span>
+        {timeLabel && <span className="text-green-700 dark:text-green-400 text-xs font-mono">{timeLabel}</span>}
+      </span>
+    );
   }
   if (status === RUNNER_STATUSES.DNF || status === RUNNER_STATUSES.DNS) {
     return <span className="text-red-500 dark:text-red-400 font-bold text-sm" aria-label="dnf">✗</span>;
@@ -118,7 +124,7 @@ const HeadsUpGrid = ({ runners = [], checkpoints = [] }) => {
                     className="px-3 py-1.5 text-center border-b border-gray-100 dark:border-gray-700/50 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20"
                     onClick={() => setEditTarget({ runnerNumber: runner.number, checkpointNumber: cp.number })}
                   >
-                    <StatusCell status={runner.checkpointStatuses?.[cp.number]} />
+                    <StatusCell status={runner.checkpointStatuses?.[cp.number]} time={runner.checkpointTimes?.[cp.number]} />
                   </td>
                 ))}
               </tr>
@@ -165,6 +171,7 @@ const HeadsUpGrid = ({ runners = [], checkpoints = [] }) => {
 const OverallStatusBadge = ({ status }) => {
   const map = {
     [RUNNER_STATUSES.NOT_STARTED]: { label: 'Not Started', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' },
+    [RUNNER_STATUSES.ACTIVE]: { label: 'Active', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400' },
     [RUNNER_STATUSES.PASSED]: { label: 'Passed', cls: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' },
     [RUNNER_STATUSES.DNF]: { label: 'DNF', cls: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' },
     [RUNNER_STATUSES.DNS]: { label: 'DNS', cls: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400' },
