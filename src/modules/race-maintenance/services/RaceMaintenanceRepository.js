@@ -20,7 +20,9 @@ export class RaceMaintenanceRepository extends BaseRepository {
           const checkpoints = raceConfig.checkpoints.map(checkpoint => ({
             raceId,
             number: checkpoint.number,
-            name: checkpoint.name || `Checkpoint ${checkpoint.number}`
+            name: checkpoint.name || `Checkpoint ${checkpoint.number}`,
+            ...(checkpoint.linkedCheckpointNumber != null && { linkedCheckpointNumber: checkpoint.linkedCheckpointNumber }),
+            ...(checkpoint.linkLabel != null && { linkLabel: checkpoint.linkLabel }),
           }));
           await db.checkpoints.bulkAdd(checkpoints);
         } else {
