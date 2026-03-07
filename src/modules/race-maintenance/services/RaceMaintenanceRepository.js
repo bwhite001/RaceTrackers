@@ -20,7 +20,9 @@ export class RaceMaintenanceRepository extends BaseRepository {
           const checkpoints = raceConfig.checkpoints.map(checkpoint => ({
             raceId,
             number: checkpoint.number,
-            name: checkpoint.name || `Checkpoint ${checkpoint.number}`
+            name: checkpoint.name || `Checkpoint ${checkpoint.number}`,
+            ...(checkpoint.linkedCheckpointNumber != null && { linkedCheckpointNumber: checkpoint.linkedCheckpointNumber }),
+            ...(checkpoint.linkLabel != null && { linkLabel: checkpoint.linkLabel }),
           }));
           await db.checkpoints.bulkAdd(checkpoints);
         } else {
@@ -117,6 +119,59 @@ export class RaceMaintenanceRepository extends BaseRepository {
     } catch (error) {
       console.error('Error updating checkpoint:', error);
       throw new Error('Failed to update checkpoint');
+    }
+  }
+
+  async linkCheckpoints(raceId, cpNumberA, cpNumberB) {
+    try {
+      const [cpA, cpB] = await Promise.all([
+        db.checkpoints.where({ raceId, number: cpNumberA }).first(),
+        db.checkpoints.where({ raceId, number: cpNumberB }).first(),
+      ]);
+      if (!cpA || !cpB) throw new Error('One or both checkpoints not found');
+
+      // Clear any previous partner's back-link
+      if (cpA.linkedCheckpointNumber != null && cpA.linkedCheckpointNumber !== cpNumberB) {
+        const oldPartnerA = await db.checkpoints.where({ raceId, number: cpA.linkedCheckpointNumber }).first();
+        if (oldPartnerA) await db.checkpoints.update(oldPartnerA.id, { linkedCheckpointNumber: null, linkLabel: null });
+      }
+      if (cpB.linkedCheckpointNumber != null && cpB.linkedCheckpointNumber !== cpNumberA) {
+        const oldPartnerB = await db.checkpoints.where({ raceId, number: cpB.linkedCheckpointNumber }).first();
+        if (oldPartnerB) await db.checkpoints.update(oldPartnerB.id, { linkedCheckpointNumber: null, linkLabel: null });
+      }
+
+      await db.checkpoints.update(cpA.id, { linkedCheckpointNumber: cpNumberB });
+      await db.checkpoints.update(cpB.id, { linkedCheckpointNumber: cpNumberA });
+    } catch (error) {
+      console.error('Error linking checkpoints:', error);
+      throw new Error('Failed to link checkpoints');
+    }
+  }
+
+  async unlinkCheckpoints(raceId, cpNumber) {
+    try {
+      const cp = await db.checkpoints.where({ raceId, number: cpNumber }).first();
+      if (!cp) return;
+      const partnerNumber = cp.linkedCheckpointNumber;
+      await db.checkpoints.update(cp.id, { linkedCheckpointNumber: null, linkLabel: null });
+      if (partnerNumber != null) {
+        const partner = await db.checkpoints.where({ raceId, number: partnerNumber }).first();
+        if (partner) await db.checkpoints.update(partner.id, { linkedCheckpointNumber: null, linkLabel: null });
+      }
+    } catch (error) {
+      console.error('Error unlinking checkpoints:', error);
+      throw new Error('Failed to unlink checkpoints');
+    }
+  }
+
+  async getLinkedCheckpoint(raceId, cpNumber) {
+    try {
+      const cp = await db.checkpoints.where({ raceId, number: cpNumber }).first();
+      if (!cp?.linkedCheckpointNumber) return null;
+      return await db.checkpoints.where({ raceId, number: cp.linkedCheckpointNumber }).first() ?? null;
+    } catch (error) {
+      console.error('Error getting linked checkpoint:', error);
+      return null;
     }
   }
 

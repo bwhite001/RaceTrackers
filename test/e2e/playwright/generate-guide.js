@@ -68,6 +68,7 @@ const SECTION_MAP = {
   'Phase 4e — Records DNF for runner 101 (injured knee)':                    'simulation',
   'Phase 4f — Overview tab shows correct runner statuses':                   'simulation',
   'Phase 4g — Reports tab renders race summary':                             'simulation',
+<<<<<<< HEAD
   'records a batch of runners at base station and views history':            'base-station',
   // Transfer Data (QR device-to-device sync)
   'Transfer Data button appears in checkpoint header':                       'checkpoint',
@@ -77,6 +78,9 @@ const SECTION_MAP = {
   'delta scope shows only entries newer than last share timestamp':          'checkpoint',
   'Receive tab shows scanner and file import fallback':                      'checkpoint',
   'back button returns to the checkpoint view':                              'checkpoint',
+=======
+  'volunteer operates linked turnaround checkpoints from one interface':    'linked-checkpoints',
+>>>>>>> feature/linked-checkpoints
 };
 
 const CHAPTERS = [
@@ -88,6 +92,7 @@ const CHAPTERS = [
   { key: 'navigation',    title: 'Navigating the App',         intro: 'How to move between modules, what to expect on the home screen, and how the app protects active operations from accidental navigation.' },
   { key: 'settings',      title: 'Settings',                   intro: 'Personalise the app. Toggle dark mode and understand how preferences are saved.' },
   { key: 'simulation',    title: 'Complete Race Walkthrough',  intro: 'A full end-to-end race simulation: race director creates the race, checkpoint volunteers mark off runners, and the base station records finish times and statuses.' },
+  { key: 'linked-checkpoints', title: 'Linked Checkpoints (Turnaround Point)', intro: 'How to operate two checkpoints at the same physical location — for example, an out-and-back turnaround where CP1 (outbound) and CP4 (return) are staffed by the same volunteers. Covers the checkpoint picker, dual view, tab switching, and cross-checkpoint overview.' },
 ];
 
 function slugify(str) {

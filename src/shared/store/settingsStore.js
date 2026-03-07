@@ -11,7 +11,11 @@ const useSettingsStore = create((set, get) => ({
     currentRaceId: null,
     currentCheckpoint: null,
     currentBaseStationCheckpoint: 1,
+<<<<<<< HEAD
     leaderboardGroupingMode: 'gender'
+=======
+    linkedCheckpointAlertMinutes: 30
+>>>>>>> feature/linked-checkpoints
   },
   loading: false,
   error: null,
@@ -92,7 +96,11 @@ const useSettingsStore = create((set, get) => ({
       currentRaceId: null,
       currentCheckpoint: null,
       currentBaseStationCheckpoint: 1,
+<<<<<<< HEAD
       leaderboardGroupingMode: 'gender'
+=======
+      linkedCheckpointAlertMinutes: 30
+>>>>>>> feature/linked-checkpoints
     };
 
     try {

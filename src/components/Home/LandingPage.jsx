@@ -23,6 +23,39 @@ import StorageService from '../../services/storage';
 import useNavigationStore, { MODULE_TYPES } from '../../shared/store/navigationStore';
 
 /**
+ * Build checkpoint picker items, grouping linked pairs into a single entry.
+ * Returns an array of { type: 'single', cp } or { type: 'linked', primary, secondary }.
+ */
+function buildCheckpointPickerItems(cps) {
+  const sorted = [...cps].sort((a, b) => a.number - b.number);
+  const seen = new Set();
+  const items = [];
+  for (const cp of sorted) {
+    if (seen.has(cp.number)) continue;
+    if (cp.linkedCheckpointNumber) {
+      const partner = sorted.find(c => c.number === cp.linkedCheckpointNumber);
+      if (partner) {
+        items.push({ type: 'linked', primary: cp, secondary: partner });
+        seen.add(cp.number);
+        seen.add(partner.number);
+        continue;
+      }
+    }
+    items.push({ type: 'single', cp });
+    seen.add(cp.number);
+  }
+  return items;
+}
+
+/** Map a picker item to its navigation path. */
+function pickerItemPath(item) {
+  if (item.type === 'linked') {
+    return `/checkpoint/dual/${item.primary.number}/${item.secondary.number}`;
+  }
+  return `/checkpoint/${item.cp.number}`;
+}
+
+/**
  * LandingPage Component - App-Friendly Homepage
  * 
  * Touch-optimized interface for mobile and tablet devices.
@@ -119,14 +152,15 @@ const LandingPage = () => {
     if (selectedModuleType.type === MODULE_TYPES.CHECKPOINT) {
       setShowRaceModal(false);
       const cps = await StorageService.getCheckpoints(race.id);
-      if (cps.length === 1) {
-        // Single checkpoint — skip picker
+      const items = buildCheckpointPickerItems(cps);
+      if (items.length === 1) {
+        // Single item — skip picker and navigate directly
         setSelectedRaceForMode(race.id);
         startOperation(MODULE_TYPES.CHECKPOINT);
-        navigate(`/checkpoint/${cps[0].number}`);
+        navigate(pickerItemPath(items[0]));
       } else {
         setPendingRaceForCheckpoint(race);
-        setCheckpointChoices(cps);
+        setCheckpointChoices(items);
       }
       return;
     }
@@ -137,13 +171,13 @@ const LandingPage = () => {
   }, [selectedModuleType, settings.hapticsEnabled, setSelectedRaceForMode, startOperation, navigate]);
 
   // Handle checkpoint selection (second step for Checkpoint Operations)
-  const handleCheckpointSelect = useCallback((checkpoint) => {
+  const handleCheckpointSelect = useCallback((item) => {
     if (!pendingRaceForCheckpoint) return;
     setSelectedRaceForMode(pendingRaceForCheckpoint.id);
     startOperation(MODULE_TYPES.CHECKPOINT);
     setPendingRaceForCheckpoint(null);
     setCheckpointChoices([]);
-    navigate(`/checkpoint/${checkpoint.number}`);
+    navigate(pickerItemPath(item));
   }, [pendingRaceForCheckpoint, setSelectedRaceForMode, startOperation, navigate]);
 
   // Handle direct race management navigation
@@ -382,16 +416,34 @@ const LandingPage = () => {
           Which checkpoint are you operating for <strong>{pendingRaceForCheckpoint?.name}</strong>?
         </p>
         <div className="space-y-2">
-          {checkpointChoices.map((cp) => (
-            <button
-              key={cp.number}
-              onClick={() => handleCheckpointSelect(cp)}
-              className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-navy-50 dark:hover:bg-navy-900/30 focus:outline-none focus:ring-2 focus:ring-navy-500 transition-colors"
-            >
-              <span className="font-semibold text-gray-900 dark:text-white">CP{cp.number}</span>
-              {cp.name && <span className="ml-2 text-gray-600 dark:text-gray-400">— {cp.name}</span>}
-            </button>
-          ))}
+          {checkpointChoices.map((item) =>
+            item.type === 'linked' ? (
+              <button
+                key={`linked-${item.primary.number}-${item.secondary.number}`}
+                onClick={() => handleCheckpointSelect(item)}
+                className="w-full text-left px-4 py-3 rounded-lg border border-navy-300 dark:border-navy-600 bg-navy-50 dark:bg-navy-900/30 hover:bg-navy-100 dark:hover:bg-navy-800/50 focus:outline-none focus:ring-2 focus:ring-navy-500 transition-colors"
+              >
+                <span className="font-semibold text-gray-900 dark:text-white">
+                  🔗 CP{item.primary.number} &amp; CP{item.secondary.number}
+                </span>
+                {(item.primary.name || item.secondary.name) && (
+                  <span className="ml-2 text-gray-600 dark:text-gray-400">
+                    — {item.primary.name || `CP${item.primary.number}`} / {item.secondary.name || `CP${item.secondary.number}`}
+                  </span>
+                )}
+                <span className="ml-2 text-xs text-navy-600 dark:text-navy-400">Operate both</span>
+              </button>
+            ) : (
+              <button
+                key={item.cp.number}
+                onClick={() => handleCheckpointSelect(item)}
+                className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-navy-50 dark:hover:bg-navy-900/30 focus:outline-none focus:ring-2 focus:ring-navy-500 transition-colors"
+              >
+                <span className="font-semibold text-gray-900 dark:text-white">CP{item.cp.number}</span>
+                {item.cp.name && <span className="ml-2 text-gray-600 dark:text-gray-400">— {item.cp.name}</span>}
+              </button>
+            )
+          )}
         </div>
       </StandardModal>
 

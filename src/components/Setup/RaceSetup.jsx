@@ -17,6 +17,7 @@ import TemplateSelectionStep from './TemplateSelectionStep';
 import RaceDetailsStep from './RaceDetailsStep';
 import RunnerRangesStep from './RunnerRangesStep';
 import BatchConfigStep from './BatchConfigStep';
+import LinkCheckpointsStep from './LinkCheckpointsStep';
 import LoadingSpinner from '../Layout/LoadingSpinner';
 import ErrorMessage from '../Layout/ErrorMessage';
 import StepIndicator from './StepIndicator';
@@ -28,7 +29,11 @@ const STEP_TEMPLATE = 0;
 const STEP_DETAILS = 1;
 const STEP_RUNNERS = 2;
 const STEP_BATCHES = 3;
+<<<<<<< HEAD
 const STEP_COURSE = 4;
+=======
+const STEP_LINK_CHECKPOINTS = 4;
+>>>>>>> feature/linked-checkpoints
 
 const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const navigate = useNavigate();
@@ -110,9 +115,23 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
     setCurrentStep(STEP_BATCHES);
   };
 
-  const handleSubmit = async () => {
+  const handleBatchesNext = () => {
+    // Show link step only if race has 2+ checkpoints
+    if ((formData.checkpoints?.length ?? 0) >= 2) {
+      setCurrentStep(STEP_LINK_CHECKPOINTS);
+    } else {
+      handleFinalSubmit();
+    }
+  };
+
+  const handleLinkCheckpointsNext = (updatedCheckpoints) => {
+    handleFinalSubmit({ checkpoints: updatedCheckpoints });
+  };
+
+  const handleFinalSubmit = async (overrides = {}) => {
     try {
-      const ranges = formData.runnerRanges || [];
+      const merged = { ...formData, ...overrides };
+      const ranges = merged.runnerRanges || [];
       // Compute minRunner/maxRunner for SharedRunnerGrid grouping
       const allNumbers = ranges.flatMap(r =>
         r.isIndividual && r.individualNumbers
@@ -120,7 +139,7 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
           : Array.from({ length: r.max - r.min + 1 }, (_, i) => r.min + i)
       );
       const completeFormData = {
-        ...formData,
+        ...merged,
         runnerRanges: ranges,
         ...(allNumbers.length > 0 && {
           minRunner: Math.min(...allNumbers),
@@ -160,10 +179,18 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
     { number: 2, label: 'Race Details', description: 'Configure race information' },
     { number: 3, label: 'Runner Setup', description: 'Set up runner number ranges' },
     { number: 4, label: 'Waves', description: 'Configure starting waves' },
+<<<<<<< HEAD
     { number: 5, label: 'Course Map', description: 'Import GPX course data (optional)' },
   ];
 
   const stepLabels = ['Template', 'Race Details', 'Runner Setup', 'Waves', 'Course Map'];
+=======
+    { number: 5, label: 'Link Checkpoints', description: 'Optional: group checkpoints at the same location' }
+  ];
+
+  const stepLabels = ['Template', 'Race Details', 'Runner Setup', 'Waves', 'Link Checkpoints'];
+  const totalSteps = (formData.checkpoints?.length ?? 0) >= 2 ? 5 : 4;
+>>>>>>> feature/linked-checkpoints
 
   return (
     <Container maxWidth="xl" padding="normal">
@@ -188,13 +215,17 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
             </div>
           </div>
           <Badge variant="primary" size="lg">
+<<<<<<< HEAD
             Step {currentStep + 1} of 5
+=======
+            Step {currentStep + 1} of {totalSteps}
+>>>>>>> feature/linked-checkpoints
           </Badge>
         </div>
       </Section>
 
       <Section spacing="normal">
-        <StepIndicator steps={steps} currentStep={currentStep} />
+        <StepIndicator steps={steps.slice(0, totalSteps)} currentStep={currentStep} />
       </Section>
 
       <Section spacing="normal">
@@ -232,12 +263,18 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
                   <Button variant="outline" onClick={handleBack}>
                     Back
                   </Button>
+<<<<<<< HEAD
                   <Button variant="primary" onClick={() => setCurrentStep(STEP_COURSE)} disabled={loading}>
                     Next: Course Map
+=======
+                  <Button variant="primary" onClick={handleBatchesNext} disabled={loading}>
+                    {loading ? 'Creating Race…' : 'Next'}
+>>>>>>> feature/linked-checkpoints
                   </Button>
                 </div>
               </div>
             )}
+<<<<<<< HEAD
             {currentStep === STEP_COURSE && (
               <CourseMapStep
                 checkpoints={formData.checkpoints || []}
@@ -255,6 +292,13 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
                   handleSubmit();
                 }}
                 onSkip={handleSubmit}
+=======
+            {currentStep === STEP_LINK_CHECKPOINTS && (
+              <LinkCheckpointsStep
+                checkpoints={formData.checkpoints}
+                onNext={handleLinkCheckpointsNext}
+                onBack={handleBack}
+>>>>>>> feature/linked-checkpoints
               />
             )}
           </CardBody>

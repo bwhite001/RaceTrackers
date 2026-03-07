@@ -1,8 +1,8 @@
 import { normaliseTemplate } from '../../services/normaliseTemplate.js';
-import { mtGloriousTemplate } from './mtGloriousTemplate.js';
-import { brisbaneTrailMarathon } from './brisbaneTrailMarathon.js';
-import { pinnaclesClassic } from './pinnaclesClassic.js';
-import { lakeManchesterTrail } from './lakeManchesterTrail.js';
+import mtGloriousTemplate from './mt-glorious-mountain-trail.json';
+import brisbaneTrailMarathon from './brisbane-trail-marathon.json';
+import pinnaclesClassic from './pinnacles-classic.json';
+import lakeManchesterTrail from './lake-manchester-trail.json';
 
 /**
  * All available race templates, normalised to canonical shape.

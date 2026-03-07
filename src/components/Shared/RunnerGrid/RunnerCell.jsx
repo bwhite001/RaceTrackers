@@ -42,7 +42,10 @@ const RunnerCell = ({ runner, isLoading = false, onMark, onUnmark }) => {
       title={`Runner ${runner.number} — ${runner.status.replace(/-/g, ' ')}${isLocked ? ' (locked — called in)' : ' — double-click to uncheck'}`}
       aria-label={`Runner ${runner.number}, status: ${runner.status}`}
     >
-      {isLocked && (
+      {runner.passedPrimary && !isLocked && (
+    <span data-testid="cell-passed-primary" className="absolute top-0.5 left-0.5 text-[8px] leading-none" aria-hidden="true" title="Passed linked checkpoint">⭐</span>
+  )}
+  {isLocked && (
         <span data-testid="cell-locked" className="absolute top-0.5 right-0.5 text-[8px] leading-none opacity-70" aria-hidden="true">
           🔒
         </span>
