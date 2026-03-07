@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import TimeUtils from '../../../services/timeUtils';
 
@@ -13,8 +14,8 @@ import TimeUtils from '../../../services/timeUtils';
  * - Real-time updates
  */
 
-const OutList = () => {
-  const [filterStatus, setFilterStatus] = useState('all');
+const OutList = ({ initialFilter = 'all' }) => {
+  const [filterStatus, setFilterStatus] = useState(initialFilter);
   const [searchTerm, setSearchTerm] = useState('');
 
   const {
@@ -310,5 +311,7 @@ const OutList = () => {
     </div>
   );
 };
+
+OutList.propTypes = { initialFilter: PropTypes.string };
 
 export default OutList;

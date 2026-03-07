@@ -17,7 +17,7 @@ import RaceOverview from '../components/RaceOverview';
 import ReportsPanel from '../components/ReportsPanel';
 import WithdrawalDialog from '../components/WithdrawalDialog';
 import CheckpointImportPanel from '../components/CheckpointImportPanel';
-import CheckpointGroupingView from '../components/CheckpointGroupingView';
+import OutList from '../components/OutList';
 import ErrorMessage from '../../../components/Layout/ErrorMessage';
 import StatusStrip from '../../../components/Layout/StatusStrip';
 import SettingsModal from '../../../components/Settings/SettingsModal';
@@ -29,9 +29,9 @@ const RaceCourseMap = lazy(() => import('../components/RaceCourseMap'));
 
 const TABS = [
   { id: 'data-entry', label: 'Data Entry' },
-  { id: 'overview', label: 'Overview' },
-  { id: 'checkpoint-matrix', label: 'Checkpoint Matrix' },
-  { id: 'reports', label: 'Reports' },
+  { id: 'overview',   label: 'Overview' },
+  { id: 'dns',        label: 'DNS' },
+  { id: 'reports',    label: 'Reports' },
 ];
 
 /**
@@ -138,7 +138,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     [HOTKEYS.NEW_ENTRY]: () => handleTabChange('data-entry'),
     [HOTKEYS.REPORTS]: () => handleTabChange('reports'),
     [HOTKEYS.DROPOUT]: () => handleWithdrawal('dnf'),
-    'shift+d': () => handleWithdrawal('dns'),
+    'shift+d': () => { handleTabChange('dns'); handleWithdrawal('dns'); },
     'escape': () => {
       if (showWithdrawalDialog) {
         setShowWithdrawalDialog(false);
@@ -258,8 +258,20 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
               </div>
             )}
 
-            {activeTab === 'checkpoint-matrix' && (
-              <CheckpointGroupingView />
+            {activeTab === 'dns' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Did Not Start</h2>
+                  <button
+                    type="button"
+                    onClick={() => handleWithdrawal('dns')}
+                    className="px-4 py-2 text-sm font-semibold bg-amber-500 hover:bg-amber-400 text-white rounded-lg transition-colors"
+                  >
+                    + Mark DNS
+                  </button>
+                </div>
+                <OutList initialFilter="non-starter" />
+              </div>
             )}
 
             {activeTab === 'reports' && (

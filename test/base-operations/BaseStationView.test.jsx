@@ -46,6 +46,7 @@ vi.mock('../../src/modules/base-operations/components/HelpDialog', () => ({ defa
 vi.mock('../../src/modules/base-operations/components/HeadsUpGrid', () => ({ default: () => null }));
 vi.mock('../../src/modules/base-operations/components/Leaderboard', () => ({ default: () => null }));
 vi.mock('../../src/modules/base-operations/components/CheckpointImportPanel', () => ({ default: () => null }));
+vi.mock('../../src/modules/base-operations/components/OutList', () => ({ default: () => <div data-testid="out-list" /> }));
 vi.mock('../../src/modules/base-operations/components/CheckpointGroupingView', () => ({ default: () => null }));
 
 // Mock the components
