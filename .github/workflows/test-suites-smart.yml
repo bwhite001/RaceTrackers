@@ -64,15 +64,6 @@ jobs:
     name: ${{ matrix.suite }} Tests
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: |
-      needs.detect-changes.outputs.run-all == 'true' ||
-      (matrix.suite == 'unit' && needs.detect-changes.outputs.unit == 'true') ||
-      (matrix.suite == 'base-operations' && needs.detect-changes.outputs.base-operations == 'true') ||
-      (matrix.suite == 'database' && needs.detect-changes.outputs.database == 'true') ||
-      (matrix.suite == 'integration' && needs.detect-changes.outputs.integration == 'true') ||
-      (matrix.suite == 'e2e' && needs.detect-changes.outputs.e2e == 'true') ||
-      (matrix.suite == 'services' && needs.detect-changes.outputs.services == 'true') ||
-      (matrix.suite == 'components' && needs.detect-changes.outputs.components == 'true')
     strategy:
       fail-fast: false
       matrix:
@@ -95,6 +86,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run ${{ matrix.suite }} test suite
+        if: |
+          needs.detect-changes.outputs.run-all == 'true' ||
+          (matrix.suite == 'unit' && needs.detect-changes.outputs.unit == 'true') ||
+          (matrix.suite == 'base-operations' && needs.detect-changes.outputs.base-operations == 'true') ||
+          (matrix.suite == 'database' && needs.detect-changes.outputs.database == 'true') ||
+          (matrix.suite == 'integration' && needs.detect-changes.outputs.integration == 'true') ||
+          (matrix.suite == 'e2e' && needs.detect-changes.outputs.e2e == 'true') ||
+          (matrix.suite == 'services' && needs.detect-changes.outputs.services == 'true') ||
+          (matrix.suite == 'components' && needs.detect-changes.outputs.components == 'true')
         run: npm run test:suite:${{ matrix.suite }}
         continue-on-error: true
       - name: Upload test results
