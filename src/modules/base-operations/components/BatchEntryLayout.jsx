@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import { useRaceStore } from '../../../store/useRaceStore';
@@ -16,6 +16,8 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
   const [chips, setChips] = useState([]);
   const [editingBatch, setEditingBatch] = useState(null);
   const [activeTab, setActiveTab] = useState('draft');
+  const nextChipId = useRef(0);
+  const makeId = useCallback(() => `c${nextChipId.current++}`, []);
 
   const existingRecords = useMemo(() => {
     if (!checkpointNumber) return [];
@@ -36,13 +38,13 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
       const existing = new Set(prev.map(c => c.bib));
       const newChips = bibs
         .filter(b => !existing.has(b))
-        .map(b => ({ bib: b, addedAt: now, isOriginal: false, isUnknown: !knownBibs.has(b) }));
+        .map(b => ({ id: makeId(), bib: b, addedAt: now, isOriginal: false, isUnknown: !knownBibs.has(b) }));
       return [...prev, ...newChips];
     });
     onUnsavedChanges?.(true);
-  }, [raceRunners, onUnsavedChanges]);
+  }, [raceRunners, onUnsavedChanges, makeId]);
 
-  const handleRemove = useCallback((bib) => setChips(prev => prev.filter(c => c.bib !== bib)), []);
+  const handleRemove = useCallback((id) => setChips(prev => prev.filter(c => (c.id ?? c.bib) !== id)), []);
 
   const handleClear = useCallback(() => {
     setChips([]);
@@ -65,7 +67,7 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
     const submittedTime = new Date(batch.submittedAt).toLocaleTimeString([], {
       hour: '2-digit', minute: '2-digit', second: '2-digit',
     });
-    setChips(batch.bibs.map(bib => ({ bib, addedAt: submittedTime, isOriginal: true })));
+    setChips(batch.bibs.map(bib => ({ id: makeId(), bib, addedAt: submittedTime, isOriginal: true })));
     setActiveTab('draft');
   }, [sessionBatches]);
 

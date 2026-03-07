@@ -89,7 +89,7 @@ const DraftView = ({
                     ? 'bg-green-50 dark:bg-green-900/20'
                     : 'bg-blue-50 dark:bg-blue-900/10';
               return (
-                <tr key={r.bib} className={`border-b border-gray-100 dark:border-gray-700 ${rowCls}`}>
+                <tr key={r.id ?? r.bib} className={`border-b border-gray-100 dark:border-gray-700 ${rowCls}`}>
                   <td className="px-4 py-3 font-bold text-base">
                     {isUnknown && <span className="mr-1">❌</span>}
                     {!isUnknown && isDup && <span className="mr-1">⚠️</span>}
@@ -102,7 +102,7 @@ const DraftView = ({
                     <button
                       type="button"
                       aria-label={`Remove runner ${r.bib}`}
-                      onClick={() => onRemove(r.bib)}
+                      onClick={() => onRemove(r.id ?? r.bib)}
                       disabled={loading}
                       className="text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded px-2 py-1 transition-colors text-lg leading-none"
                     >
@@ -169,7 +169,8 @@ const DraftFooter = ({ count, isEditMode, loading, onClear, onRecord, onCancel, 
 
 DraftView.propTypes = {
   runners: PropTypes.arrayOf(PropTypes.shape({
-    bib:        PropTypes.number.isRequired,
+    id:         PropTypes.string,
+    bib:        PropTypes.number,
     addedAt:    PropTypes.string,
     isOriginal: PropTypes.bool,
     isUnknown:  PropTypes.bool,

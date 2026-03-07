@@ -45,7 +45,16 @@ describe('DraftView — with runners', () => {
     const onRemove = vi.fn();
     render(<DraftView {...baseProps} runners={runners} onRemove={onRemove} />);
     fireEvent.click(screen.getAllByRole('button', { name: /remove runner/i })[0]);
+    // runners without id fall back to bib for backward compat
     expect(onRemove).toHaveBeenCalledWith(23);
+  });
+
+  it('calls onRemove with chip id (not bib)', () => {
+    const onRemove = vi.fn();
+    const runnersWithId = [{ id: 'c1', bib: 23, addedAt: '14:00:12' }];
+    render(<DraftView {...baseProps} runners={runnersWithId} onRemove={onRemove} />);
+    fireEvent.click(screen.getByRole('button', { name: /remove runner 23/i }));
+    expect(onRemove).toHaveBeenCalledWith('c1');
   });
 
   it('Record button shows count and is enabled', () => {
