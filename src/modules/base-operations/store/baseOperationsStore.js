@@ -410,6 +410,16 @@ const useBaseOperationsStore = create(
         }
       },
 
+      clearCheckpointRunner: async (runnerNumber, checkpointNumber) => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) return;
+        await StorageService.updateCheckpointRunner(
+          currentRaceId, checkpointNumber, Number(runnerNumber),
+          { status: RUNNER_STATUSES.NOT_STARTED, markOffTime: null, callInTime: null, commonTime: null, commonTimeLabel: null }
+        );
+        await get().refreshData();
+      },
+
       editSessionBatch: async (batchId, newBibs, commonTime, checkpointNumber) => {
         await get().voidSessionBatch(batchId);
         await get().submitRadioBatch(newBibs, commonTime, checkpointNumber, { editedFrom: batchId });

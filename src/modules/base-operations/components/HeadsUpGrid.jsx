@@ -32,7 +32,7 @@ const StatusCell = ({ status, time }) => {
  * @param {Object[]} checkpoints - Array of { number, name }
  */
 const HeadsUpGrid = ({ runners = [], checkpoints = [] }) => {
-  const { submitRadioBatch } = useBaseOperationsStore();
+  const { submitRadioBatch, clearCheckpointRunner } = useBaseOperationsStore();
   const [editTarget, setEditTarget] = useState(null);
 
   const sortedRunners = useMemo(
@@ -155,11 +155,15 @@ const HeadsUpGrid = ({ runners = [], checkpoints = [] }) => {
         isOpen={true}
         runnerNumber={editTarget.runnerNumber}
         checkpointNumber={editTarget.checkpointNumber}
-        existingTime={runners?.find(r => r.number === editTarget.runnerNumber && r.checkpointNumber === editTarget.checkpointNumber)?.markOffTime ?? null}
-        isDuplicate={runners?.some(r => r.number === editTarget.runnerNumber && r.checkpointNumber === editTarget.checkpointNumber && r.markOffTime) ?? false}
+        existingTime={runners?.find(r => r.number === editTarget.runnerNumber)?.checkpointTimes?.[editTarget.checkpointNumber] ?? null}
+        isDuplicate={!!(runners?.find(r => r.number === editTarget.runnerNumber)?.checkpointTimes?.[editTarget.checkpointNumber])}
         onClose={() => setEditTarget(null)}
         onSave={async ({ runnerNumber, time }) => {
           await submitRadioBatch([runnerNumber], time, editTarget.checkpointNumber);
+          setEditTarget(null);
+        }}
+        onClear={async ({ runnerNumber, checkpointNumber }) => {
+          await clearCheckpointRunner(runnerNumber, checkpointNumber);
           setEditTarget(null);
         }}
       />
