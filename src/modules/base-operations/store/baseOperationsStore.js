@@ -32,12 +32,16 @@ const useBaseOperationsStore = create(
       
       // Statistics
       stats: {
-        total: 0,
+        notStarted: 0,
         finished: 0,
         active: 0,
         dnf: 0,
-        dns: 0
+        dns: 0,
+        total: 0,
+        checkpointCounts: {},
       },
+
+      outList: [],
 
       // Actions - Initialization
       initialize: async (raceId) => {
@@ -319,6 +323,14 @@ const useBaseOperationsStore = create(
         return repo.generateOutListReport(currentRaceId);
       },
 
+      loadOutList: async () => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) return;
+        const repo = new BaseOperationsRepository();
+        const outList = await repo.getOutList(currentRaceId);
+        set({ outList });
+      },
+
       generateCheckpointLogReport: async (checkpoint) => {
         const { currentRaceId } = get();
         if (!currentRaceId) throw new Error('No active race');
@@ -357,7 +369,17 @@ const useBaseOperationsStore = create(
           else counts.active++;
         }
 
-        return { total, ...counts };
+        const notStarted = total - counts.finished - counts.active - counts.dnf - counts.dns;
+
+        // Per-checkpoint counts — distinct runner numbers recorded at each CP
+        const checkpointCounts = {};
+        for (const runner of runners) {
+          if (runner.checkpointNumber === 0) continue;
+          const cp = runner.checkpointNumber;
+          checkpointCounts[cp] = (checkpointCounts[cp] ?? 0) + 1;
+        }
+
+        return { notStarted: Math.max(0, notStarted), ...counts, total, checkpointCounts };
       },
 
       submitRadioBatch: async (runnerNumbers, time, checkpointNumber, meta = {}) => {
@@ -415,11 +437,13 @@ const useBaseOperationsStore = create(
           commonTime: null,
           batchEntryMode: false,
           stats: {
-            total: 0,
+            notStarted: 0,
             finished: 0,
             active: 0,
             dnf: 0,
-            dns: 0
+            dns: 0,
+            total: 0,
+            checkpointCounts: {},
           }
         });
       }
