@@ -185,14 +185,14 @@ const RaceEditView = () => {
 
       <Tabs defaultTab={0}>
         <TabList>
-          <Tab>Core Details</Tab>
-          <Tab>Checkpoints</Tab>
-          <Tab>Runner Info</Tab>
+          <Tab index={0}>Core Details</Tab>
+          <Tab index={1}>Checkpoints</Tab>
+          <Tab index={2}>Runner Info</Tab>
         </TabList>
 
         <TabPanels>
           {/* ── Core Details ── */}
-          <TabPanel>
+          <TabPanel index={0}>
             <Card variant="elevated" className="mt-4">
               <CardBody>
                 <div className="space-y-4">
@@ -264,7 +264,7 @@ const RaceEditView = () => {
           </TabPanel>
 
           {/* ── Checkpoints ── */}
-          <TabPanel>
+          <TabPanel index={1}>
             <Card variant="elevated" className="mt-4">
               <CardBody>
                 {hasRunnerData && (
@@ -321,7 +321,7 @@ const RaceEditView = () => {
           </TabPanel>
 
           {/* ── Runner Info ── */}
-          <TabPanel>
+          <TabPanel index={2}>
             <Card variant="elevated" className="mt-4">
               <CardBody>
                 <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
