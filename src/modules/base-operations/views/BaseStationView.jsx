@@ -18,20 +18,18 @@ import ReportsPanel from '../components/ReportsPanel';
 import WithdrawalDialog from '../components/WithdrawalDialog';
 import CheckpointImportPanel from '../components/CheckpointImportPanel';
 import CheckpointGroupingView from '../components/CheckpointGroupingView';
-import LoadingSpinner from '../../../components/Layout/LoadingSpinner';
 import ErrorMessage from '../../../components/Layout/ErrorMessage';
 import StatusStrip from '../../../components/Layout/StatusStrip';
 import SettingsModal from '../../../components/Settings/SettingsModal';
 import HelpDialog from '../components/HelpDialog';
 import HeadsUpGrid from '../components/HeadsUpGrid';
 import CourseLeadersCard from '../components/CourseLeadersCard';
+import LoadingSpinner from '../../../components/Layout/LoadingSpinner';
 const RaceCourseMap = lazy(() => import('../components/RaceCourseMap'));
-import LeaderboardTab from '../components/Leaderboard';
 
 const TABS = [
   { id: 'data-entry', label: 'Data Entry' },
   { id: 'overview', label: 'Overview' },
-  { id: 'leaderboard', label: 'Leaderboard' },
   { id: 'checkpoint-matrix', label: 'Checkpoint Matrix' },
   { id: 'reports', label: 'Reports' },
 ];
@@ -226,12 +224,6 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
               >
                 Live Dashboard
               </button>
-              <button
-                onClick={() => navigate('/base-station/pending')}
-                className="px-3 py-1.5 text-xs font-medium rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                Pending Call-Ins
-              </button>
             </div>
           </div>
         </nav>
@@ -264,10 +256,6 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
                 <RaceOverview />
                 <CheckpointImportPanel />
               </div>
-            )}
-
-            {activeTab === 'leaderboard' && (
-              <LeaderboardTab />
             )}
 
             {activeTab === 'checkpoint-matrix' && (

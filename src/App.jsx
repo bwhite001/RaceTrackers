@@ -19,7 +19,6 @@ import BaseStationView from './modules/base-operations/views/BaseStationView';
 import RaceOverview from './views/RaceOverview';
 import RaceEditView from './modules/race-maintenance/views/RaceEditView';
 import LiveDashboardView from './views/LiveDashboardView';
-import PendingCallInsView from './views/PendingCallInsView';
 import Footer from './components/Layout/Footer';
 
 function App() {
@@ -123,7 +122,6 @@ function App() {
                   <Routes>
                     <Route path="operations" element={<BaseStationView />} />
                     <Route path="dashboard" element={<LiveDashboardView />} />
-                    <Route path="pending" element={<PendingCallInsView />} />
                     <Route path="*" element={<Navigate to="/base-station/operations" replace />} />
                   </Routes>
                 </ProtectedRoute>

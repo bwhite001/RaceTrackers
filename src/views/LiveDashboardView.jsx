@@ -74,18 +74,6 @@ function LiveDashboardView() {
           Live Dashboard
         </h1>
         <div className="flex gap-2">
-          <button
-            onClick={() => navigate('/base-station/pending')}
-            className="btn-outline text-sm"
-          >
-            Pending Call-Ins
-          </button>
-          <button
-            onClick={() => navigate('/base-station/leaderboard')}
-            className="btn-outline text-sm"
-          >
-            Leaderboard
-          </button>
         </div>
       </div>
 
@@ -97,17 +85,16 @@ function LiveDashboardView() {
             const total = runners.length;
             const allDone = total > 0 && passed === total;
             return (
-              <button
+              <div
                 key={cp.number}
-                onClick={() => navigate('/base-station/pending')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium border ${
                   allDone
                     ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:border-navy-500'
+                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300'
                 }`}
               >
                 CP{cp.number} {allDone ? '✓' : ''} {passed}/{total}
-              </button>
+              </div>
             );
           })}
         </div>
