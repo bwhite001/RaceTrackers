@@ -149,3 +149,21 @@ expect.extend({
     }
   },
 });
+
+// Mock react-leaflet and leaflet to avoid DOM/browser requirements in tests
+vi.mock('react-leaflet', async () => {
+  const { createElement } = await import('react');
+  return {
+    MapContainer: ({ children }) => createElement('div', { 'data-testid': 'map-container' }, children),
+    TileLayer: () => null,
+    Polyline: () => null,
+    Marker: ({ children }) => createElement('div', { 'data-testid': 'marker' }, children),
+    Popup: ({ children }) => createElement('div', null, children),
+    useMap: () => ({ fitBounds: vi.fn() }),
+  };
+});
+vi.mock('leaflet', () => ({
+  default: { divIcon: vi.fn(() => ({})), latLngBounds: vi.fn(() => ({})) },
+  divIcon: vi.fn(() => ({})),
+  latLngBounds: vi.fn(() => ({})),
+}));
