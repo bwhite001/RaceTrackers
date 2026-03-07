@@ -360,7 +360,7 @@ const useBaseOperationsStore = create(
         return { total, ...counts };
       },
 
-      submitRadioBatch: async (runnerNumbers, time, checkpointNumber) => {
+      submitRadioBatch: async (runnerNumbers, time, checkpointNumber, meta = {}) => {
         const { currentRaceId } = get();
         if (!currentRaceId) throw new Error('No active race');
         if (checkpointNumber === undefined || checkpointNumber === null) throw new Error('checkpointNumber is required');
@@ -376,6 +376,8 @@ const useBaseOperationsStore = create(
             id: `batch-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
             checkpointNumber, commonTime: time, bibs: [...runnerNumbers],
             submittedAt: new Date().toISOString(), voided: false,
+            editedFrom: meta.editedFrom ?? null,
+            editedAt: meta.editedFrom ? new Date().toISOString() : null,
           };
           set(state => ({ sessionBatches: [newBatch, ...state.sessionBatches] }));
           await get().refreshData();
@@ -383,6 +385,11 @@ const useBaseOperationsStore = create(
           set({ error: error.message, loading: false });
           throw error;
         }
+      },
+
+      editSessionBatch: async (batchId, newBibs, commonTime, checkpointNumber) => {
+        get().voidSessionBatch(batchId);
+        await get().submitRadioBatch(newBibs, commonTime, checkpointNumber, { editedFrom: batchId });
       },
 
       voidSessionBatch: (batchId) => {
