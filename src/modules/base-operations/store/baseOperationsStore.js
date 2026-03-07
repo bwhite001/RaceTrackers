@@ -411,14 +411,25 @@ const useBaseOperationsStore = create(
       },
 
       editSessionBatch: async (batchId, newBibs, commonTime, checkpointNumber) => {
-        get().voidSessionBatch(batchId);
+        await get().voidSessionBatch(batchId);
         await get().submitRadioBatch(newBibs, commonTime, checkpointNumber, { editedFrom: batchId });
       },
 
-      voidSessionBatch: (batchId) => {
+      voidSessionBatch: async (batchId) => {
+        const { currentRaceId, sessionBatches } = get();
+        const batch = sessionBatches.find(b => b.id === batchId);
+        if (batch && currentRaceId) {
+          for (const num of batch.bibs) {
+            await StorageService.updateCheckpointRunner(
+              currentRaceId, batch.checkpointNumber, Number(num),
+              { status: RUNNER_STATUSES.NOT_STARTED, markOffTime: null, callInTime: null, commonTime: null, commonTimeLabel: null }
+            );
+          }
+        }
         set(state => ({
           sessionBatches: state.sessionBatches.map(b => b.id === batchId ? { ...b, voided: true } : b)
         }));
+        await get().refreshData();
       },
 
       // Reset store
