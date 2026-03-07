@@ -29,11 +29,8 @@ const STEP_TEMPLATE = 0;
 const STEP_DETAILS = 1;
 const STEP_RUNNERS = 2;
 const STEP_BATCHES = 3;
-<<<<<<< HEAD
 const STEP_COURSE = 4;
-=======
-const STEP_LINK_CHECKPOINTS = 4;
->>>>>>> feature/linked-checkpoints
+const STEP_LINK_CHECKPOINTS = 5;
 
 const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const navigate = useNavigate();
@@ -116,11 +113,30 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
   };
 
   const handleBatchesNext = () => {
-    // Show link step only if race has 2+ checkpoints
+    setCurrentStep(STEP_COURSE);
+  };
+
+  const handleCourseNext = (courseData) => {
+    // Apply course data to formData
+    if (courseData) {
+      setFormData(prev => ({
+        ...prev,
+        courseGpx: courseData.courseGpx,
+        courseBounds: courseData.courseBounds,
+        checkpoints: (prev.checkpoints || []).map(cp => {
+          const coord = courseData.checkpointCoordinates?.find(c => c.number === cp.number);
+          return coord ? { ...cp, latitude: coord.latitude, longitude: coord.longitude } : cp;
+        }),
+      }));
+    }
+    // Show link step if ≥2 checkpoints
     if ((formData.checkpoints?.length ?? 0) >= 2) {
       setCurrentStep(STEP_LINK_CHECKPOINTS);
     } else {
-      handleFinalSubmit();
+      handleFinalSubmit(courseData ? {
+        courseGpx: courseData.courseGpx,
+        courseBounds: courseData.courseBounds,
+      } : {});
     }
   };
 
@@ -179,18 +195,12 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
     { number: 2, label: 'Race Details', description: 'Configure race information' },
     { number: 3, label: 'Runner Setup', description: 'Set up runner number ranges' },
     { number: 4, label: 'Waves', description: 'Configure starting waves' },
-<<<<<<< HEAD
     { number: 5, label: 'Course Map', description: 'Import GPX course data (optional)' },
+    { number: 6, label: 'Link Checkpoints', description: 'Optional: group checkpoints at the same location' }
   ];
 
-  const stepLabels = ['Template', 'Race Details', 'Runner Setup', 'Waves', 'Course Map'];
-=======
-    { number: 5, label: 'Link Checkpoints', description: 'Optional: group checkpoints at the same location' }
-  ];
-
-  const stepLabels = ['Template', 'Race Details', 'Runner Setup', 'Waves', 'Link Checkpoints'];
-  const totalSteps = (formData.checkpoints?.length ?? 0) >= 2 ? 5 : 4;
->>>>>>> feature/linked-checkpoints
+  const stepLabels = ['Template', 'Race Details', 'Runner Setup', 'Waves', 'Course Map', 'Link Checkpoints'];
+  const totalSteps = (formData.checkpoints?.length ?? 0) >= 2 ? 6 : 5;
 
   return (
     <Container maxWidth="xl" padding="normal">
@@ -215,11 +225,7 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
             </div>
           </div>
           <Badge variant="primary" size="lg">
-<<<<<<< HEAD
-            Step {currentStep + 1} of 5
-=======
             Step {currentStep + 1} of {totalSteps}
->>>>>>> feature/linked-checkpoints
           </Badge>
         </div>
       </Section>
@@ -263,42 +269,25 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
                   <Button variant="outline" onClick={handleBack}>
                     Back
                   </Button>
-<<<<<<< HEAD
-                  <Button variant="primary" onClick={() => setCurrentStep(STEP_COURSE)} disabled={loading}>
-                    Next: Course Map
-=======
                   <Button variant="primary" onClick={handleBatchesNext} disabled={loading}>
-                    {loading ? 'Creating Race…' : 'Next'}
->>>>>>> feature/linked-checkpoints
+                    Next: Course Map
                   </Button>
                 </div>
               </div>
             )}
-<<<<<<< HEAD
             {currentStep === STEP_COURSE && (
               <CourseMapStep
                 checkpoints={formData.checkpoints || []}
                 initialData={formData}
-                onComplete={(courseData) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    courseGpx: courseData.courseGpx,
-                    courseBounds: courseData.courseBounds,
-                    checkpoints: (prev.checkpoints || []).map(cp => {
-                      const coord = courseData.checkpointCoordinates.find(c => c.number === cp.number);
-                      return coord ? { ...cp, latitude: coord.latitude, longitude: coord.longitude } : cp;
-                    }),
-                  }));
-                  handleSubmit();
-                }}
-                onSkip={handleSubmit}
-=======
+                onComplete={handleCourseNext}
+                onSkip={() => handleCourseNext(null)}
+              />
+            )}
             {currentStep === STEP_LINK_CHECKPOINTS && (
               <LinkCheckpointsStep
                 checkpoints={formData.checkpoints}
                 onNext={handleLinkCheckpointsNext}
                 onBack={handleBack}
->>>>>>> feature/linked-checkpoints
               />
             )}
           </CardBody>

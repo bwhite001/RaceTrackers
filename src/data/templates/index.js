@@ -3,6 +3,10 @@ import mtGloriousTemplate from './mt-glorious-mountain-trail.json';
 import brisbaneTrailMarathon from './brisbane-trail-marathon.json';
 import pinnaclesClassic from './pinnacles-classic.json';
 import lakeManchesterTrail from './lake-manchester-trail.json';
+import mtGloriousGpx from './gpx/mt-glorious-mountain-trail.gpx?raw';
+import brisbaneTrailMarathonGpx from './gpx/brisbane-trail-marathon.gpx?raw';
+import pinnaclesClassicGpx from './gpx/pinnacles-classic.gpx?raw';
+import lakeManchesterTrailGpx from './gpx/lake-manchester-trail.gpx?raw';
 
 /**
  * All available race templates, normalised to canonical shape.
@@ -10,10 +14,10 @@ import lakeManchesterTrail from './lake-manchester-trail.json';
  *         or: import { getTemplateById } from '../../data/templates/index';
  */
 const RACE_TEMPLATES = [
-  normaliseTemplate(mtGloriousTemplate),
-  normaliseTemplate(brisbaneTrailMarathon),
-  normaliseTemplate(pinnaclesClassic),
-  normaliseTemplate(lakeManchesterTrail)
+  normaliseTemplate({ ...mtGloriousTemplate, courseGpx: mtGloriousGpx }),
+  normaliseTemplate({ ...brisbaneTrailMarathon, courseGpx: brisbaneTrailMarathonGpx }),
+  normaliseTemplate({ ...pinnaclesClassic, courseGpx: pinnaclesClassicGpx }),
+  normaliseTemplate({ ...lakeManchesterTrail, courseGpx: lakeManchesterTrailGpx }),
 ];
 
 export default RACE_TEMPLATES;

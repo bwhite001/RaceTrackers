@@ -68,7 +68,6 @@ const SECTION_MAP = {
   'Phase 4e — Records DNF for runner 101 (injured knee)':                    'simulation',
   'Phase 4f — Overview tab shows correct runner statuses':                   'simulation',
   'Phase 4g — Reports tab renders race summary':                             'simulation',
-<<<<<<< HEAD
   'records a batch of runners at base station and views history':            'base-station',
   // Transfer Data (QR device-to-device sync)
   'Transfer Data button appears in checkpoint header':                       'checkpoint',
@@ -78,9 +77,7 @@ const SECTION_MAP = {
   'delta scope shows only entries newer than last share timestamp':          'checkpoint',
   'Receive tab shows scanner and file import fallback':                      'checkpoint',
   'back button returns to the checkpoint view':                              'checkpoint',
-=======
   'volunteer operates linked turnaround checkpoints from one interface':    'linked-checkpoints',
->>>>>>> feature/linked-checkpoints
 };
 
 const CHAPTERS = [
