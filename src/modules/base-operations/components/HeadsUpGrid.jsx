@@ -162,8 +162,8 @@ const HeadsUpGrid = ({ runners = [], checkpoints = [] }) => {
           await submitRadioBatch([runnerNumber], time, editTarget.checkpointNumber);
           setEditTarget(null);
         }}
-        onClear={async ({ runnerNumber, checkpointNumber }) => {
-          await clearCheckpointRunner(runnerNumber, checkpointNumber);
+        onClear={async ({ runnerNumber }) => {
+          await clearCheckpointRunner(runnerNumber);
           setEditTarget(null);
         }}
       />

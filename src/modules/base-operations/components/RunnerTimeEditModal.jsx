@@ -23,7 +23,7 @@ const RunnerTimeEditModal = ({ runnerNumber, checkpointNumber, existingTime, isO
           {existingTime && onClear ? (
             <button type="button" aria-label="clear time" onClick={() => onClear({ runnerNumber, checkpointNumber })}
               className="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
-              Clear Time
+              Clear All Times
             </button>
           ) : <span />}
           <div className="flex gap-3">

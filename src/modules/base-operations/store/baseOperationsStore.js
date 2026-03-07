@@ -410,13 +410,18 @@ const useBaseOperationsStore = create(
         }
       },
 
-      clearCheckpointRunner: async (runnerNumber, checkpointNumber) => {
+      clearCheckpointRunner: async (runnerNumber) => {
         const { currentRaceId } = get();
         if (!currentRaceId) return;
-        await StorageService.updateCheckpointRunner(
-          currentRaceId, checkpointNumber, Number(runnerNumber),
-          { status: RUNNER_STATUSES.NOT_STARTED, markOffTime: null, callInTime: null, commonTime: null, commonTimeLabel: null }
-        );
+        // Clear all checkpoint records for this runner across every checkpoint
+        const allCheckpointRunners = await StorageService.getCheckpointRunners(currentRaceId);
+        const runnerRecords = allCheckpointRunners.filter(r => r.number === Number(runnerNumber));
+        for (const r of runnerRecords) {
+          await StorageService.updateCheckpointRunner(
+            currentRaceId, r.checkpointNumber, r.number,
+            { status: RUNNER_STATUSES.NOT_STARTED, markOffTime: null, callInTime: null, commonTime: null, commonTimeLabel: null }
+          );
+        }
         await get().refreshData();
       },
 
