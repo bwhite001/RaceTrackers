@@ -31,7 +31,9 @@ const RunnerOverview = ({ runners: runnersProp } = {}) => {
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(runner => 
-        runner.number.toString().includes(term)
+        runner.number.toString().includes(term) ||
+        (runner.firstName && runner.firstName.toLowerCase().includes(term)) ||
+        (runner.lastName && runner.lastName.toLowerCase().includes(term))
       );
     }
 
@@ -187,7 +189,7 @@ const RunnerOverview = ({ runners: runnersProp } = {}) => {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search runner number..."
+                placeholder="Search by number or name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="form-input pr-10"
@@ -263,6 +265,18 @@ const RunnerOverview = ({ runners: runnersProp } = {}) => {
                   Runner #
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  First Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Last Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Gender
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Batch
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -286,6 +300,18 @@ const RunnerOverview = ({ runners: runnersProp } = {}) => {
                 <tr key={runner.number} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                   <td className="px-6 py-1 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                     {runner.number}
+                  </td>
+                  <td className="px-6 py-1 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    {runner.firstName || '—'}
+                  </td>
+                  <td className="px-6 py-1 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    {runner.lastName || '—'}
+                  </td>
+                  <td className="px-6 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    {runner.gender || '—'}
+                  </td>
+                  <td className="px-6 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    {runner.batchNumber || '—'}
                   </td>
                   <td className="px-6 py-1 whitespace-nowrap">
                     <span className={getStatusBadgeClass(runner.status)}>

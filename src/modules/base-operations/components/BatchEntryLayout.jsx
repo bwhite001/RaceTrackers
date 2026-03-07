@@ -31,15 +31,16 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
 
   const handleBibEntered = useCallback((bibs) => {
     const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const knownBibs = new Set((raceRunners ?? []).map(r => r.number));
     setChips(prev => {
       const existing = new Set(prev.map(c => c.bib));
       const newChips = bibs
         .filter(b => !existing.has(b))
-        .map(b => ({ bib: b, addedAt: now, isOriginal: false }));
+        .map(b => ({ bib: b, addedAt: now, isOriginal: false, isUnknown: !knownBibs.has(b) }));
       return [...prev, ...newChips];
     });
     onUnsavedChanges?.(true);
-  }, [onUnsavedChanges]);
+  }, [raceRunners, onUnsavedChanges]);
 
   const handleRemove = useCallback((bib) => setChips(prev => prev.filter(c => c.bib !== bib)), []);
 

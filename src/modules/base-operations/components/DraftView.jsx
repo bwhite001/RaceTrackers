@@ -17,6 +17,8 @@ const DraftView = ({
   const isEditMode = editingBatch !== null;
   const duplicates = runners.filter(r => existingRecords.includes(r.bib));
   const hasDuplicates = duplicates.length > 0;
+  const unknowns = runners.filter(r => r.isUnknown);
+  const hasUnknowns = unknowns.length > 0;
 
   if (runners.length === 0) {
     return (
@@ -51,6 +53,13 @@ const DraftView = ({
         )}
       </div>
 
+      {/* Unknown bib error */}
+      {hasUnknowns && (
+        <div role="alert" className="px-4 py-2 bg-red-50 dark:bg-red-900/20 border-b border-red-200 text-red-800 dark:text-red-200 text-sm">
+          ❌ {unknowns.map(r => `Runner ${r.bib} is not a registered racer`).join(', ')}
+        </div>
+      )}
+
       {/* Duplicate warning */}
       {hasDuplicates && (
         <div role="alert" className="px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 text-amber-800 dark:text-amber-200 text-sm">
@@ -71,19 +80,23 @@ const DraftView = ({
           <tbody>
             {runners.map(r => {
               const isDup = existingRecords.includes(r.bib);
-              const rowCls = isDup
-                ? 'bg-amber-50 dark:bg-amber-900/20'
-                : r.isOriginal
-                  ? 'bg-green-50 dark:bg-green-900/20'
-                  : 'bg-blue-50 dark:bg-blue-900/10';
+              const isUnknown = r.isUnknown;
+              const rowCls = isUnknown
+                ? 'bg-red-50 dark:bg-red-900/20'
+                : isDup
+                  ? 'bg-amber-50 dark:bg-amber-900/20'
+                  : r.isOriginal
+                    ? 'bg-green-50 dark:bg-green-900/20'
+                    : 'bg-blue-50 dark:bg-blue-900/10';
               return (
                 <tr key={r.bib} className={`border-b border-gray-100 dark:border-gray-700 ${rowCls}`}>
                   <td className="px-4 py-3 font-bold text-base">
-                    {isDup && <span className="mr-1">⚠️</span>}
+                    {isUnknown && <span className="mr-1">❌</span>}
+                    {!isUnknown && isDup && <span className="mr-1">⚠️</span>}
                     {r.bib}
                   </td>
                   <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                    {isDup ? 'Already in batch' : r.isOriginal ? 'Original' : r.addedAt}
+                    {isUnknown ? 'Not a registered racer' : isDup ? 'Already in batch' : r.isOriginal ? 'Original' : r.addedAt}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button
@@ -159,6 +172,7 @@ DraftView.propTypes = {
     bib:        PropTypes.number.isRequired,
     addedAt:    PropTypes.string,
     isOriginal: PropTypes.bool,
+    isUnknown:  PropTypes.bool,
   })).isRequired,
   checkpointName:  PropTypes.string,
   commonTime:      PropTypes.string,
