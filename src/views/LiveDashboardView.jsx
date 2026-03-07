@@ -94,6 +94,8 @@ function LiveDashboardView() {
   const STATUS_LABELS = {
     finished: 'Finished', active: 'Active', dnf: 'DNF', dns: 'DNS', 'not-started': 'Not Started',
   };
+
+  const formatTime = (iso) => {
     if (!iso) return '—';
     try {
       const d = new Date(iso);

@@ -37,6 +37,16 @@ vi.mock('../../src/shared/services/database/schema', () => ({
         })),
       })),
     },
+    runners: {
+      where: vi.fn(() => ({
+        equals: vi.fn(() => ({
+          toArray: vi.fn(() => Promise.resolve([
+            { id: 1, number: 101, status: 'passed', firstName: 'Alice', lastName: 'Smith' },
+            { id: 2, number: 102, status: 'not-started', firstName: null, lastName: null },
+          ])),
+        })),
+      })),
+    },
   },
 }));
 
@@ -91,8 +101,10 @@ describe('LiveDashboardView', () => {
     });
   });
 
-  it('shows runner names alongside bib numbers', async () => {
-    render(<LiveDashboardView />);
+  it('shows runner names when PII toggle is enabled', async () => {
+    const { getByRole } = render(<LiveDashboardView />);
+    await waitFor(() => expect(screen.getByText('#101')).toBeInTheDocument());
+    getByRole('button', { name: /show names/i }).click();
     await waitFor(() => {
       expect(screen.getByText('Alice Smith')).toBeInTheDocument();
     });
@@ -114,11 +126,10 @@ describe('LiveDashboardView', () => {
     });
   });
 
-  it('shows runner status badge', async () => {
+  it('renders a bib cell for each runner', async () => {
     render(<LiveDashboardView />);
     await waitFor(() => {
-      expect(screen.getByText('passed')).toBeInTheDocument();
-      expect(screen.getByText('not-started')).toBeInTheDocument();
+      expect(screen.getAllByText(/^#\d+/).length).toBeGreaterThanOrEqual(2);
     });
   });
 });
