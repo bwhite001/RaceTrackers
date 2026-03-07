@@ -410,16 +410,25 @@ const useBaseOperationsStore = create(
         }
       },
 
-      clearCheckpointRunner: async (runnerNumber) => {
+      clearCheckpointRunner: async (runnerNumber, checkpointNumber) => {
         const { currentRaceId } = get();
         if (!currentRaceId) return;
-        // Clear all checkpoint records for this runner across every checkpoint
+        await StorageService.updateCheckpointRunner(
+          currentRaceId, checkpointNumber, Number(runnerNumber),
+          { status: RUNNER_STATUSES.NOT_STARTED, actualTime: null, markOffTime: null, callInTime: null, commonTime: null, commonTimeLabel: null, calledIn: false }
+        );
+        await get().refreshData();
+      },
+
+      clearAllCheckpointTimes: async (runnerNumber) => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) return;
         const allCheckpointRunners = await StorageService.getCheckpointRunners(currentRaceId);
         const runnerRecords = allCheckpointRunners.filter(r => r.number === Number(runnerNumber));
         for (const r of runnerRecords) {
           await StorageService.updateCheckpointRunner(
             currentRaceId, r.checkpointNumber, r.number,
-            { status: RUNNER_STATUSES.NOT_STARTED, markOffTime: null, callInTime: null, commonTime: null, commonTimeLabel: null }
+            { status: RUNNER_STATUSES.NOT_STARTED, actualTime: null, markOffTime: null, callInTime: null, commonTime: null, commonTimeLabel: null, calledIn: false }
           );
         }
         await get().refreshData();
@@ -437,7 +446,7 @@ const useBaseOperationsStore = create(
           for (const num of batch.bibs) {
             await StorageService.updateCheckpointRunner(
               currentRaceId, batch.checkpointNumber, Number(num),
-              { status: RUNNER_STATUSES.NOT_STARTED, markOffTime: null, callInTime: null, commonTime: null, commonTimeLabel: null }
+              { status: RUNNER_STATUSES.NOT_STARTED, actualTime: null, markOffTime: null, callInTime: null, commonTime: null, commonTimeLabel: null, calledIn: false }
             );
           }
         }

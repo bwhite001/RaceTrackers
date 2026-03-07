@@ -32,7 +32,7 @@ const StatusCell = ({ status, time }) => {
  * @param {Object[]} checkpoints - Array of { number, name }
  */
 const HeadsUpGrid = ({ runners = [], checkpoints = [] }) => {
-  const { submitRadioBatch, clearCheckpointRunner } = useBaseOperationsStore();
+  const { submitRadioBatch, clearCheckpointRunner, clearAllCheckpointTimes } = useBaseOperationsStore();
   const [editTarget, setEditTarget] = useState(null);
 
   const sortedRunners = useMemo(
@@ -162,8 +162,12 @@ const HeadsUpGrid = ({ runners = [], checkpoints = [] }) => {
           await submitRadioBatch([runnerNumber], time, editTarget.checkpointNumber);
           setEditTarget(null);
         }}
-        onClear={async ({ runnerNumber }) => {
-          await clearCheckpointRunner(runnerNumber);
+        onClear={async ({ runnerNumber, checkpointNumber, clearAll }) => {
+          if (clearAll) {
+            await clearAllCheckpointTimes(runnerNumber);
+          } else {
+            await clearCheckpointRunner(runnerNumber, checkpointNumber);
+          }
           setEditTarget(null);
         }}
       />
