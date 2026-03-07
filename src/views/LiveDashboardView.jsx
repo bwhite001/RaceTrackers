@@ -97,6 +97,8 @@ function LiveDashboardView() {
 
   const formatTime = (iso) => {
     if (!iso) return '—';
+    // Already HH:mm — return as-is
+    if (/^\d{2}:\d{2}(:\d{2})?$/.test(iso)) return iso.slice(0, 5);
     try {
       const d = new Date(iso);
       return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;

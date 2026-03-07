@@ -50,7 +50,7 @@ export default function CourseLeadersCard({ runners = [], checkpoints = [], topN
       if (!a.furthestTime && !b.furthestTime) return 0;
       if (!a.furthestTime) return 1;
       if (!b.furthestTime) return -1;
-      return new Date(a.furthestTime) - new Date(b.furthestTime);
+      return (a.furthestTime ?? '').localeCompare(b.furthestTime ?? '');
     });
 
     return scored.slice(0, topN).map((r, i) => ({
@@ -58,9 +58,7 @@ export default function CourseLeadersCard({ runners = [], checkpoints = [], topN
       position: i + 1,
       cpName: sortedCheckpoints[r.furthestIdx]?.name ?? `CP ${sortedCheckpoints[r.furthestIdx]?.number}`,
       cpNumber: sortedCheckpoints[r.furthestIdx]?.number,
-      timeLabel: r.furthestTime
-        ? new Date(r.furthestTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        : null,
+      timeLabel: r.furthestTime ?? null,
     }));
   }, [runners, sortedCheckpoints, topN]);
 

@@ -21,6 +21,8 @@ const CELL_MISSING = 'bg-gray-50 dark:bg-gray-800 text-gray-400';
 
 function formatTime(isoString) {
   if (!isoString) return '—';
+  // Already an HH:mm string — return as-is
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(isoString)) return isoString.slice(0, 5);
   try {
     return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   } catch {

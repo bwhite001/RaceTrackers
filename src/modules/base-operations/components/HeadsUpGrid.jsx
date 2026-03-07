@@ -11,7 +11,7 @@ const StatusCell = ({ status, time }) => {
     return <span className="text-gray-300 dark:text-gray-600 text-xs">—</span>;
   }
   if (status === RUNNER_STATUSES.PASSED || status === RUNNER_STATUSES.MARKED_OFF || status === RUNNER_STATUSES.CALLED_IN) {
-    const timeLabel = time ? new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null;
+    const timeLabel = time ?? null;
     return (
       <span className="inline-flex flex-col items-center leading-tight" aria-label="passed">
         <span className="text-green-600 dark:text-green-400 font-bold text-sm">✓</span>
