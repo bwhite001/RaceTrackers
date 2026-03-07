@@ -86,77 +86,88 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
   const raceStartTime = currentRace?.startTime ?? null;
 
   return (
-    <div className="flex flex-col h-full">
-      <InputSection
-        checkpoints={checkpoints ?? []}
-        checkpointNumber={checkpointNumber}
-        commonTime={commonTime}
-        locked={!!editingBatch}
-        disabled={loading}
-        raceStartTime={raceStartTime}
-        onCheckpointChange={setCheckpointNumber}
-        onTimeChange={setCommonTime}
-        onBibEntered={handleBibEntered}
-      />
+    <div className="flex flex-col md:flex-row md:divide-x divide-gray-200 dark:divide-gray-700
+                    rounded-lg border border-gray-200 dark:border-gray-700
+                    bg-white dark:bg-gray-800 overflow-hidden">
 
-      {/* Tab bar */}
-      <div className="flex border-b border-gray-200 dark:border-gray-700 px-4">
-        {[
-          { id: 'draft',   label: '📝 Draft',   count: draftCount,   ariaLabel: 'Draft' },
-          { id: 'history', label: '📋 History',  count: historyCount, ariaLabel: 'History' },
-        ].map(tab => (
-          <button
-            key={tab.id}
-            type="button"
-            aria-label={tab.ariaLabel}
-            aria-selected={activeTab === tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px ${
-              activeTab === tab.id
-                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-            }`}
-          >
-            {tab.label}
-            {tab.count > 0 && (
-              <span className={`ml-1 px-1.5 py-0.5 text-xs rounded-full font-bold ${
-                activeTab === tab.id
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-              }`}>
-                {tab.count}
-              </span>
-            )}
-          </button>
-        ))}
+      {/* ── Left column: Input ── */}
+      <div className="md:w-72 lg:w-80 flex-shrink-0 border-b md:border-b-0 border-gray-200 dark:border-gray-700">
+        <InputSection
+          checkpoints={checkpoints ?? []}
+          checkpointNumber={checkpointNumber}
+          commonTime={commonTime}
+          locked={!!editingBatch}
+          disabled={loading}
+          raceStartTime={raceStartTime}
+          onCheckpointChange={setCheckpointNumber}
+          onTimeChange={setCommonTime}
+          onBibEntered={handleBibEntered}
+        />
       </div>
 
-      {/* Content area */}
-      <div className="flex-1 overflow-hidden">
-        {activeTab === 'draft' ? (
-          <DraftView
-            runners={chips}
-            checkpointName={checkpointNumber ? cpName(checkpointNumber) : ''}
-            commonTime={commonTime}
-            existingRecords={existingRecords}
-            editingBatch={editingBatch}
-            loading={loading}
-            onRemove={handleRemove}
-            onClear={handleClear}
-            onRecord={handleRecord}
-            onCancel={handleCancel}
-            onUpdate={handleUpdate}
-          />
-        ) : (
-          <div className="p-4 overflow-y-auto h-full">
-            <HistoryView
-              batches={sessionBatches ?? []}
-              checkpoints={checkpoints ?? []}
-              onEdit={handleEditBatch}
-              onVoid={voidSessionBatch}
+      {/* ── Right column: Draft / History tabs + list ── */}
+      <div className="flex flex-col flex-1 min-h-[320px]">
+
+        {/* Tab bar */}
+        <div className="flex border-b border-gray-200 dark:border-gray-700 px-4">
+          {[
+            { id: 'draft',   label: '📝 Draft',   count: draftCount,   ariaLabel: 'Draft' },
+            { id: 'history', label: '📋 History',  count: historyCount, ariaLabel: 'History' },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              type="button"
+              aria-label={tab.ariaLabel}
+              aria-selected={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px ${
+                activeTab === tab.id
+                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              {tab.label}
+              {tab.count > 0 && (
+                <span className={`ml-1 px-1.5 py-0.5 text-xs rounded-full font-bold ${
+                  activeTab === tab.id
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                }`}>
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-auto">
+          {activeTab === 'draft' ? (
+            <DraftView
+              runners={chips}
+              checkpointName={checkpointNumber ? cpName(checkpointNumber) : ''}
+              commonTime={commonTime}
+              existingRecords={existingRecords}
+              editingBatch={editingBatch}
+              loading={loading}
+              onRemove={handleRemove}
+              onClear={handleClear}
+              onRecord={handleRecord}
+              onCancel={handleCancel}
+              onUpdate={handleUpdate}
             />
-          </div>
-        )}
+          ) : (
+            <div className="p-4">
+              <HistoryView
+                batches={sessionBatches ?? []}
+                checkpoints={checkpoints ?? []}
+                onEdit={handleEditBatch}
+                onVoid={voidSessionBatch}
+              />
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );
