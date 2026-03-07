@@ -85,7 +85,8 @@
     "test:related": "vitest run --related",
     "generate:guide": "node test/e2e/playwright/generate-guide.js",
     "generate:guide:pdfs": "node test/e2e/playwright/generate-guide-pdfs.js",
-    "generate:journeys": "node test/e2e/playwright/generate-journey-docs.js"
+    "generate:journeys": "node test/e2e/playwright/generate-journey-docs.js",
+    "generate:gpx-guide": "node scripts/generate-gpx-guide.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",

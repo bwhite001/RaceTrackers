@@ -1,0 +1,48 @@
+{
+  "_comment": "Customise this file then run: node scripts/generate-gpx-guide.js",
+
+  "organizationName": "RaceTracker Pro",
+  "guideTitle": "AllTrails GPX Extraction Guide",
+  "guideSubtitle": "How to extract course GPX data from AllTrails and embed it in race templates",
+  "primaryColor": "#1e3a5f",
+  "accentColor": "#3b82f6",
+  "footerText": "RaceTracker Pro — Internal Developer Guide",
+
+  "prerequisites": [
+    "Node.js 18+ installed",
+    "Playwright installed (already in the project — run <code>npx playwright install chromium</code> if needed)",
+    "An AllTrails account with the custom race routes saved",
+    "The RaceTracker Pro repository cloned locally"
+  ],
+
+  "races": [
+    {
+      "name": "Pinnacles Classic",
+      "slug": "pinnacles-classic",
+      "alltrailsUrl": "https://www.alltrails.com/explore/custom-routes/pinnacles-loop-d3b1fb0",
+      "checkpoints": 3,
+      "notes": "Confirmed URL from network capture. Should decode to Gold Creek / Mt Glorious area coordinates."
+    },
+    {
+      "name": "Mt Glorious Mountain Trail",
+      "slug": "mt-glorious-mountain-trail",
+      "alltrailsUrl": "",
+      "checkpoints": 4,
+      "notes": "Find this route on AllTrails — search near Maiala Picnic Area, Mt Glorious Rd."
+    },
+    {
+      "name": "Brisbane Trail Marathon",
+      "slug": "brisbane-trail-marathon",
+      "alltrailsUrl": "",
+      "checkpoints": 3,
+      "notes": "Find this route on AllTrails — search near Enoggera Reservoir, The Gap."
+    },
+    {
+      "name": "Lake Manchester Trail",
+      "slug": "lake-manchester-trail",
+      "alltrailsUrl": "",
+      "checkpoints": 3,
+      "notes": "Find this route on AllTrails — search near Lake Manchester Dam Wall."
+    }
+  ]
+}
