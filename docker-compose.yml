@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount source for live edits
+      - .:/app
+      # Preserve container's node_modules (don't override with host)
+      - /app/node_modules
+    environment:
+      # Required for file-watch polling inside Docker bind mounts
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=300
+    restart: always

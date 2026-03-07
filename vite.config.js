@@ -225,6 +225,11 @@ export default defineConfig({
   
   server: {
     host: true,
-    port: 3000
+    port: 3000,
+    watch: {
+      // Required for HMR inside Docker bind mounts
+      usePolling: true,
+      interval: 300,
+    },
   }
 })
