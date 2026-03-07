@@ -97,8 +97,7 @@ const RaceManagementView = () => {
   };
 
   const handleEditRace = (race) => {
-    setSelectedRaceForMode(race.id);
-    navigate('/race-maintenance/setup');
+    navigate(`/race-maintenance/edit?raceId=${race.id}`);
   };
 
   const handleViewRace = async (race) => {
