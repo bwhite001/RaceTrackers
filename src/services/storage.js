@@ -644,7 +644,8 @@ export class StorageService {
         notes: null
       }));
 
-      await db.checkpoint_runners.bulkAdd(checkpointRunners);
+      // Use bulkPut to handle concurrent initialization calls safely (avoids ConstraintError)
+      await db.checkpoint_runners.bulkPut(checkpointRunners);
       return checkpointRunners;
     } catch (error) {
       console.error('Error initializing checkpoint runners:', error);

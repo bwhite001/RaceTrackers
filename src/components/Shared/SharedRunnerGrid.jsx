@@ -38,13 +38,6 @@ const SharedRunnerGrid = ({
     const [editTimeValue, setEditTimeValue] = useState("");
     const [clickTimeout, setClickTimeout] = useState(null);
 
-    // Auto-expand the first group on initial load
-    useEffect(() => {
-        if (groupedRunners.length > 0) {
-            setExpandedGroups(prev => prev.size === 0 ? new Set([groupedRunners[0].start]) : prev);
-        }
-    }, [groupedRunners]);
-
     // Filter and deduplicate runners based on search term
     const filteredRunners = useMemo(() => {
         // First, deduplicate runners by runner number
@@ -124,6 +117,18 @@ const SharedRunnerGrid = ({
         }
         return groups;
     }, [filteredRunners, raceConfig, groupSize, searchTerm]);
+
+    // Auto-expand the first group when no current group is expanded.
+    // Uses `anyExpanded` instead of `prev.size === 0` so that when raceConfig loads
+    // and groups change (e.g. from [1] to [100, 125]), the first real group re-expands.
+    useEffect(() => {
+        if (groupedRunners.length > 0) {
+            setExpandedGroups(prev => {
+                const anyExpanded = groupedRunners.some(g => prev.has(g.start));
+                return anyExpanded ? prev : new Set([groupedRunners[0].start]);
+            });
+        }
+    }, [groupedRunners]);
 
     const handleRunnerClick = async (runner) => {
         // Clear any existing timeout

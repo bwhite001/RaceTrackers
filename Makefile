@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 .PHONY: help install dev build preview test test-run test-coverage test-watch \
         test-unit test-base test-db test-integration test-services test-components \
-        test-e2e test-e2e-ci test-changed seed seed-minimal clear-data clean
+        test-e2e test-e2e-ci test-confidence test-changed seed seed-minimal clear-data clean
 
 # ─── Local Development ────────────────────────────────────────────────────────
 
@@ -54,6 +54,9 @@ test-e2e: build ## E2E tests (builds first)
 
 test-e2e-ci: build ## E2E tests headless (builds first)
 	npm run test:e2e:ci
+
+test-confidence: build ## Full-confidence E2E check across all 3 operator roles
+	npx playwright test test/e2e/playwright/00-full-confidence.journey.spec.js
 
 test-changed: ## Run only tests affected by uncommitted changes
 	npm run test:changed
