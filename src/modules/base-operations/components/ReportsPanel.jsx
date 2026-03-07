@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import useBaseOperationsStore from '../store/baseOperationsStore';
+import { BaseOperationsRepository } from '../services/BaseOperationsRepository';
 import TimeUtils from '../../../services/timeUtils';
 
 /**
@@ -109,7 +110,7 @@ const EXPORT_FORMATS = {
   }
 };
 
-const ReportsPanel = () => {
+const ReportsPanel = ({ raceId: raceIdProp } = {}) => {
   const [selectedReport, setSelectedReport] = useState('missing');
   const [selectedFormat, setSelectedFormat] = useState('csv');
   const [checkpoint, setCheckpoint] = useState(1);
@@ -118,13 +119,36 @@ const ReportsPanel = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [generating, setGenerating] = useState(false);
 
-  const {
-    generateReport,
-    downloadReport,
-    previewReport,
-    loading,
-    checkpoints = []
-  } = useBaseOperationsStore();
+  const store = useBaseOperationsStore();
+  const checkpoints = raceIdProp ? [] : (store.checkpoints ?? []);
+
+  const generateReport = async (reportType, options = {}) => {
+    const id = raceIdProp ?? store.currentRaceId;
+    if (!id) throw new Error('No active race');
+    const repo = new BaseOperationsRepository();
+    switch (reportType) {
+      case 'missing':      return repo.generateMissingNumbersReport(id, options.checkpoint ?? 1, options.format ?? 'csv');
+      case 'outList':      return repo.generateOutListReport(id);
+      case 'checkpointLog':return repo.generateCheckpointLogReport(id, options.checkpoint ?? 1);
+      case 'summary':      return repo.generateRaceResults(id, options.format ?? 'csv');
+      default: throw new Error(`Unknown report type: ${reportType}`);
+    }
+  };
+
+  const downloadReport = (report) => {
+    if (!report?.content || !report?.filename) return;
+    const blob = new Blob([report.content], { type: report.mimeType ?? 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = report.filename; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const previewReport = (report) => {
+    if (!report?.content) return;
+    const blob = new Blob([report.content], { type: report.mimeType ?? 'text/plain' });
+    window.open(URL.createObjectURL(blob), '_blank');
+  };
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -310,10 +334,10 @@ const ReportsPanel = () => {
       <div className="flex items-center justify-end space-x-3">
         <button
           onClick={handleGenerate}
-          disabled={generating || loading}
+          disabled={generating}
           className="btn-primary"
         >
-          {generating || loading ? (
+          {generating ? (
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               <span>Generating...</span>

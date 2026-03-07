@@ -49,11 +49,13 @@ describe('Base Operations Store', () => {
       expect(state.loading).toBe(false);
       expect(state.error).toBeNull();
       expect(state.stats).toEqual({
+        notStarted: 0,
         total: 0,
         finished: 0,
         active: 0,
         dnf: 0,
-        dns: 0
+        dns: 0,
+        checkpointCounts: {},
       });
     });
 
@@ -151,11 +153,13 @@ describe('Base Operations Store', () => {
       const stats = useBaseOperationsStore.getState().calculateStats(runners);
 
       expect(stats).toEqual({
+        notStarted: 0,
         total: 5,
         finished: 2,
         active: 1,
         dnf: 1,
-        dns: 1
+        dns: 1,
+        checkpointCounts: { 1: 3 },
       });
     });
   });

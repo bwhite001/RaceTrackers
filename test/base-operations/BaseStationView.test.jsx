@@ -130,7 +130,6 @@ describe('BaseStationView', () => {
     // Check tab navigation buttons exist (role="tab")
     expect(screen.getByRole('tab', { name: /data entry/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /overview/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /reports/i })).toBeInTheDocument();
   });
 
   test('handles tab navigation', () => {
@@ -139,10 +138,6 @@ describe('BaseStationView', () => {
     // Switch to overview tab
     fireEvent.click(screen.getByRole('tab', { name: /overview/i }));
     expect(screen.getByTestId('race-overview')).toBeInTheDocument();
-
-    // Switch to reports tab
-    fireEvent.click(screen.getByRole('tab', { name: /reports/i }));
-    expect(screen.getByTestId('reports-panel')).toBeInTheDocument();
 
     // Switch back to data entry
     fireEvent.click(screen.getByRole('tab', { name: /data entry/i }));

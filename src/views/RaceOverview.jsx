@@ -6,6 +6,7 @@ import { useRaceStore } from '../store/useRaceStore.js';
 import { useToast } from '../shared/components/ui/Toast';
 import RosterImport from '../modules/race-maintenance/components/RosterImport.jsx';
 import DistributeRaceModal from '../modules/race-maintenance/components/DistributeRaceModal.jsx';
+import ReportsPanel from '../modules/base-operations/components/ReportsPanel.jsx';
 import { Card, CardHeader, CardBody, CardFooter, Button, Badge } from '../design-system/components';
 
 const RaceOverview = () => {
@@ -19,6 +20,7 @@ const RaceOverview = () => {
   const [showDistribute, setShowDistribute] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [postRaceOpen, setPostRaceOpen] = useState(false);
 
   const {
     currentRace: raceConfig,
@@ -368,7 +370,28 @@ const RaceOverview = () => {
         </CardBody>
       </Card>
 
-      {/* ── 5. Advanced tools (collapsible) ── */}
+      {/* ── 5. Post Race Procedures (collapsible) ── */}
+      <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <button
+          onClick={() => setPostRaceOpen(prev => !prev)}
+          className="w-full flex items-center justify-between px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+        >
+          <span>Post race procedures &amp; reports</span>
+          <svg
+            className={`w-4 h-4 transition-transform ${postRaceOpen ? 'rotate-180' : ''}`}
+            fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {postRaceOpen && raceConfig?.id && (
+          <div className="px-4 pb-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <ReportsPanel raceId={raceConfig.id} />
+          </div>
+        )}
+      </div>
+
+      {/* ── 6. Advanced tools (collapsible) ── */}
       <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         <button
           onClick={() => setAdvancedOpen(prev => !prev)}

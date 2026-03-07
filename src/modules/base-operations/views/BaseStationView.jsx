@@ -14,7 +14,6 @@ import ImportExportModal from '../../../components/ImportExport/ImportExportModa
 // Components
 import BatchEntryLayout from '../components/BatchEntryLayout';
 import RaceOverview from '../components/RaceOverview';
-import ReportsPanel from '../components/ReportsPanel';
 import WithdrawalDialog from '../components/WithdrawalDialog';
 import CheckpointImportPanel from '../components/CheckpointImportPanel';
 import OutList from '../components/OutList';
@@ -31,7 +30,6 @@ const TABS = [
   { id: 'data-entry', label: 'Data Entry' },
   { id: 'overview',   label: 'Overview' },
   { id: 'dns',        label: 'DNS' },
-  { id: 'reports',    label: 'Reports' },
 ];
 
 /**
@@ -136,7 +134,6 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   // Define hotkeys
   const hotkeys = {
     [HOTKEYS.NEW_ENTRY]: () => handleTabChange('data-entry'),
-    [HOTKEYS.REPORTS]: () => handleTabChange('reports'),
     [HOTKEYS.DROPOUT]: () => handleWithdrawal('dnf'),
     'shift+d': () => { handleTabChange('dns'); handleWithdrawal('dns'); },
     'escape': () => {
@@ -274,9 +271,6 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
               </div>
             )}
 
-            {activeTab === 'reports' && (
-              <ReportsPanel />
-            )}
           </div>
         </main>
 
