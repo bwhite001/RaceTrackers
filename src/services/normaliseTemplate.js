@@ -3,7 +3,7 @@
  * consumed by TemplateSelectionStep, RaceSetup, and RaceTemplateService.
  *
  * @param {Object} raw - Raw template object (rich JS or simple JSON format)
- * @returns {Object} Normalised template in canonical shape
+ * @returns {Object} Normalised template in canonical shape (includes courseGpx if present)
  */
 export function normaliseTemplate(raw) {
   const isRichFormat = raw.defaultRunnerRangeStart != null;
@@ -38,6 +38,7 @@ export function normaliseTemplate(raw) {
     baseLocation: raw.metadata?.baseLocation || '',
     checkpoints,
     runnerRanges,
-    defaultBatches: isRichFormat ? [] : (raw.defaultBatches || [])
+    defaultBatches: isRichFormat ? [] : (raw.defaultBatches || []),
+    courseGpx: raw.courseGpx || null
   };
 }
