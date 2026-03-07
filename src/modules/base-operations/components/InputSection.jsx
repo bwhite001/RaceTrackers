@@ -35,6 +35,21 @@ function parseBibs(raw) {
   return results;
 }
 
+/** "HH:mm" or "HH:mm:ss" → seconds since midnight */
+function timeToSecs(str) {
+  const parts = str.split(':').map(Number);
+  return (parts[0] ?? 0) * 3600 + (parts[1] ?? 0) * 60 + (parts[2] ?? 0);
+}
+
+/** Seconds since midnight → "HH:mm:ss" (wraps within 24h) */
+function secsToTime(s) {
+  const total = ((s % 86400) + 86400) % 86400;
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const sec = total % 60;
+  return [h, m, sec].map(n => String(n).padStart(2, '0')).join(':');
+}
+
 const InputSection = ({
   checkpoints,
   checkpointNumber,
@@ -44,6 +59,7 @@ const InputSection = ({
   onCheckpointChange,
   onTimeChange,
   onBibEntered,
+  onUnresolvedAdded,
   raceStartTime,
 }) => {
   const bibRef = useRef(null);
@@ -66,6 +82,11 @@ const InputSection = ({
     const d = new Date();
     if (e.key === 'ArrowUp')   { e.preventDefault(); d.setHours(h, m + 5, 0, 0); onTimeChange(format(d, 'HH:mm')); }
     if (e.key === 'ArrowDown') { e.preventDefault(); d.setHours(h, m - 5, 0, 0); onTimeChange(format(d, 'HH:mm')); }
+  };
+
+  const handleNudge = (deltaSecs) => {
+    if (!commonTime) return;
+    onTimeChange(secsToTime(timeToSecs(commonTime) + deltaSecs));
   };
 
   const handleBibKeyDown = (e) => {
@@ -148,7 +169,30 @@ const InputSection = ({
         {isInFuture(commonTime) && (
           <p className="mt-1 text-xs text-amber-600">⚠ Time is in the future</p>
         )}
-        <p className="mt-1 text-xs text-gray-400">↑↓ keys nudge by 5 minutes</p>
+        <p className="mt-1 text-xs text-gray-400">↑↓ keys nudge ±5 min • buttons nudge ±30s/1m</p>
+
+        {/* Time nudge buttons */}
+        {!locked && (
+          <div className="flex gap-1 mt-1">
+            {[
+              { label: '−1m', delta: -60 },
+              { label: '−30s', delta: -30 },
+              { label: '+30s', delta: 30 },
+              { label: '+1m', delta: 60 },
+            ].map(({ label, delta }) => (
+              <button
+                key={label}
+                type="button"
+                aria-label={label}
+                onClick={() => handleNudge(delta)}
+                disabled={disabled || !commonTime}
+                className="flex-1 px-1 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Bib Numbers */}
@@ -156,17 +200,31 @@ const InputSection = ({
         <label htmlFor="is-bib" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Bib Numbers
         </label>
-        <input
-          id="is-bib"
-          aria-label="Bib Numbers"
-          ref={bibRef}
-          type="text"
-          placeholder={ready ? 'Enter bib, press Enter…' : 'Set checkpoint and time first'}
-          onKeyDown={handleBibKeyDown}
-          disabled={disabled || !ready}
-          className={inputCls}
-        />
-        <p className="mt-1 text-xs text-gray-400">Formats: 101, 105-107, 110</p>
+        <div className="flex gap-2">
+          <input
+            id="is-bib"
+            aria-label="Bib Numbers"
+            ref={bibRef}
+            type="text"
+            placeholder={ready ? 'Enter bib, press Enter…' : 'Set checkpoint and time first'}
+            onKeyDown={handleBibKeyDown}
+            disabled={disabled || !ready}
+            className={`flex-1 ${inputCls}`}
+          />
+          {ready && !locked && (
+            <button
+              type="button"
+              aria-label="Add unresolved call"
+              title="Garbled call — record placeholder"
+              onClick={onUnresolvedAdded}
+              disabled={disabled}
+              className="px-3 py-2 text-sm font-bold border border-amber-400 text-amber-700 dark:text-amber-400 rounded-md hover:bg-amber-50 dark:hover:bg-amber-900/20 disabled:opacity-40"
+            >
+              ?
+            </button>
+          )}
+        </div>
+        <p className="mt-1 text-xs text-gray-400">Formats: 101, 105-107, 110 — or ? for unclear calls</p>
       </div>
     </div>
   );
@@ -181,6 +239,7 @@ InputSection.propTypes = {
   onCheckpointChange: PropTypes.func.isRequired,
   onTimeChange:       PropTypes.func.isRequired,
   onBibEntered:       PropTypes.func.isRequired,
+  onUnresolvedAdded:  PropTypes.func,
   raceStartTime:      PropTypes.string,
 };
 

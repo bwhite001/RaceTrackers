@@ -91,6 +91,43 @@ describe('DraftView — duplicate warning', () => {
   });
 });
 
+describe('DraftView — unresolved chip', () => {
+  const unresolvedRunner = { id: 'c0', bib: null, isUnresolved: true, addedAt: '14:00:12' };
+
+  it('renders "?" for an unresolved chip', () => {
+    render(<DraftView {...baseProps} runners={[unresolvedRunner]} />);
+    expect(screen.getByText('?')).toBeInTheDocument();
+  });
+
+  it('shows unresolved alert banner', () => {
+    render(<DraftView {...baseProps} runners={[unresolvedRunner]} />);
+    const alerts = screen.getAllByRole('alert');
+    expect(alerts.some(a => /unresolved/i.test(a.textContent))).toBe(true);
+  });
+
+  it('Record button is disabled and shows "Resolve all calls first"', () => {
+    render(<DraftView {...baseProps} runners={[unresolvedRunner]} />);
+    const btn = screen.getByRole('button', { name: /resolve all calls first/i });
+    expect(btn).toBeDisabled();
+  });
+
+  it('shows Resolve inline input after clicking Resolve button', () => {
+    render(<DraftView {...baseProps} runners={[unresolvedRunner]} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Resolve' }));
+    expect(screen.getByPlaceholderText(/bib number/i)).toBeInTheDocument();
+  });
+
+  it('calls onResolve with chip id and bib number on Enter', () => {
+    const onResolve = vi.fn();
+    render(<DraftView {...baseProps} runners={[unresolvedRunner]} onResolve={onResolve} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Resolve' }));
+    const input = screen.getByPlaceholderText(/bib number/i);
+    fireEvent.change(input, { target: { value: '42' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(onResolve).toHaveBeenCalledWith('c0', 42);
+  });
+});
+
 describe('DraftView — edit mode', () => {
   const editingBatch = { id: 'b1', batchNumber: 2, originalBibs: [23, 45] };
   const runners = [
