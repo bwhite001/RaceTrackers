@@ -67,6 +67,7 @@ const InputSection = ({
   const [quickEntryOpen, setQuickEntryOpen] = useState(false);
   const [textareaValue, setTextareaValue] = useState('');
   const [numpadValue, setNumpadValue] = useState('');
+  const [nudgesOpen, setNudgesOpen] = useState(false);
 
   // Auto-focus bib input once checkpoint + time are both set
   useEffect(() => {
@@ -179,45 +180,57 @@ const InputSection = ({
 
         {/* Time nudge buttons */}
         {!locked && (
-          <div className="flex flex-col gap-1 mt-1">
-            <div className="flex gap-1">
-              {[
-                { label: '−1h', delta: -3600 },
-                { label: '−15m', delta: -900 },
-                { label: '−5m', delta: -300 },
-                { label: '−1m', delta: -60 },
-              ].map(({ label, delta }) => (
-                <button
-                  key={label}
-                  type="button"
-                  aria-label={label}
-                  onClick={() => handleNudge(delta)}
-                  disabled={disabled || !commonTime}
-                  className="flex-1 px-1 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <div className="flex gap-1">
-              {[
-                { label: '+1m', delta: 60 },
-                { label: '+5m', delta: 300 },
-                { label: '+15m', delta: 900 },
-                { label: '+1h', delta: 3600 },
-              ].map(({ label, delta }) => (
-                <button
-                  key={label}
-                  type="button"
-                  aria-label={label}
-                  onClick={() => handleNudge(delta)}
-                  disabled={disabled || !commonTime}
-                  className="flex-1 px-1 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+          <div className="mt-1">
+            <button
+              type="button"
+              onClick={() => setNudgesOpen(o => !o)}
+              disabled={disabled || !commonTime}
+              className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-40"
+            >
+              {nudgesOpen ? '▲ Hide nudges' : '▼ Adjust time'}
+            </button>
+            {nudgesOpen && (
+              <div className="flex flex-col gap-1 mt-1">
+                <div className="flex gap-1">
+                  {[
+                    { label: '+1h', delta: 3600 },
+                    { label: '+15m', delta: 900 },
+                    { label: '+5m', delta: 300 },
+                    { label: '+1m', delta: 60 },
+                  ].map(({ label, delta }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      aria-label={label}
+                      onClick={() => handleNudge(delta)}
+                      disabled={disabled || !commonTime}
+                      className="flex-1 px-1 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-1">
+                  {[
+                    { label: '−1m', delta: -60 },
+                    { label: '−5m', delta: -300 },
+                    { label: '−15m', delta: -900 },
+                    { label: '−1h', delta: -3600 },
+                  ].map(({ label, delta }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      aria-label={label}
+                      onClick={() => handleNudge(delta)}
+                      disabled={disabled || !commonTime}
+                      className="flex-1 px-1 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
