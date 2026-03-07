@@ -1,0 +1,10 @@
+@media print {
+  /* Hide controls bar (first child) */
+  .leaderboard-print-target > :first-child { display: none !important; }
+  nav, header, [role="tablist"], button { display: none !important; }
+
+  /* Expand to full page */
+  .leaderboard-print-target { width: 100% !important; }
+  table { width: 100% !important; page-break-inside: auto; }
+  tr { page-break-inside: avoid; }
+}

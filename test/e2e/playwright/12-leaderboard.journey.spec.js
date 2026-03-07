@@ -1,11 +1,12 @@
 /**
- * Customer Journey: Base Station Operator – Leaderboard Tab
+ * Customer Journey: Race Coordinator — Leaderboard Tab
  *
- * Covers the Leaderboard tab flow in BaseStationView:
+ * Covers the new Leaderboard tab in BaseStationView:
  *   1. Navigate to base station after seeding a race
  *   2. Click the Leaderboard tab
- *   3. Verify the Leaderboard renders (even if empty)
- *   4. Verify DNF runners appear in a separate "Did Not Finish" section
+ *   3. Verify group-by controls are rendered
+ *   4. Verify empty state message when no finishers
+ *   5. Switch grouping modes
  */
 
 import { test, expect } from './fixtures.js';
@@ -24,7 +25,7 @@ test.describe('Leaderboard Tab', () => {
     await seedRace(page, RACE);
   });
 
-  test('leaderboard tab shows runners sorted by finish time', async ({ page, step }) => {
+  test('leaderboard tab shows group-by controls and empty state', async ({ page, step }) => {
     await step('Navigate to Base Station via home screen', async () => {
       await goHome(page);
       const baseStationBtn = page.getByRole('button', { name: /base station/i });
@@ -40,7 +41,7 @@ test.describe('Leaderboard Tab', () => {
     await step('Wait for Base Station view to load', async () => {
       const loaded = await page.waitForURL(/base-station/, { timeout: 10000 }).then(() => true).catch(() => false);
       if (!loaded) {
-        test.skip(true, 'Base Station navigation did not occur — modal or routing may not be implemented');
+        test.skip(true, 'Base Station navigation did not occur');
         return;
       }
     });
@@ -56,32 +57,37 @@ test.describe('Leaderboard Tab', () => {
       await page.waitForTimeout(500);
     });
 
-    await step('Verify Leaderboard component renders', async () => {
-      // Look for leaderboard heading or empty state
-      const leaderboardHeading = page.getByText(/leaderboard/i).first();
-      const emptyState = page.getByText(/no finishers|no runners|no results|empty/i).first();
-      const finishersSection = page.getByText(/finishers|finished|position|place|rank/i).first();
-
-      const headingVisible = await leaderboardHeading.isVisible({ timeout: 5000 }).catch(() => false);
-      const emptyVisible = await emptyState.isVisible({ timeout: 3000 }).catch(() => false);
-      const finisherVisible = await finishersSection.isVisible({ timeout: 3000 }).catch(() => false);
-
-      if (!headingVisible && !emptyVisible && !finisherVisible) {
-        test.skip(true, 'Leaderboard component did not render — may not be implemented');
+    await step('Verify group-by controls are visible', async () => {
+      const groupBySelect = page.getByRole('combobox', { name: /group by/i }).first();
+      const selectVisible = await groupBySelect.isVisible({ timeout: 5000 }).catch(() => false);
+      if (!selectVisible) {
+        test.skip(true, 'Group-by controls not found — leaderboard may not be implemented');
         return;
       }
-      // Accept any of: heading, empty state, or finisher section — all indicate the component rendered
-      expect(headingVisible || emptyVisible || finisherVisible).toBeTruthy();
+      await expect(groupBySelect).toBeVisible();
+    });
+
+    await step('Verify empty state when no finishers recorded', async () => {
+      const emptyMsg = page.getByText(/no finishers recorded yet/i).first();
+      const emptyVisible = await emptyMsg.isVisible({ timeout: 5000 }).catch(() => false);
+      if (!emptyVisible) {
+        // Could also be showing a table with entries — both are valid
+        const table = page.locator('table').first();
+        const tableVisible = await table.isVisible({ timeout: 3000 }).catch(() => false);
+        expect(emptyVisible || tableVisible).toBeTruthy();
+        return;
+      }
+      await expect(emptyMsg).toBeVisible();
     });
   });
 
-  test('dnf runners shown separately from finishers', async ({ page, step }) => {
-    await step('Navigate to Base Station', async () => {
+  test('leaderboard grouping mode can be switched', async ({ page, step }) => {
+    await step('Navigate to Base Station Leaderboard tab', async () => {
       await goHome(page);
       const baseStationBtn = page.getByRole('button', { name: /base station/i });
       const btnVisible = await baseStationBtn.isVisible({ timeout: 5000 }).catch(() => false);
       if (!btnVisible) {
-        test.skip(true, 'Base Station button not found on home screen');
+        test.skip(true, 'Base Station button not found');
         return;
       }
       await baseStationBtn.click();
@@ -91,48 +97,7 @@ test.describe('Leaderboard Tab', () => {
         test.skip(true, 'Base Station navigation did not occur');
         return;
       }
-    });
 
-    await step('Record a DNF via the Data Entry tab or withdrawal dialog', async () => {
-      const dataEntryTab = page.getByRole('tab', { name: /data entry/i }).first();
-      const tabVisible = await dataEntryTab.isVisible({ timeout: 5000 }).catch(() => false);
-      if (!tabVisible) {
-        test.skip(true, 'Data Entry tab not found — Base Station may not be fully loaded');
-        return;
-      }
-      await dataEntryTab.click();
-      await page.waitForTimeout(300);
-
-      // Check if the store is integrated (DEVELOPMENT GAP check)
-      const timeInput = page.locator('#commonTime, input[placeholder*="time" i]').first();
-      const timeVisible = await timeInput.isVisible({ timeout: 3000 }).catch(() => false);
-      if (!timeVisible) {
-        test.skip(true, 'DEVELOPMENT GAP: baseOperationsStore uses localStorage — not integrated with main app data');
-        return;
-      }
-
-      // Try to open a DNF/withdrawal dialog
-      const dnfBtn = page.getByRole('button', { name: /dnf|withdrawal|did not finish/i }).first();
-      const dnfBtnVisible = await dnfBtn.isVisible({ timeout: 2000 }).catch(() => false);
-      if (dnfBtnVisible) {
-        await dnfBtn.click();
-        const dialog = page.getByRole('dialog');
-        const dialogVisible = await dialog.waitFor({ state: 'visible', timeout: 5000 }).catch(() => false);
-        if (dialogVisible) {
-          const runnerInput = dialog.locator('input[type="text"], textarea').first();
-          if (await runnerInput.isVisible({ timeout: 2000 }).catch(() => false)) {
-            await runnerInput.fill('505');
-          }
-          const confirmBtn = dialog.getByRole('button', { name: /confirm|submit|save/i }).first();
-          if (await confirmBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-            await confirmBtn.click();
-            await page.waitForTimeout(500);
-          }
-        }
-      }
-    });
-
-    await step('Switch to Leaderboard tab and check DNF section', async () => {
       const leaderboardTab = page.getByRole('tab', { name: /leaderboard/i }).first();
       const tabVisible = await leaderboardTab.isVisible({ timeout: 5000 }).catch(() => false);
       if (!tabVisible) {
@@ -141,26 +106,32 @@ test.describe('Leaderboard Tab', () => {
       }
       await leaderboardTab.click();
       await page.waitForTimeout(500);
+    });
 
-      // Look for the "Did Not Finish" section
-      const dnfSection = page.getByText(/did not finish|dnf/i).first();
-      const dnfVisible = await dnfSection.isVisible({ timeout: 5000 }).catch(() => false);
-
-      // Also check that finishers and DNFs are in separate sections if both exist
-      const finisherSection = page.getByText(/finishers|finished|position/i).first();
-      const finisherVisible = await finisherSection.isVisible({ timeout: 3000 }).catch(() => false);
-
-      if (!dnfVisible && !finisherVisible) {
-        // Leaderboard may render empty state — that's acceptable
-        const emptyState = page.getByText(/no finishers|no runners|no results|empty/i).first();
-        const emptyVisible = await emptyState.isVisible({ timeout: 3000 }).catch(() => false);
-        if (emptyVisible) return; // Empty leaderboard is valid
-        test.skip(true, 'Leaderboard component did not render DNF section — may not be implemented yet');
+    await step('Switch grouping mode to Overall', async () => {
+      const groupBySelect = page.getByRole('combobox', { name: /group by/i }).first();
+      const selectVisible = await groupBySelect.isVisible({ timeout: 5000 }).catch(() => false);
+      if (!selectVisible) {
+        test.skip(true, 'Group-by controls not found');
         return;
       }
+      await groupBySelect.selectOption('overall');
+      await page.waitForTimeout(300);
+      await expect(groupBySelect).toHaveValue('overall');
+    });
 
-      // When DNFs are recorded, they should appear in a separate section from finishers
-      expect(dnfVisible || finisherVisible).toBeTruthy();
+    await step('Switch grouping mode to Wave', async () => {
+      const groupBySelect = page.getByRole('combobox', { name: /group by/i }).first();
+      await groupBySelect.selectOption('wave');
+      await page.waitForTimeout(300);
+      await expect(groupBySelect).toHaveValue('wave');
+    });
+
+    await step('Switch grouping mode to Combined (Gender + Wave)', async () => {
+      const groupBySelect = page.getByRole('combobox', { name: /group by/i }).first();
+      await groupBySelect.selectOption('combined');
+      await page.waitForTimeout(300);
+      await expect(groupBySelect).toHaveValue('combined');
     });
   });
 });

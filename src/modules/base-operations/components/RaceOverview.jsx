@@ -3,6 +3,7 @@ import useBaseOperationsStore from '../store/baseOperationsStore';
 import useDeviceDetection from '../../../shared/hooks/useDeviceDetection';
 import { RUNNER_STATUSES, STATUS_LABELS } from '../../../types';
 import { formatRunnerNumber } from '../../../utils/runnerNumberUtils';
+import LiveLeadersBanner from './Leaderboard/LiveLeadersBanner';
 
 // Static status colour classes (Tailwind JIT requires static strings)
 const STATUS_CLASS_MAP = {
@@ -114,6 +115,7 @@ const RaceOverview = () => {
 
   return (
     <div className="space-y-6">
+      <LiveLeadersBanner />
       {/* Controls */}
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Search */}
