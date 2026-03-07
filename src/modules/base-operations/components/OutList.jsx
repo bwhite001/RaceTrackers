@@ -157,16 +157,14 @@ const OutList = ({ initialFilter = 'all' }) => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by number, reason, or comments..."
-            className="form-input w-full"
-          />
-        </div>
+      <div className="flex flex-col gap-3">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search by number…"
+          className="form-input w-full text-base py-3"
+        />
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}

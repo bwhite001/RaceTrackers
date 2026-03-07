@@ -25,7 +25,7 @@ const WITHDRAWAL_REASONS = [
   'Other'
 ];
 
-const WithdrawalDialog = ({ isOpen, onClose, runnerNumber: initialRunnerNumber = '' }) => {
+const WithdrawalDialog = ({ isOpen, onClose, runnerNumber: initialRunnerNumber = '', type = 'withdrawal' }) => {
   const [runnerNumber, setRunnerNumber] = useState(initialRunnerNumber);
   const [checkpoint, setCheckpoint] = useState(1);
   const [withdrawalTime, setWithdrawalTime] = useState('');
@@ -87,8 +87,8 @@ const WithdrawalDialog = ({ isOpen, onClose, runnerNumber: initialRunnerNumber =
       newErrors.withdrawalTime = 'Withdrawal time is required';
     }
 
-    // Validate reason (only for withdrawal, not reversal)
-    if (!isReversal && !reason) {
+    // Validate reason (only for withdrawal, not reversal, dns, or dnf)
+    if (!isReversal && !reason && type === 'withdrawal') {
       newErrors.reason = 'Reason is required';
     }
 
@@ -232,7 +232,8 @@ const WithdrawalDialog = ({ isOpen, onClose, runnerNumber: initialRunnerNumber =
                 )}
               </div>
 
-              {/* Reason */}
+              {/* Reason — hidden for DNS/DNF */}
+              {type === 'withdrawal' && (
               <div>
                 <label htmlFor="reason" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Reason
@@ -255,6 +256,7 @@ const WithdrawalDialog = ({ isOpen, onClose, runnerNumber: initialRunnerNumber =
                   </p>
                 )}
               </div>
+              )}
 
               {/* Comments */}
               <div>
@@ -338,7 +340,8 @@ const WithdrawalDialog = ({ isOpen, onClose, runnerNumber: initialRunnerNumber =
 WithdrawalDialog.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  runnerNumber: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+  runnerNumber: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  type: PropTypes.string,
 };
 
 export default WithdrawalDialog;
