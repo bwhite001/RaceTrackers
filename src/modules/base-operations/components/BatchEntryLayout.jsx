@@ -2,88 +2,166 @@ import React, { useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import { useRaceStore } from '../../../store/useRaceStore';
-import BatchEntryPane from './BatchEntryPane';
-import SessionHistoryPane from './SessionHistoryPane';
+import InputSection from './InputSection';
+import DraftView from './DraftView';
+import HistoryView from './HistoryView';
 
 const BatchEntryLayout = ({ onUnsavedChanges }) => {
-  const { runners, sessionBatches, submitRadioBatch, voidSessionBatch, loading } = useBaseOperationsStore();
-  const { checkpoints, runners: raceRunners } = useRaceStore();
-  const [activeBib, setActiveBib] = useState(null);
-  const [selectedCheckpoint, setSelectedCheckpoint] = useState(null);
-  const [mobileTab, setMobileTab] = useState('entry');
+  const { runners, sessionBatches, submitRadioBatch, voidSessionBatch, editSessionBatch, loading } =
+    useBaseOperationsStore();
+  const { checkpoints, runners: raceRunners, currentRace } = useRaceStore();
 
-  const knownRunners = useMemo(() => (raceRunners ?? []).map(r => r.number), [raceRunners]);
+  const [checkpointNumber, setCheckpointNumber] = useState(null);
+  const [commonTime, setCommonTime] = useState('');
+  const [chips, setChips] = useState([]);
+  const [editingBatch, setEditingBatch] = useState(null);
+  const [activeTab, setActiveTab] = useState('draft');
 
   const existingRecords = useMemo(() => {
-    if (selectedCheckpoint === null) return [];
-    // Only flag runners that have actually been recorded (not-started records are pre-created
-    // for all runners when a checkpoint is initialised and must not trigger a duplicate warning).
-    return runners
-      .filter(r => r.checkpointNumber === selectedCheckpoint && r.status !== 'not-started')
+    if (!checkpointNumber) return [];
+    return (runners ?? [])
+      .filter(r => r.checkpointNumber === checkpointNumber && r.status !== 'not-started')
       .map(r => r.number);
-  }, [runners, selectedCheckpoint]);
+  }, [runners, checkpointNumber]);
 
-  const statusWarnings = useMemo(() => {
-    const seen = new Map();
-    for (const r of runners) {
-      if ((r.status === 'dnf' || r.status === 'non-starter') && !seen.has(r.number)) {
-        seen.set(r.number, r.status);
-      }
-    }
-    return Array.from(seen.entries()).map(([number, status]) => ({ number, status }));
-  }, [runners]);
+  const cpName = useCallback((n) => {
+    const cp = (checkpoints ?? []).find(c => c.number === n);
+    return cp ? `CP${cp.number} — ${cp.name}` : `CP${n ?? '?'}`;
+  }, [checkpoints]);
 
-  const handleSubmit = useCallback(async ({ checkpointNumber, commonTime, bibs }) => {
-    setSelectedCheckpoint(checkpointNumber);
-    await submitRadioBatch(bibs.map(c => c.bib), commonTime, checkpointNumber);
+  const handleBibEntered = useCallback((bibs) => {
+    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    setChips(prev => {
+      const existing = new Set(prev.map(c => c.bib));
+      const newChips = bibs
+        .filter(b => !existing.has(b))
+        .map(b => ({ bib: b, addedAt: now, isOriginal: false }));
+      return [...prev, ...newChips];
+    });
+    onUnsavedChanges?.(true);
+  }, [onUnsavedChanges]);
+
+  const handleRemove = useCallback((bib) => setChips(prev => prev.filter(c => c.bib !== bib)), []);
+
+  const handleClear = useCallback(() => {
+    setChips([]);
     onUnsavedChanges?.(false);
-  }, [submitRadioBatch, onUnsavedChanges]);
+  }, [onUnsavedChanges]);
 
-  const entryPane = (
-    <BatchEntryPane
-      checkpoints={checkpoints ?? []}
-      knownRunners={knownRunners}
-      existingRecords={existingRecords}
-      statusWarnings={statusWarnings}
-      onSubmit={handleSubmit}
-      onCheckpointChange={setSelectedCheckpoint}
-      loading={loading}
-    />
-  );
+  const handleRecord = useCallback(async () => {
+    if (!checkpointNumber || !commonTime || chips.length === 0) return;
+    await submitRadioBatch(chips.map(c => c.bib), commonTime, checkpointNumber, {});
+    setChips([]);
+    onUnsavedChanges?.(false);
+    setActiveTab('history');
+  }, [checkpointNumber, commonTime, chips, submitRadioBatch, onUnsavedChanges]);
 
-  const historyPane = (
-    <SessionHistoryPane
-      batches={sessionBatches}
-      checkpoints={checkpoints ?? []}
-      activeBib={activeBib}
-      onVoid={voidSessionBatch}
-    />
-  );
+  const handleEditBatch = useCallback((batch) => {
+    const batchNumber = (sessionBatches ?? []).indexOf(batch) + 1;
+    setEditingBatch({ ...batch, batchNumber });
+    setCheckpointNumber(batch.checkpointNumber);
+    setCommonTime(batch.commonTime);
+    const submittedTime = new Date(batch.submittedAt).toLocaleTimeString([], {
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+    });
+    setChips(batch.bibs.map(bib => ({ bib, addedAt: submittedTime, isOriginal: true })));
+    setActiveTab('draft');
+  }, [sessionBatches]);
+
+  const handleCancel = useCallback(() => {
+    setEditingBatch(null);
+    setChips([]);
+  }, []);
+
+  const handleUpdate = useCallback(async () => {
+    if (!editingBatch || chips.length === 0) return;
+    await editSessionBatch(editingBatch.id, chips.map(c => c.bib), commonTime, checkpointNumber);
+    setEditingBatch(null);
+    setChips([]);
+    setActiveTab('history');
+  }, [editingBatch, chips, commonTime, checkpointNumber, editSessionBatch]);
+
+  const draftCount = chips.length;
+  const historyCount = (sessionBatches ?? []).filter(b => !b.voided).length;
+  const raceStartTime = currentRace?.startTime ?? null;
 
   return (
-    <div className="h-full">
-      <div className="flex lg:hidden border-b border-gray-200 dark:border-gray-700 mb-4">
-        {['entry', 'history'].map(tab => (
-          <button key={tab}
-            className={`flex-1 py-2 text-sm font-medium capitalize ${mobileTab === tab ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
-            onClick={() => setMobileTab(tab)}>
-            {tab}{tab === 'history' && sessionBatches.length > 0 && ` (${sessionBatches.length})`}
+    <div className="flex flex-col h-full">
+      <InputSection
+        checkpoints={checkpoints ?? []}
+        checkpointNumber={checkpointNumber}
+        commonTime={commonTime}
+        locked={!!editingBatch}
+        disabled={loading}
+        raceStartTime={raceStartTime}
+        onCheckpointChange={setCheckpointNumber}
+        onTimeChange={setCommonTime}
+        onBibEntered={handleBibEntered}
+      />
+
+      {/* Tab bar */}
+      <div className="flex border-b border-gray-200 dark:border-gray-700 px-4">
+        {[
+          { id: 'draft',   label: '📝 Draft',   count: draftCount,   ariaLabel: 'Draft' },
+          { id: 'history', label: '📋 History',  count: historyCount, ariaLabel: 'History' },
+        ].map(tab => (
+          <button
+            key={tab.id}
+            type="button"
+            aria-label={tab.ariaLabel}
+            aria-selected={activeTab === tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px ${
+              activeTab === tab.id
+                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+          >
+            {tab.label}
+            {tab.count > 0 && (
+              <span className={`ml-1 px-1.5 py-0.5 text-xs rounded-full font-bold ${
+                activeTab === tab.id
+                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+              }`}>
+                {tab.count}
+              </span>
+            )}
           </button>
         ))}
       </div>
-      <div className="hidden lg:flex h-full gap-4">
-        <div className="w-[45%] border border-gray-200 dark:border-gray-700 rounded-xl overflow-y-auto">{entryPane}</div>
-        <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl overflow-y-auto p-4">
-          <h3 className="text-sm font-semibold text-gray-500 tracking-wide mb-3">Session History</h3>
-          {historyPane}
-        </div>
-      </div>
-      <div className="lg:hidden">
-        {mobileTab === 'entry' ? entryPane : <div className="p-4">{historyPane}</div>}
+
+      {/* Content area */}
+      <div className="flex-1 overflow-hidden">
+        {activeTab === 'draft' ? (
+          <DraftView
+            runners={chips}
+            checkpointName={checkpointNumber ? cpName(checkpointNumber) : ''}
+            commonTime={commonTime}
+            existingRecords={existingRecords}
+            editingBatch={editingBatch}
+            loading={loading}
+            onRemove={handleRemove}
+            onClear={handleClear}
+            onRecord={handleRecord}
+            onCancel={handleCancel}
+            onUpdate={handleUpdate}
+          />
+        ) : (
+          <div className="p-4 overflow-y-auto h-full">
+            <HistoryView
+              batches={sessionBatches ?? []}
+              checkpoints={checkpoints ?? []}
+              onEdit={handleEditBatch}
+              onVoid={voidSessionBatch}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 BatchEntryLayout.propTypes = { onUnsavedChanges: PropTypes.func };
+
 export default BatchEntryLayout;
