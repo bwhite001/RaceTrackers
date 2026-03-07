@@ -8,6 +8,7 @@ import RosterImport from '../modules/race-maintenance/components/RosterImport.js
 import DistributeRaceModal from '../modules/race-maintenance/components/DistributeRaceModal.jsx';
 import ReportsPanel from '../modules/base-operations/components/ReportsPanel.jsx';
 import { Card, CardHeader, CardBody, CardFooter, Button, Badge } from '../design-system/components';
+import { getRunnerTotal } from '../utils/raceStatistics';
 
 const RaceOverview = () => {
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ const RaceOverview = () => {
     const base = getRunnerCounts();
     if (base.total > 0) return base;
     if (raceConfig?.maxRunner != null && raceConfig?.minRunner != null) {
-      return { ...base, total: raceConfig.maxRunner - raceConfig.minRunner + 1 };
+      return { ...base, total: getRunnerTotal(raceConfig) };
     }
     return base;
   })();

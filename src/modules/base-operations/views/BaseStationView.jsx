@@ -25,6 +25,7 @@ import HelpDialog from '../components/HelpDialog';
 import HeadsUpGrid from '../components/HeadsUpGrid';
 import CourseLeadersCard from '../components/CourseLeadersCard';
 import LoadingSpinner from '../../../components/Layout/LoadingSpinner';
+import { getRunnerTotal } from '../../../utils/raceStatistics';
 const RaceCourseMap = lazy(() => import('../components/RaceCourseMap'));
 
 const TABS = [
@@ -247,7 +248,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
                     courseGpx={currentRace?.courseGpx ?? null}
                     checkpoints={checkpoints ?? []}
                     runners={runners ?? []}
-                    total={currentRace ? (currentRace.maxRunner - currentRace.minRunner + 1) : 0}
+                    total={getRunnerTotal(currentRace)}
                   />
                 </Suspense>
                 <CourseLeadersCard runners={groupedRunners} checkpoints={checkpoints ?? []} />

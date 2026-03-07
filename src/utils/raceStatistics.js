@@ -268,6 +268,27 @@ export const searchRaces = (races, query) => {
 };
 
 /**
+ * Computes the total number of runners configured for a race.
+ * Uses runnerRanges when available; falls back to maxRunner - minRunner + 1.
+ * @param {Object} race - Race object
+ * @returns {number}
+ */
+export const getRunnerTotal = (race) => {
+  if (!race) return 0;
+  if (race.runnerRanges?.length) {
+    return race.runnerRanges.reduce((sum, r) => {
+      if (!r) return sum;
+      if (r.isIndividual) return sum + (r.individualNumbers?.length ?? 0);
+      return sum + (r.max - r.min + 1);
+    }, 0);
+  }
+  if (race.minRunner != null && race.maxRunner != null) {
+    return race.maxRunner - race.minRunner + 1;
+  }
+  return 0;
+};
+
+/**
  * Gets runner count range for a race
  * @param {Object} race - Race object with minRunner and maxRunner
  * @returns {string} Formatted runner range (e.g., "1-100" or "Multiple ranges")
@@ -306,4 +327,5 @@ export default {
   getRaceStatusColor,
   searchRaces,
   getRunnerRange,
+  getRunnerTotal,
 };

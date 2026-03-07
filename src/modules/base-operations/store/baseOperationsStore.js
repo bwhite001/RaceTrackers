@@ -4,6 +4,7 @@ import { RUNNER_STATUSES } from '../../../types';
 import db from '../../../shared/services/database/schema.js';
 import StorageService from '../../../services/storage.js';
 import { BaseOperationsRepository } from '../services/BaseOperationsRepository';
+import { getRunnerTotal } from '../../../utils/raceStatistics';
 
 /**
  * Base Operations Store
@@ -341,7 +342,7 @@ const useBaseOperationsStore = create(
       // Utilities
       calculateStats: (runners) => {
         const { currentRace } = get();
-        const total = currentRace ? (currentRace.maxRunner - currentRace.minRunner + 1) : 0;
+        const total = getRunnerTotal(currentRace);
 
         // Runners with a base station record (checkpointNumber === 0, status 'passed') are finishers.
         // All other records use the highest-checkpoint entry to determine current status.
