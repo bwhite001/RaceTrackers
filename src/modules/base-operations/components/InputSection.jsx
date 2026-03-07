@@ -77,7 +77,7 @@ const InputSection = ({
   }, [ready]);
 
   const handleTimeFocus = () => {
-    if (!commonTime) onTimeChange(roundDownTo5Min(new Date()));
+    if (!commonTime) onTimeChange(secsToTime(timeToSecs(format(new Date(), 'HH:mm:ss')) - 900));
   };
 
   const handleTimeKeyDown = (e) => {
@@ -154,11 +154,11 @@ const InputSection = ({
             <>
               <button
                 type="button"
-                onClick={() => onTimeChange(format(new Date(), 'HH:mm'))}
+                onClick={() => onTimeChange(secsToTime(timeToSecs(format(new Date(), 'HH:mm:ss')) - 900))}
                 disabled={disabled}
                 className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40"
               >
-                Now
+                −15m
               </button>
               {raceStartTime && (
                 <button
