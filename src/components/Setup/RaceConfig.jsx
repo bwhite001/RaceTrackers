@@ -68,11 +68,11 @@ const RaceConfig = () => {
         startTime: TimeUtils.parseTimeInput(raceDetails.startTime)
       };
 
-      await createRace(raceData);
+      const raceId = await createRace(raceData);
       
       // End the operation and navigate to race overview
       endOperation();
-      navigate('/race-maintenance/overview');
+      navigate(`/race-maintenance/overview?raceId=${raceId}&fromWizard=true`);
     } catch (err) {
       console.error('Failed to create race:', err);
     }

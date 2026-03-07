@@ -10,10 +10,10 @@ import { Card, CardHeader, CardBody, CardFooter, Button, Badge } from '../design
 
 const RaceOverview = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const rawId = searchParams.get('raceId');
   const raceId = rawId ? parseInt(rawId, 10) : null;
-  const isPostCreation = !!rawId;
+  const isPostCreation = searchParams.get('fromWizard') === 'true';
 
   const [showSuccessBanner, setShowSuccessBanner] = useState(isPostCreation);
   const [showDistribute, setShowDistribute] = useState(false);
@@ -47,6 +47,15 @@ const RaceOverview = () => {
     };
     load();
   }, [raceId, loadRace, loadCurrentRace]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Remove ?fromWizard from the URL so a hard refresh doesn't re-show the banner
+  useEffect(() => {
+    if (isPostCreation) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('fromWizard');
+      setSearchParams(next, { replace: true });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (raceConfig?.id) {

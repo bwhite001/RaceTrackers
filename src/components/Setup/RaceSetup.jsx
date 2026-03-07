@@ -164,7 +164,7 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
       };
       const raceId = await createRace(completeFormData);
       setHasUnsavedChanges(false);
-      navigate(`/race-maintenance/overview?raceId=${raceId}`);
+      navigate(`/race-maintenance/overview?raceId=${raceId}&fromWizard=true`);
     } catch (err) {
       console.error('Error creating race:', err);
     }
