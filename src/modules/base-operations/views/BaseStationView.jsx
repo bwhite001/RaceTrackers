@@ -24,7 +24,7 @@ import StatusStrip from '../../../components/Layout/StatusStrip';
 import SettingsModal from '../../../components/Settings/SettingsModal';
 import HelpDialog from '../components/HelpDialog';
 import HeadsUpGrid from '../components/HeadsUpGrid';
-import Leaderboard from '../components/Leaderboard';
+import LeaderboardTab from '../components/Leaderboard';
 
 const TABS = [
   { id: 'data-entry', label: 'Data Entry' },
@@ -199,12 +199,6 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
                 Live Dashboard
               </button>
               <button
-                onClick={() => navigate('/base-station/leaderboard')}
-                className="px-3 py-1.5 text-xs font-medium rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                Leaderboard
-              </button>
-              <button
                 onClick={() => navigate('/base-station/pending')}
                 className="px-3 py-1.5 text-xs font-medium rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
@@ -255,7 +249,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             )}
 
             {activeTab === 'leaderboard' && (
-              <Leaderboard runners={runners ?? []} />
+              <LeaderboardTab />
             )}
 
             {activeTab === 'checkpoint-matrix' && (

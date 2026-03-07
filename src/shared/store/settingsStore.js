@@ -10,7 +10,8 @@ const useSettingsStore = create((set, get) => ({
     defaultCheckpoint: 1,
     currentRaceId: null,
     currentCheckpoint: null,
-    currentBaseStationCheckpoint: 1
+    currentBaseStationCheckpoint: 1,
+    leaderboardGroupingMode: 'gender'
   },
   loading: false,
   error: null,
@@ -90,7 +91,8 @@ const useSettingsStore = create((set, get) => ({
       defaultCheckpoint: 1,
       currentRaceId: null,
       currentCheckpoint: null,
-      currentBaseStationCheckpoint: 1
+      currentBaseStationCheckpoint: 1,
+      leaderboardGroupingMode: 'gender'
     };
 
     try {
@@ -129,7 +131,8 @@ const useSettingsStore = create((set, get) => ({
         defaultCheckpoint: 1,
         currentRaceId: null,
         currentCheckpoint: null,
-        currentBaseStationCheckpoint: 1
+        currentBaseStationCheckpoint: 1,
+        leaderboardGroupingMode: 'gender'
       },
       loading: false,
       error: null
