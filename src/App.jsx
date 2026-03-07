@@ -13,6 +13,7 @@ import Homepage from './components/Home/Homepage';
 import RaceSetup from './components/Setup/RaceSetup';
 import RaceManagementView from './views/RaceManagementView';
 import CheckpointView from './views/CheckpointView';
+import TransferView from './modules/checkpoint-operations/views/TransferView';
 import BaseStationView from './modules/base-operations/views/BaseStationView';
 import RaceOverview from './views/RaceOverview';
 import LiveDashboardView from './views/LiveDashboardView';
@@ -104,6 +105,7 @@ function App() {
                 <ProtectedRoute moduleType={MODULE_TYPES.CHECKPOINT}>
                   <Routes>
                     <Route path=":checkpointId" element={<CheckpointView />} />
+                    <Route path=":checkpointId/transfer" element={<TransferView />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </ProtectedRoute>

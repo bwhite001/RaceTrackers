@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon, ArrowsRightLeftIcon } from '@heroicons/react/24/outline';
 import { withOperationExit } from '../shared/components/ExitOperationModal';
 import useNavigationStore, { MODULE_TYPES } from '../shared/store/navigationStore';
 import useCheckpointStore, { checkpointStore } from '../modules/checkpoint-operations/store/checkpointStore';
@@ -118,6 +118,11 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         moduleLabel={checkpoints.find(cp => cp.number === parseInt(checkpointId))?.name || `Checkpoint ${checkpointId}`}
         onExit={onExitAttempt}
         actions={[
+          {
+            icon: <ArrowsRightLeftIcon />,
+            label: 'Transfer Data',
+            onClick: () => navigate(`/checkpoint/${checkpointId}/transfer`),
+          },
           {
             icon: <ArrowDownTrayIcon />,
             label: 'Export Results',

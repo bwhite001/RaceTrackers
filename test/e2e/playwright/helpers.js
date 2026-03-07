@@ -202,6 +202,48 @@ export async function clearAppData(page) {
 }
 
 /**
+ * Seed marked checkpoint_runners directly into IndexedDB for a given checkpoint.
+ * Use this to set up pre-marked runner state for Transfer Data tests.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {number} raceId
+ * @param {number} checkpointNumber
+ * @param {Array<{number: number, actualTime?: string, status?: string, calledIn?: boolean}>} entries
+ */
+export async function seedCheckpointRunners(page, raceId, checkpointNumber, entries) {
+  await page.evaluate(async ({ raceId, checkpointNumber, entries }) => {
+    const db = await new Promise((res, rej) => {
+      const req = indexedDB.open('RaceTrackerDB');
+      req.onsuccess = e => res(e.target.result);
+      req.onerror = () => rej(new Error('Cannot open RaceTrackerDB'));
+    });
+
+    await new Promise((res, rej) => {
+      const tx = db.transaction('checkpoint_runners', 'readwrite');
+      const store = tx.objectStore('checkpoint_runners');
+      for (const entry of entries) {
+        const actualTime = entry.actualTime || new Date().toISOString();
+        store.put({
+          raceId,
+          checkpointNumber,
+          number: entry.number,
+          actualTime,
+          commonTime: actualTime,
+          commonTimeLabel: '0740-0745',
+          status: entry.status || 'passed',
+          calledIn: entry.calledIn || false,
+          markOffTime: actualTime,
+          callInTime: null,
+          notes: null,
+        });
+      }
+      tx.oncomplete = res;
+      tx.onerror = () => rej(tx.error);
+    });
+  }, { raceId, checkpointNumber, entries });
+}
+
+/**
  * Create a race via the setup form and return the race name used.
  *
  * @param {import('@playwright/test').Page} page

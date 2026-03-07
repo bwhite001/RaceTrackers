@@ -21,11 +21,14 @@ import LoadingSpinner from '../Layout/LoadingSpinner';
 import ErrorMessage from '../Layout/ErrorMessage';
 import StepIndicator from './StepIndicator';
 
+import CourseMapStep from './CourseMapStep';
+
 // Step indices
 const STEP_TEMPLATE = 0;
 const STEP_DETAILS = 1;
 const STEP_RUNNERS = 2;
 const STEP_BATCHES = 3;
+const STEP_COURSE = 4;
 
 const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const navigate = useNavigate();
@@ -156,10 +159,11 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
     { number: 1, label: 'Template', description: 'Choose a starting template' },
     { number: 2, label: 'Race Details', description: 'Configure race information' },
     { number: 3, label: 'Runner Setup', description: 'Set up runner number ranges' },
-    { number: 4, label: 'Waves', description: 'Configure starting waves' }
+    { number: 4, label: 'Waves', description: 'Configure starting waves' },
+    { number: 5, label: 'Course Map', description: 'Import GPX course data (optional)' },
   ];
 
-  const stepLabels = ['Template', 'Race Details', 'Runner Setup', 'Waves'];
+  const stepLabels = ['Template', 'Race Details', 'Runner Setup', 'Waves', 'Course Map'];
 
   return (
     <Container maxWidth="xl" padding="normal">
@@ -184,7 +188,7 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
             </div>
           </div>
           <Badge variant="primary" size="lg">
-            Step {currentStep + 1} of 4
+            Step {currentStep + 1} of 5
           </Badge>
         </div>
       </Section>
@@ -228,11 +232,30 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
                   <Button variant="outline" onClick={handleBack}>
                     Back
                   </Button>
-                  <Button variant="primary" onClick={handleSubmit} disabled={loading}>
-                    {loading ? 'Creating Race…' : 'Create Race'}
+                  <Button variant="primary" onClick={() => setCurrentStep(STEP_COURSE)} disabled={loading}>
+                    Next: Course Map
                   </Button>
                 </div>
               </div>
+            )}
+            {currentStep === STEP_COURSE && (
+              <CourseMapStep
+                checkpoints={formData.checkpoints || []}
+                initialData={formData}
+                onComplete={(courseData) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    courseGpx: courseData.courseGpx,
+                    courseBounds: courseData.courseBounds,
+                    checkpoints: (prev.checkpoints || []).map(cp => {
+                      const coord = courseData.checkpointCoordinates.find(c => c.number === cp.number);
+                      return coord ? { ...cp, latitude: coord.latitude, longitude: coord.longitude } : cp;
+                    }),
+                  }));
+                  handleSubmit();
+                }}
+                onSkip={handleSubmit}
+              />
             )}
           </CardBody>
         </Card>

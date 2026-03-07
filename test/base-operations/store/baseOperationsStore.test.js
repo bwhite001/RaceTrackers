@@ -2,6 +2,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import useBaseOperationsStore from '../../../src/modules/base-operations/store/baseOperationsStore';
 import { RUNNER_STATUSES } from '../../../src/types';
 import db from '../../../src/shared/services/database/schema';
+import StorageService from '../../../src/services/storage';
 
 describe('Base Operations Store', () => {
   beforeEach(async () => {
@@ -196,6 +197,37 @@ describe('Base Operations Store', () => {
 
       useBaseOperationsStore.getState().setFilterStatus('all');
       expect(useBaseOperationsStore.getState().filterStatus).toBe('all');
+    });
+  });
+
+  describe('editSessionBatch', () => {
+    test('voids the original batch and creates a replacement with editedFrom set', async () => {
+      vi.spyOn(StorageService, 'updateCheckpointRunner').mockResolvedValue();
+      useBaseOperationsStore.setState({
+        sessionBatches: [{
+          id: 'batch-original',
+          checkpointNumber: 1,
+          commonTime: '10:00',
+          bibs: [1, 2],
+          submittedAt: new Date().toISOString(),
+          voided: false,
+          editedFrom: null,
+          editedAt: null,
+        }],
+        currentRaceId: 'race1',
+        loading: false,
+      });
+
+      await useBaseOperationsStore.getState().editSessionBatch('batch-original', [1, 3], '10:00', 1);
+
+      const batches = useBaseOperationsStore.getState().sessionBatches;
+      const original = batches.find(b => b.id === 'batch-original');
+      expect(original.voided).toBe(true);
+      const replacement = batches.find(b => b.editedFrom === 'batch-original');
+      expect(replacement).toBeDefined();
+      expect(replacement.bibs).toEqual(expect.arrayContaining([1, 3]));
+      expect(replacement.voided).toBe(false);
+      expect(replacement.editedAt).toBeDefined();
     });
   });
 

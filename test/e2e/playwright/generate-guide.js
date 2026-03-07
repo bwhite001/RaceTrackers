@@ -66,11 +66,20 @@ const SECTION_MAP = {
   'Phase 4e — Records DNF for runner 101 (injured knee)':                    'simulation',
   'Phase 4f — Overview tab shows correct runner statuses':                   'simulation',
   'Phase 4g — Reports tab renders race summary':                             'simulation',
+  'records a batch of runners at base station and views history':            'base-station',
+  // Transfer Data (QR device-to-device sync)
+  'Transfer Data button appears in checkpoint header':                       'checkpoint',
+  'navigates to transfer view and shows Send and Receive tabs':              'checkpoint',
+  'shows empty state warning when no runners are marked off':                'checkpoint',
+  'generates a QR code when marked runners are present':                    'checkpoint',
+  'delta scope shows only entries newer than last share timestamp':          'checkpoint',
+  'Receive tab shows scanner and file import fallback':                      'checkpoint',
+  'back button returns to the checkpoint view':                              'checkpoint',
 };
 
 const CHAPTERS = [
   { key: 'setup',         title: 'Setting Up a Race',          intro: 'Use these steps to create and manage races. This section covers the full setup wizard, runner ranges, checkpoints, waves, and the race overview.' },
-  { key: 'checkpoint',    title: 'Running a Checkpoint',       intro: 'Steps for checkpoint volunteers. Covers opening a checkpoint, marking off runners individually and in bulk, reviewing counts, and exporting data.' },
+  { key: 'checkpoint',    title: 'Running a Checkpoint',       intro: 'Steps for checkpoint volunteers. Covers opening a checkpoint, marking off runners individually and in bulk, reviewing counts, exporting data, and transferring data to another device via QR code.' },
   { key: 'base-station',  title: 'Operating the Base Station', intro: 'Steps for the base station operator. Record finish times, mark DNF/DNS runners, and review race-wide status from the Overview and Reports tabs.' },
   { key: 'import-export', title: 'Importing & Exporting Data', intro: 'Transfer race configurations and results between devices. Export from the base station header or race management page; import to restore a race.' },
   { key: 'navigation',    title: 'Navigating the App',         intro: 'How to move between modules, what to expect on the home screen, and how the app protects active operations from accidental navigation.' },

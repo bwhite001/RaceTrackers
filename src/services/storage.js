@@ -16,7 +16,9 @@ export class StorageService {
         const checkpoints = raceConfig.checkpoints.map(checkpoint => ({
           raceId,
           number: checkpoint.number,
-          name: checkpoint.name || `Checkpoint ${checkpoint.number}`
+          name: checkpoint.name || `Checkpoint ${checkpoint.number}`,
+          latitude: checkpoint.latitude ?? null,
+          longitude: checkpoint.longitude ?? null,
         }));
         await db.checkpoints.bulkAdd(checkpoints);
       } else {
@@ -888,6 +890,31 @@ export class StorageService {
     } catch (error) {
       console.error('Error migrating to isolated tracking:', error);
       throw new Error('Failed to migrate to isolated tracking');
+    }
+  }
+  /**
+   * Updates course GPS data on a race record.
+   * @param {number} raceId
+   * @param {{ courseGpx: string, courseBounds: object }} data
+   */
+  static async updateRaceCourseData(raceId, { courseGpx, courseBounds }) {
+    await db.races.update(raceId, { courseGpx, courseBounds });
+  }
+
+  /**
+   * Updates GPS coordinates on a single checkpoint.
+   * @param {number} raceId
+   * @param {number} checkpointNumber
+   * @param {number} latitude
+   * @param {number} longitude
+   */
+  static async updateCheckpointCoordinates(raceId, checkpointNumber, latitude, longitude) {
+    const cp = await db.checkpoints
+      .where(['raceId', 'number'])
+      .equals([raceId, checkpointNumber])
+      .first();
+    if (cp) {
+      await db.checkpoints.update(cp.id, { latitude, longitude });
     }
   }
 }
