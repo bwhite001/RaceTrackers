@@ -285,6 +285,32 @@ export class RaceMaintenanceRepository extends BaseRepository {
     });
     return { updated, created, errors };
   }
+
+  async updateRace(raceId, updates) {
+    const allowed = ['name', 'date', 'startTime', 'description'];
+    const safe = Object.fromEntries(
+      Object.entries(updates).filter(([k]) => allowed.includes(k))
+    );
+    if (Object.keys(safe).length === 0) return;
+    await db.races.update(raceId, safe);
+  }
+
+  async addCheckpoint(raceId, { name } = {}) {
+    const existing = await db.checkpoints.where('raceId').equals(raceId).toArray();
+    const nextNumber = existing.length > 0
+      ? Math.max(...existing.map(c => c.number)) + 1
+      : 1;
+    return await db.checkpoints.add({
+      raceId,
+      number: nextNumber,
+      name: name?.trim() || `Checkpoint ${nextNumber}`,
+    });
+  }
+
+  async hasCheckpointRunnerData(raceId) {
+    const count = await db.checkpoint_runners.where('raceId').equals(raceId).count();
+    return count > 0;
+  }
 }
 
 export default new RaceMaintenanceRepository();
