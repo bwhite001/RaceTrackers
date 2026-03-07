@@ -10,7 +10,8 @@ const useSettingsStore = create((set, get) => ({
     defaultCheckpoint: 1,
     currentRaceId: null,
     currentCheckpoint: null,
-    currentBaseStationCheckpoint: 1
+    currentBaseStationCheckpoint: 1,
+    linkedCheckpointAlertMinutes: 30
   },
   loading: false,
   error: null,
@@ -90,7 +91,8 @@ const useSettingsStore = create((set, get) => ({
       defaultCheckpoint: 1,
       currentRaceId: null,
       currentCheckpoint: null,
-      currentBaseStationCheckpoint: 1
+      currentBaseStationCheckpoint: 1,
+      linkedCheckpointAlertMinutes: 30
     };
 
     try {

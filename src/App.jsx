@@ -13,6 +13,7 @@ import Homepage from './components/Home/Homepage';
 import RaceSetup from './components/Setup/RaceSetup';
 import RaceManagementView from './views/RaceManagementView';
 import CheckpointView from './views/CheckpointView';
+import DualCheckpointView from './views/DualCheckpointView';
 import BaseStationView from './modules/base-operations/views/BaseStationView';
 import RaceOverview from './views/RaceOverview';
 import LiveDashboardView from './views/LiveDashboardView';
@@ -103,6 +104,7 @@ function App() {
               element={
                 <ProtectedRoute moduleType={MODULE_TYPES.CHECKPOINT}>
                   <Routes>
+                    <Route path="dual/:primaryCpId/:secondaryCpId" element={<DualCheckpointView />} />
                     <Route path=":checkpointId" element={<CheckpointView />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
