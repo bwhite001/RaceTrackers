@@ -88,6 +88,27 @@ class RaceTrackerDB extends Dexie {
                 if (!bs.markOffEntryTime) bs.markOffEntryTime = null;
             });
         });
+
+    // Version 9: Add GPS course data to races and checkpoint coordinates (non-breaking, additive)
+    this.version(9)
+        .stores({
+            races: "++id, name, date, startTime, minRunner, maxRunner, createdAt",
+            runners: "++id, [raceId+number], raceId, number, gender, batchNumber, status, recordedTime, notes",
+            checkpoints: "++id, [raceId+number], raceId, number, name",
+            checkpoint_runners: "++id, [raceId+checkpointNumber+number], raceId, checkpointNumber, number, actualTime, commonTime, calledIn, markOffTime, callInTime, status, notes",
+            base_station_runners: "++id, [raceId+checkpointNumber+number], raceId, checkpointNumber, number, commonTime, markOffEntryTime, status, notes",
+            settings: "key, value",
+            deleted_entries: "++id, raceId, entryType, deletedAt, restorable",
+            strapper_calls: "++id, [raceId+checkpoint], raceId, checkpoint, status, priority, createdAt",
+            audit_log: "++id, raceId, entityType, action, performedAt",
+            withdrawal_records: "++id, [raceId+runnerNumber], raceId, runnerNumber, checkpoint, withdrawalTime, reversedAt",
+            vet_out_records: "++id, [raceId+runnerNumber], raceId, runnerNumber, checkpoint, vetOutTime",
+            imported_checkpoint_results: "++id, [raceId+checkpointNumber], raceId, checkpointNumber, importedAt",
+            race_batches: "++id, [raceId+batchNumber], raceId, batchNumber, batchName, startTime"
+            // courseGpx, courseBounds added to races as data columns (no index needed)
+            // latitude, longitude added to checkpoints as data columns (no index needed)
+        });
+        // No .upgrade() needed: new GPS fields are nullable, existing records unaffected.
   }
 }
 
