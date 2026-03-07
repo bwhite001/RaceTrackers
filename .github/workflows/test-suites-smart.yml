@@ -85,16 +85,28 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm ci
+      - name: Check if suite should run
+        id: should-run
+        env:
+          RUN_ALL: ${{ needs.detect-changes.outputs.run-all }}
+          UNIT: ${{ needs.detect-changes.outputs.unit }}
+          BASE_OPERATIONS: ${{ needs.detect-changes.outputs.base-operations }}
+          DATABASE: ${{ needs.detect-changes.outputs.database }}
+          INTEGRATION: ${{ needs.detect-changes.outputs.integration }}
+          E2E: ${{ needs.detect-changes.outputs.e2e }}
+          SERVICES: ${{ needs.detect-changes.outputs.services }}
+          COMPONENTS: ${{ needs.detect-changes.outputs.components }}
+        run: |
+          SUITE="${{ matrix.suite }}"
+          if [[ "$RUN_ALL" == "true" ]]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          VAR_NAME=$(echo "$SUITE" | tr '-' '_' | tr '[:lower:]' '[:upper:]')
+          VALUE=$(eval "echo \$$VAR_NAME")
+          echo "result=${VALUE}" >> $GITHUB_OUTPUT
       - name: Run ${{ matrix.suite }} test suite
-        if: |
-          needs.detect-changes.outputs.run-all == 'true' ||
-          (matrix.suite == 'unit' && needs.detect-changes.outputs.unit == 'true') ||
-          (matrix.suite == 'base-operations' && needs.detect-changes.outputs.base-operations == 'true') ||
-          (matrix.suite == 'database' && needs.detect-changes.outputs.database == 'true') ||
-          (matrix.suite == 'integration' && needs.detect-changes.outputs.integration == 'true') ||
-          (matrix.suite == 'e2e' && needs.detect-changes.outputs.e2e == 'true') ||
-          (matrix.suite == 'services' && needs.detect-changes.outputs.services == 'true') ||
-          (matrix.suite == 'components' && needs.detect-changes.outputs.components == 'true')
+        if: steps.should-run.outputs.result == 'true'
         run: npm run test:suite:${{ matrix.suite }}
         continue-on-error: true
       - name: Upload test results
