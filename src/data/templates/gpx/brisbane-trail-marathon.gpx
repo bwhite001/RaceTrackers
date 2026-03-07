@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PLACEHOLDER: Replace with actual course track by running:                          -->
+<!-- node scripts/extract-alltrails-gpx.js <alltrails-url> brisbane-trail-marathon  -->
+<gpx version="1.1" creator="RaceTracker Pro" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata><name>Brisbane Trail Marathon</name></metadata>
+  <wpt lat="-27.3875" lon="152.9123"><name>CP1 - Mt Nebo Road</name></wpt>\n  <wpt lat="-27.4123" lon="152.9345"><name>CP2 - Walkabout Creek</name></wpt>\n  <wpt lat="-27.4289" lon="152.9478"><name>CP3 - Simpson Falls</name></wpt>
+  <trk>
+    <name>Brisbane Trail Marathon</name>
+    <trkseg>
+      <trkpt lat="-27.3875" lon="152.9123"></trkpt>\n      <trkpt lat="-27.4123" lon="152.9345"></trkpt>\n      <trkpt lat="-27.4289" lon="152.9478"></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

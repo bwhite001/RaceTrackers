@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PLACEHOLDER: Replace with actual course track by running:                          -->
+<!-- node scripts/extract-alltrails-gpx.js <alltrails-url> mt-glorious-mountain-trail  -->
+<gpx version="1.1" creator="RaceTracker Pro" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata><name>Mt Glorious Mountain Trail</name></metadata>
+  <wpt lat="-27.321677" lon="152.714852"><name>CP1 - Northbrook Bush Camp</name></wpt>\n  <wpt lat="-27.345838" lon="152.730526"><name>CP2 - England Creek Bush Camp</name></wpt>\n  <wpt lat="-27.366238" lon="152.730747"><name>CP3 - England Creek Rd & Joyners Ridge Rd</name></wpt>\n  <wpt lat="-27.346490" lon="152.750306"><name>CP4 - Near Apiary Site, Joyners Ridge Rd</name></wpt>
+  <trk>
+    <name>Mt Glorious Mountain Trail</name>
+    <trkseg>
+      <trkpt lat="-27.321677" lon="152.714852"></trkpt>\n      <trkpt lat="-27.345838" lon="152.730526"></trkpt>\n      <trkpt lat="-27.366238" lon="152.730747"></trkpt>\n      <trkpt lat="-27.346490" lon="152.750306"></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

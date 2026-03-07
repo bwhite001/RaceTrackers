@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PLACEHOLDER: Replace with actual course track by running:                          -->
+<!-- node scripts/extract-alltrails-gpx.js <alltrails-url> pinnacles-classic  -->
+<gpx version="1.1" creator="RaceTracker Pro" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata><name>Pinnacles Classic</name></metadata>
+  <wpt lat="-27.3423" lon="152.7889"><name>CP1 - Mt Glorious Road Junction</name></wpt>\n  <wpt lat="-27.3156" lon="152.7734"><name>CP2 - Pinnacles Lookout</name></wpt>\n  <wpt lat="-27.3567" lon="152.8123"><name>CP3 - Return Trail</name></wpt>
+  <trk>
+    <name>Pinnacles Classic</name>
+    <trkseg>
+      <trkpt lat="-27.3423" lon="152.7889"></trkpt>\n      <trkpt lat="-27.3156" lon="152.7734"></trkpt>\n      <trkpt lat="-27.3567" lon="152.8123"></trkpt>
+    </trkseg>
+  </trk>
+</gpx>
