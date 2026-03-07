@@ -17,6 +17,7 @@ import TransferView from './modules/checkpoint-operations/views/TransferView';
 import DualCheckpointView from './views/DualCheckpointView';
 import BaseStationView from './modules/base-operations/views/BaseStationView';
 import RaceOverview from './views/RaceOverview';
+import RaceEditView from './modules/race-maintenance/views/RaceEditView';
 import LiveDashboardView from './views/LiveDashboardView';
 import PendingCallInsView from './views/PendingCallInsView';
 import Footer from './components/Layout/Footer';
@@ -92,6 +93,7 @@ function App() {
                   <Routes>
                     <Route path="setup" element={<RaceSetup />} />
                     <Route path="overview" element={<RaceOverview />} />
+                    <Route path="edit" element={<RaceEditView />} />
                     <Route path="*" element={<Navigate to="/race-maintenance/setup" replace />} />
                   </Routes>
                 </ProtectedRoute>

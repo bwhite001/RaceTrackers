@@ -151,6 +151,30 @@ const useRaceMaintenanceStore = create((set, get) => ({
     }
   },
 
+  updateRace: async (raceId, updates) => {
+    try {
+      set({ loading: true, error: null });
+      await RaceMaintenanceRepository.updateRace(raceId, updates);
+      const race = await RaceMaintenanceRepository.getById(raceId);
+      set({ currentRace: race, loading: false });
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
+
+  addCheckpoint: async (raceId, data) => {
+    try {
+      set({ loading: true, error: null });
+      await RaceMaintenanceRepository.addCheckpoint(raceId, data);
+      const checkpoints = await RaceMaintenanceRepository.getCheckpoints(raceId);
+      set({ checkpoints, loading: false });
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
+
   // Batch / Wave Management
   batches: [],
 
