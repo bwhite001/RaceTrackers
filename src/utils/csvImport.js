@@ -14,7 +14,9 @@ const ALLOWED_GENDERS = new Set(['M', 'F', 'X', 'm', 'f', 'x']);
  * @returns {{ headers: string[], rows: Object[] }}
  */
 export function parseCSV(csvText) {
-  const lines = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  // Strip UTF-8 BOM (common in Windows/Excel exports)
+  const text = csvText.replace(/^\uFEFF/, '');
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
   const nonEmpty = lines.filter(l => l.trim().length > 0);
   if (nonEmpty.length < 2) return { headers: [], rows: [] };
 
@@ -22,7 +24,7 @@ export function parseCSV(csvText) {
   const firstLine = nonEmpty[0];
   const delimiter = firstLine.includes(';') ? ';' : ',';
 
-  const headers = firstLine.split(delimiter).map(h => h.trim().replace(/^["']|["']$/g, ''));
+  const headers = firstLine.split(delimiter).map(h => h.trim().replace(/^["']|["']$/g, '').replace(/^\uFEFF/, ''));
 
   const rows = nonEmpty.slice(1).map(line => {
     const values = line.split(delimiter).map(v => v.trim().replace(/^["']|["']$/g, ''));
