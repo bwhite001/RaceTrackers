@@ -275,19 +275,18 @@ export const searchRaces = (races, query) => {
 export const getRunnerRange = (race) => {
   if (!race) return 'N/A';
   
-  if (race.minRunner !== undefined && race.maxRunner !== undefined) {
-    return `${race.minRunner}-${race.maxRunner}`;
+  if (race.runnerRanges && Array.isArray(race.runnerRanges) && race.runnerRanges.length > 0) {
+    return race.runnerRanges.map(r => {
+      if (!r) return null;
+      if (typeof r === 'string') return r;
+      if (r.isIndividual) return r.individualNumbers?.join(', ') ?? '?';
+      if (r.min != null) return `${r.min}–${r.max}`;
+      return null;
+    }).filter(Boolean).join(', ');
   }
-  
-  if (race.runnerRanges && Array.isArray(race.runnerRanges)) {
-    if (race.runnerRanges.length === 1) {
-      const r = race.runnerRanges[0];
-      if (r && typeof r === 'object') {
-        return r.isIndividual ? `${r.count || r.individualNumbers?.length || '?'} individual` : `${r.min}-${r.max}`;
-      }
-      return String(r);
-    }
-    return 'Multiple ranges';
+
+  if (race.minRunner !== undefined && race.maxRunner !== undefined) {
+    return `${race.minRunner}–${race.maxRunner}`;
   }
   
   return 'N/A';
