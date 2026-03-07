@@ -16,6 +16,7 @@ import BatchEntryLayout from '../components/BatchEntryLayout';
 import RaceOverview from '../components/RaceOverview';
 import WithdrawalDialog from '../components/WithdrawalDialog';
 import CheckpointImportPanel from '../components/CheckpointImportPanel';
+import BulkDnsModal from '../components/BulkDnsView';
 import OutList from '../components/OutList';
 import ErrorMessage from '../../../components/Layout/ErrorMessage';
 import StatusStrip from '../../../components/Layout/StatusStrip';
@@ -78,6 +79,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
+  const [showBulkDns, setShowBulkDns] = useState(false);
 
   // Initialize base station from selectedRaceForMode, or redirect if no race
   useEffect(() => {
@@ -135,7 +137,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const hotkeys = {
     [HOTKEYS.NEW_ENTRY]: () => handleTabChange('data-entry'),
     [HOTKEYS.DROPOUT]: () => handleWithdrawal('dnf'),
-    'shift+d': () => { handleTabChange('dns'); handleWithdrawal('dns'); },
+    'shift+d': () => handleTabChange('dns'),
     'escape': () => {
       if (showWithdrawalDialog) {
         setShowWithdrawalDialog(false);
@@ -258,16 +260,16 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             {activeTab === 'dns' && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Did Not Start</h2>
+                  <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">DNS &amp; DNF</h2>
                   <button
                     type="button"
-                    onClick={() => handleWithdrawal('dns')}
+                    onClick={() => setShowBulkDns(true)}
                     className="px-4 py-2 text-sm font-semibold bg-amber-500 hover:bg-amber-400 text-white rounded-lg transition-colors"
                   >
-                    + Mark DNS
+                    Bulk Mark DNS
                   </button>
                 </div>
-                <OutList initialFilter="non-starter" />
+                <OutList initialFilter="all" />
               </div>
             )}
 
@@ -282,6 +284,12 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
           isOpen={showWithdrawalDialog}
           onClose={() => setShowWithdrawalDialog(false)}
           type={withdrawalType}
+        />
+
+        {/* Bulk DNS Modal */}
+        <BulkDnsModal
+          isOpen={showBulkDns}
+          onClose={() => setShowBulkDns(false)}
         />
 
         <SettingsModal
