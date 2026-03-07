@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowDownTrayIcon, ArrowUpTrayIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import { withOperationExit } from '../../../shared/components/ExitOperationModal';
@@ -24,6 +24,7 @@ import StatusStrip from '../../../components/Layout/StatusStrip';
 import SettingsModal from '../../../components/Settings/SettingsModal';
 import HelpDialog from '../components/HelpDialog';
 import HeadsUpGrid from '../components/HeadsUpGrid';
+const RaceCourseMap = lazy(() => import('../components/RaceCourseMap'));
 import Leaderboard from '../components/Leaderboard';
 
 const TABS = [
@@ -229,6 +230,14 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
             {activeTab === 'overview' && (
               <div className="space-y-6">
+                <Suspense fallback={null}>
+                  <RaceCourseMap
+                    courseGpx={currentRace?.courseGpx ?? null}
+                    checkpoints={checkpoints ?? []}
+                    runners={runners ?? []}
+                    total={currentRace ? (currentRace.maxRunner - currentRace.minRunner + 1) : 0}
+                  />
+                </Suspense>
                 <HeadsUpGrid
                   runners={(() => {
                     // Group flat checkpoint/base-station records by runner number
