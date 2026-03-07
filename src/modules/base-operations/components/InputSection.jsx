@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { format } from 'date-fns';
 
@@ -64,6 +64,9 @@ const InputSection = ({
 }) => {
   const bibRef = useRef(null);
   const ready = checkpointNumber && commonTime;
+  const [quickEntryOpen, setQuickEntryOpen] = useState(false);
+  const [textareaValue, setTextareaValue] = useState('');
+  const [numpadValue, setNumpadValue] = useState('');
 
   // Auto-focus bib input once checkpoint + time are both set
   useEffect(() => {
@@ -226,6 +229,121 @@ const InputSection = ({
         </div>
         <p className="mt-1 text-xs text-gray-400">Formats: 101, 105-107, 110 — or ? for unclear calls</p>
       </div>
+
+      {/* Quick Entry — collapsible textarea + numpad */}
+      {(() => {
+        const parsedListBibs = parseBibs(textareaValue.replace(/\n/g, ','));
+        return (
+          <div>
+            <button
+              type="button"
+              aria-label="Quick Entry"
+              onClick={() => setQuickEntryOpen(o => !o)}
+              className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-medium"
+            >
+              <span>{quickEntryOpen ? '▾' : '▶'}</span>
+              <span>Quick Entry</span>
+            </button>
+
+            {quickEntryOpen && (
+              <div className="mt-3 space-y-5">
+                {/* Multi-line list input */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    List — one bib per line or comma-separated
+                  </label>
+                  <textarea
+                    rows={5}
+                    placeholder="One bib per line…"
+                    value={textareaValue}
+                    onChange={e => setTextareaValue(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && e.ctrlKey && parsedListBibs.length > 0) {
+                        e.preventDefault();
+                        onBibEntered(parsedListBibs);
+                        setTextareaValue('');
+                      }
+                    }}
+                    disabled={disabled || !ready}
+                    className={`w-full font-mono resize-none ${inputCls}`}
+                  />
+                  <button
+                    type="button"
+                    aria-label={`Add ${parsedListBibs.length} bib${parsedListBibs.length === 1 ? '' : 's'}`}
+                    onClick={() => { onBibEntered(parsedListBibs); setTextareaValue(''); }}
+                    disabled={disabled || !ready || parsedListBibs.length === 0}
+                    className="mt-2 w-full px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Add {parsedListBibs.length} bib{parsedListBibs.length === 1 ? '' : 's'}
+                  </button>
+                </div>
+
+                {/* On-screen numpad */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                    Numpad
+                  </label>
+                  <div
+                    data-testid="numpad-display"
+                    className="mb-3 h-10 flex items-center justify-end px-4 bg-gray-100 dark:bg-gray-700 rounded-md font-mono text-xl font-bold dark:text-white tracking-widest"
+                  >
+                    {numpadValue || <span className="text-gray-400 font-normal">—</span>}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[1,2,3,4,5,6,7,8,9].map(d => (
+                      <button
+                        key={d}
+                        type="button"
+                        aria-label={`Digit ${d}`}
+                        onClick={() => setNumpadValue(v => v.length < 6 ? v + d : v)}
+                        disabled={disabled || !ready}
+                        className="py-4 text-xl font-semibold rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-40 active:scale-95 transition-transform"
+                      >
+                        {d}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      aria-label="Backspace"
+                      onClick={() => setNumpadValue(v => v.slice(0, -1))}
+                      disabled={disabled || !ready || !numpadValue}
+                      className="py-4 text-xl font-semibold rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-40 active:scale-95 transition-transform"
+                    >
+                      ⌫
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Digit 0`}
+                      onClick={() => setNumpadValue(v => v.length < 6 ? v + '0' : v)}
+                      disabled={disabled || !ready}
+                      className="py-4 text-xl font-semibold rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-40 active:scale-95 transition-transform"
+                    >
+                      0
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Confirm"
+                      onClick={() => {
+                        if (!numpadValue) return;
+                        const n = parseInt(numpadValue, 10);
+                        if (!isNaN(n) && n > 0) {
+                          onBibEntered([n]);
+                          navigator.vibrate?.(30);
+                        }
+                        setNumpadValue('');
+                      }}
+                      disabled={disabled || !ready || !numpadValue}
+                      className="py-4 text-xl font-semibold rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-40 active:scale-95 transition-transform"
+                    >
+                      ✓
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 };

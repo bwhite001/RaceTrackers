@@ -145,6 +145,105 @@ describe('InputSection — unresolved button', () => {
   });
 });
 
+describe('InputSection — Quick Entry panel', () => {
+  const readyProps = {
+    checkpoints: [{ number: 1, name: 'Start' }],
+    checkpointNumber: 1,
+    commonTime: '10:00',
+    onCheckpointChange: vi.fn(),
+    onTimeChange: vi.fn(),
+    onBibEntered: vi.fn(),
+  };
+
+  it('is collapsed by default — textarea not visible', () => {
+    render(<InputSection {...readyProps} />);
+    expect(screen.queryByPlaceholderText(/one bib per line/i)).not.toBeInTheDocument();
+  });
+
+  it('toggle button reveals the textarea and numpad', () => {
+    render(<InputSection {...readyProps} />);
+    fireEvent.click(screen.getByRole('button', { name: /quick entry/i }));
+    expect(screen.getByPlaceholderText(/one bib per line/i)).toBeInTheDocument();
+    expect(screen.getByTestId('numpad-display')).toBeInTheDocument();
+  });
+
+  it('"Add" button calls onBibEntered with parsed bibs from textarea', () => {
+    const onBibEntered = vi.fn();
+    render(<InputSection {...readyProps} onBibEntered={onBibEntered} />);
+    fireEvent.click(screen.getByRole('button', { name: /quick entry/i }));
+    const textarea = screen.getByPlaceholderText(/one bib per line/i);
+    fireEvent.change(textarea, { target: { value: '112\n205\n43' } });
+    fireEvent.click(screen.getByRole('button', { name: /add 3 bibs/i }));
+    expect(onBibEntered).toHaveBeenCalledWith([112, 205, 43]);
+  });
+
+  it('clears textarea after Add', () => {
+    render(<InputSection {...readyProps} />);
+    fireEvent.click(screen.getByRole('button', { name: /quick entry/i }));
+    const textarea = screen.getByPlaceholderText(/one bib per line/i);
+    fireEvent.change(textarea, { target: { value: '42' } });
+    fireEvent.click(screen.getByRole('button', { name: /add 1 bib/i }));
+    expect(textarea).toHaveValue('');
+  });
+
+  it('Add button is disabled when textarea has no parseable bibs', () => {
+    render(<InputSection {...readyProps} />);
+    fireEvent.click(screen.getByRole('button', { name: /quick entry/i }));
+    expect(screen.getByRole('button', { name: /add 0 bibs/i })).toBeDisabled();
+  });
+
+  it('textarea is disabled when not ready (no checkpoint)', () => {
+    render(<InputSection {...readyProps} checkpointNumber={null} />);
+    fireEvent.click(screen.getByRole('button', { name: /quick entry/i }));
+    expect(screen.getByPlaceholderText(/one bib per line/i)).toBeDisabled();
+  });
+
+  describe('Numpad', () => {
+    it('renders digit buttons 0-9 when open', () => {
+      render(<InputSection {...readyProps} />);
+      fireEvent.click(screen.getByRole('button', { name: /quick entry/i }));
+      for (let d = 0; d <= 9; d++) {
+        expect(screen.getByRole('button', { name: `Digit ${d}` })).toBeInTheDocument();
+      }
+    });
+
+    it('pressing digits composes a number in the display', () => {
+      render(<InputSection {...readyProps} />);
+      fireEvent.click(screen.getByRole('button', { name: /quick entry/i }));
+      fireEvent.click(screen.getByRole('button', { name: 'Digit 1' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Digit 1' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Digit 2' }));
+      expect(screen.getByTestId('numpad-display')).toHaveTextContent('112');
+    });
+
+    it('backspace removes last digit', () => {
+      render(<InputSection {...readyProps} />);
+      fireEvent.click(screen.getByRole('button', { name: /quick entry/i }));
+      fireEvent.click(screen.getByRole('button', { name: 'Digit 1' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Digit 2' }));
+      fireEvent.click(screen.getByRole('button', { name: /backspace/i }));
+      expect(screen.getByTestId('numpad-display')).toHaveTextContent('1');
+    });
+
+    it('confirm calls onBibEntered with composed number and clears display', () => {
+      const onBibEntered = vi.fn();
+      render(<InputSection {...readyProps} onBibEntered={onBibEntered} />);
+      fireEvent.click(screen.getByRole('button', { name: /quick entry/i }));
+      fireEvent.click(screen.getByRole('button', { name: 'Digit 4' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Digit 2' }));
+      fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
+      expect(onBibEntered).toHaveBeenCalledWith([42]);
+      expect(screen.getByTestId('numpad-display')).toHaveTextContent('—');
+    });
+
+    it('confirm is disabled when display is empty', () => {
+      render(<InputSection {...readyProps} />);
+      fireEvent.click(screen.getByRole('button', { name: /quick entry/i }));
+      expect(screen.getByRole('button', { name: /confirm/i })).toBeDisabled();
+    });
+  });
+});
+
 describe('InputSection — time nudge buttons', () => {
   function renderWithTime(time) {
     const onTimeChange = vi.fn();
