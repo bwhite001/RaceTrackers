@@ -63,6 +63,9 @@ test-changed: ## Run only tests affected by uncommitted changes
 
 # ─── Test Data ────────────────────────────────────────────────────────────────
 
+dev-fixtures: ## Copy sample XLSX fixtures to public/import/ for the dev file picker
+	mkdir -p public/import && cp import/*.xlsx public/import/
+
 seed: ## Seed full test dataset into IndexedDB
 	npm run test:seed
 

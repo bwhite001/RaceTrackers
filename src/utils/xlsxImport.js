@@ -90,6 +90,20 @@ export function applyMappingsToRows(rows, mappings) {
     if (field !== 'ignore') fieldToCol[field] = col;
   }
 
+  // Pre-scan batch column: if all values are non-numeric text, assign sequential IDs
+  // e.g. "Pinnacles Classic" → 1, "Pinnacles Double" → 2 (in order of first appearance)
+  const batchLabelMap = new Map(); // label → assigned number
+  if (fieldToCol.batchNumber) {
+    let nextId = 1;
+    for (const row of rows) {
+      const raw = (row[fieldToCol.batchNumber] ?? '').toString().trim();
+      const asNum = parseInt(raw, 10);
+      if (raw && isNaN(asNum) && !batchLabelMap.has(raw)) {
+        batchLabelMap.set(raw, nextId++);
+      }
+    }
+  }
+
   rows.forEach((row, index) => {
     const lineNum = index + 2;
 
@@ -111,16 +125,19 @@ export function applyMappingsToRows(rows, mappings) {
     const rawGender = (fieldToCol.gender ? (row[fieldToCol.gender] ?? '') : '').toString().trim().toUpperCase();
     const gender = ALLOWED_GENDERS.has(rawGender) ? rawGender : 'X';
 
-    // batchNumber
+    // batchNumber — numeric value wins; text labels use pre-scanned sequential map
     const rawBatch = fieldToCol.batchNumber ? row[fieldToCol.batchNumber] : '';
     const batchNumber = parseInt(rawBatch, 10);
+    const resolvedBatch = !isNaN(batchNumber) && batchNumber > 0
+      ? batchNumber
+      : (batchLabelMap.get(rawBatch?.toString().trim()) ?? 1);
 
     valid.push({
       number,
       firstName,
       lastName,
       gender,
-      batchNumber: isNaN(batchNumber) || batchNumber <= 0 ? 1 : batchNumber,
+      batchNumber: resolvedBatch,
     });
   });
 

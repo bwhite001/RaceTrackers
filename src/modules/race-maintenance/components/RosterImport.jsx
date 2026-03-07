@@ -174,21 +174,23 @@ function RosterImport({ raceId, onComplete }) {
         />
       </div>
 
-      {/* Dev file picker */}
-      <div className="flex items-center gap-2 p-2 rounded border border-dashed border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20">
-        <span className="text-xs font-medium text-amber-700 dark:text-amber-400 whitespace-nowrap">Dev only</span>
-        <select
-          className="text-sm flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-2 py-1"
-          defaultValue=""
-          onChange={handleDevPick}
-          disabled={state.step === 'importing'}
-        >
-          <option value="" disabled>— quick load xlsx —</option>
-          {DEV_IMPORTS.map(f => (
-            <option key={f.path} value={f.path}>{f.label}</option>
-          ))}
-        </select>
-      </div>
+      {/* Dev file picker — only rendered in development builds */}
+      {import.meta.env.DEV && (
+        <div className="flex items-center gap-2 p-2 rounded border border-dashed border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20">
+          <span className="text-xs font-medium text-amber-700 dark:text-amber-400 whitespace-nowrap">Dev only</span>
+          <select
+            className="text-sm flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-2 py-1"
+            defaultValue=""
+            onChange={handleDevPick}
+            disabled={state.step === 'importing'}
+          >
+            <option value="" disabled>— quick load xlsx —</option>
+            {DEV_IMPORTS.map(f => (
+              <option key={f.path} value={f.path}>{f.label}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Error */}
       {state.fileError && (

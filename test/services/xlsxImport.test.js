@@ -96,10 +96,26 @@ describe('applyMappingsToRows', () => {
     expect(valid[0].gender).toBe('X');
   });
 
-  it('defaults batchNumber to 1 when blank or non-numeric', () => {
+  it('defaults batchNumber to 1 when blank', () => {
     const r = [{ 'Bib Numbers': '300', 'First Name': 'Jo', 'Last Name': 'Doe', 'Sex': 'F', 'Sub-event': '' }];
     const { valid } = applyMappingsToRows(r, mappings);
     expect(valid[0].batchNumber).toBe(1);
+  });
+
+  it('auto-numbers text wave labels in order of first appearance', () => {
+    const waveMappings = { 'Bib': 'number', 'Wave': 'batchNumber' };
+    const waveRows = [
+      { Bib: 1, Wave: 'Classic' },
+      { Bib: 2, Wave: 'Double'  },
+      { Bib: 3, Wave: 'Classic' },
+      { Bib: 4, Wave: 'Double'  },
+    ];
+    const { valid, errors } = applyMappingsToRows(waveRows, waveMappings);
+    expect(errors).toHaveLength(0);
+    expect(valid[0].batchNumber).toBe(1); // Classic → 1
+    expect(valid[1].batchNumber).toBe(2); // Double  → 2
+    expect(valid[2].batchNumber).toBe(1); // Classic → 1 again
+    expect(valid[3].batchNumber).toBe(2); // Double  → 2 again
   });
 
   it('sets firstName/lastName to null when column is ignored or blank', () => {
