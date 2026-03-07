@@ -66,6 +66,7 @@ const SECTION_MAP = {
   'Phase 4e — Records DNF for runner 101 (injured knee)':                    'simulation',
   'Phase 4f — Overview tab shows correct runner statuses':                   'simulation',
   'Phase 4g — Reports tab renders race summary':                             'simulation',
+  'records a batch of runners at base station and views history':            'base-station',
 };
 
 const CHAPTERS = [
