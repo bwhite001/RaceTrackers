@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import useRaceMaintenanceStore from '../store/raceMaintenanceStore';
 import { useToast } from '../../../shared/components/ui/Toast';
 import RosterImport from '../components/RosterImport.jsx';
-import RunnerOverview from '../../../components/Shared/RunnerOverview.jsx';
+import { useRaceStore } from '../../../store/useRaceStore.js';
 import {
   Card, CardBody, CardFooter,
   Button,
@@ -18,6 +18,7 @@ const RaceEditView = () => {
   const rawId = searchParams.get('raceId');
   const raceId = rawId ? parseInt(rawId, 10) : null;
   const { addToast } = useToast();
+  const { runners } = useRaceStore();
 
   const {
     currentRace,
@@ -346,9 +347,39 @@ const RaceEditView = () => {
               </CardBody>
             </Card>
 
-            <div className="mt-4">
-              <RunnerOverview />
-            </div>
+            <Card variant="elevated" className="mt-4">
+              <CardBody>
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                  Runner Roster
+                </h3>
+                {runners.length === 0 ? (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No runners loaded.</p>
+                ) : (
+                  <div className="overflow-x-auto max-h-96 rounded border border-gray-200 dark:border-gray-700">
+                    <table className="min-w-full text-xs">
+                      <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0">
+                        <tr>
+                          {['#', 'First Name', 'Last Name', 'Gender', 'Batch'].map(h => (
+                            <th key={h} className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                        {runners.map((runner) => (
+                          <tr key={runner.number} className="bg-white dark:bg-gray-900">
+                            <td className="px-3 py-1.5 font-mono">{runner.number}</td>
+                            <td className="px-3 py-1.5">{runner.firstName || '—'}</td>
+                            <td className="px-3 py-1.5">{runner.lastName || '—'}</td>
+                            <td className="px-3 py-1.5">{runner.gender || '—'}</td>
+                            <td className="px-3 py-1.5">{runner.batchNumber || '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardBody>
+            </Card>
 
             {raceId && (
               <Card variant="elevated" className="mt-4">

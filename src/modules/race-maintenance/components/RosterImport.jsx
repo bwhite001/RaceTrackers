@@ -281,7 +281,7 @@ function RosterImport({ raceId, onComplete }) {
             <table className="min-w-full text-xs">
               <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0">
                 <tr>
-                  {['#', 'First Name', 'Last Name', 'Gender', 'Wave'].map(h => (
+                  {['#', 'First Name', 'Last Name', 'Gender', 'Batch'].map(h => (
                     <th key={h} className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">{h}</th>
                   ))}
                 </tr>
