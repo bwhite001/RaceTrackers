@@ -384,7 +384,7 @@ const RaceEditView = () => {
             {raceId && (
               <Card variant="elevated" className="mt-4">
                 <CardBody>
-                  <RosterImport raceId={raceId} onComplete={() => {}} />
+                  <RosterImport raceId={raceId} onComplete={() => loadRace(raceId)} />
                 </CardBody>
               </Card>
             )}

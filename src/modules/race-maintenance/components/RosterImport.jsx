@@ -129,6 +129,23 @@ function RosterImport({ raceId, onComplete }) {
     setState(s => ({ ...s, step: 'importing' }));
     try {
       const res = await RaceMaintenanceRepository.bulkUpsertRunnerDetails(raceId, state.preview.valid);
+
+      // Compute ranges per batch from imported numbers and update the race config
+      const numbers = state.preview.valid.map(r => r.number);
+      const batchMap = {};
+      for (const r of state.preview.valid) {
+        const b = r.batchNumber ?? 1;
+        if (!batchMap[b]) batchMap[b] = { min: r.number, max: r.number };
+        else {
+          batchMap[b].min = Math.min(batchMap[b].min, r.number);
+          batchMap[b].max = Math.max(batchMap[b].max, r.number);
+        }
+      }
+      const runnerRanges = Object.values(batchMap).sort((a, b) => a.min - b.min);
+      const minRunner = Math.min(...numbers);
+      const maxRunner = Math.max(...numbers);
+      await RaceMaintenanceRepository.updateRace(parseInt(raceId, 10), { runnerRanges, minRunner, maxRunner });
+
       setState(s => ({ ...s, step: 'done', result: res }));
       if (onComplete) onComplete(res);
     } catch (err) {
