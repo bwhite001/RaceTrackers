@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowDownTrayIcon, ArrowUpTrayIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import { withOperationExit } from '../../../shared/components/ExitOperationModal';
@@ -24,6 +24,7 @@ import StatusStrip from '../../../components/Layout/StatusStrip';
 import SettingsModal from '../../../components/Settings/SettingsModal';
 import HelpDialog from '../components/HelpDialog';
 import HeadsUpGrid from '../components/HeadsUpGrid';
+import CourseLeadersCard from '../components/CourseLeadersCard';
 const RaceCourseMap = lazy(() => import('../components/RaceCourseMap'));
 import LeaderboardTab from '../components/Leaderboard';
 
@@ -47,6 +48,32 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const { selectedRaceForMode, checkpoints, loadRace: loadRaceIntoStore } = useRaceStore();
   const { darkMode } = useSettingsStore();
   const initStarted = useRef(false);
+
+  // Group flat runner records by bib number for overview components
+  const groupedRunners = useMemo(() => {
+    const byRunner = new Map();
+    const PASSED_STATUSES = new Set([RUNNER_STATUSES.PASSED, RUNNER_STATUSES.MARKED_OFF, RUNNER_STATUSES.CALLED_IN]);
+    for (const r of (runners ?? [])) {
+      if (!byRunner.has(r.number)) {
+        byRunner.set(r.number, { number: r.number, status: RUNNER_STATUSES.NOT_STARTED, checkpointStatuses: {}, checkpointTimes: {}, hasBaseRecord: false });
+      }
+      const entry = byRunner.get(r.number);
+      if (r.checkpointNumber !== 0) {
+        entry.checkpointStatuses[r.checkpointNumber] = r.status;
+        const t = r.commonTime || r.markOffTime || r.callInTime;
+        if (t) entry.checkpointTimes[r.checkpointNumber] = t;
+      } else {
+        entry.status = r.status;
+        entry.hasBaseRecord = true;
+      }
+    }
+    for (const entry of byRunner.values()) {
+      if (!entry.hasBaseRecord && Object.values(entry.checkpointStatuses).some(s => PASSED_STATUSES.has(s))) {
+        entry.status = RUNNER_STATUSES.ACTIVE;
+      }
+    }
+    return Array.from(byRunner.values());
+  }, [runners]);
 
   // Local state
   const [activeTab, setActiveTab] = useState('data-entry');
@@ -232,36 +259,8 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
                     total={currentRace ? (currentRace.maxRunner - currentRace.minRunner + 1) : 0}
                   />
                 </Suspense>
-                <HeadsUpGrid
-                  runners={(() => {
-                    // Group flat checkpoint/base-station records by runner number
-                    const byRunner = new Map();
-                    const PASSED_STATUSES = new Set([RUNNER_STATUSES.PASSED, RUNNER_STATUSES.MARKED_OFF, RUNNER_STATUSES.CALLED_IN]);
-                    for (const r of (runners ?? [])) {
-                      if (!byRunner.has(r.number)) {
-                        byRunner.set(r.number, { number: r.number, status: RUNNER_STATUSES.NOT_STARTED, checkpointStatuses: {}, checkpointTimes: {}, hasBaseRecord: false });
-                      }
-                      const entry = byRunner.get(r.number);
-                      if (r.checkpointNumber !== 0) {
-                        entry.checkpointStatuses[r.checkpointNumber] = r.status;
-                        const t = r.commonTime || r.markOffTime || r.callInTime;
-                        if (t) entry.checkpointTimes[r.checkpointNumber] = t;
-                      } else {
-                        // base station record — use as overall status
-                        entry.status = r.status;
-                        entry.hasBaseRecord = true;
-                      }
-                    }
-                    // Derive overall status from checkpoint activity when no base-station record exists
-                    for (const entry of byRunner.values()) {
-                      if (!entry.hasBaseRecord && Object.values(entry.checkpointStatuses).some(s => PASSED_STATUSES.has(s))) {
-                        entry.status = RUNNER_STATUSES.ACTIVE;
-                      }
-                    }
-                    return Array.from(byRunner.values());
-                  })()}
-                  checkpoints={checkpoints ?? []}
-                />
+                <CourseLeadersCard runners={groupedRunners} checkpoints={checkpoints ?? []} />
+                <HeadsUpGrid runners={groupedRunners} checkpoints={checkpoints ?? []} />
                 <RaceOverview />
                 <CheckpointImportPanel />
               </div>
