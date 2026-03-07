@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 const DraftView = ({
@@ -13,11 +13,15 @@ const DraftView = ({
   onRecord,
   onCancel,
   onUpdate,
+  onResolve,
 }) => {
+  const [resolvingId, setResolvingId] = useState(null);
   const isEditMode = editingBatch !== null;
-  const duplicates = runners.filter(r => existingRecords.includes(r.bib));
+  const unresolved = runners.filter(r => r.isUnresolved && r.bib === null);
+  const hasUnresolved = unresolved.length > 0;
+  const duplicates = runners.filter(r => !r.isUnresolved && existingRecords.includes(r.bib));
   const hasDuplicates = duplicates.length > 0;
-  const unknowns = runners.filter(r => r.isUnknown);
+  const unknowns = runners.filter(r => !r.isUnresolved && r.isUnknown);
   const hasUnknowns = unknowns.length > 0;
 
   if (runners.length === 0) {
@@ -29,7 +33,7 @@ const DraftView = ({
           <p className="text-sm mt-1">Enter bib numbers above to start building your batch</p>
         </div>
         <DraftFooter
-          count={0} isEditMode={isEditMode} loading={loading}
+          count={0} isEditMode={isEditMode} loading={loading} hasUnresolved={false}
           onClear={onClear} onRecord={onRecord} onCancel={onCancel} onUpdate={onUpdate}
         />
       </div>
@@ -52,6 +56,13 @@ const DraftView = ({
           <span className="ml-2 font-normal">⏰ {commonTime}</span>
         )}
       </div>
+
+      {/* Unresolved calls warning */}
+      {hasUnresolved && (
+        <div role="alert" className="px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 text-amber-800 dark:text-amber-200 text-sm">
+          ⚠️ {unresolved.length} unresolved call{unresolved.length > 1 ? 's' : ''} — resolve or remove before submitting
+        </div>
+      )}
 
       {/* Unknown bib error */}
       {hasUnknowns && (
@@ -79,30 +90,67 @@ const DraftView = ({
           </thead>
           <tbody>
             {runners.map(r => {
-              const isDup = existingRecords.includes(r.bib);
-              const isUnknown = r.isUnknown;
-              const rowCls = isUnknown
-                ? 'bg-red-50 dark:bg-red-900/20'
-                : isDup
-                  ? 'bg-amber-50 dark:bg-amber-900/20'
-                  : r.isOriginal
-                    ? 'bg-green-50 dark:bg-green-900/20'
-                    : 'bg-blue-50 dark:bg-blue-900/10';
+              const isUnresolved = r.isUnresolved && r.bib === null;
+              const isDup = !isUnresolved && existingRecords.includes(r.bib);
+              const isUnknown = !isUnresolved && r.isUnknown;
+              const rowCls = isUnresolved
+                ? 'bg-amber-50 dark:bg-amber-900/20'
+                : isUnknown
+                  ? 'bg-red-50 dark:bg-red-900/20'
+                  : isDup
+                    ? 'bg-amber-50 dark:bg-amber-900/20'
+                    : r.isOriginal
+                      ? 'bg-green-50 dark:bg-green-900/20'
+                      : 'bg-blue-50 dark:bg-blue-900/10';
               return (
-                <tr key={r.bib} className={`border-b border-gray-100 dark:border-gray-700 ${rowCls}`}>
+                <tr key={r.id ?? r.bib} className={`border-b border-gray-100 dark:border-gray-700 ${rowCls}`}>
                   <td className="px-4 py-3 font-bold text-base">
-                    {isUnknown && <span className="mr-1">❌</span>}
-                    {!isUnknown && isDup && <span className="mr-1">⚠️</span>}
-                    {r.bib}
+                    {isUnresolved
+                      ? <span className="text-amber-600 dark:text-amber-400">?</span>
+                      : <>
+                          {isUnknown && <span className="mr-1">❌</span>}
+                          {!isUnknown && isDup && <span className="mr-1">⚠️</span>}
+                          {r.bib}
+                        </>
+                    }
                   </td>
                   <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                    {isUnknown ? 'Not a registered racer' : isDup ? 'Already in batch' : r.isOriginal ? 'Original' : r.addedAt}
+                    {isUnresolved ? (
+                      resolvingId === r.id ? (
+                        <input
+                          // eslint-disable-next-line jsx-a11y/no-autofocus
+                          autoFocus
+                          type="number"
+                          placeholder="Bib number…"
+                          className="w-24 border border-amber-400 rounded px-2 py-1 text-sm dark:bg-gray-700 dark:text-white"
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              const n = parseInt(e.target.value, 10);
+                              if (!isNaN(n) && n > 0) {
+                                onResolve?.(r.id, n);
+                                setResolvingId(null);
+                              }
+                            }
+                            if (e.key === 'Escape') setResolvingId(null);
+                          }}
+                          onBlur={() => setResolvingId(null)}
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setResolvingId(r.id)}
+                          className="text-sm text-amber-700 dark:text-amber-400 underline hover:no-underline"
+                        >
+                          Resolve
+                        </button>
+                      )
+                    ) : isUnknown ? 'Not a registered racer' : isDup ? 'Already in batch' : r.isOriginal ? 'Original' : r.addedAt}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button
                       type="button"
-                      aria-label={`Remove runner ${r.bib}`}
-                      onClick={() => onRemove(r.bib)}
+                      aria-label={`Remove runner ${r.bib ?? '?'}`}
+                      onClick={() => onRemove(r.id ?? r.bib)}
                       disabled={loading}
                       className="text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded px-2 py-1 transition-colors text-lg leading-none"
                     >
@@ -117,14 +165,14 @@ const DraftView = ({
       </div>
 
       <DraftFooter
-        count={runners.length} isEditMode={isEditMode} loading={loading}
+        count={runners.length} isEditMode={isEditMode} loading={loading} hasUnresolved={hasUnresolved}
         onClear={onClear} onRecord={onRecord} onCancel={onCancel} onUpdate={onUpdate}
       />
     </div>
   );
 };
 
-const DraftFooter = ({ count, isEditMode, loading, onClear, onRecord, onCancel, onUpdate }) => (
+const DraftFooter = ({ count, hasUnresolved, isEditMode, loading, onClear, onRecord, onCancel, onUpdate }) => (
   <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
     {isEditMode ? (
       <button
@@ -158,10 +206,10 @@ const DraftFooter = ({ count, isEditMode, loading, onClear, onRecord, onCancel, 
       <button
         type="button"
         onClick={onRecord}
-        disabled={count === 0 || loading}
+        disabled={count === 0 || loading || hasUnresolved}
         className="px-6 py-2 text-sm font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        {loading ? 'Recording…' : `Record ${count} Runner${count === 1 ? '' : 's'}`}
+        {loading ? 'Recording…' : hasUnresolved ? 'Resolve all calls first' : `Record ${count} Runner${count === 1 ? '' : 's'}`}
       </button>
     )}
   </div>
@@ -169,10 +217,12 @@ const DraftFooter = ({ count, isEditMode, loading, onClear, onRecord, onCancel, 
 
 DraftView.propTypes = {
   runners: PropTypes.arrayOf(PropTypes.shape({
-    bib:        PropTypes.number.isRequired,
-    addedAt:    PropTypes.string,
-    isOriginal: PropTypes.bool,
-    isUnknown:  PropTypes.bool,
+    id:           PropTypes.string,
+    bib:          PropTypes.number,
+    addedAt:      PropTypes.string,
+    isOriginal:   PropTypes.bool,
+    isUnknown:    PropTypes.bool,
+    isUnresolved: PropTypes.bool,
   })).isRequired,
   checkpointName:  PropTypes.string,
   commonTime:      PropTypes.string,
@@ -184,6 +234,7 @@ DraftView.propTypes = {
   onRecord:        PropTypes.func.isRequired,
   onCancel:        PropTypes.func.isRequired,
   onUpdate:        PropTypes.func.isRequired,
+  onResolve:       PropTypes.func,
 };
 
 DraftView.defaultProps = { existingRecords: [], editingBatch: null, loading: false };

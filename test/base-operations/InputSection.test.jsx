@@ -110,3 +110,91 @@ describe('InputSection', () => {
     expect(screen.getByLabelText(/common time/i)).toBeDisabled();
   });
 });
+
+describe('InputSection — unresolved button', () => {
+  it('renders "?" button when checkpoint and time are set', () => {
+    render(
+      <InputSection
+        checkpoints={checkpoints}
+        checkpointNumber={1}
+        commonTime="10:00"
+        onCheckpointChange={vi.fn()}
+        onTimeChange={vi.fn()}
+        onBibEntered={vi.fn()}
+        onUnresolvedAdded={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: /unresolved/i })).toBeInTheDocument();
+  });
+
+  it('calls onUnresolvedAdded when "?" button is clicked', () => {
+    const onUnresolvedAdded = vi.fn();
+    render(
+      <InputSection
+        checkpoints={checkpoints}
+        checkpointNumber={1}
+        commonTime="10:00"
+        onCheckpointChange={vi.fn()}
+        onTimeChange={vi.fn()}
+        onBibEntered={vi.fn()}
+        onUnresolvedAdded={onUnresolvedAdded}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /unresolved/i }));
+    expect(onUnresolvedAdded).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('InputSection — time nudge buttons', () => {
+  function renderWithTime(time) {
+    const onTimeChange = vi.fn();
+    render(
+      <InputSection
+        checkpoints={checkpoints}
+        checkpointNumber={1}
+        commonTime={time}
+        onCheckpointChange={vi.fn()}
+        onTimeChange={onTimeChange}
+        onBibEntered={vi.fn()}
+      />
+    );
+    return onTimeChange;
+  }
+
+  it('renders four nudge buttons when time is set', () => {
+    renderWithTime('10:00');
+    expect(screen.getByRole('button', { name: '−1m' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '−30s' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '+30s' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '+1m' })).toBeInTheDocument();
+  });
+
+  it('+30s nudges time forward by 30 seconds', () => {
+    const onTimeChange = renderWithTime('10:00');
+    fireEvent.click(screen.getByRole('button', { name: '+30s' }));
+    expect(onTimeChange).toHaveBeenCalledWith('10:00:30');
+  });
+
+  it('−30s nudges time back by 30 seconds', () => {
+    const onTimeChange = renderWithTime('10:01:00');
+    fireEvent.click(screen.getByRole('button', { name: '−30s' }));
+    expect(onTimeChange).toHaveBeenCalledWith('10:00:30');
+  });
+
+  it('+1m nudges time forward by 60 seconds', () => {
+    const onTimeChange = renderWithTime('10:00');
+    fireEvent.click(screen.getByRole('button', { name: '+1m' }));
+    expect(onTimeChange).toHaveBeenCalledWith('10:01:00');
+  });
+
+  it('−1m nudges time back by 60 seconds', () => {
+    const onTimeChange = renderWithTime('10:05');
+    fireEvent.click(screen.getByRole('button', { name: '−1m' }));
+    expect(onTimeChange).toHaveBeenCalledWith('10:04:00');
+  });
+
+  it('nudge buttons are disabled when time field is empty', () => {
+    renderWithTime('');
+    expect(screen.getByRole('button', { name: '+30s' })).toBeDisabled();
+  });
+});

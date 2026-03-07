@@ -1,10 +1,11 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import { useRaceStore } from '../../../store/useRaceStore';
 import InputSection from './InputSection';
 import DraftView from './DraftView';
 import HistoryView from './HistoryView';
+import UndoToast from './UndoToast';
 
 const BatchEntryLayout = ({ onUnsavedChanges }) => {
   const { runners, sessionBatches, submitRadioBatch, voidSessionBatch, editSessionBatch, loading } =
@@ -16,6 +17,9 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
   const [chips, setChips] = useState([]);
   const [editingBatch, setEditingBatch] = useState(null);
   const [activeTab, setActiveTab] = useState('draft');
+  const [undoEntry, setUndoEntry] = useState(null); // { count, bibs, checkpointNumber, commonTime, batchId }
+  const nextChipId = useRef(0);
+  const makeId = useCallback(() => `c${nextChipId.current++}`, []);
 
   const existingRecords = useMemo(() => {
     if (!checkpointNumber) return [];
@@ -36,13 +40,28 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
       const existing = new Set(prev.map(c => c.bib));
       const newChips = bibs
         .filter(b => !existing.has(b))
-        .map(b => ({ bib: b, addedAt: now, isOriginal: false, isUnknown: !knownBibs.has(b) }));
+        .map(b => ({ id: makeId(), bib: b, addedAt: now, isOriginal: false, isUnknown: !knownBibs.has(b) }));
       return [...prev, ...newChips];
     });
     onUnsavedChanges?.(true);
-  }, [raceRunners, onUnsavedChanges]);
+  }, [raceRunners, onUnsavedChanges, makeId]);
 
-  const handleRemove = useCallback((bib) => setChips(prev => prev.filter(c => c.bib !== bib)), []);
+  const handleUnresolvedAdded = useCallback(() => {
+    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    setChips(prev => [...prev, { id: makeId(), bib: null, addedAt: now, isOriginal: false, isUnresolved: true }]);
+    onUnsavedChanges?.(true);
+  }, [makeId, onUnsavedChanges]);
+
+  const handleResolve = useCallback((id, bib) => {
+    const knownBibs = new Set((raceRunners ?? []).map(r => r.number));
+    setChips(prev => prev.map(c =>
+      c.id === id
+        ? { ...c, bib, isUnresolved: false, isUnknown: !knownBibs.has(bib) }
+        : c
+    ));
+  }, [raceRunners]);
+
+  const handleRemove = useCallback((id) => setChips(prev => prev.filter(c => (c.id ?? c.bib) !== id)), []);
 
   const handleClear = useCallback(() => {
     setChips([]);
@@ -51,11 +70,26 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
 
   const handleRecord = useCallback(async () => {
     if (!checkpointNumber || !commonTime || chips.length === 0) return;
-    await submitRadioBatch(chips.map(c => c.bib), commonTime, checkpointNumber, {});
+    if (chips.some(c => c.bib === null)) return;
+    const bibs = chips.map(c => c.bib);
+    const result = await submitRadioBatch(bibs, commonTime, checkpointNumber, {});
+    const batchId = result?.id ?? null;
+    setUndoEntry({ count: bibs.length, bibs, checkpointNumber, commonTime, batchId });
     setChips([]);
     onUnsavedChanges?.(false);
     setActiveTab('history');
   }, [checkpointNumber, commonTime, chips, submitRadioBatch, onUnsavedChanges]);
+
+  const handleUndo = useCallback(async () => {
+    if (!undoEntry) return;
+    if (undoEntry.batchId) await voidSessionBatch(undoEntry.batchId);
+    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    setChips(undoEntry.bibs.map(bib => ({ id: makeId(), bib, addedAt: now, isOriginal: false, isUnknown: false })));
+    setCheckpointNumber(undoEntry.checkpointNumber);
+    setCommonTime(undoEntry.commonTime);
+    setUndoEntry(null);
+    setActiveTab('draft');
+  }, [undoEntry, voidSessionBatch, makeId]);
 
   const handleEditBatch = useCallback((batch) => {
     const batchNumber = (sessionBatches ?? []).indexOf(batch) + 1;
@@ -65,7 +99,7 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
     const submittedTime = new Date(batch.submittedAt).toLocaleTimeString([], {
       hour: '2-digit', minute: '2-digit', second: '2-digit',
     });
-    setChips(batch.bibs.map(bib => ({ bib, addedAt: submittedTime, isOriginal: true })));
+    setChips(batch.bibs.map(bib => ({ id: makeId(), bib, addedAt: submittedTime, isOriginal: true })));
     setActiveTab('draft');
   }, [sessionBatches]);
 
@@ -87,7 +121,7 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
   const raceStartTime = currentRace?.startTime ?? null;
 
   return (
-    <div className="flex flex-col md:flex-row md:divide-x divide-gray-200 dark:divide-gray-700
+    <div className="relative flex flex-col md:flex-row md:divide-x divide-gray-200 dark:divide-gray-700
                     rounded-lg border border-gray-200 dark:border-gray-700
                     bg-white dark:bg-gray-800 overflow-hidden">
 
@@ -103,6 +137,7 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
           onCheckpointChange={setCheckpointNumber}
           onTimeChange={setCommonTime}
           onBibEntered={handleBibEntered}
+          onUnresolvedAdded={handleUnresolvedAdded}
         />
       </div>
 
@@ -156,6 +191,7 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
               onRecord={handleRecord}
               onCancel={handleCancel}
               onUpdate={handleUpdate}
+              onResolve={handleResolve}
             />
           ) : (
             <div className="p-4">
@@ -170,6 +206,17 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
         </div>
 
       </div>
+
+      {/* Undo toast — floats above the layout */}
+      {undoEntry && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 w-80 max-w-full">
+          <UndoToast
+            count={undoEntry.count}
+            onUndo={handleUndo}
+            onDismiss={() => setUndoEntry(null)}
+          />
+        </div>
+      )}
     </div>
   );
 };
