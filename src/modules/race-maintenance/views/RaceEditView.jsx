@@ -330,22 +330,18 @@ const RaceEditView = () => {
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
                   Runner ranges are locked after creation and cannot be edited here.
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {currentRace.runnerRanges?.map((range, i) => {
-                    let label;
-                    if (typeof range === 'string') label = range;
-                    else if (range?.isIndividual) label = range.individualNumbers?.join(', ');
-                    else if (range?.min != null) label = `${range.min}–${range.max}`;
-                    else label = 'Range';
-                    return (
-                      <span
-                        key={i}
-                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-navy-100 text-navy-800 dark:bg-navy-900 dark:text-navy-200"
-                      >
-                        {label}
-                      </span>
-                    );
-                  })}
+                <div className="text-sm text-gray-700 dark:text-gray-300">
+                  {currentRace.runnerRanges?.length
+                    ? currentRace.runnerRanges.map((range, i) => {
+                        let label;
+                        if (typeof range === 'string') label = range;
+                        else if (range?.isIndividual) label = range.individualNumbers?.join(', ');
+                        else if (range?.min != null) label = `${range.min}–${range.max}`;
+                        else label = 'Range';
+                        return label;
+                      }).join(', ')
+                    : '—'
+                  }
                 </div>
               </CardBody>
             </Card>
