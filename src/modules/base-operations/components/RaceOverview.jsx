@@ -60,7 +60,15 @@ const RaceOverview = () => {
 
   // Filter runners
   const filteredRunners = useMemo(() => {
-    let result = [...runners];
+    // Deduplicate by bib: prefer base station record (checkpointNumber === 0) over checkpoint records
+    const byBib = new Map();
+    for (const r of runners) {
+      const existing = byBib.get(r.number);
+      if (!existing || r.checkpointNumber === 0) {
+        byBib.set(r.number, r);
+      }
+    }
+    let result = Array.from(byBib.values());
 
     // Apply search filter
     if (searchQuery) {

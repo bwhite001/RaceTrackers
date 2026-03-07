@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Badge } from '../../../design-system/components/Badge';
 import { Card } from '../../../design-system/components/Card';
@@ -26,13 +26,25 @@ const statusLabel = {
  * @param {{ runners: Array<{number: number|string, commonTime: string|null, status: string}> }} props
  */
 const Leaderboard = ({ runners = [] }) => {
-  const finishers = runners
+  // Deduplicate by bib: prefer base station record (checkpointNumber === 0) over checkpoint records
+  const deduped = useMemo(() => {
+    const byBib = new Map();
+    for (const r of runners) {
+      const existing = byBib.get(r.number);
+      if (!existing || r.checkpointNumber === 0) {
+        byBib.set(r.number, r);
+      }
+    }
+    return Array.from(byBib.values());
+  }, [runners]);
+
+  const finishers = deduped
     .filter(r => r.commonTime && r.status !== RUNNER_STATUSES.DNF)
     .sort((a, b) => new Date(a.commonTime) - new Date(b.commonTime));
 
-  const dnfRunners = runners.filter(r => r.status === RUNNER_STATUSES.DNF);
+  const dnfRunners = deduped.filter(r => r.status === RUNNER_STATUSES.DNF);
 
-  const stillRacing = runners.filter(
+  const stillRacing = deduped.filter(
     r => !r.commonTime && r.status !== RUNNER_STATUSES.DNF
   );
 

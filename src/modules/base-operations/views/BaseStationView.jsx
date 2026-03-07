@@ -7,7 +7,7 @@ import useNavigationStore, { MODULE_TYPES } from '../../../shared/store/navigati
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import { useRaceStore } from '../../../store/useRaceStore.js';
 import useSettingsStore from '../../../shared/store/settingsStore';
-import { HOTKEYS } from '../../../types';
+import { HOTKEYS, RUNNER_STATUSES } from '../../../types';
 import PageHeader from '../../../shared/components/PageHeader';
 import ImportExportModal from '../../../components/ImportExport/ImportExportModal';
 
@@ -235,7 +235,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
                     const byRunner = new Map();
                     for (const r of (runners ?? [])) {
                       if (!byRunner.has(r.number)) {
-                        byRunner.set(r.number, { number: r.number, status: r.status, checkpointStatuses: {} });
+                        byRunner.set(r.number, { number: r.number, status: RUNNER_STATUSES.NOT_STARTED, checkpointStatuses: {} });
                       }
                       const entry = byRunner.get(r.number);
                       if (r.checkpointNumber !== 0) {
