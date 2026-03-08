@@ -3,9 +3,11 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import RaceOverview from '../../src/modules/base-operations/components/RaceOverview';
 import useBaseOperationsStore from '../../src/modules/base-operations/store/baseOperationsStore';
+import { useRaceStore } from '../../src/store/useRaceStore';
 
-// Mock the store
+// Mock the stores
 vi.mock('../../src/modules/base-operations/store/baseOperationsStore');
+vi.mock('../../src/store/useRaceStore', () => ({ useRaceStore: vi.fn() }));
 
 // Mock LiveLeadersBanner (self-contained, tested separately)
 vi.mock('../../src/modules/base-operations/components/Leaderboard/LiveLeadersBanner', () => ({
@@ -26,6 +28,7 @@ describe('RaceOverview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useBaseOperationsStore.mockImplementation(() => ({ stats: mockStats, checkpoints: [] }));
+    useRaceStore.mockReturnValue({ currentRace: null });
   });
 
   test('renders stats cards', () => {
@@ -63,5 +66,20 @@ describe('RaceOverview', () => {
     render(<RaceOverview />);
     expect(screen.getByTestId('cp-count-1')).toBeInTheDocument();
     expect(screen.getByTestId('cp-count-2')).toBeInTheDocument();
+  });
+
+  test('shows "Not Started" label before race starts', () => {
+    useRaceStore.mockReturnValue({ currentRace: { date: '2099-01-01', startTime: '08:00' } });
+    render(<RaceOverview />);
+    expect(within(screen.getByTestId('stat-notStarted')).getByText('Not Started')).toBeInTheDocument();
+  });
+
+  test('shows "Pending" label after race has started', () => {
+    const past = new Date(Date.now() - 60 * 60 * 1000); // 1h ago
+    const date = past.toISOString().slice(0, 10);
+    const startTime = `${String(past.getHours()).padStart(2, '0')}:${String(past.getMinutes()).padStart(2, '0')}`;
+    useRaceStore.mockReturnValue({ currentRace: { date, startTime } });
+    render(<RaceOverview />);
+    expect(within(screen.getByTestId('stat-notStarted')).getByText('Pending')).toBeInTheDocument();
   });
 });

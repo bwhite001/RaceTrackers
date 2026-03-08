@@ -1,5 +1,6 @@
 import React from 'react';
 import useBaseOperationsStore from '../store/baseOperationsStore';
+import { useRaceStore } from '../../../store/useRaceStore';
 import LiveLeadersBanner from './Leaderboard/LiveLeadersBanner';
 
 // Static status colour classes (Tailwind JIT requires static strings)
@@ -18,6 +19,11 @@ const STAT_LABELS = {
   notStarted: 'Not Started', total: 'Total', finished: 'Finished', active: 'Active', dnf: 'DNF', dns: 'DNS',
 };
 
+/** Returns 'Pending' instead of 'Not Started' once the race has started. */
+function notStartedLabel(raceStarted) {
+  return raceStarted ? 'Pending' : 'Not Started';
+}
+
 const STAT_ORDER = ['notStarted', 'active', 'finished', 'dnf', 'dns', 'total'];
 
 /**
@@ -26,7 +32,14 @@ const STAT_ORDER = ['notStarted', 'active', 'finished', 'dnf', 'dns', 'total'];
  */
 const RaceOverview = () => {
   const { stats, checkpoints = [] } = useBaseOperationsStore();
+  const { currentRace } = useRaceStore();
   const { checkpointCounts = {} } = stats;
+
+  const raceStarted = Boolean(
+    currentRace?.startTime &&
+    currentRace?.date &&
+    new Date(`${currentRace.date}T${currentRace.startTime}`) <= new Date()
+  );
 
   // Expected = runners who could still arrive (not DNS/DNF)
   const expected = Math.max(0, stats.total - stats.dnf - stats.dns);
@@ -73,7 +86,7 @@ const RaceOverview = () => {
               className={`px-3 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border-t-4 ${accentClass}`}
             >
               <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide leading-tight">
-                {STAT_LABELS[key] ?? key}
+                {key === 'notStarted' ? notStartedLabel(raceStarted) : (STAT_LABELS[key] ?? key)}
               </div>
               <div className="mt-0.5 text-xl font-bold text-gray-900 dark:text-white">
                 {value}
