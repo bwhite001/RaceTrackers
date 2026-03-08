@@ -68,17 +68,35 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
     onUnsavedChanges?.(false);
   }, [onUnsavedChanges]);
 
-  const handleRecord = useCallback(async () => {
-    if (!checkpointNumber || !commonTime || chips.length === 0) return;
-    if (chips.some(c => c.bib === null)) return;
-    const bibs = chips.map(c => c.bib);
+  const [dnsWarning, setDnsWarning] = useState(null); // { dnsRunners: [...], pendingBibs: [...] }
+
+  const submitBatch = useCallback(async (bibs) => {
     const result = await submitRadioBatch(bibs, commonTime, checkpointNumber, {});
     const batchId = result?.id ?? null;
     setUndoEntry({ count: bibs.length, bibs, checkpointNumber, commonTime, batchId });
     setChips([]);
     onUnsavedChanges?.(false);
     setActiveTab('history');
-  }, [checkpointNumber, commonTime, chips, submitRadioBatch, onUnsavedChanges]);
+  }, [checkpointNumber, commonTime, submitRadioBatch, onUnsavedChanges]);
+
+  const handleRecord = useCallback(async () => {
+    if (!checkpointNumber || !commonTime || chips.length === 0) return;
+    if (chips.some(c => c.bib === null)) return;
+    const bibs = chips.map(c => c.bib);
+
+    // Warn if any bib belongs to a DNS (non-starter) runner
+    const dnsNumbers = new Set(
+      (raceRunners ?? [])
+        .filter(r => r.status === 'non-starter')
+        .map(r => r.number)
+    );
+    const dnsInBatch = bibs.filter(b => dnsNumbers.has(b));
+    if (dnsInBatch.length > 0) {
+      setDnsWarning({ dnsRunners: dnsInBatch, pendingBibs: bibs });
+      return;
+    }
+    await submitBatch(bibs);
+  }, [checkpointNumber, commonTime, chips, raceRunners, submitBatch]);
 
   const handleUndo = useCallback(async () => {
     if (!undoEntry) return;
@@ -206,6 +224,42 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
         </div>
 
       </div>
+
+      {/* DNS warning modal */}
+      {dnsWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm p-6 space-y-4">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white">
+              DNS Runner{dnsWarning.dnsRunners.length > 1 ? 's' : ''} Detected
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Bib{dnsWarning.dnsRunners.length > 1 ? 's' : ''}{' '}
+              <strong>{dnsWarning.dnsRunners.join(', ')}</strong> {dnsWarning.dnsRunners.length > 1 ? 'are' : 'is'} marked as DNS (Did Not Start).
+              Do you want to record a time for {dnsWarning.dnsRunners.length > 1 ? 'these runners' : 'this runner'} anyway?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setDnsWarning(null)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={async () => {
+                  const bibs = dnsWarning.pendingBibs;
+                  setDnsWarning(null);
+                  await submitBatch(bibs);
+                }}
+              >
+                Record Anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Undo toast — floats above the layout */}
       {undoEntry && (

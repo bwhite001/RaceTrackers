@@ -71,4 +71,51 @@ describe('BatchEntryLayout', () => {
     fireEvent.click(screen.getByRole('button', { name: /record 1 runner/i }));
     await waitFor(() => expect(submitRadioBatch).toHaveBeenCalledWith([42], '10:00', 1, {}));
   });
+
+  it('shows DNS warning modal when a DNS runner is in the batch', async () => {
+    const submitRadioBatch = vi.fn().mockResolvedValue();
+    useBaseOperationsStore.mockReturnValue({ ...defaultStore, submitRadioBatch });
+    useRaceStore.mockReturnValue({
+      checkpoints: [{ number: 1, name: 'Start' }],
+      runners: [
+        { number: 42, status: 'non-starter' },
+        { number: 100, status: 'not-started' },
+      ],
+      currentRace: null,
+    });
+
+    render(<BatchEntryLayout onUnsavedChanges={vi.fn()} />, { wrapper: MemoryRouter });
+    fireEvent.change(screen.getByRole('combobox', { name: /checkpoint/i }), { target: { value: '1' } });
+    fireEvent.change(screen.getByLabelText(/common time/i), { target: { value: '10:00' } });
+    const bibInput = screen.getByLabelText(/bib numbers/i);
+    fireEvent.change(bibInput, { target: { value: '42' } });
+    fireEvent.keyDown(bibInput, { key: 'Enter' });
+    fireEvent.click(screen.getByRole('button', { name: /record 1 runner/i }));
+
+    await waitFor(() => expect(screen.getByText(/dns runner detected/i)).toBeInTheDocument());
+    expect(submitRadioBatch).not.toHaveBeenCalled();
+  });
+
+  it('submits batch after confirming DNS warning', async () => {
+    const submitRadioBatch = vi.fn().mockResolvedValue();
+    useBaseOperationsStore.mockReturnValue({ ...defaultStore, submitRadioBatch });
+    useRaceStore.mockReturnValue({
+      checkpoints: [{ number: 1, name: 'Start' }],
+      runners: [{ number: 42, status: 'non-starter' }],
+      currentRace: null,
+    });
+
+    render(<BatchEntryLayout onUnsavedChanges={vi.fn()} />, { wrapper: MemoryRouter });
+    fireEvent.change(screen.getByRole('combobox', { name: /checkpoint/i }), { target: { value: '1' } });
+    fireEvent.change(screen.getByLabelText(/common time/i), { target: { value: '10:00' } });
+    const bibInput = screen.getByLabelText(/bib numbers/i);
+    fireEvent.change(bibInput, { target: { value: '42' } });
+    fireEvent.keyDown(bibInput, { key: 'Enter' });
+    fireEvent.click(screen.getByRole('button', { name: /record 1 runner/i }));
+
+    await waitFor(() => expect(screen.getByText(/dns runner detected/i)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /record anyway/i }));
+    await waitFor(() => expect(submitRadioBatch).toHaveBeenCalledWith([42], '10:00', 1, {}));
+  });
 });
+
