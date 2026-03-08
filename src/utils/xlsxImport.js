@@ -107,11 +107,11 @@ export function applyMappingsToRows(rows, mappings) {
   rows.forEach((row, index) => {
     const lineNum = index + 2;
 
-    // number (required)
+    // number — skip only if truly non-numeric
     const rawNumber = fieldToCol.number ? row[fieldToCol.number] : undefined;
     const number = parseInt(rawNumber, 10);
     if (!rawNumber || isNaN(number) || number <= 0) {
-      errors.push(`Row ${lineNum}: invalid or missing bib number ("${rawNumber ?? ''}")`);
+      errors.push(`Row ${lineNum}: skipped — bib "${rawNumber ?? ''}" is not a number`);
       return;
     }
 
@@ -141,7 +141,13 @@ export function applyMappingsToRows(rows, mappings) {
     });
   });
 
-  return { valid, errors };
+  // Build batchLabels: { [number]: string } from the label→number map
+  const batchLabels = {};
+  for (const [label, num] of batchLabelMap.entries()) {
+    batchLabels[num] = label;
+  }
+
+  return { valid, errors, batchLabels };
 }
 
 // ---------------------------------------------------------------------------

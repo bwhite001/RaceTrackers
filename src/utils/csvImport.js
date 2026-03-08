@@ -50,11 +50,11 @@ export function validateCSVRows(rows) {
   rows.forEach((row, index) => {
     const lineNum = index + 2; // +2 for 1-based + header row
 
-    // Required: number
+    // Required: number — skip only if truly non-numeric
     const rawNumber = row.number ?? row.Number ?? row.bib ?? row.Bib ?? row['#'];
     const number = parseInt(rawNumber, 10);
     if (!rawNumber || isNaN(number) || number <= 0) {
-      errors.push(`Line ${lineNum}: invalid or missing bib number ("${rawNumber}")`);
+      errors.push(`Line ${lineNum}: skipped — bib "${rawNumber}" is not a number`);
       return;
     }
 

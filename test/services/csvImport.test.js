@@ -81,14 +81,14 @@ describe('validateCSVRows', () => {
     const { valid, errors } = validateCSVRows(rows);
     expect(valid).toHaveLength(0);
     expect(errors).toHaveLength(1);
-    expect(errors[0]).toMatch(/invalid or missing bib/i);
+    expect(errors[0]).toMatch(/skipped.*bib|invalid.*bib/i);
   });
 
   it('rejects a row with non-numeric bib number', () => {
     const rows = [{ number: 'abc' }];
     const { valid, errors } = validateCSVRows(rows);
     expect(valid).toHaveLength(0);
-    expect(errors[0]).toMatch(/invalid or missing bib/i);
+    expect(errors[0]).toMatch(/skipped.*bib|invalid.*bib/i);
   });
 
   it('rejects a row with a zero bib number', () => {

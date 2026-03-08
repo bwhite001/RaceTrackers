@@ -115,8 +115,8 @@ function RosterImport({ raceId, onComplete }) {
   };
 
   const handleMappingNext = () => {
-    const { valid, errors } = applyMappingsToRows(state.xlsxRows, state.mappings);
-    setState(s => ({ ...s, step: 'preview', preview: { valid, errors } }));
+    const { valid, errors, batchLabels } = applyMappingsToRows(state.xlsxRows, state.mappings);
+    setState(s => ({ ...s, step: 'preview', preview: { valid, errors, batchLabels } }));
   };
 
   const numberMapped = Object.values(state.mappings).includes('number');
@@ -145,6 +145,12 @@ function RosterImport({ raceId, onComplete }) {
       const minRunner = Math.min(...numbers);
       const maxRunner = Math.max(...numbers);
       await RaceMaintenanceRepository.updateRace(parseInt(raceId, 10), { runnerRanges, minRunner, maxRunner });
+
+      // Upsert race_batches with real string names from the XLSX wave column
+      const { batchLabels } = state.preview;
+      if (batchLabels && Object.keys(batchLabels).length > 0) {
+        await RaceMaintenanceRepository.upsertBatchNames(parseInt(raceId, 10), batchLabels);
+      }
 
       setState(s => ({ ...s, step: 'done', result: res }));
       if (onComplete) onComplete(res);
