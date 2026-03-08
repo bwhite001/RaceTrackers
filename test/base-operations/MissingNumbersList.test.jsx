@@ -33,7 +33,9 @@ describe('MissingNumbersList', () => {
       loadMissingRunners: mockLoadMissingRunners,
       generateMissingNumbersReport: mockGenerateMissingNumbersReport,
       downloadReport: mockDownloadReport,
-      loading: false
+      loading: false,
+      outList: [],
+      loadOutList: vi.fn(),
     }));
   });
 
@@ -137,7 +139,9 @@ describe('MissingNumbersList', () => {
     useBaseOperationsStore.mockImplementation(() => ({
       missingRunners: [],
       loadMissingRunners: mockLoadMissingRunners,
-      loading: true
+      loading: true,
+      outList: [],
+      loadOutList: vi.fn(),
     }));
 
     render(<MissingNumbersList />);
@@ -149,7 +153,9 @@ describe('MissingNumbersList', () => {
     useBaseOperationsStore.mockImplementation(() => ({
       missingRunners: [],
       loadMissingRunners: mockLoadMissingRunners,
-      loading: false
+      loading: false,
+      outList: [],
+      loadOutList: vi.fn(),
     }));
 
     render(<MissingNumbersList />);
@@ -161,7 +167,9 @@ describe('MissingNumbersList', () => {
     useBaseOperationsStore.mockImplementation(() => ({
       missingRunners: [],
       loadMissingRunners: mockLoadMissingRunners,
-      loading: false
+      loading: false,
+      outList: [],
+      loadOutList: vi.fn(),
     }));
 
     render(<MissingNumbersList />);
@@ -218,7 +226,9 @@ describe('MissingNumbersList', () => {
     useBaseOperationsStore.mockImplementation(() => ({
       missingRunners: [...mockMissingRunners, { number: 111 }],
       loadMissingRunners: mockLoadMissingRunners,
-      loading: false
+      loading: false,
+      outList: [],
+      loadOutList: vi.fn(),
     }));
 
     rerender(<MissingNumbersList />);
@@ -247,5 +257,41 @@ describe('MissingNumbersList', () => {
     expect(mockLoadMissingRunners).toHaveBeenCalledWith(2);
 
     vi.useRealTimers();
+  });
+
+  it('opens missing runners modal when Show List is clicked', async () => {
+    render(<MissingNumbersList checkpoint={1} />);
+    fireEvent.click(screen.getByRole('button', { name: /show list/i }));
+    await waitFor(() => expect(screen.getByText(/missing at cp1/i)).toBeInTheDocument());
+  });
+
+  it('Show List button is disabled when no missing runners', () => {
+    useBaseOperationsStore.mockImplementation(() => ({
+      missingRunners: [],
+      loadMissingRunners: mockLoadMissingRunners,
+      loading: false,
+      outList: [],
+      loadOutList: vi.fn(),
+    }));
+    render(<MissingNumbersList />);
+    expect(screen.getByRole('button', { name: /show list/i })).toBeDisabled();
+  });
+
+  it('opens withdrawn modal and shows withdrawn runners', async () => {
+    useBaseOperationsStore.mockImplementation(() => ({
+      missingRunners: mockMissingRunners,
+      loadMissingRunners: mockLoadMissingRunners,
+      loading: false,
+      outList: [
+        { number: 230, status: 'withdrawn', withdrawalDetails: { reason: 'Injury' } },
+        { number: 240, status: 'withdrawn', withdrawalDetails: { reason: 'DNF' } },
+      ],
+      loadOutList: vi.fn(),
+    }));
+    render(<MissingNumbersList />);
+    fireEvent.click(screen.getByRole('button', { name: /withdrawn/i }));
+    await waitFor(() => expect(screen.getByText('Withdrawn Runners')).toBeInTheDocument());
+    expect(screen.getByText('#230')).toBeInTheDocument();
+    expect(screen.getByText('#240')).toBeInTheDocument();
   });
 });

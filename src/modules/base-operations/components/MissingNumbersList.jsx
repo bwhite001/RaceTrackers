@@ -17,19 +17,27 @@ const MissingNumbersList = ({ checkpoint: initialCheckpoint = 1, autoRefresh: in
   const [selectedCheckpoint, setSelectedCheckpoint] = useState(initialCheckpoint);
   const [autoRefresh, setAutoRefresh] = useState(initialAutoRefresh);
   const [refreshInterval, setRefreshInterval] = useState(null);
+  const [showMissingModal, setShowMissingModal] = useState(false);
+  const [showWithdrawnModal, setShowWithdrawnModal] = useState(false);
 
   const {
     missingRunners,
     loadMissingRunners,
     generateMissingNumbersReport,
     downloadReport,
-    loading
+    loading,
+    outList,
+    loadOutList,
   } = useBaseOperationsStore();
 
   // Load missing runners on mount and when checkpoint changes
   useEffect(() => {
     loadMissingRunners(selectedCheckpoint);
   }, [selectedCheckpoint, loadMissingRunners]);
+
+  useEffect(() => {
+    loadOutList();
+  }, [loadOutList]);
 
   // Sync selectedCheckpoint when checkpoint prop changes
   useEffect(() => {
@@ -122,6 +130,21 @@ const MissingNumbersList = ({ checkpoint: initialCheckpoint = 1, autoRefresh: in
           </p>
         </div>
         <div className="flex items-center space-x-2">
+          <button
+            type="button"
+            onClick={() => setShowMissingModal(true)}
+            disabled={missingRunners.length === 0}
+            className="btn-secondary text-xs"
+          >
+            Show List
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowWithdrawnModal(true)}
+            className="btn-secondary text-xs"
+          >
+            Withdrawn
+          </button>
           <button
             onClick={handleRefresh}
             disabled={loading}
@@ -279,6 +302,65 @@ const MissingNumbersList = ({ checkpoint: initialCheckpoint = 1, autoRefresh: in
           <li>• List updates automatically when runners check in</li>
         </ul>
       </div>
+
+      {/* Missing runners modal */}
+      {showMissingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                Missing at CP{selectedCheckpoint} ({missingRunners.length})
+              </h3>
+              <button type="button" onClick={() => setShowMissingModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1">✕</button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5">
+              {missingRunners.length === 0 ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No missing runners at this checkpoint.</p>
+              ) : (
+                <ul className="space-y-1 text-sm text-gray-800 dark:text-gray-200">
+                  {missingRunners.map(r => (
+                    <li key={r.number} className="font-mono px-2 py-1 bg-amber-50 dark:bg-amber-900/20 rounded">#{r.number}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+              <button type="button" onClick={() => setShowMissingModal(false)} className="btn-secondary">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Withdrawn at-a-glance modal */}
+      {showWithdrawnModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">Withdrawn Runners</h3>
+              <button type="button" onClick={() => setShowWithdrawnModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1">✕</button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5">
+              {(outList ?? []).filter(r => r.status === 'withdrawn').length === 0 ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No withdrawn runners.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {(outList ?? []).filter(r => r.status === 'withdrawn').map(r => (
+                    <li key={r.number} className="flex items-center justify-between text-sm border-b border-gray-100 dark:border-gray-700 pb-1">
+                      <span className="font-mono font-semibold text-gray-900 dark:text-white">#{r.number}</span>
+                      <span className="text-gray-500 dark:text-gray-400 text-xs">
+                        {r.withdrawalDetails?.reason || 'Withdrawn'}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+              <button type="button" onClick={() => setShowWithdrawnModal(false)} className="btn-secondary">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
