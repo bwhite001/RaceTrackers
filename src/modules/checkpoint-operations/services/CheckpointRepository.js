@@ -21,8 +21,16 @@ export class CheckpointRepository extends BaseRepository {
 
   async initializeCheckpoint(raceId, checkpointNumber) {
     try {
-      const raceRunners = await db.runners.where('raceId').equals(raceId).toArray();
-      
+      let raceRunners = await db.runners.where('raceId').equals(raceId).toArray();
+
+      // Filter by allowedBatches if the checkpoint restricts waves
+      const checkpoint = await db.checkpoints
+        .where('[raceId+number]').equals([raceId, checkpointNumber])
+        .first();
+      if (checkpoint?.allowedBatches?.length) {
+        raceRunners = raceRunners.filter(r => checkpoint.allowedBatches.includes(r.batchNumber));
+      }
+
       const checkpointRunners = raceRunners.map(runner => ({
         raceId,
         checkpointNumber,

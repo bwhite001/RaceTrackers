@@ -59,10 +59,14 @@ const RaceEditView = () => {
 
   // ── Checkpoints editing state ────────────────────────────────────────────
   const [cpEdits, setCpEdits] = useState({}); // { [cp.id]: newName }
+  const [cpBatchEdits, setCpBatchEdits] = useState({}); // { [cp.id]: number[] | null }
   const [cpSaving, setCpSaving] = useState({});
   const [newCpName, setNewCpName] = useState('');
   const [addingCp, setAddingCp] = useState(false);
   const [hasRunnerData, setHasRunnerData] = useState(false);
+
+  // Derive unique batch numbers from loaded runners
+  const availableBatches = [...new Set(runners.map(r => r.batchNumber).filter(Boolean))].sort((a, b) => a - b);
 
   // Load race on mount
   useEffect(() => {
@@ -95,6 +99,7 @@ const RaceEditView = () => {
   useEffect(() => {
     if (checkpoints) {
       setCpEdits(Object.fromEntries(checkpoints.map(cp => [cp.id, cp.name])));
+      setCpBatchEdits(Object.fromEntries(checkpoints.map(cp => [cp.id, cp.allowedBatches ?? null])));
     }
   }, [checkpoints]);
 
@@ -124,6 +129,35 @@ const RaceEditView = () => {
       addToast({ variant: 'error', message: 'Failed to rename checkpoint.' });
     } finally {
       setCpSaving(prev => ({ ...prev, [cp.id]: false }));
+    }
+  };
+
+  const handleToggleCpBatch = (cp, batchNum) => {
+    setCpBatchEdits(prev => {
+      const current = prev[cp.id] ?? null;
+      let next;
+      if (current === null) {
+        // Was "all" — selecting a batch means restrict to only that one
+        next = [batchNum];
+      } else if (current.includes(batchNum)) {
+        next = current.filter(b => b !== batchNum);
+        if (next.length === 0) next = null; // revert to all
+      } else {
+        next = [...current, batchNum].sort((a, b) => a - b);
+      }
+      return { ...prev, [cp.id]: next };
+    });
+  };
+
+  const handleSaveCheckpointWaves = async (cp) => {
+    setCpSaving(prev => ({ ...prev, [`waves-${cp.id}`]: true }));
+    try {
+      await updateCheckpoint(cp.id, { allowedBatches: cpBatchEdits[cp.id] ?? null });
+      addToast({ variant: 'success', message: `Checkpoint ${cp.number} waves saved.` });
+    } catch {
+      addToast({ variant: 'error', message: 'Failed to save checkpoint waves.' });
+    } finally {
+      setCpSaving(prev => ({ ...prev, [`waves-${cp.id}`]: false }));
     }
   };
 
@@ -303,28 +337,65 @@ const RaceEditView = () => {
               </div>
             )}
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               {checkpoints.map(cp => (
-                <div key={cp.id} className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400 w-8 flex-shrink-0">
-                    #{cp.number}
-                  </span>
-                  <Input
-                    value={cpEdits[cp.id] ?? cp.name}
-                    onChange={(e) =>
-                      setCpEdits(prev => ({ ...prev, [cp.id]: e.target.value }))
-                    }
-                    className="flex-1"
-                    aria-label={`Checkpoint ${cp.number} name`}
-                  />
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleSaveCheckpointName(cp)}
-                    disabled={cpSaving[cp.id] || cpEdits[cp.id] === cp.name}
-                  >
-                    {cpSaving[cp.id] ? 'Saving…' : 'Save'}
-                  </Button>
+                <div key={cp.id} className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 space-y-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400 w-8 flex-shrink-0">
+                      #{cp.number}
+                    </span>
+                    <Input
+                      value={cpEdits[cp.id] ?? cp.name}
+                      onChange={(e) =>
+                        setCpEdits(prev => ({ ...prev, [cp.id]: e.target.value }))
+                      }
+                      className="flex-1"
+                      aria-label={`Checkpoint ${cp.number} name`}
+                    />
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleSaveCheckpointName(cp)}
+                      disabled={cpSaving[cp.id] || cpEdits[cp.id] === cp.name}
+                    >
+                      {cpSaving[cp.id] ? 'Saving…' : 'Save'}
+                    </Button>
+                  </div>
+                  {availableBatches.length > 1 && (
+                    <div className="pl-10">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Waves at this checkpoint:</p>
+                      <div className="flex flex-wrap gap-3 items-center">
+                        <label className="flex items-center gap-1 text-xs cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={cpBatchEdits[cp.id] === null}
+                            onChange={() => setCpBatchEdits(prev => ({ ...prev, [cp.id]: null }))}
+                            aria-label={`Checkpoint ${cp.number} all waves`}
+                          />
+                          All waves
+                        </label>
+                        {availableBatches.map(b => (
+                          <label key={b} className="flex items-center gap-1 text-xs cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={(cpBatchEdits[cp.id] ?? []).includes(b)}
+                              onChange={() => handleToggleCpBatch(cp, b)}
+                              aria-label={`Checkpoint ${cp.number} wave ${b}`}
+                            />
+                            Wave {b}
+                          </label>
+                        ))}
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleSaveCheckpointWaves(cp)}
+                          disabled={cpSaving[`waves-${cp.id}`]}
+                        >
+                          {cpSaving[`waves-${cp.id}`] ? 'Saving…' : 'Save Waves'}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

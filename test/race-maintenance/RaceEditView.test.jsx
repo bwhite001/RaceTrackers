@@ -7,7 +7,7 @@ import RaceEditView from '../../src/modules/race-maintenance/views/RaceEditView'
 // ── Mocks ─────────────────────────────────────────────────────────────────
 
 vi.mock('../../src/store/useRaceStore.js', () => ({
-  useRaceStore: () => ({ runners: [] }),
+  useRaceStore: vi.fn(() => ({ runners: [] })),
 }));
 
 vi.mock('../../src/shared/components/ui/Toast', () => ({
@@ -185,5 +185,57 @@ describe('RaceEditView', () => {
     fireEvent.click(screen.getByRole('button', { name: /next/i }));
 
     await waitFor(() => expect(screen.getByRole('textbox', { name: /new checkpoint name/i })).toBeInTheDocument());
+  });
+
+  it('shows waves checkboxes when runners have multiple batch numbers', async () => {
+    const useRaceStore = (await import('../../src/store/useRaceStore.js')).useRaceStore;
+    useRaceStore.mockReturnValue({ runners: [
+      { batchNumber: 1 }, { batchNumber: 1 }, { batchNumber: 2 },
+    ] });
+
+    renderAt('?raceId=1');
+    await waitFor(() => expect(screen.getByDisplayValue('Coastal Classic')).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+
+    await waitFor(() => expect(screen.getAllByLabelText(/wave 1/i).length).toBeGreaterThan(0));
+    expect(screen.getAllByLabelText(/wave 2/i).length).toBeGreaterThan(0);
+  });
+
+  it('does not show wave controls when all runners are in one batch', async () => {
+    const useRaceStore = (await import('../../src/store/useRaceStore.js')).useRaceStore;
+    useRaceStore.mockReturnValue({ runners: [
+      { batchNumber: 1 }, { batchNumber: 1 },
+    ] });
+
+    renderAt('?raceId=1');
+    await waitFor(() => expect(screen.getByDisplayValue('Coastal Classic')).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+
+    await waitFor(() => expect(screen.queryAllByLabelText(/wave 1/i)).toHaveLength(0));
+  });
+
+  it('calls updateCheckpoint with allowedBatches when Save Waves is clicked', async () => {
+    const { default: useStore } = await import('../../src/modules/race-maintenance/store/raceMaintenanceStore');
+    const useRaceStore = (await import('../../src/store/useRaceStore.js')).useRaceStore;
+    useRaceStore.mockReturnValue({ runners: [
+      { batchNumber: 1 }, { batchNumber: 2 },
+    ] });
+
+    renderAt('?raceId=1');
+    await waitFor(() => expect(screen.getByDisplayValue('Coastal Classic')).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+
+    // Check Wave 1 for the first checkpoint
+    await waitFor(() => expect(screen.getAllByLabelText(/checkpoint 1 wave 1/i).length).toBeGreaterThan(0));
+    fireEvent.click(screen.getAllByLabelText(/checkpoint 1 wave 1/i)[0]);
+
+    fireEvent.click(screen.getAllByRole('button', { name: /save waves/i })[0]);
+
+    await waitFor(() =>
+      expect(useStore.getState().updateCheckpoint).toHaveBeenCalledWith(
+        10,
+        expect.objectContaining({ allowedBatches: [1] })
+      )
+    );
   });
 });

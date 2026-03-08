@@ -90,6 +90,15 @@ class RaceTrackerDB extends Dexie {
         });
 
     // Version 9: Add GPS course data to races and checkpoint coordinates (non-breaking, additive)
+    this.version(10)
+        .stores({
+            races: "++id, name, date, startTime, minRunner, maxRunner, createdAt",
+            runners: "++id, [raceId+number], raceId, number, gender, batchNumber, status, recordedTime, notes",
+            checkpoints: "++id, [raceId+number], raceId, number, name",
+            // allowedBatches added as a data column (no index needed, nullable = all waves)
+        });
+        // No .upgrade() needed: allowedBatches is nullable, existing checkpoints default to undefined (all waves).
+
     this.version(9)
         .stores({
             races: "++id, name, date, startTime, minRunner, maxRunner, createdAt",
