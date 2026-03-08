@@ -225,6 +225,14 @@ const useBaseOperationsStore = create(
         await get().refreshData();
       },
 
+      undoDns: async (runnerNumber) => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) throw new Error('No active race');
+        const repo = new BaseOperationsRepository();
+        await repo.reverseNonStarter(currentRaceId, Number(runnerNumber));
+        await get().refreshData();
+      },
+
       withdrawRunner: async (runnerNumber, reason, comments, checkpoint, withdrawalTime) => {
         const { currentRaceId } = get();
         if (!currentRaceId) throw new Error('No active race');

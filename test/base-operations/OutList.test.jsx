@@ -278,4 +278,38 @@ describe('OutList', () => {
     expect(screen.getByText('104')).toBeInTheDocument();
     expect(screen.getByText('Did not start')).toBeInTheDocument();
   });
+
+  it('shows Undo DNS button for non-starter runners and calls undoDns on click', async () => {
+    const mockUndoDns = vi.fn().mockResolvedValue();
+    useBaseOperationsStore.mockImplementation(() => ({
+      outList: [{ id: 3, number: 103, status: 'non-starter', recordedTime: null, notes: '' }],
+      loadOutList: mockLoadOutList,
+      generateOutListReport: mockGenerateOutListReport,
+      downloadReport: mockDownloadReport,
+      loading: false,
+      undoDns: mockUndoDns,
+    }));
+
+    render(<OutList initialFilter="non-starter" />);
+
+    const undoBtn = screen.getByRole('button', { name: /undo dns/i });
+    expect(undoBtn).toBeInTheDocument();
+
+    fireEvent.click(undoBtn);
+    await waitFor(() => expect(mockUndoDns).toHaveBeenCalledWith(103));
+  });
+
+  it('does not show Undo DNS button for DNF runners', () => {
+    useBaseOperationsStore.mockImplementation(() => ({
+      outList: [{ id: 1, number: 101, status: 'dnf', withdrawalDetails: { withdrawalTime: '2024-01-01T10:00:00Z', reason: 'Injury', comments: '' } }],
+      loadOutList: mockLoadOutList,
+      generateOutListReport: mockGenerateOutListReport,
+      downloadReport: mockDownloadReport,
+      loading: false,
+      undoDns: vi.fn(),
+    }));
+
+    render(<OutList initialFilter="dnf" />);
+    expect(screen.queryByRole('button', { name: /undo dns/i })).not.toBeInTheDocument();
+  });
 });

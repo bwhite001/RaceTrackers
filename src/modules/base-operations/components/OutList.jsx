@@ -23,7 +23,8 @@ const OutList = ({ initialFilter = 'all' }) => {
     loadOutList,
     generateOutListReport,
     downloadReport,
-    loading
+    loading,
+    undoDns,
   } = useBaseOperationsStore();
 
   // Load out list on mount
@@ -212,6 +213,9 @@ const OutList = ({ initialFilter = 'all' }) => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Reason / Comments
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -254,6 +258,17 @@ const OutList = ({ initialFilter = 'all' }) => {
                             </p>
                           )}
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {runner.status === 'non-starter' && (
+                          <button
+                            type="button"
+                            onClick={() => undoDns(runner.number)}
+                            className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
+                          >
+                            Undo DNS
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );
