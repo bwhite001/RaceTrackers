@@ -287,12 +287,34 @@ export class RaceMaintenanceRepository extends BaseRepository {
   }
 
   async updateRace(raceId, updates) {
-    const allowed = ['name', 'date', 'startTime', 'description', 'minRunner', 'maxRunner', 'runnerRanges'];
+    const allowed = ['name', 'date', 'startTime', 'description', 'runnerRanges'];
     const safe = Object.fromEntries(
       Object.entries(updates).filter(([k]) => allowed.includes(k))
     );
     if (Object.keys(safe).length === 0) return;
     await db.races.update(raceId, safe);
+  }
+
+  /**
+   * Upsert race_batches rows with names from XLSX import.
+   * @param {number} raceId
+   * @param {{ [batchNumber]: string }} batchLabels - e.g. { 1: 'Pinnacles Classic', 2: 'Pinnacles Double' }
+   */
+  async upsertBatchNames(raceId, batchLabels) {
+    await db.transaction('rw', db.race_batches, async () => {
+      for (const [num, name] of Object.entries(batchLabels)) {
+        const batchNumber = parseInt(num, 10);
+        const existing = await db.race_batches
+          .where(['raceId', 'batchNumber'])
+          .equals([raceId, batchNumber])
+          .first();
+        if (existing) {
+          await db.race_batches.update(existing.id, { batchName: name });
+        } else {
+          await db.race_batches.add({ raceId, batchNumber, batchName: name, startTime: null });
+        }
+      }
+    });
   }
 
   async addCheckpoint(raceId, { name } = {}) {

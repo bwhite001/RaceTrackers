@@ -7,6 +7,7 @@ import RosterImport from '../../src/modules/race-maintenance/components/RosterIm
 vi.mock('../../src/modules/race-maintenance/services/RaceMaintenanceRepository', () => ({
   default: {
     bulkUpsertRunnerDetails: vi.fn().mockResolvedValue({ updated: 2, created: 0, errors: 0 }),
+    updateRace: vi.fn().mockResolvedValue(undefined),
   },
 }));
 
