@@ -7,7 +7,6 @@ import { useRaceStore } from '../../../store/useRaceStore.js';
 import {
   Card, CardBody, CardFooter,
   Button,
-  Tabs, TabList, Tab, TabPanels, TabPanel,
   FormGroup, FormLabel, FormHelperText, FormErrorMessage,
   Input, Textarea,
 } from '../../../design-system/components';
@@ -19,6 +18,29 @@ const RaceEditView = () => {
   const raceId = rawId ? parseInt(rawId, 10) : null;
   const { addToast } = useToast();
   const { runners } = useRaceStore();
+
+  const STEPS = ['Core Details', 'Checkpoints', 'Runner Info'];
+  const [currentStep, setCurrentStep] = useState(0);
+
+  // ── Stepper navigation ───────────────────────────────────────────────────
+  const handleNext = async () => {
+    if (currentStep === 0) {
+      const errors = validateCore();
+      if (Object.keys(errors).length > 0) { setCoreErrors(errors); return; }
+      setCoreSaving(true);
+      try {
+        await updateRace(raceId, coreForm);
+      } catch {
+        addToast({ variant: 'error', message: 'Failed to save race details. Please try again.' });
+        setCoreSaving(false);
+        return;
+      }
+      setCoreSaving(false);
+    }
+    setCurrentStep(s => Math.min(s + 1, STEPS.length - 1));
+  };
+
+  const handleBack = () => setCurrentStep(s => Math.max(s - 1, 0));
 
   const {
     currentRace,
@@ -90,20 +112,6 @@ const RaceEditView = () => {
     return errors;
   };
 
-  const handleSaveCore = async () => {
-    const errors = validateCore();
-    if (Object.keys(errors).length > 0) { setCoreErrors(errors); return; }
-    setCoreSaving(true);
-    try {
-      await updateRace(raceId, coreForm);
-      addToast({ variant: 'success', message: 'Race details saved.' });
-      navigate(`/race-maintenance/overview?raceId=${raceId}`);
-    } catch {
-      addToast({ variant: 'error', message: 'Failed to save race details. Please try again.' });
-    } finally {
-      setCoreSaving(false);
-    }
-  };
 
   const handleSaveCheckpointName = async (cp) => {
     const newName = cpEdits[cp.id]?.trim();
@@ -184,213 +192,252 @@ const RaceEditView = () => {
         <p className="text-gray-600 dark:text-gray-400 mt-1">{currentRace.name}</p>
       </div>
 
-      <Tabs defaultTab={0}>
-        <TabList>
-          <Tab index={0}>Core Details</Tab>
-          <Tab index={1}>Checkpoints</Tab>
-          <Tab index={2}>Runner Info</Tab>
-        </TabList>
+      {/* Step indicator */}
+      <nav aria-label="Progress" className="mb-6">
+        <ol className="flex items-center gap-2">
+          {STEPS.map((label, idx) => (
+            <React.Fragment key={label}>
+              <li className="flex items-center gap-2">
+                <span
+                  className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold
+                    ${idx === currentStep
+                      ? 'bg-navy-600 text-white'
+                      : idx < currentStep
+                        ? 'bg-green-600 text-white'
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                    }`}
+                >
+                  {idx < currentStep ? '✓' : idx + 1}
+                </span>
+                <span className={`text-sm ${idx === currentStep ? 'font-semibold text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+                  {label}
+                </span>
+              </li>
+              {idx < STEPS.length - 1 && (
+                <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700 mx-1" />
+              )}
+            </React.Fragment>
+          ))}
+        </ol>
+      </nav>
 
-        <TabPanels>
-          {/* ── Core Details ── */}
-          <TabPanel index={0}>
-            <Card variant="elevated" className="mt-4">
-              <CardBody>
-                <div className="space-y-4">
-                  <FormGroup>
-                    <FormLabel htmlFor="name" required>Race Name</FormLabel>
-                    <Input
-                      id="name"
-                      name="name"
-                      value={coreForm.name}
-                      onChange={handleCoreChange}
-                      error={!!coreErrors.name}
-                    />
-                    {coreErrors.name && <FormErrorMessage>{coreErrors.name}</FormErrorMessage>}
-                  </FormGroup>
+      {/* ── Core Details (step 0) ── */}
+      {currentStep === 0 && (
+        <Card variant="elevated">
+          <CardBody>
+            <div className="space-y-4">
+              <FormGroup>
+                <FormLabel htmlFor="name" required>Race Name</FormLabel>
+                <Input
+                  id="name"
+                  name="name"
+                  value={coreForm.name}
+                  onChange={handleCoreChange}
+                  error={!!coreErrors.name}
+                />
+                {coreErrors.name && <FormErrorMessage>{coreErrors.name}</FormErrorMessage>}
+              </FormGroup>
 
-                  <FormGroup>
-                    <FormLabel htmlFor="date" required>Race Date</FormLabel>
-                    <Input
-                      id="date"
-                      name="date"
-                      type="date"
-                      value={coreForm.date}
-                      onChange={handleCoreChange}
-                      error={!!coreErrors.date}
-                    />
-                    {coreErrors.date && <FormErrorMessage>{coreErrors.date}</FormErrorMessage>}
-                  </FormGroup>
+              <FormGroup>
+                <FormLabel htmlFor="date" required>Race Date</FormLabel>
+                <Input
+                  id="date"
+                  name="date"
+                  type="date"
+                  value={coreForm.date}
+                  onChange={handleCoreChange}
+                  error={!!coreErrors.date}
+                />
+                {coreErrors.date && <FormErrorMessage>{coreErrors.date}</FormErrorMessage>}
+              </FormGroup>
 
-                  <FormGroup>
-                    <FormLabel htmlFor="startTime">Start Time</FormLabel>
-                    <Input
-                      id="startTime"
-                      name="startTime"
-                      type="time"
-                      value={coreForm.startTime}
-                      onChange={handleCoreChange}
-                    />
-                    <FormHelperText>
-                      ⚠ Changing start time will update elapsed times shown at checkpoints and base station.
-                    </FormHelperText>
-                  </FormGroup>
+              <FormGroup>
+                <FormLabel htmlFor="startTime">Start Time</FormLabel>
+                <Input
+                  id="startTime"
+                  name="startTime"
+                  type="time"
+                  value={coreForm.startTime}
+                  onChange={handleCoreChange}
+                />
+                <FormHelperText>
+                  ⚠ Changing start time will update elapsed times shown at checkpoints and base station.
+                </FormHelperText>
+              </FormGroup>
 
-                  <FormGroup>
-                    <FormLabel htmlFor="description">Description</FormLabel>
-                    <Textarea
-                      id="description"
-                      name="description"
-                      value={coreForm.description}
-                      onChange={handleCoreChange}
-                      rows={3}
-                    />
-                  </FormGroup>
-                </div>
-              </CardBody>
-              <CardFooter>
-                <div className="flex justify-end gap-3">
+              <FormGroup>
+                <FormLabel htmlFor="description">Description</FormLabel>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={coreForm.description}
+                  onChange={handleCoreChange}
+                  rows={3}
+                />
+              </FormGroup>
+            </div>
+          </CardBody>
+          <CardFooter>
+            <div className="flex justify-between gap-3">
+              <Button
+                variant="secondary"
+                onClick={() => navigate(`/race-maintenance/overview?raceId=${raceId}`)}
+              >
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={handleNext} disabled={coreSaving}>
+                {coreSaving ? 'Saving…' : 'Next →'}
+              </Button>
+            </div>
+          </CardFooter>
+        </Card>
+      )}
+
+      {/* ── Checkpoints (step 1) ── */}
+      {currentStep === 1 && (
+        <Card variant="elevated">
+          <CardBody>
+            {hasRunnerData && (
+              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-sm text-blue-800 dark:text-blue-200">
+                Checkpoint data has already been recorded. Renaming checkpoints won&apos;t affect recorded times.
+              </div>
+            )}
+
+            <div className="space-y-3">
+              {checkpoints.map(cp => (
+                <div key={cp.id} className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400 w-8 flex-shrink-0">
+                    #{cp.number}
+                  </span>
+                  <Input
+                    value={cpEdits[cp.id] ?? cp.name}
+                    onChange={(e) =>
+                      setCpEdits(prev => ({ ...prev, [cp.id]: e.target.value }))
+                    }
+                    className="flex-1"
+                    aria-label={`Checkpoint ${cp.number} name`}
+                  />
                   <Button
                     variant="secondary"
-                    onClick={() => navigate(`/race-maintenance/overview?raceId=${raceId}`)}
+                    size="sm"
+                    onClick={() => handleSaveCheckpointName(cp)}
+                    disabled={cpSaving[cp.id] || cpEdits[cp.id] === cp.name}
                   >
-                    Cancel
-                  </Button>
-                  <Button variant="primary" onClick={handleSaveCore} disabled={coreSaving}>
-                    {coreSaving ? 'Saving…' : 'Save & Return'}
+                    {cpSaving[cp.id] ? 'Saving…' : 'Save'}
                   </Button>
                 </div>
-              </CardFooter>
-            </Card>
-          </TabPanel>
+              ))}
+            </div>
 
-          {/* ── Checkpoints ── */}
-          <TabPanel index={1}>
-            <Card variant="elevated" className="mt-4">
-              <CardBody>
-                {hasRunnerData && (
-                  <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-sm text-blue-800 dark:text-blue-200">
-                    Checkpoint data has already been recorded. Renaming checkpoints won&apos;t affect recorded times.
-                  </div>
-                )}
+            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Add Checkpoint
+              </h3>
+              <div className="flex items-center gap-3">
+                <Input
+                  placeholder={`Checkpoint ${nextCpNumber}`}
+                  value={newCpName}
+                  onChange={(e) => setNewCpName(e.target.value)}
+                  className="flex-1"
+                  aria-label="New checkpoint name"
+                />
+                <Button variant="primary" onClick={handleAddCheckpoint} disabled={addingCp}>
+                  {addingCp ? 'Adding…' : 'Add'}
+                </Button>
+              </div>
+            </div>
+          </CardBody>
+          <CardFooter>
+            <div className="flex justify-between gap-3">
+              <Button variant="secondary" onClick={handleBack}>← Back</Button>
+              <Button variant="primary" onClick={handleNext}>Next →</Button>
+            </div>
+          </CardFooter>
+        </Card>
+      )}
 
-                <div className="space-y-3">
-                  {checkpoints.map(cp => (
-                    <div key={cp.id} className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400 w-8 flex-shrink-0">
-                        #{cp.number}
-                      </span>
-                      <Input
-                        value={cpEdits[cp.id] ?? cp.name}
-                        onChange={(e) =>
-                          setCpEdits(prev => ({ ...prev, [cp.id]: e.target.value }))
-                        }
-                        className="flex-1"
-                        aria-label={`Checkpoint ${cp.number} name`}
-                      />
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleSaveCheckpointName(cp)}
-                        disabled={cpSaving[cp.id] || cpEdits[cp.id] === cp.name}
-                      >
-                        {cpSaving[cp.id] ? 'Saving…' : 'Save'}
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+      {/* ── Runner Info (step 2) ── */}
+      {currentStep === 2 && (
+        <>
+          <Card variant="elevated">
+            <CardBody>
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                Runner Ranges
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                Runner ranges are locked after creation and cannot be edited here.
+              </p>
+              <div className="text-sm text-gray-700 dark:text-gray-300">
+                {currentRace.runnerRanges?.length
+                  ? currentRace.runnerRanges.map((range) => {
+                      if (typeof range === 'string') return range;
+                      if (range?.isIndividual) return range.individualNumbers?.join(', ');
+                      if (range?.min != null) return `${range.min}–${range.max}`;
+                      return 'Range';
+                    }).join(', ')
+                  : '—'
+                }
+              </div>
+            </CardBody>
+          </Card>
 
-                <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                    Add Checkpoint
-                  </h3>
-                  <div className="flex items-center gap-3">
-                    <Input
-                      placeholder={`Checkpoint ${nextCpNumber}`}
-                      value={newCpName}
-                      onChange={(e) => setNewCpName(e.target.value)}
-                      className="flex-1"
-                      aria-label="New checkpoint name"
-                    />
-                    <Button variant="primary" onClick={handleAddCheckpoint} disabled={addingCp}>
-                      {addingCp ? 'Adding…' : 'Add'}
-                    </Button>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-          </TabPanel>
-
-          {/* ── Runner Info ── */}
-          <TabPanel index={2}>
-            <Card variant="elevated" className="mt-4">
-              <CardBody>
-                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                  Runner Ranges
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                  Runner ranges are locked after creation and cannot be edited here.
-                </p>
-                <div className="text-sm text-gray-700 dark:text-gray-300">
-                  {currentRace.runnerRanges?.length
-                    ? currentRace.runnerRanges.map((range, i) => {
-                        let label;
-                        if (typeof range === 'string') label = range;
-                        else if (range?.isIndividual) label = range.individualNumbers?.join(', ');
-                        else if (range?.min != null) label = `${range.min}–${range.max}`;
-                        else label = 'Range';
-                        return label;
-                      }).join(', ')
-                    : '—'
-                  }
-                </div>
-              </CardBody>
-            </Card>
-
-            <Card variant="elevated" className="mt-4">
-              <CardBody>
-                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                  Runner Roster
-                </h3>
-                {runners.length === 0 ? (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">No runners loaded.</p>
-                ) : (
-                  <div className="overflow-x-auto max-h-96 rounded border border-gray-200 dark:border-gray-700">
-                    <table className="min-w-full text-xs">
-                      <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0">
-                        <tr>
-                          {['#', 'First Name', 'Last Name', 'Gender', 'Batch'].map(h => (
-                            <th key={h} className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                        {runners.map((runner) => (
-                          <tr key={runner.number} className="bg-white dark:bg-gray-900">
-                            <td className="px-3 py-1.5 font-mono">{runner.number}</td>
-                            <td className="px-3 py-1.5">{runner.firstName || '—'}</td>
-                            <td className="px-3 py-1.5">{runner.lastName || '—'}</td>
-                            <td className="px-3 py-1.5">{runner.gender || '—'}</td>
-                            <td className="px-3 py-1.5">{runner.batchNumber || '—'}</td>
-                          </tr>
+          <Card variant="elevated" className="mt-4">
+            <CardBody>
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Runner Roster
+              </h3>
+              {runners.length === 0 ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400">No runners loaded.</p>
+              ) : (
+                <div className="overflow-x-auto max-h-96 rounded border border-gray-200 dark:border-gray-700">
+                  <table className="min-w-full text-xs">
+                    <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0">
+                      <tr>
+                        {['#', 'First Name', 'Last Name', 'Gender', 'Batch'].map(h => (
+                          <th key={h} className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">{h}</th>
                         ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                      {runners.map((runner) => (
+                        <tr key={runner.number} className="bg-white dark:bg-gray-900">
+                          <td className="px-3 py-1.5 font-mono">{runner.number}</td>
+                          <td className="px-3 py-1.5">{runner.firstName || '—'}</td>
+                          <td className="px-3 py-1.5">{runner.lastName || '—'}</td>
+                          <td className="px-3 py-1.5">{runner.gender || '—'}</td>
+                          <td className="px-3 py-1.5">{runner.batchNumber || '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardBody>
+          </Card>
+
+          {raceId && (
+            <Card variant="elevated" className="mt-4">
+              <CardBody>
+                <RosterImport raceId={raceId} onComplete={() => loadRace(raceId)} />
               </CardBody>
             </Card>
+          )}
 
-            {raceId && (
-              <Card variant="elevated" className="mt-4">
-                <CardBody>
-                  <RosterImport raceId={raceId} onComplete={() => loadRace(raceId)} />
-                </CardBody>
-              </Card>
-            )}
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
+          <Card variant="elevated" className="mt-4">
+            <CardFooter>
+              <div className="flex justify-between gap-3">
+                <Button variant="secondary" onClick={handleBack}>← Back</Button>
+                <Button
+                  variant="primary"
+                  onClick={() => navigate(`/race-maintenance/overview?raceId=${raceId}`)}
+                >
+                  Done
+                </Button>
+              </div>
+            </CardFooter>
+          </Card>
+        </>
+      )}
     </div>
   );
 };

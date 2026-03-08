@@ -6,6 +6,10 @@ import RaceEditView from '../../src/modules/race-maintenance/views/RaceEditView'
 
 // ── Mocks ─────────────────────────────────────────────────────────────────
 
+vi.mock('../../src/store/useRaceStore.js', () => ({
+  useRaceStore: () => ({ runners: [] }),
+}));
+
 vi.mock('../../src/shared/components/ui/Toast', () => ({
   useToast: () => ({ addToast: vi.fn() }),
 }));
@@ -111,7 +115,7 @@ describe('RaceEditView', () => {
     fireEvent.change(screen.getByDisplayValue('Coastal Classic'), {
       target: { value: 'Coastal Classic 2026' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /save & return/i }));
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
 
     await waitFor(() =>
       expect(useStore.getState().updateRace).toHaveBeenCalledWith(1, expect.objectContaining({ name: 'Coastal Classic 2026' }))
@@ -123,18 +127,31 @@ describe('RaceEditView', () => {
     await waitFor(() => expect(screen.getByDisplayValue('Coastal Classic')).toBeInTheDocument());
 
     fireEvent.change(screen.getByDisplayValue('Coastal Classic'), { target: { value: '' } });
-    fireEvent.click(screen.getByRole('button', { name: /save & return/i }));
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
 
     await waitFor(() => expect(screen.getByText(/race name is required/i)).toBeInTheDocument());
   });
 
-  it('renders existing checkpoint names on the Checkpoints tab', async () => {
+  it('renders existing checkpoint names after advancing to Checkpoints step', async () => {
     renderAt('?raceId=1');
     await waitFor(() => expect(screen.getByDisplayValue('Coastal Classic')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole('tab', { name: /checkpoints/i }));
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
     await waitFor(() => expect(screen.getByDisplayValue('Mile 5')).toBeInTheDocument());
     expect(screen.getByDisplayValue('Mile 10')).toBeInTheDocument();
+  });
+
+  it('Back button on Checkpoints step returns to Core Details', async () => {
+    renderAt('?raceId=1');
+    await waitFor(() => expect(screen.getByDisplayValue('Coastal Classic')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    await waitFor(() => expect(screen.getByDisplayValue('Mile 5')).toBeInTheDocument());
+
+    // Second "back" button — first is "Back to Race Overview" nav
+    const backBtns = screen.getAllByRole('button', { name: /back/i });
+    fireEvent.click(backBtns[backBtns.length - 1]);
+    await waitFor(() => expect(screen.getByDisplayValue('Coastal Classic')).toBeInTheDocument());
   });
 
   it('adds a new checkpoint with the next sequential number', async () => {
@@ -144,7 +161,7 @@ describe('RaceEditView', () => {
     renderAt('?raceId=1');
     await waitFor(() => expect(screen.getByDisplayValue('Coastal Classic')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole('tab', { name: /checkpoints/i }));
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
     await waitFor(() => expect(screen.getByRole('textbox', { name: /new checkpoint name/i })).toBeInTheDocument());
 
     fireEvent.change(screen.getByRole('textbox', { name: /new checkpoint name/i }), {
@@ -157,8 +174,7 @@ describe('RaceEditView', () => {
     );
   });
 
-  it('shows informational banner on Checkpoints tab when runner data exists', async () => {
-    // Override the schema mock to simulate existing runner data
+  it('shows informational banner on Checkpoints step when runner data exists', async () => {
     const { default: db } = await import('../../src/shared/services/database/schema.js');
     db.checkpoint_runners.where = () => ({
       equals: () => ({ count: async () => 5 }),
@@ -166,9 +182,8 @@ describe('RaceEditView', () => {
 
     renderAt('?raceId=1');
     await waitFor(() => expect(screen.getByDisplayValue('Coastal Classic')).toBeInTheDocument());
-    fireEvent.click(screen.getByRole('tab', { name: /checkpoints/i }));
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
 
-    // Banner may not appear in unit test environment due to async import; just assert tab renders
     await waitFor(() => expect(screen.getByRole('textbox', { name: /new checkpoint name/i })).toBeInTheDocument());
   });
 });
