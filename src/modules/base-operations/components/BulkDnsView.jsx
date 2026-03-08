@@ -1,31 +1,22 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import useBaseOperationsStore from '../store/baseOperationsStore';
+import { parseBibs } from '../../../shared/utils/parseBibs.js';
 import db from '../../../shared/services/database/schema.js';
 
 /**
- * BulkDnsModal — modal for bulk-marking not-yet-started runners as DNS.
+ * BulkDnsModal — bulk-mark runners as DNS by typing bib numbers/ranges.
+ * Accepts input like: 101, 105-110, 120
  */
 const BulkDnsModal = ({ isOpen, onClose }) => {
-  const { currentRaceId, runners, markAsDNS, loading } = useBaseOperationsStore();
-  const [allRunners, setAllRunners] = useState([]);
-  const [selected, setSelected] = useState(new Set());
+  const { currentRaceId, markAsDNS, loading } = useBaseOperationsStore();
+  const [input, setInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [search, setSearch] = useState('');
-
-  const loadRunners = useCallback(() => {
-    if (!currentRaceId) return;
-    db.runners.where('raceId').equals(currentRaceId).sortBy('number').then(setAllRunners);
-  }, [currentRaceId]);
+  const [result, setResult] = useState(null); // { updated, notFound }
 
   useEffect(() => {
-    if (isOpen) {
-      loadRunners();
-      setSelected(new Set());
-      setSearch('');
-    }
-  }, [isOpen, loadRunners]);
+    if (isOpen) { setInput(''); setResult(null); }
+  }, [isOpen]);
 
-  // Close on Escape
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e) => { if (e.key === 'Escape') onClose(); };
@@ -33,55 +24,32 @@ const BulkDnsModal = ({ isOpen, onClose }) => {
     return () => document.removeEventListener('keydown', handler);
   }, [isOpen, onClose]);
 
-  const processedNumbers = useMemo(() => {
-    const s = new Set();
-    for (const r of runners) s.add(r.number);
-    return s;
-  }, [runners]);
-
-  const notStarted = useMemo(
-    () => allRunners.filter(r => !processedNumbers.has(r.number)),
-    [allRunners, processedNumbers]
-  );
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return notStarted;
-    return notStarted.filter(r =>
-      String(r.number).includes(q) ||
-      (r.firstName || '').toLowerCase().includes(q) ||
-      (r.lastName || '').toLowerCase().includes(q)
-    );
-  }, [notStarted, search]);
-
-  const allSelected = filtered.length > 0 && filtered.every(r => selected.has(r.number));
-
-  const toggle = (num) => {
-    setSelected(prev => {
-      const next = new Set(prev);
-      next.has(num) ? next.delete(num) : next.add(num);
-      return next;
-    });
-  };
-
-  const toggleAll = () => {
-    setSelected(prev => {
-      const next = new Set(prev);
-      if (allSelected) {
-        filtered.forEach(r => next.delete(r.number));
-      } else {
-        filtered.forEach(r => next.add(r.number));
-      }
-      return next;
-    });
-  };
-
   const handleMarkDns = async () => {
-    if (selected.size === 0) return;
+    const bibs = parseBibs(input);
+    if (bibs.length === 0) return;
     setSubmitting(true);
     try {
-      await markAsDNS([...selected]);
-      onClose();
+      // Determine which bibs actually exist in the race
+      const existing = await db.runners
+        .where('raceId').equals(currentRaceId)
+        .and(r => bibs.includes(r.number))
+        .primaryKeys();
+      const existingBibs = bibs.filter(b =>
+        existing.length === 0
+          ? false
+          : true // will filter properly below
+      );
+
+      // Get actual runner numbers that exist
+      const raceRunners = await db.runners
+        .where('raceId').equals(currentRaceId)
+        .toArray();
+      const raceNumbers = new Set(raceRunners.map(r => r.number));
+      const validBibs = bibs.filter(b => raceNumbers.has(b));
+      const notFoundBibs = bibs.filter(b => !raceNumbers.has(b));
+
+      await markAsDNS(validBibs);
+      setResult({ updated: validBibs.length, notFound: notFoundBibs.length });
     } finally {
       setSubmitting(false);
     }
@@ -91,13 +59,13 @@ const BulkDnsModal = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg flex flex-col max-h-[90vh]">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
           <div>
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">Bulk Mark DNS</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              {notStarted.length} runner{notStarted.length !== 1 ? 's' : ''} not yet started
+              Enter bib numbers or ranges, e.g. 101, 105-110, 120
             </p>
           </div>
           <button
@@ -112,59 +80,21 @@ const BulkDnsModal = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* Search */}
-        <div className="px-5 pt-4">
-          <input
-            type="search"
-            placeholder="Search bib or name…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-navy-500"
+        {/* Body */}
+        <div className="p-5 space-y-4">
+          <textarea
+            aria-label="Bib numbers"
+            rows={4}
+            value={input}
+            onChange={e => { setInput(e.target.value); setResult(null); }}
+            placeholder="101, 105-110, 120"
+            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-navy-500 font-mono resize-none"
           />
-        </div>
 
-        {/* Runner list */}
-        <div className="flex-1 overflow-y-auto px-5 py-3">
-          {filtered.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400 py-8 text-center">
-              {notStarted.length === 0 ? 'All runners have been processed.' : 'No runners match your search.'}
-            </p>
-          ) : (
-            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-              <label className="flex items-center gap-3 px-4 py-2 bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  onChange={toggleAll}
-                  className="w-4 h-4 rounded accent-amber-500"
-                />
-                <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">
-                  Select all ({filtered.length})
-                </span>
-              </label>
-              <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                {filtered.map(runner => (
-                  <label
-                    key={runner.number}
-                    className="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/60"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selected.has(runner.number)}
-                      onChange={() => toggle(runner.number)}
-                      className="w-4 h-4 rounded accent-amber-500"
-                    />
-                    <span className="font-mono text-sm font-semibold text-gray-900 dark:text-white w-14 flex-shrink-0">
-                      #{runner.number}
-                    </span>
-                    {(runner.firstName || runner.lastName) && (
-                      <span className="text-sm text-gray-600 dark:text-gray-300 truncate">
-                        {[runner.firstName, runner.lastName].filter(Boolean).join(' ')}
-                      </span>
-                    )}
-                  </label>
-                ))}
-              </div>
+          {result && (
+            <div className={`text-sm rounded-lg p-3 ${result.notFound > 0 ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200' : 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200'}`}>
+              {result.updated} runner{result.updated !== 1 ? 's' : ''} marked as DNS.
+              {result.notFound > 0 && ` ${result.notFound} bib${result.notFound !== 1 ? 's' : ''} not found.`}
             </div>
           )}
         </div>
@@ -172,16 +102,18 @@ const BulkDnsModal = ({ isOpen, onClose }) => {
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 p-5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-b-lg">
           <button type="button" onClick={onClose} className="btn-secondary">
-            Cancel
+            {result ? 'Close' : 'Cancel'}
           </button>
-          <button
-            type="button"
-            onClick={handleMarkDns}
-            disabled={selected.size === 0 || submitting || loading}
-            className="btn-primary bg-amber-500 hover:bg-amber-400 disabled:opacity-40"
-          >
-            {submitting ? 'Marking…' : `Mark DNS (${selected.size})`}
-          </button>
+          {!result && (
+            <button
+              type="button"
+              onClick={handleMarkDns}
+              disabled={!input.trim() || submitting || loading}
+              className="btn-primary bg-amber-500 hover:bg-amber-400 disabled:opacity-40"
+            >
+              {submitting ? 'Marking…' : 'Mark DNS'}
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -190,3 +122,4 @@ const BulkDnsModal = ({ isOpen, onClose }) => {
 
 BulkDnsModal.displayName = 'BulkDnsModal';
 export default BulkDnsModal;
+

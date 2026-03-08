@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { format } from 'date-fns';
+import { parseBibs } from '../../../shared/utils/parseBibs.js';
 
 function roundDownTo5Min(date) {
   const d = new Date(date);
@@ -18,22 +19,6 @@ function isInFuture(timeStr) {
 }
 
 /** Parse "101, 105-107, 110" → [101, 105, 106, 107, 110] */
-function parseBibs(raw) {
-  const results = [];
-  for (const token of raw.split(',')) {
-    const t = token.trim();
-    const rangeMatch = t.match(/^(\d+)-(\d+)$/);
-    if (rangeMatch) {
-      const lo = parseInt(rangeMatch[1], 10);
-      const hi = parseInt(rangeMatch[2], 10);
-      for (let i = lo; i <= hi; i++) results.push(i);
-    } else {
-      const n = parseInt(t, 10);
-      if (!isNaN(n) && n > 0) results.push(n);
-    }
-  }
-  return results;
-}
 
 /** "HH:mm" or "HH:mm:ss" → seconds since midnight */
 function timeToSecs(str) {
