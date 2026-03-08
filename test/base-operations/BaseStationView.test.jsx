@@ -217,4 +217,20 @@ describe('BaseStationView', () => {
     // Check tab panel
     expect(screen.getByRole('tabpanel')).toBeInTheDocument();
   });
+
+  test('shows Withdraw Runner button on DNS tab that opens WithdrawalDialog', () => {
+    renderWithRouter(<BaseStationView />);
+
+    // Navigate to DNS tab
+    fireEvent.click(screen.getByRole('tab', { name: /dns/i }));
+
+    // Withdraw Runner button should be present
+    const withdrawBtn = screen.getByRole('button', { name: /withdraw runner/i });
+    expect(withdrawBtn).toBeInTheDocument();
+
+    // Clicking it should open the WithdrawalDialog with type='withdrawal'
+    fireEvent.click(withdrawBtn);
+    expect(screen.getByTestId('withdrawal-dialog')).toBeInTheDocument();
+    expect(screen.getByText(/withdrawal dialog \(withdrawal\)/i)).toBeInTheDocument();
+  });
 });

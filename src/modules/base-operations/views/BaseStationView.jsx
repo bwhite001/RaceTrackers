@@ -262,13 +262,22 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">DNS &amp; DNF</h2>
-                  <button
-                    type="button"
-                    onClick={() => setShowBulkDns(true)}
-                    className="px-4 py-2 text-sm font-semibold bg-amber-500 hover:bg-amber-400 text-white rounded-lg transition-colors"
-                  >
-                    Bulk Mark DNS
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleWithdrawal('withdrawal')}
+                      className="px-4 py-2 text-sm font-semibold bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors"
+                    >
+                      Withdraw Runner
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowBulkDns(true)}
+                      className="px-4 py-2 text-sm font-semibold bg-amber-500 hover:bg-amber-400 text-white rounded-lg transition-colors"
+                    >
+                      Bulk Mark DNS
+                    </button>
+                  </div>
                 </div>
                 <OutList initialFilter="all" />
               </div>
