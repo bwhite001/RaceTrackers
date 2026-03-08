@@ -43,9 +43,10 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
   // Store access
   const { currentRaceId, currentRace, loading, error, stats, runners, initialize, refreshData } = useBaseOperationsStore();
-  const { selectedRaceForMode, checkpoints, loadRace: loadRaceIntoStore } = useRaceStore();
+  const { selectedRaceForMode, checkpoints, loadRace: loadRaceIntoStore, runners: raceRunners } = useRaceStore();
   const { darkMode } = useSettingsStore();
   const initStarted = useRef(false);
+  const [showRunnerNames, setShowRunnerNames] = useState(false);
 
   // Group flat runner records by bib number for overview components
   const groupedRunners = useMemo(() => {
@@ -70,8 +71,14 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         entry.status = RUNNER_STATUSES.ACTIVE;
       }
     }
+    // Merge name data from race runner list
+    const nameMap = new Map((raceRunners ?? []).map(r => [r.number, r]));
+    for (const entry of byRunner.values()) {
+      const r = nameMap.get(entry.number);
+      if (r) { entry.firstName = r.firstName || ''; entry.lastName = r.lastName || ''; }
+    }
     return Array.from(byRunner.values());
-  }, [runners]);
+  }, [runners, raceRunners]);
 
   // Local state
   const [activeTab, setActiveTab] = useState('data-entry');
@@ -252,7 +259,16 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
                   />
                 </Suspense>
                 <CourseLeadersCard runners={groupedRunners} checkpoints={checkpoints ?? []} />
-                <HeadsUpGrid runners={groupedRunners} checkpoints={checkpoints ?? []} />
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setShowRunnerNames(v => !v)}
+                    className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${showRunnerNames ? 'bg-navy-600 text-white border-navy-600' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600'}`}
+                  >
+                    {showRunnerNames ? 'Hide Names' : 'Show Names'}
+                  </button>
+                </div>
+                <HeadsUpGrid runners={groupedRunners} checkpoints={checkpoints ?? []} showNames={showRunnerNames} />
                 <RaceOverview />
                 <CheckpointImportPanel />
               </div>

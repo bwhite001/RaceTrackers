@@ -30,8 +30,9 @@ const StatusCell = ({ status, time }) => {
  *
  * @param {Object[]} runners - Array of { number, status, checkpointStatuses: { [cpNumber]: string } }
  * @param {Object[]} checkpoints - Array of { number, name }
+ * @param {boolean} showNames - Whether to display runner names
  */
-const HeadsUpGrid = ({ runners = [], checkpoints = [] }) => {
+const HeadsUpGrid = ({ runners = [], checkpoints = [], showNames = false }) => {
   const { submitRadioBatch, clearCheckpointRunner, clearAllCheckpointTimes } = useBaseOperationsStore();
   const [editTarget, setEditTarget] = useState(null);
 
@@ -85,6 +86,11 @@ const HeadsUpGrid = ({ runners = [], checkpoints = [] }) => {
               <th className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                 Bib #
               </th>
+              {showNames && (
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                  Name
+                </th>
+              )}
               <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                 Overall
               </th>
@@ -111,6 +117,13 @@ const HeadsUpGrid = ({ runners = [], checkpoints = [] }) => {
                 <td className="sticky left-0 z-10 bg-inherit px-3 py-1.5 font-mono font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-700/50 whitespace-nowrap">
                   {runner.number}
                 </td>
+
+                {/* Runner name (optional) */}
+                {showNames && (
+                  <td className="px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700/50 whitespace-nowrap">
+                    {[runner.firstName, runner.lastName].filter(Boolean).join(' ') || '—'}
+                  </td>
+                )}
 
                 {/* Overall status badge */}
                 <td className="px-3 py-1.5 border-b border-gray-100 dark:border-gray-700/50 whitespace-nowrap">
