@@ -116,61 +116,7 @@ main { max-width: 860px; margin: 0 auto; padding: 40px 24px 60px; }
     <h2>Open the Checkpoint Screen</h2>
   </div>
   <div class="phase-steps">
-    <div class="test-block">
-<h3 class="test-title">navigates to checkpoint and sees runner grid</h3>
-<p class="test-desc">A checkpoint volunteer opens the app, taps &quot;Checkpoint Operations&quot;, selects their race, and arrives at the correct checkpoint screen. This test confirms that the grid of runner bib numbers — the list of every runner they need to watch for — is visible and fully loaded.</p>
-
-<div class="step">
-  <p class="step-label">Home — tap Checkpoint Operations module card</p>
-  <img src="assets/navigates-to-checkpoint-and-sees-runner-grid-home-tap-checkpoint-operations-module-card.png" alt="Home — tap Checkpoint Operations module card" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">🖱</span>
-    <span class="ann-action-label">Click</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Checkpoint Operations&quot; card → &quot;Get Started&quot; link</span></div>
-    
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Takes you to the race selector. The app shows all available races so the volunteer can pick the correct one.</span></div>
-  </div>
-</div>
-</div>
-
-<div class="step">
-  <p class="step-label">Select Race modal — choose race from list</p>
-  <img src="assets/navigates-to-checkpoint-and-sees-runner-grid-select-race-modal-choose-race-from-list.png" alt="Select Race modal — choose race from list" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">🖱</span>
-    <span class="ann-action-label">Click</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The correct race in the race selection list, then choose your checkpoint</span></div>
-    
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Each volunteer must select both the race and their specific checkpoint. This ensures their mark-offs go into the right data bucket.</span></div>
-  </div>
-</div>
-</div>
-
-<div class="step">
-  <p class="step-label">Checkpoint view — runner grid loaded with bib numbers 200–210</p>
-  <img src="assets/navigates-to-checkpoint-and-sees-runner-grid-checkpoint-view-runner-grid-loaded-with-bib-numbers-200-210.png" alt="Checkpoint view — runner grid loaded with bib numbers 200–210" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">👁</span>
-    <span class="ann-action-label">Observe</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The runner grid tiles and the stats bar at the top (Not Started / Called In / Passed / Total)</span></div>
-    
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Confirm the correct runner range is loaded. The &quot;Not Started&quot; count should equal the total number of runners at the start of the session.</span></div>
-  </div>
-</div>
-</div>
-</div>
+    <p class="missing-test">⚠ Screenshot data not found for test: "navigates to checkpoint and sees runner grid" — run <code>make test-e2e</code> first.</p>
 
   </div>
 </section>
@@ -239,23 +185,6 @@ main { max-width: 860px; margin: 0 auto; padding: 40px 24px 60px; }
 <div class="test-block">
 <h3 class="test-title">marks off multiple runners via Quick Entry</h3>
 <p class="test-desc">Instead of finding runners in the grid, a volunteer can just type a bib number and press Enter to record it quickly. This test enters two bib numbers one after the other using the quick-entry shortcut and confirms both runners are marked off.</p>
-
-<div class="step">
-  <p class="step-label">Checkpoint view — Quick Entry bar visible</p>
-  <img src="assets/marks-off-multiple-runners-via-quick-entry-checkpoint-view-quick-entry-bar-visible.png" alt="Checkpoint view — Quick Entry bar visible" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">👁</span>
-    <span class="ann-action-label">Observe</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The search/quick-entry bar at the top of the runner grid</span></div>
-    
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Quick Entry is faster than finding tiles in the grid — ideal when runners arrive in groups. Tap the search bar to start typing.</span></div>
-  </div>
-</div>
-</div>
 
 <div class="step">
   <p class="step-label">Quick Entry — type first bib number and press Enter</p>

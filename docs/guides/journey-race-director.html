@@ -346,146 +346,7 @@ main { max-width: 860px; margin: 0 auto; padding: 40px 24px 60px; }
     <h2>Create a Race</h2>
   </div>
   <div class="phase-steps">
-    <div class="test-block">
-<h3 class="test-title">creates a new race from scratch and verifies the overview</h3>
-<p class="test-desc">A race director fills in all the details needed to create a brand-new race — the race name, date, start time, how many checkpoints there are, and the range of runner bib numbers. Once saved, the race overview page should correctly display the race name, list every checkpoint, and show the right number of registered runners.</p>
-
-<div class="step">
-  <p class="step-label">Home — Welcome Back screen with 3 module cards</p>
-  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-home-welcome-back-screen-with-3-module-cards.png" alt="Home — Welcome Back screen with 3 module cards" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">👁</span>
-    <span class="ann-action-label">Observe</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The three module cards on the home screen</span></div>
-    
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>The home screen shows the three roles available. As a race director, you will use Race Maintenance to set up the race.</span></div>
-  </div>
-</div>
-</div>
-
-<div class="step">
-  <p class="step-label">Race Maintenance → Create New Race — setup wizard opens</p>
-  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-race-maintenance-create-new-race-setup-wizard-opens.png" alt="Race Maintenance → Create New Race — setup wizard opens" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">🖱</span>
-    <span class="ann-action-label">Click</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Race Maintenance&quot; card → &quot;Get Started&quot; link</span></div>
-    
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Opens the Race Management screen where all your races are listed and new ones can be created.</span></div>
-  </div>
-</div>
-</div>
-
-<div class="step">
-  <p class="step-label">Step 1 of 4 — Template: choose Start from Scratch</p>
-  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-1-of-4-template-choose-start-from-scratch.png" alt="Step 1 of 4 — Template: choose Start from Scratch" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">🖱</span>
-    <span class="ann-action-label">Click</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Start from Scratch&quot; card at the top of the template list</span></div>
-    
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Start from Scratch gives you a blank race. Choose a pre-built template only if the course and runner ranges already match your event.</span></div>
-  </div>
-</div>
-</div>
-
-<div class="step">
-  <p class="step-label">Step 2 of 4 — Race Details: enter name, date, start time and checkpoints</p>
-  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-2-of-4-race-details-enter-name-date-start-time-and-checkpoints.png" alt="Step 2 of 4 — Race Details: enter name, date, start time and checkpoints" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#166534;--ann-bg:#f0fdf4;--ann-border:#bbf7d0;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">✏️</span>
-    <span class="ann-action-label">Fill in</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>Race Name field, Race Date field, Start Time field, Number of Checkpoints dropdown</span></div>
-    <div class="ann-row ann-value"><span class="ann-key">Enter:</span> <span class="ann-val-text">e.g. Mountain Ultra 2025 / 2025-09-20 / 06:30 / 3 checkpoints</span></div>
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>These details appear on the race overview and are used to calculate elapsed times. The checkpoint count determines how many mark-off screens are created.</span></div>
-  </div>
-</div>
-</div>
-
-<div class="step">
-  <p class="step-label">Step 3 of 4 — Runner Setup: add bib number range 101–115</p>
-  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-3-of-4-runner-setup-add-bib-number-range-101-115.png" alt="Step 3 of 4 — Runner Setup: add bib number range 101–115" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#166534;--ann-bg:#f0fdf4;--ann-border:#bbf7d0;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">✏️</span>
-    <span class="ann-action-label">Fill in</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Start Number&quot; field and &quot;End Number&quot; field, then click &quot;Add Range&quot;</span></div>
-    <div class="ann-row ann-value"><span class="ann-key">Enter:</span> <span class="ann-val-text">Start: 101 — End: 115</span></div>
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Runner ranges define which bib numbers are registered. Every number in the range gets its own tile in the checkpoint grid. You can add multiple ranges if bib numbers are not sequential.</span></div>
-  </div>
-</div>
-</div>
-
-<div class="step">
-  <p class="step-label">Step 4 of 4 — Waves: confirm wave and save race</p>
-  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-4-of-4-waves-confirm-wave-and-save-race.png" alt="Step 4 of 4 — Waves: confirm wave and save race" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">🖱</span>
-    <span class="ann-action-label">Click</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Create Race&quot; button (bottom-right)</span></div>
-    
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Waves set the official start time used to calculate elapsed times per runner. Once you click Create Race the race is saved and you land on the Race Overview.</span></div>
-  </div>
-</div>
-</div>
-
-<div class="step">
-  <p class="step-label">Race overview — name, 3 checkpoints and 15 runners correct</p>
-  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-race-overview-name-3-checkpoints-and-15-runners-correct.png" alt="Race overview — name, 3 checkpoints and 15 runners correct" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">👁</span>
-    <span class="ann-action-label">Observe</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The race summary panel at the top of the overview</span></div>
-    
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Verify that the checkpoint count and total runner count match what you entered. If they are wrong, edit the race before handing devices to volunteers.</span></div>
-  </div>
-</div>
-</div>
-
-<div class="step">
-  <p class="step-label">Home — new race listed under module cards</p>
-  <img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-home-new-race-listed-under-module-cards.png" alt="Home — new race listed under module cards" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">👁</span>
-    <span class="ann-action-label">Observe</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The race card below the module cards on the home screen</span></div>
-    
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>The home screen now shows your race so any volunteer who opens the app can find it immediately.</span></div>
-  </div>
-</div>
-</div>
-</div>
+    <p class="missing-test">⚠ Screenshot data not found for test: "creates a new race from scratch and verifies the overview" — run <code>make test-e2e</code> first.</p>
 <div class="test-block">
 <h3 class="test-title">step indicator advances correctly through setup wizard</h3>
 <p class="test-desc">The race creation wizard has four steps: Template, Race Details, Runner Setup, and Waves. This test checks that the progress indicator at the top updates as you advance through each step, so the race director always knows where they are in the setup process.</p>
@@ -699,133 +560,8 @@ main { max-width: 860px; margin: 0 auto; padding: 40px 24px 60px; }
 </div>
 </div>
 </div>
-<div class="test-block">
-<h3 class="test-title">creates a second race from the management page</h3>
-<p class="test-desc">A race director creates a second race directly from the management screen, going through the full two-step setup wizard (race details, then runner ranges) and landing on the new race's overview page.</p>
-
-<div class="step">
-  <p class="step-label">Race Management — tap Create New Race button</p>
-  <img src="assets/creates-a-second-race-from-the-management-page-race-management-tap-create-new-race-button.png" alt="Race Management — tap Create New Race button" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">🖱</span>
-    <span class="ann-action-label">Click</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Create New Race&quot; button at the top of the Race Management screen</span></div>
-    
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>You can run multiple races in the same app instance. Each race is fully independent.</span></div>
-  </div>
-</div>
-</div>
-
-<div class="step">
-  <p class="step-label">Step 1 of 4 — Template: choose Start from Scratch</p>
-  <img src="assets/creates-a-second-race-from-the-management-page-step-1-of-4-template-choose-start-from-scratch.png" alt="Step 1 of 4 — Template: choose Start from Scratch" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">🖱</span>
-    <span class="ann-action-label">Click</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Start from Scratch&quot; card</span></div>
-    
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Begin a fresh race configuration.</span></div>
-  </div>
-</div>
-</div>
-
-<div class="step">
-  <p class="step-label">Step 2 of 4 — Race Details: enter name, date, start time</p>
-  <img src="assets/creates-a-second-race-from-the-management-page-step-2-of-4-race-details-enter-name-date-start-time.png" alt="Step 2 of 4 — Race Details: enter name, date, start time" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#166534;--ann-bg:#f0fdf4;--ann-border:#bbf7d0;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">✏️</span>
-    <span class="ann-action-label">Fill in</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>Race Name, Race Date, Start Time fields</span></div>
-    <div class="ann-row ann-value"><span class="ann-key">Enter:</span> <span class="ann-val-text">e.g. Valley Sprint 2025 / 2025-10-05 / 07:00</span></div>
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Each race needs its own name so volunteers and the race director can distinguish them at a glance.</span></div>
-  </div>
-</div>
-</div>
-
-<div class="step">
-  <p class="step-label">Step 3 of 4 — Runner Setup: add bib range 500–503</p>
-  <img src="assets/creates-a-second-race-from-the-management-page-step-3-of-4-runner-setup-add-bib-range-500-503.png" alt="Step 3 of 4 — Runner Setup: add bib range 500–503" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#166534;--ann-bg:#f0fdf4;--ann-border:#bbf7d0;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">✏️</span>
-    <span class="ann-action-label">Fill in</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Start Number&quot; and &quot;End Number&quot; fields, then &quot;Add Range&quot;</span></div>
-    <div class="ann-row ann-value"><span class="ann-key">Enter:</span> <span class="ann-val-text">Start: 500 — End: 503</span></div>
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>This race uses a different bib range so there is no overlap with the first race.</span></div>
-  </div>
-</div>
-</div>
-
-<div class="step">
-  <p class="step-label">Step 4 of 4 — Waves: confirm and save</p>
-  <img src="assets/creates-a-second-race-from-the-management-page-step-4-of-4-waves-confirm-and-save.png" alt="Step 4 of 4 — Waves: confirm and save" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#1d4ed8;--ann-bg:#eff6ff;--ann-border:#bfdbfe;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">🖱</span>
-    <span class="ann-action-label">Click</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>&quot;Create Race&quot; button (bottom-right)</span></div>
-    
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Saves the second race. The app supports as many races as needed.</span></div>
-  </div>
-</div>
-</div>
-
-<div class="step">
-  <p class="step-label">Race overview — second race created successfully</p>
-  <img src="assets/creates-a-second-race-from-the-management-page-race-overview-second-race-created-successfully.png" alt="Race overview — second race created successfully" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">👁</span>
-    <span class="ann-action-label">Observe</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The race summary panel</span></div>
-    
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Confirm the new race is set up correctly before distributing devices.</span></div>
-  </div>
-</div>
-</div>
-</div>
-<div class="test-block">
-<h3 class="test-title">race overview shows correct runner and checkpoint counts</h3>
-<p class="test-desc">After creating a race with runner bib numbers 400 to 405 (6 runners) and 2 checkpoints, the race overview page should display &quot;6&quot; as the runner count and &quot;2&quot; as the checkpoint count — no more, no less.</p>
-
-<div class="step">
-  <p class="step-label">Race overview — runner count 6 and checkpoint count 2 shown</p>
-  <img src="assets/race-overview-shows-correct-runner-and-checkpoint-counts-race-overview-runner-count-6-and-checkpoint-count-2-shown.png" alt="Race overview — runner count 6 and checkpoint count 2 shown" loading="lazy">
-  
-<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
-  <div class="ann-action">
-    <span class="ann-icon" aria-hidden="true">👁</span>
-    <span class="ann-action-label">Observe</span>
-  </div>
-  <div class="ann-body">
-    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The &quot;Total Runners&quot; and &quot;Checkpoints&quot; counters in the race summary</span></div>
-    
-    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>These must match your entry. If a runner range was wrong, the count will be off — fix it here before race day.</span></div>
-  </div>
-</div>
-</div>
-</div>
+<p class="missing-test">⚠ Screenshot data not found for test: "creates a second race from the management page" — run <code>make test-e2e</code> first.</p>
+<p class="missing-test">⚠ Screenshot data not found for test: "race overview shows correct runner and checkpoint counts" — run <code>make test-e2e</code> first.</p>
 
   </div>
 </section>
@@ -839,10 +575,50 @@ main { max-width: 860px; margin: 0 auto; padding: 40px 24px 60px; }
     <div class="test-block">
 <h3 class="test-title">navigates from race overview to a checkpoint</h3>
 <p class="test-desc">From the race overview, a race director can jump straight to any checkpoint's live mark-off screen. This test clicks the Checkpoint 1 link and confirms the checkpoint mark-off screen opens.</p>
+
+<div class="step">
+  <p class="step-label">Checkpoint view — mark-off screen for CP1 open</p>
+  <img src="assets/navigates-from-race-overview-to-a-checkpoint-checkpoint-view-mark-off-screen-for-cp1-open.png" alt="Checkpoint view — mark-off screen for CP1 open" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The runner grid and the &quot;Checkpoint 1&quot; label in the header</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>Confirms the correct checkpoint is open. The volunteer at this checkpoint will use this screen to mark off runners.</span></div>
+  </div>
+</div>
+</div>
 </div>
 <div class="test-block">
 <h3 class="test-title">navigates from race overview to base station</h3>
 <p class="test-desc">From the race overview, a race director can jump straight to the base station. This test clicks the Base Station button on the overview page and confirms the base station operations screen opens.</p>
+
+<div class="step">
+  <p class="step-label">Navigate directly to base station operations</p>
+  <img src="assets/navigates-from-race-overview-to-base-station-navigate-directly-to-base-station-operations.png" alt="Navigate directly to base station operations" loading="lazy">
+  
+</div>
+
+<div class="step">
+  <p class="step-label">Base Station — operations screen open</p>
+  <img src="assets/navigates-from-race-overview-to-base-station-base-station-operations-screen-open.png" alt="Base Station — operations screen open" loading="lazy">
+  
+<div class="annotation" style="--ann-color:#374151;--ann-bg:#f9fafb;--ann-border:#e5e7eb;">
+  <div class="ann-action">
+    <span class="ann-icon" aria-hidden="true">👁</span>
+    <span class="ann-action-label">Observe</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row ann-target"><span class="ann-key">Where:</span> <span>The Base Station data entry form</span></div>
+    
+    <div class="ann-row ann-why"><span class="ann-key">Why:</span> <span>The base station operator uses this screen for the entire race. Confirm it loads before handing the device over.</span></div>
+  </div>
+</div>
+</div>
 </div>
 
   </div>

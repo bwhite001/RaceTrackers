@@ -86,6 +86,9 @@ generate-journeys: ## Generate annotated role journey docs (requires a prior tes
 guide-pdfs: ## Generate PDFs from user guide (one per journey section)
 	npm run generate:guide:pdfs
 
+journey-pdfs: ## Generate PDFs from annotated role journey docs
+	npm run generate:journey:pdfs
+
 generate-gpx-guide: ## Generate AllTrails GPX extraction guide (HTML + PDF) from scripts/gpx-guide-config.json
 	npm run generate:gpx-guide
 
