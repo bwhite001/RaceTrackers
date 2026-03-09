@@ -52,19 +52,44 @@ export default class ProgressiveHTMLReporter {
     const skipped = this.results.filter(r => r.result.status === 'skipped').length;
     const total   = this.results.length;
 
+    const outDir = path.dirname(path.resolve(this.outputFile));
+    fs.mkdirSync(outDir, { recursive: true });
+
+    // Write one file per journey
+    const journeyFiles = [];
+    for (const [title, { filename, tests }] of suites.entries()) {
+      const slug = filename.replace(/\.journey\.spec\.[jt]s$/, '').replace(/^\d+-/, '');
+      const journeyFile = path.join(outDir, `journey-${slug}.html`);
+      const jp = tests.filter(t => t.result.status === 'passed').length;
+      const jf = tests.filter(t => ['failed', 'timedOut'].includes(t.result.status)).length;
+      const js = tests.filter(t => t.result.status === 'skipped').length;
+      const html = this._buildPage({
+        passed: jp, failed: jf, skipped: js,
+        total: tests.length, duration,
+        suitesHTML: this._suiteHTML(title, tests),
+        pageTitle: title,
+      });
+      fs.writeFileSync(journeyFile, html, 'utf-8');
+      journeyFiles.push({ title, slug, passed: jp, failed: jf, file: `journey-${slug}.html` });
+    }
+
+    // Write combined index (the configured outputFile)
     const html = this._buildPage({
       passed, failed, skipped, total, duration,
       suitesHTML: [...suites.entries()]
         .map(([title, { tests }]) => this._suiteHTML(title, tests))
         .join('\n'),
+      pageTitle: 'All Journeys',
     });
-
-    const outDir = path.dirname(path.resolve(this.outputFile));
-    fs.mkdirSync(outDir, { recursive: true });
     fs.writeFileSync(this.outputFile, html, 'utf-8');
 
     const rel = path.relative(process.cwd(), this.outputFile);
-    console.log(`\n  📋  Journey report →  ${rel}\n`);
+    console.log(`\n  📋  Journey report →  ${rel}`);
+    for (const { title, file, passed: p, failed: f } of journeyFiles) {
+      const icon = f > 0 ? '❌' : '✅';
+      console.log(`  ${icon}  ${path.relative(process.cwd(), path.join(outDir, file))}  (${title}: ${p} passed${f > 0 ? `, ${f} failed` : ''})`);
+    }
+    console.log();
   }
 
   // ── Private helpers ────────────────────────────────────────────────────────
@@ -104,9 +129,9 @@ export default class ProgressiveHTMLReporter {
 
     const filmstrip = screenshots.length > 0
       ? `<div class="filmstrip" role="img" aria-label="Test screenshots">
-          ${screenshots.map(({ label, b64 }) => `
+          ${screenshots.map(({ label, b64, mime }) => `
           <figure class="frame">
-            <img src="data:image/png;base64,${b64}" alt="${esc(label)}" />
+            <img src="data:${mime};base64,${b64}" alt="${esc(label)}" />
             <figcaption>${esc(label)}</figcaption>
           </figure>`).join('')}
         </div>`
@@ -142,11 +167,12 @@ export default class ProgressiveHTMLReporter {
 
   _screenshots(attachments) {
     return attachments
-      .filter((a) => a.contentType === 'image/png')
+      .filter((a) => a.contentType === 'image/jpeg' || a.contentType === 'image/png')
       .map((a) => {
         const b64 = this._toBase64(a);
         if (!b64) return null;
-        return { label: a.name, b64 };
+        const mime = a.contentType === 'image/jpeg' ? 'image/jpeg' : 'image/png';
+        return { label: a.name, b64, mime };
       })
       .filter(Boolean);
   }

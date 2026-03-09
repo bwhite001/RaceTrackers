@@ -44,6 +44,8 @@ design/*
 docs/plans/
 test-results/
 playwright-report/live/
+# Combined journey report is large and regenerated from per-journey files
+playwright-report/journey-report.html
 
 # Git worktrees
 .worktrees/

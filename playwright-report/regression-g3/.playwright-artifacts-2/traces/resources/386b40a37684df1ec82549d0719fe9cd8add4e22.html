@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script type="module">import { injectIntoGlobalHook } from "/@react-refresh";
+injectIntoGlobalHook(window);
+window.$RefreshReg$ = () => {};
+window.$RefreshSig$ = () => (type) => type;</script>
+
+    <script type="module" src="/@vite/client"></script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#21808D" />
+    <meta name="description" content="Professional race timing and checkpoint management system for ultra-marathons, trail races, and endurance events" />
+    <!-- manifest injected by vite-plugin-pwa with correct base path -->
+    
+    <!-- iOS Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="RaceTracker" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    
+    <!-- Canonical domain redirect -->
+    <script>
+      (function() {
+        var canonical = 'racetrackers.bwhite.id.au';
+        var host = window.location.hostname;
+        var isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(host);
+        if (host && host !== canonical && host !== 'localhost' && !isIp) {
+          window.location.replace('https://' + canonical + window.location.pathname + window.location.search + window.location.hash);
+        }
+      })();
+    </script>
+
+    <!-- GitHub Pages SPA: restore path stored by 404.html redirect -->
+    <script>
+      (function() {
+        var redirect = sessionStorage.getItem('spa-redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa-redirect');
+          if (redirect !== '/') {
+            window.history.replaceState(null, '', redirect);
+          }
+        }
+      })();
+    </script>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon_io/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon_io/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon_io/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-192x192.png" />
+    
+    <title>RaceTracker Pro</title>
+  <link rel="manifest" href="/manifest.webmanifest"></head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx?t=1772893419793"></script>
+  <script id="vite-plugin-pwa:register-dev-sw" type="module">
+import registerDevSW from '/@vite-plugin-pwa/pwa-entry-point-loaded';
+registerDevSW();
+</script>
+</body>
+</html>

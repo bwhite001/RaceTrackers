@@ -14,15 +14,15 @@ The race creation wizard has four steps: Template, Race Details, Runner Setup, a
 
 **Step 1 of 4 — Template: setup wizard opens**
 
-![Step 1 of 4 — Template: setup wizard opens](assets/step-indicator-advances-correctly-through-setup-wizard-step-01.png)
+![Step 1 of 4 — Template: setup wizard opens](assets/step-indicator-advances-correctly-through-setup-wizard-step-01.jpg)
 
 **Step 2 of 4 — Race Details: step indicator shows step 2**
 
-![Step 2 of 4 — Race Details: step indicator shows step 2](assets/step-indicator-advances-correctly-through-setup-wizard-step-02.png)
+![Step 2 of 4 — Race Details: step indicator shows step 2](assets/step-indicator-advances-correctly-through-setup-wizard-step-02.jpg)
 
 **Step 3 of 4 — Runner Setup: step indicator advances to step 3**
 
-![Step 3 of 4 — Runner Setup: step indicator advances to step 3](assets/step-indicator-advances-correctly-through-setup-wizard-step-03.png)
+![Step 3 of 4 — Runner Setup: step indicator advances to step 3](assets/step-indicator-advances-correctly-through-setup-wizard-step-03.jpg)
 
 ### Back button on step 2 returns to race details with data preserved
 
@@ -30,19 +30,19 @@ If a race director fills in the race name and other details on Step 2 of 4 (Race
 
 **Step 1 of 4 — Template: choose Start from Scratch**
 
-![Step 1 of 4 — Template: choose Start from Scratch](assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-01.png)
+![Step 1 of 4 — Template: choose Start from Scratch](assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-01.jpg)
 
 **Step 2 of 4 — Race Details: fill in race name and details**
 
-![Step 2 of 4 — Race Details: fill in race name and details](assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-02.png)
+![Step 2 of 4 — Race Details: fill in race name and details](assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-02.jpg)
 
 **Step 3 of 4 — Runner Setup: navigate forward then press Back**
 
-![Step 3 of 4 — Runner Setup: navigate forward then press Back](assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-03.png)
+![Step 3 of 4 — Runner Setup: navigate forward then press Back](assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-03.jpg)
 
 **Step 2 of 4 — Race Details: data preserved after Back**
 
-![Step 2 of 4 — Race Details: data preserved after Back](assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-04.png)
+![Step 2 of 4 — Race Details: data preserved after Back](assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-04.jpg)
 
 ### Race management page lists created races
 
@@ -50,7 +50,7 @@ The Race Management page is the race director's central hub where all races are 
 
 **Race Management — page lists all created races**
 
-![Race Management — page lists all created races](assets/race-management-page-lists-created-races-step-01.png)
+![Race Management — page lists all created races](assets/race-management-page-lists-created-races-step-01.jpg)
 
 ### Clicking a race opens its overview
 
@@ -58,15 +58,15 @@ When the race director clicks on a race in the management list, they should be t
 
 **Race Management — page with race listed**
 
-![Race Management — page with race listed](assets/clicking-a-race-opens-its-overview-step-01.png)
+![Race Management — page with race listed](assets/clicking-a-race-opens-its-overview-step-01.jpg)
 
 **Race card — click race name to open overview**
 
-![Race card — click race name to open overview](assets/clicking-a-race-opens-its-overview-step-02.png)
+![Race card — click race name to open overview](assets/clicking-a-race-opens-its-overview-step-02.jpg)
 
 **Race overview — name and details visible**
 
-![Race overview — name and details visible](assets/clicking-a-race-opens-its-overview-step-03.png)
+![Race overview — name and details visible](assets/clicking-a-race-opens-its-overview-step-03.jpg)
 
 ### Runner name/gender section appears after adding a range
 
@@ -74,19 +74,19 @@ After a race director adds a bib number range on Step 3 of the setup wizard, an 
 
 **Navigate to race setup wizard**
 
-![Navigate to race setup wizard](assets/runner-name-gender-section-appears-after-adding-a-range-step-01.png)
+![Navigate to race setup wizard](assets/runner-name-gender-section-appears-after-adding-a-range-step-01.jpg)
 
 **Fill in Race Details and advance to Step 3**
 
-![Fill in Race Details and advance to Step 3](assets/runner-name-gender-section-appears-after-adding-a-range-step-02.png)
+![Fill in Race Details and advance to Step 3](assets/runner-name-gender-section-appears-after-adding-a-range-step-02.jpg)
 
 **Remove default range and add range 200-205**
 
-![Remove default range and add range 200-205](assets/runner-name-gender-section-appears-after-adding-a-range-step-03.png)
+![Remove default range and add range 200-205](assets/runner-name-gender-section-appears-after-adding-a-range-step-03.jpg)
 
 **Check that optional names section toggle is visible**
 
-![Check that optional names section toggle is visible](assets/runner-name-gender-section-appears-after-adding-a-range-step-04.png)
+![Check that optional names section toggle is visible](assets/runner-name-gender-section-appears-after-adding-a-range-step-04.jpg)
 
 ### Waves step shows default wave and allows adding more
 
@@ -94,15 +94,15 @@ Step 4 of the race setup wizard is the Waves step, which groups runners into sep
 
 **Navigate through setup wizard to the Waves step**
 
-![Navigate through setup wizard to the Waves step](assets/waves-step-shows-default-wave-and-allows-adding-more-step-01.png)
+![Navigate through setup wizard to the Waves step](assets/waves-step-shows-default-wave-and-allows-adding-more-step-01.jpg)
 
 **Confirm Waves step heading and at least one wave row**
 
-![Confirm Waves step heading and at least one wave row](assets/waves-step-shows-default-wave-and-allows-adding-more-step-02.png)
+![Confirm Waves step heading and at least one wave row](assets/waves-step-shows-default-wave-and-allows-adding-more-step-02.jpg)
 
 **Click "+ Add Wave" to add a second wave**
 
-![Click "+ Add Wave" to add a second wave](assets/waves-step-shows-default-wave-and-allows-adding-more-step-03.png)
+![Click "+ Add Wave" to add a second wave](assets/waves-step-shows-default-wave-and-allows-adding-more-step-03.jpg)
 
 ### Wave name and time fields are editable and save
 
@@ -110,23 +110,23 @@ A race director can give each wave a custom name (e.g. "Wave B") and a specific 
 
 **Navigate through setup wizard to the Waves step**
 
-![Navigate through setup wizard to the Waves step](assets/wave-name-and-time-fields-are-editable-and-save-step-01.png)
+![Navigate through setup wizard to the Waves step](assets/wave-name-and-time-fields-are-editable-and-save-step-01.jpg)
 
 **Confirm "+ Add Wave" button is available**
 
-![Confirm "+ Add Wave" button is available](assets/wave-name-and-time-fields-are-editable-and-save-step-02.png)
+![Confirm "+ Add Wave" button is available](assets/wave-name-and-time-fields-are-editable-and-save-step-02.jpg)
 
 **Add a second wave**
 
-![Add a second wave](assets/wave-name-and-time-fields-are-editable-and-save-step-03.png)
+![Add a second wave](assets/wave-name-and-time-fields-are-editable-and-save-step-03.jpg)
 
 **Set second wave name to "Wave B" and start time to "07:30"**
 
-![Set second wave name to "Wave B" and start time to "07:30"](assets/wave-name-and-time-fields-are-editable-and-save-step-04.png)
+![Set second wave name to "Wave B" and start time to "07:30"](assets/wave-name-and-time-fields-are-editable-and-save-step-04.jpg)
 
 **Verify "Wave B" appears in the wave name input**
 
-![Verify "Wave B" appears in the wave name input](assets/wave-name-and-time-fields-are-editable-and-save-step-05.png)
+![Verify "Wave B" appears in the wave name input](assets/wave-name-and-time-fields-are-editable-and-save-step-05.jpg)
 
 ## Running a Checkpoint
 
@@ -136,17 +136,13 @@ Steps for checkpoint volunteers. Covers opening a checkpoint, marking off runner
 
 A checkpoint volunteer clicks on a single runner's bib number tile in the grid to record that the runner passed through. The tile should change colour or appearance to make it obvious that runner has been marked as "through".
 
-**Checkpoint view — runner grid visible**
-
-![Checkpoint view — runner grid visible](assets/marks-off-a-single-runner-via-the-runner-grid-step-01.png)
-
 **Runner grid — tap first runner tile (200s range)**
 
-![Runner grid — tap first runner tile (200s range)](assets/marks-off-a-single-runner-via-the-runner-grid-step-02.png)
+![Runner grid — tap first runner tile (200s range)](assets/marks-off-a-single-runner-via-the-runner-grid-step-01.jpg)
 
 **Runner tile — marked state applied**
 
-![Runner tile — marked state applied](assets/marks-off-a-single-runner-via-the-runner-grid-step-03.png)
+![Runner tile — marked state applied](assets/marks-off-a-single-runner-via-the-runner-grid-step-02.jpg)
 
 ### Marks off multiple runners via Quick Entry
 
@@ -154,47 +150,39 @@ Instead of finding runners in the grid, a volunteer can just type a bib number a
 
 **Quick Entry — type first bib number and press Enter**
 
-![Quick Entry — type first bib number and press Enter](assets/marks-off-multiple-runners-via-quick-entry-step-01.png)
+![Quick Entry — type first bib number and press Enter](assets/marks-off-multiple-runners-via-quick-entry-step-01.jpg)
 
 **Quick Entry — type second bib number and press Enter**
 
-![Quick Entry — type second bib number and press Enter](assets/marks-off-multiple-runners-via-quick-entry-step-02.png)
+![Quick Entry — type second bib number and press Enter](assets/marks-off-multiple-runners-via-quick-entry-step-02.jpg)
 
 **Runner grid — both runners marked off**
 
-![Runner grid — both runners marked off](assets/marks-off-multiple-runners-via-quick-entry-step-03.png)
+![Runner grid — both runners marked off](assets/marks-off-multiple-runners-via-quick-entry-step-03.jpg)
 
 ### Switches to Callout Sheet tab
 
 The Callout Sheet tab shows the list of runners who have not yet been recorded at this checkpoint. Volunteers read these numbers out over the radio to base station. This test checks the tab loads correctly and the list is visible.
 
-**Checkpoint view — Mark Off tab active**
-
-![Checkpoint view — Mark Off tab active](assets/switches-to-callout-sheet-tab-step-01.png)
-
 **Callout Sheet tab — tap to switch**
 
-![Callout Sheet tab — tap to switch](assets/switches-to-callout-sheet-tab-step-02.png)
+![Callout Sheet tab — tap to switch](assets/switches-to-callout-sheet-tab-step-01.jpg)
 
 **Callout Sheet — unrecorded runners listed**
 
-![Callout Sheet — unrecorded runners listed](assets/switches-to-callout-sheet-tab-step-03.png)
+![Callout Sheet — unrecorded runners listed](assets/switches-to-callout-sheet-tab-step-02.jpg)
 
 ### Switches to Overview tab and shows runner counts
 
 The Overview tab shows a summary — how many runners have been through, how many are still expected, and other totals. This test confirms those summary numbers appear correctly when the tab is selected.
 
-**Checkpoint view — navigate to checkpoint**
-
-![Checkpoint view — navigate to checkpoint](assets/switches-to-overview-tab-and-shows-runner-counts-step-01.png)
-
 **Overview tab — tap to switch**
 
-![Overview tab — tap to switch](assets/switches-to-overview-tab-and-shows-runner-counts-step-02.png)
+![Overview tab — tap to switch](assets/switches-to-overview-tab-and-shows-runner-counts-step-01.jpg)
 
 **Overview — runner count summary visible**
 
-![Overview — runner count summary visible](assets/switches-to-overview-tab-and-shows-runner-counts-step-03.png)
+![Overview — runner count summary visible](assets/switches-to-overview-tab-and-shows-runner-counts-step-02.jpg)
 
 ### Can export checkpoint results
 
@@ -202,11 +190,11 @@ At the end of a checkpoint shift, a volunteer may need to export their recorded 
 
 **Checkpoint view — navigate to checkpoint**
 
-![Checkpoint view — navigate to checkpoint](assets/can-export-checkpoint-results-step-01.png)
+![Checkpoint view — navigate to checkpoint](assets/can-export-checkpoint-results-step-01.jpg)
 
 **Export option — triggers JSON download**
 
-![Export option — triggers JSON download](assets/can-export-checkpoint-results-step-02.png)
+![Export option — triggers JSON download](assets/can-export-checkpoint-results-step-02.jpg)
 
 ### Navigates from race overview to a checkpoint
 
@@ -214,7 +202,7 @@ From the race overview, a race director can jump straight to any checkpoint's li
 
 **Checkpoint view — mark-off screen for CP1 open**
 
-![Checkpoint view — mark-off screen for CP1 open](assets/navigates-from-race-overview-to-a-checkpoint-step-01.png)
+![Checkpoint view — mark-off screen for CP1 open](assets/navigates-from-race-overview-to-a-checkpoint-step-01.jpg)
 
 ### Callout sheet tab shows runners who passed but not called in
 
@@ -222,15 +210,15 @@ The Callout Sheet tab lists all runners who have been marked as passed at the ch
 
 **Mark Off tab — mark two runners as passed**
 
-![Mark Off tab — mark two runners as passed](assets/callout-sheet-tab-shows-runners-who-passed-but-not-called-in-step-01.png)
+![Mark Off tab — mark two runners as passed](assets/callout-sheet-tab-shows-runners-who-passed-but-not-called-in-step-01.jpg)
 
 **Callout Sheet tab — click to switch**
 
-![Callout Sheet tab — click to switch](assets/callout-sheet-tab-shows-runners-who-passed-but-not-called-in-step-02.png)
+![Callout Sheet tab — click to switch](assets/callout-sheet-tab-shows-runners-who-passed-but-not-called-in-step-02.jpg)
 
 **Callout Sheet — verify content is visible**
 
-![Callout Sheet — verify content is visible](assets/callout-sheet-tab-shows-runners-who-passed-but-not-called-in-step-03.png)
+![Callout Sheet — verify content is visible](assets/callout-sheet-tab-shows-runners-who-passed-but-not-called-in-step-03.jpg)
 
 ### Pending count badge decrements when runner is called in
 
@@ -238,15 +226,15 @@ When a checkpoint volunteer marks a runner as called in, the pending count badge
 
 **Mark Off tab — mark a runner to create a callout segment**
 
-![Mark Off tab — mark a runner to create a callout segment](assets/pending-count-badge-decrements-when-runner-is-called-in-step-01.png)
+![Mark Off tab — mark a runner to create a callout segment](assets/pending-count-badge-decrements-when-runner-is-called-in-step-01.jpg)
 
 **Tab bar — check for pending count badge**
 
-![Tab bar — check for pending count badge](assets/pending-count-badge-decrements-when-runner-is-called-in-step-02.png)
+![Tab bar — check for pending count badge](assets/pending-count-badge-decrements-when-runner-is-called-in-step-02.jpg)
 
 **Callout Sheet — click Mark Called if a pending segment exists**
 
-![Callout Sheet — click Mark Called if a pending segment exists](assets/pending-count-badge-decrements-when-runner-is-called-in-step-03.png)
+![Callout Sheet — click Mark Called if a pending segment exists](assets/pending-count-badge-decrements-when-runner-is-called-in-step-03.jpg)
 
 ### Transfer Data button appears in checkpoint header
 
@@ -254,7 +242,7 @@ When a checkpoint volunteer marks a runner as called in, the pending count badge
 
 **Checkpoint header — Transfer Data button is visible**
 
-![Checkpoint header — Transfer Data button is visible](assets/transfer-data-button-appears-in-checkpoint-header-step-01.png)
+![Checkpoint header — Transfer Data button is visible](assets/transfer-data-button-appears-in-checkpoint-header-step-01.jpg)
 
 ### Navigates to transfer view and shows Send and Receive tabs
 
@@ -262,19 +250,19 @@ When a checkpoint volunteer marks a runner as called in, the pending count badge
 
 **Transfer view — click Transfer Data button**
 
-![Transfer view — click Transfer Data button](assets/navigates-to-transfer-view-and-shows-send-and-receive-tabs-step-01.png)
+![Transfer view — click Transfer Data button](assets/navigates-to-transfer-view-and-shows-send-and-receive-tabs-step-01.jpg)
 
 **Transfer view — Send and Receive tabs visible**
 
-![Transfer view — Send and Receive tabs visible](assets/navigates-to-transfer-view-and-shows-send-and-receive-tabs-step-02.png)
+![Transfer view — Send and Receive tabs visible](assets/navigates-to-transfer-view-and-shows-send-and-receive-tabs-step-02.jpg)
 
 **Transfer view — Send tab is active by default**
 
-![Transfer view — Send tab is active by default](assets/navigates-to-transfer-view-and-shows-send-and-receive-tabs-step-03.png)
+![Transfer view — Send tab is active by default](assets/navigates-to-transfer-view-and-shows-send-and-receive-tabs-step-03.jpg)
 
 **Transfer view — scope options are visible**
 
-![Transfer view — scope options are visible](assets/navigates-to-transfer-view-and-shows-send-and-receive-tabs-step-04.png)
+![Transfer view — scope options are visible](assets/navigates-to-transfer-view-and-shows-send-and-receive-tabs-step-04.jpg)
 
 ### Back button returns to the checkpoint view
 
@@ -282,7 +270,7 @@ When a checkpoint volunteer marks a runner as called in, the pending count badge
 
 **Navigate to transfer route**
 
-![Navigate to transfer route](assets/back-button-returns-to-the-checkpoint-view-step-01.png)
+![Navigate to transfer route](assets/back-button-returns-to-the-checkpoint-view-step-01.jpg)
 
 ## Importing & Exporting Data
 
@@ -294,15 +282,15 @@ This test triggers the export function and confirms that a JSON file is actually
 
 **Race Management — page with created race listed**
 
-![Race Management — page with created race listed](assets/downloads-a-race-configuration-json-file-step-01.png)
+![Race Management — page with created race listed](assets/downloads-a-race-configuration-json-file-step-01.jpg)
 
 **Race card — open dropdown then click Export**
 
-![Race card — open dropdown then click Export](assets/downloads-a-race-configuration-json-file-step-02.png)
+![Race card — open dropdown then click Export](assets/downloads-a-race-configuration-json-file-step-02.jpg)
 
 **Download triggered — JSON file confirmed in temp folder**
 
-![Download triggered — JSON file confirmed in temp folder](assets/downloads-a-race-configuration-json-file-step-03.png)
+![Download triggered — JSON file confirmed in temp folder](assets/downloads-a-race-configuration-json-file-step-03.jpg)
 
 ### Imports a race configuration and restores data
 
@@ -318,11 +306,11 @@ From the race overview, a race director can jump straight to the base station. T
 
 **Navigate directly to base station operations**
 
-![Navigate directly to base station operations](assets/navigates-from-race-overview-to-base-station-step-01.png)
+![Navigate directly to base station operations](assets/navigates-from-race-overview-to-base-station-step-01.jpg)
 
 **Base Station — operations screen open**
 
-![Base Station — operations screen open](assets/navigates-from-race-overview-to-base-station-step-02.png)
+![Base Station — operations screen open](assets/navigates-from-race-overview-to-base-station-step-02.jpg)
 
 ### Home page landing shows the race management module card
 
@@ -330,7 +318,7 @@ The Race Maintenance module card should always be visible on the home screen so 
 
 **Home — Race Maintenance module card visible**
 
-![Home — Race Maintenance module card visible](assets/home-page-landing-shows-the-race-management-module-card-step-01.png)
+![Home — Race Maintenance module card visible](assets/home-page-landing-shows-the-race-management-module-card-step-01.jpg)
 
 ### Shows protection modal when leaving active checkpoint operation
 
@@ -338,11 +326,11 @@ While a checkpoint volunteer is actively recording runners, the app should warn 
 
 **Attempt navigation away — go to home /**
 
-![Attempt navigation away — go to home /](assets/shows-protection-modal-when-leaving-active-checkpoint-operation-step-01.png)
+![Attempt navigation away — go to home /](assets/shows-protection-modal-when-leaving-active-checkpoint-operation-step-01.jpg)
 
 **Protection modal — operation warning or graceful fallback**
 
-![Protection modal — operation warning or graceful fallback](assets/shows-protection-modal-when-leaving-active-checkpoint-operation-step-02.png)
+![Protection modal — operation warning or graceful fallback](assets/shows-protection-modal-when-leaving-active-checkpoint-operation-step-02.jpg)
 
 ### Allows navigation after confirming exit from active operation
 
@@ -350,11 +338,11 @@ If a volunteer sees the "you're about to leave an active session" warning and co
 
 **Confirm exit — trigger exit and accept confirmation**
 
-![Confirm exit — trigger exit and accept confirmation](assets/allows-navigation-after-confirming-exit-from-active-operation-step-01.png)
+![Confirm exit — trigger exit and accept confirmation](assets/allows-navigation-after-confirming-exit-from-active-operation-step-01.jpg)
 
 **Navigation complete — landed on non-checkpoint route**
 
-![Navigation complete — landed on non-checkpoint route](assets/allows-navigation-after-confirming-exit-from-active-operation-step-02.png)
+![Navigation complete — landed on non-checkpoint route](assets/allows-navigation-after-confirming-exit-from-active-operation-step-02.jpg)
 
 ### Home page module cards are all accessible when no operation is active
 
@@ -362,7 +350,7 @@ When the app is idle on the home screen and no operation is in progress, all thr
 
 **Home page — all module cards visible and enabled**
 
-![Home page — all module cards visible and enabled](assets/home-page-module-cards-are-all-accessible-when-no-operation-is-active-step-01.png)
+![Home page — all module cards visible and enabled](assets/home-page-module-cards-are-all-accessible-when-no-operation-is-active-step-01.jpg)
 
 ### Unknown routes redirect to home
 
@@ -370,7 +358,7 @@ If someone types a web address that doesn't exist in the app (perhaps a typo or 
 
 **Unknown route — redirects to home page**
 
-![Unknown route — redirects to home page](assets/unknown-routes-redirect-to-home-step-01.png)
+![Unknown route — redirects to home page](assets/unknown-routes-redirect-to-home-step-01.jpg)
 
 ## Settings
 
@@ -382,15 +370,15 @@ Tapping the settings cog in the top-right corner should open the settings panel.
 
 **Home — tap Settings cog button (aria-label Settings)**
 
-![Home — tap Settings cog button (aria-label Settings)](assets/opens-and-closes-the-settings-modal-step-01.png)
+![Home — tap Settings cog button (aria-label Settings)](assets/opens-and-closes-the-settings-modal-step-01.jpg)
 
 **Settings modal — panel open with customisation options**
 
-![Settings modal — panel open with customisation options](assets/opens-and-closes-the-settings-modal-step-02.png)
+![Settings modal — panel open with customisation options](assets/opens-and-closes-the-settings-modal-step-02.jpg)
 
 **Settings modal — closed after pressing X button**
 
-![Settings modal — closed after pressing X button](assets/opens-and-closes-the-settings-modal-step-03.png)
+![Settings modal — closed after pressing X button](assets/opens-and-closes-the-settings-modal-step-03.jpg)
 
 ### Toggles dark mode on and off
 
@@ -398,19 +386,19 @@ The dark mode toggle in settings switches the app between a light colour scheme 
 
 **Home — open Settings modal**
 
-![Home — open Settings modal](assets/toggles-dark-mode-on-and-off-step-01.png)
+![Home — open Settings modal](assets/toggles-dark-mode-on-and-off-step-01.jpg)
 
 **Settings modal — locate Dark Mode toggle switch**
 
-![Settings modal — locate Dark Mode toggle switch](assets/toggles-dark-mode-on-and-off-step-02.png)
+![Settings modal — locate Dark Mode toggle switch](assets/toggles-dark-mode-on-and-off-step-02.jpg)
 
 **Dark mode ON — html element gains "dark" class**
 
-![Dark mode ON — html element gains "dark" class](assets/toggles-dark-mode-on-and-off-step-03.png)
+![Dark mode ON — html element gains "dark" class](assets/toggles-dark-mode-on-and-off-step-03.jpg)
 
 **Dark mode OFF — "dark" class removed from html element**
 
-![Dark mode OFF — "dark" class removed from html element](assets/toggles-dark-mode-on-and-off-step-04.png)
+![Dark mode OFF — "dark" class removed from html element](assets/toggles-dark-mode-on-and-off-step-04.jpg)
 
 ### Settings persist after closing and reopening the modal
 
@@ -418,16 +406,16 @@ Changes made in settings should be saved and remembered. If dark mode is turned 
 
 **Home — open Settings modal**
 
-![Home — open Settings modal](assets/settings-persist-after-closing-and-reopening-the-modal-step-01.png)
+![Home — open Settings modal](assets/settings-persist-after-closing-and-reopening-the-modal-step-01.jpg)
 
 **Settings modal — enable dark mode and save**
 
-![Settings modal — enable dark mode and save](assets/settings-persist-after-closing-and-reopening-the-modal-step-02.png)
+![Settings modal — enable dark mode and save](assets/settings-persist-after-closing-and-reopening-the-modal-step-02.jpg)
 
 **Home — reopen Settings modal**
 
-![Home — reopen Settings modal](assets/settings-persist-after-closing-and-reopening-the-modal-step-03.png)
+![Home — reopen Settings modal](assets/settings-persist-after-closing-and-reopening-the-modal-step-03.jpg)
 
 **Settings modal — dark mode toggle persists as checked**
 
-![Settings modal — dark mode toggle persists as checked](assets/settings-persist-after-closing-and-reopening-the-modal-step-04.png)
+![Settings modal — dark mode toggle persists as checked](assets/settings-persist-after-closing-and-reopening-the-modal-step-04.jpg)

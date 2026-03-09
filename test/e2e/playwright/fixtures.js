@@ -28,15 +28,15 @@ export const test = base.extend({
         const hasTarget = await target.isVisible().catch(() => false);
         let body;
         if (hasTarget) {
-          body = await target.screenshot();
+          body = await target.screenshot({ type: 'jpeg', quality: 75 });
         } else {
-          body = await page.locator('main').screenshot().catch(
-            () => page.screenshot({ fullPage: false })
+          body = await page.locator('main').screenshot({ type: 'jpeg', quality: 75 }).catch(
+            () => page.screenshot({ type: 'jpeg', quality: 75, fullPage: false })
           );
         }
         await testInfo.attach(
           `${String(++seq).padStart(3, '0')} ${label}`,
-          { body, contentType: 'image/png' }
+          { body, contentType: 'image/jpeg' }
         );
       } catch {
         // Ignore — page may be mid-navigation or already closed
@@ -102,11 +102,11 @@ export const test = base.extend({
           const target = page.locator('[data-screenshot-target]').first();
           const hasTarget = await target.isVisible().catch(() => false);
           const body = hasTarget
-            ? await target.screenshot()
-            : await page.locator('main').screenshot().catch(() => page.screenshot({ fullPage: false }));
+            ? await target.screenshot({ type: 'jpeg', quality: 75 })
+            : await page.locator('main').screenshot({ type: 'jpeg', quality: 75 }).catch(() => page.screenshot({ type: 'jpeg', quality: 75, fullPage: false }));
           await testInfo.attach(
             `${String(n).padStart(2, '0')}-A ${title}`,
-            { body, contentType: 'image/png' }
+            { body, contentType: 'image/jpeg' }
           );
         } catch {}
 
@@ -117,11 +117,11 @@ export const test = base.extend({
           const target = page.locator('[data-screenshot-target]').first();
           const hasTarget = await target.isVisible().catch(() => false);
           const body = hasTarget
-            ? await target.screenshot()
-            : await page.locator('main').screenshot().catch(() => page.screenshot({ fullPage: false }));
+            ? await target.screenshot({ type: 'jpeg', quality: 75 })
+            : await page.locator('main').screenshot({ type: 'jpeg', quality: 75 }).catch(() => page.screenshot({ type: 'jpeg', quality: 75, fullPage: false }));
           await testInfo.attach(
             `${String(n).padStart(2, '0')}-B ${title}`,
-            { body, contentType: 'image/png' }
+            { body, contentType: 'image/jpeg' }
           );
         } catch {}
 
@@ -139,8 +139,8 @@ export const test = base.extend({
     async ({ page }, use, testInfo) => {
       await use();
       try {
-        const body = await page.screenshot({ fullPage: false });
-        await testInfo.attach('final state', { body, contentType: 'image/png' });
+        const body = await page.screenshot({ type: 'jpeg', quality: 75, fullPage: false });
+        await testInfo.attach('final state', { body, contentType: 'image/jpeg' });
       } catch {}
     },
     { auto: true },

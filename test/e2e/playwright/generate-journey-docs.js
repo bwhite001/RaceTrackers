@@ -216,7 +216,7 @@ function extractPassingTests(reportHtml) {
     const title = unesc(titleMatch[1].trim());
 
     // Screenshots are named "NN-B label" (B = after-action state)
-    const figRe = /<img src="(data:image\/png;base64,[^"]+)" alt="([^"]+)"/g;
+    const figRe = /<img src="(data:image\/(?:png|jpeg);base64,[^"]+)" alt="([^"]+)"/g;
     const shots = [];
     let im;
     while ((im = figRe.exec(block)) !== null) {
@@ -236,10 +236,12 @@ function extractPassingTests(reportHtml) {
 }
 
 function saveAsset(dataUri, filename) {
-  const base64 = dataUri.replace(/^data:image\/png;base64,/, '');
-  const dest = path.join(ASSETS_DIR, filename);
+  const base64 = dataUri.replace(/^data:image\/(?:png|jpeg);base64,/, '');
+  const ext  = dataUri.startsWith('data:image/jpeg') ? 'jpg' : 'png';
+  const finalName = filename.replace(/\.png$/, `.${ext}`);
+  const dest = path.join(ASSETS_DIR, finalName);
   fs.writeFileSync(dest, Buffer.from(base64, 'base64'));
-  return `assets/${filename}`;
+  return `assets/${finalName}`;
 }
 
 // ── Document builder ───────────────────────────────────────────────────────
@@ -277,12 +279,17 @@ function buildJourneyHTML(journey, allTests) {
       }
 
       for (const shot of testData.shots) {
-        const filename = `${slugify(testTitle)}-${slugify(shot.label)}.png`;
+        const baseFilename = `${slugify(testTitle)}-${slugify(shot.label)}`;
+        const ext = shot.dataUri && shot.dataUri.startsWith('data:image/jpeg') ? 'jpg' : 'png';
+        const filename = `${baseFilename}.${ext}`;
         let imgPath;
-        // Reuse existing asset if already saved, otherwise save from data URI
-        const existingPath = path.join(ASSETS_DIR, filename);
-        if (fs.existsSync(existingPath)) {
-          imgPath = `assets/${filename}`;
+        // Reuse existing asset if already saved (check both extensions), otherwise save
+        const existingPng = path.join(ASSETS_DIR, `${baseFilename}.png`);
+        const existingJpg = path.join(ASSETS_DIR, `${baseFilename}.jpg`);
+        if (fs.existsSync(existingJpg)) {
+          imgPath = `assets/${baseFilename}.jpg`;
+        } else if (fs.existsSync(existingPng)) {
+          imgPath = `assets/${baseFilename}.png`;
         } else {
           imgPath = saveAsset(shot.dataUri, filename);
         }

@@ -126,7 +126,7 @@ function extractPassingTests(html) {
     const titleMatch = block.match(/class="test-title">([^<]+)<\/h3>/);
     const descMatch  = block.match(/class="test-description">([^<]+)<\/p>/);
     // Extract { dataUri, label } pairs — src and alt are always adjacent in reporter output
-    const figRe = /<img src="(data:image\/png;base64,[^"]+)" alt="([^"]+)"/g;
+    const figRe = /<img src="(data:image\/(?:png|jpeg);base64,[^"]+)" alt="([^"]+)"/g;
     const allScreenshots = [];
     let im;
     while ((im = figRe.exec(block)) !== null) {
@@ -148,9 +148,13 @@ function extractPassingTests(html) {
 }
 
 function saveScreenshot(dataUri, filename) {
-  const base64 = dataUri.replace(/^data:image\/png;base64,/, '');
-  fs.writeFileSync(path.join(ASSETS_DIR, filename), Buffer.from(base64, 'base64'));
-  return `assets/${filename}`;
+  // Strip MIME prefix regardless of image type (png or jpeg)
+  const base64 = dataUri.replace(/^data:image\/(?:png|jpeg);base64,/, '');
+  // Preserve the correct extension based on MIME type
+  const ext = dataUri.startsWith('data:image/jpeg') ? 'jpg' : 'png';
+  const finalName = filename.replace(/\.png$/, `.${ext}`);
+  fs.writeFileSync(path.join(ASSETS_DIR, finalName), Buffer.from(base64, 'base64'));
+  return `assets/${finalName}`;
 }
 
 function main() {
@@ -289,8 +293,8 @@ ${chapterBlocks.join('\n')}
   fs.writeFileSync(path.join(OUT_DIR, 'user-guide.html'), finalHtml, 'utf8');
   console.log('Written: docs/guides/user-guide.html');
 
-  const pngCount = fs.readdirSync(ASSETS_DIR).filter(f => f.endsWith('.png')).length;
-  console.log(`Written: ${pngCount} screenshots to docs/guides/assets/`);
+  const imgCount = fs.readdirSync(ASSETS_DIR).filter(f => f.endsWith('.png') || f.endsWith('.jpg')).length;
+  console.log(`Written: ${imgCount} screenshots to docs/guides/assets/`);
   console.log('\nDone! Open docs/guides/user-guide.html in a browser.');
 }
 
