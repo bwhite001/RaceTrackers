@@ -96,6 +96,29 @@ const RaceOverview = () => {
         })}
       </div>
 
+      {/* Per-wave breakdown — only shown when multiple waves exist */}
+      {stats.waveBreakdown?.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+            By Wave
+          </h3>
+          <div className="space-y-1">
+            {stats.waveBreakdown.map(wave => (
+              <div
+                key={wave.batchNumber}
+                data-testid={`wave-row-${wave.batchNumber}`}
+                className="flex items-center gap-4 text-sm bg-white dark:bg-gray-800 rounded-lg px-3 py-2 shadow-sm"
+              >
+                <span className="font-semibold text-gray-700 dark:text-gray-200 w-20 shrink-0">{wave.label}</span>
+                <span className="text-green-600 dark:text-green-400">{wave.throughCP} finished</span>
+                <span className="text-blue-500">{wave.pending} pending</span>
+                {wave.dns > 0 && <span className="text-yellow-500">{wave.dns} DNS</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <LiveLeadersBanner />
     </div>
   );

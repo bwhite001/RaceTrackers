@@ -82,4 +82,34 @@ describe('RaceOverview', () => {
     render(<RaceOverview />);
     expect(within(screen.getByTestId('stat-notStarted')).getByText('Pending')).toBeInTheDocument();
   });
+
+  test('renders per-wave breakdown when waveBreakdown is provided', () => {
+    useBaseOperationsStore.mockImplementation(() => ({
+      stats: {
+        ...mockStats,
+        waveBreakdown: [
+          { batchNumber: 1, label: 'Wave 1', throughCP: 4, pending: 2, dns: 0 },
+          { batchNumber: 2, label: 'Wave 2', throughCP: 2, pending: 1, dns: 1 },
+        ],
+      },
+      checkpoints: [],
+    }));
+    render(<RaceOverview />);
+    expect(screen.getByText('Wave 1')).toBeInTheDocument();
+    expect(screen.getByText('Wave 2')).toBeInTheDocument();
+    expect(screen.getByTestId('wave-row-1')).toBeInTheDocument();
+    expect(screen.getByTestId('wave-row-2')).toBeInTheDocument();
+    // DNS count only shown when > 0
+    expect(screen.getByText('1 DNS')).toBeInTheDocument();
+    expect(screen.queryByTestId('wave-row-1')).not.toHaveTextContent('DNS');
+  });
+
+  test('hides wave breakdown when waveBreakdown is empty', () => {
+    useBaseOperationsStore.mockImplementation(() => ({
+      stats: { ...mockStats, waveBreakdown: [] },
+      checkpoints: [],
+    }));
+    render(<RaceOverview />);
+    expect(screen.queryByText('By Wave')).not.toBeInTheDocument();
+  });
 });

@@ -115,6 +115,34 @@ const useBaseOperationsStore = create(
           const runners = await get().loadRunners(currentRaceId);
           const stats = get().calculateStats(runners);
 
+          // Compute per-wave breakdown if the race has multiple batches
+          const batches = await db.race_batches
+            .where('raceId').equals(currentRaceId).sortBy('batchNumber');
+          if (batches.length > 1) {
+            const baseRunners = await StorageService.getRunners(currentRaceId);
+            const finishedNums = new Set(
+              runners
+                .filter(r => r.checkpointNumber === 0 && r.status === RUNNER_STATUSES.PASSED)
+                .map(r => r.number)
+            );
+            stats.waveBreakdown = batches.map(batch => {
+              const waveRunners = baseRunners.filter(r => r.batchNumber === batch.batchNumber);
+              const dns = waveRunners.filter(
+                r => r.status === RUNNER_STATUSES.NON_STARTER || r.status === RUNNER_STATUSES.DNS || r.status === 'dns'
+              ).length;
+              const throughCP = waveRunners.filter(r => finishedNums.has(r.number)).length;
+              return {
+                batchNumber: batch.batchNumber,
+                label: batch.batchName || `Wave ${batch.batchNumber}`,
+                throughCP,
+                pending: Math.max(0, waveRunners.length - dns - throughCP),
+                dns,
+              };
+            });
+          } else {
+            stats.waveBreakdown = [];
+          }
+
           set({
             runners,
             stats,
