@@ -82,10 +82,9 @@ const ALL_BIBS = new Set([...CP0_UNIQUE, ...CP1_UNIQUE, ...CP2_UNIQUE]);
 
 // ─── Test constants ───────────────────────────────────────────────────────────
 
-/** Bibs listed as Non Starters on the official sheet. */
-const DNS_BIBS = [200, 232, 249, 222];
-// Note: 249 also appears in CP0 and CP2 batch data — a transcription ambiguity
-// flagged in the source document. Tests treat the DNS list as authoritative.
+/** Bibs listed as Non Starters on the official sheet (corrected: 249 was edited
+ *  from DNS after the fact — they did start; 246 is the correct DNS entry). */
+const DNS_BIBS = [200, 232, 246, 222];
 
 const RACE_ID = 'race-8mar2026-scenario';
 const RACE = {
