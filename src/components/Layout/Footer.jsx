@@ -1,4 +1,5 @@
 import React from 'react';
+import { version } from '../../../package.json';
 
 /**
  * Footer Component
@@ -6,8 +7,6 @@ import React from 'react';
  * Simplified footer with copyright, version, and implementer information.
  */
 const Footer = () => {
-  // Get version from package.json
-  const version = '1.0.0';
   const currentYear = new Date().getFullYear();
   
   return (
