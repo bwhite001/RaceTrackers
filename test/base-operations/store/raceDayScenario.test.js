@@ -86,6 +86,16 @@ const ALL_BIBS = new Set([...CP0_UNIQUE, ...CP1_UNIQUE, ...CP2_UNIQUE]);
  *  from DNS after the fact — they did start; 246 is the correct DNS entry). */
 const DNS_BIBS = [200, 232, 246, 222];
 
+/** Runners who withdrew at CP1.
+ *  240 also appears in CP2 batch data — that CP2 entry is a transcription error
+ *  superseded by the withdrawal; it is seeded as 'dnf' in the CP2 records. */
+const WITHDRAWAL_BIBS = [230, 240]; // withdrew at checkpoint 1
+
+// Withdrawn runners not already in CP1 batch data get an extra CP1 record added
+// by seedWithdrawals, so the total CP1 count is larger than CP1_UNIQUE alone.
+const CP1_WITHDRAWN_NEW = WITHDRAWAL_BIBS.filter(b => !CP1_UNIQUE.has(b));
+const EXPECTED_CP1_COUNT = CP1_UNIQUE.size + CP1_WITHDRAWN_NEW.length; // 71 + 2 = 73
+
 const RACE_ID = 'race-8mar2026-scenario';
 const RACE = {
   id: RACE_ID,
@@ -118,14 +128,49 @@ async function seedRace() {
 
 async function seedCheckpointRunners() {
   const cp1Rows = [...CP1_UNIQUE].map(bib => ({
-    raceId: RACE_ID, checkpointNumber: 1, number: bib, status: 'passed',
+    raceId: RACE_ID, checkpointNumber: 1, number: bib,
+    // Withdrawal bibs are dnf at CP1; all others passed
+    status: WITHDRAWAL_BIBS.includes(bib) ? 'dnf' : 'passed',
     markOffTime: '2026-03-08T08:00:00.000Z',
   }));
   const cp2Rows = [...CP2_UNIQUE].map(bib => ({
-    raceId: RACE_ID, checkpointNumber: 2, number: bib, status: 'passed',
+    raceId: RACE_ID, checkpointNumber: 2, number: bib,
+    // 240 appears in CP2 data but withdrew at CP1 — transcription error; mark dnf
+    status: WITHDRAWAL_BIBS.includes(bib) ? 'dnf' : 'passed',
     markOffTime: '2026-03-08T09:30:00.000Z',
   }));
   await db.checkpoint_runners.bulkPut([...cp1Rows, ...cp2Rows]);
+}
+
+async function seedWithdrawals() {
+  const rows = WITHDRAWAL_BIBS.map(bib => ({
+    raceId: RACE_ID,
+    runnerNumber: bib,
+    checkpoint: 1,
+    withdrawalTime: '2026-03-08T08:30:00.000Z',
+    reason: 'Withdrew at CP1',
+    comments: '',
+    reversedAt: null,
+    reversedBy: null,
+  }));
+  await db.withdrawal_records.bulkPut(rows);
+
+  // Ensure a CP1 dnf record exists for each withdrawn runner (they may not have
+  // appeared in the original batch sheets if volunteers noted them separately)
+  const cp1DnfRows = WITHDRAWAL_BIBS.map(bib => ({
+    raceId: RACE_ID, checkpointNumber: 1, number: bib, status: 'dnf',
+    markOffTime: '08:30', callInTime: '08:30',
+    notes: 'Withdrew at CP1',
+  }));
+  await db.checkpoint_runners.bulkPut(cp1DnfRows);
+
+  // 240 appears in base_station_runners as 'passed' (CP0 sheet data) but withdrew
+  // at CP1 — the base station record is pre-race registration data, not a finish.
+  // Remove it so calculateStats doesn't count them as finished.
+  await db.base_station_runners
+    .where('raceId').equals(RACE_ID)
+    .filter(r => r.checkpointNumber === 0 && WITHDRAWAL_BIBS.includes(r.number))
+    .delete();
 }
 
 async function seedBaseStationRunners() {
@@ -144,12 +189,14 @@ describe('Base Station — Race Day Scenario (8 Mar 2026)', () => {
     // Clear this race's records to prevent accumulation across test runs
     await db.checkpoint_runners.where('raceId').equals(RACE_ID).delete();
     await db.base_station_runners.where('raceId').equals(RACE_ID).delete();
+    await db.withdrawal_records.where('raceId').equals(RACE_ID).delete();
     await db.runners.where('raceId').equals(RACE_ID).delete();
     await db.checkpoints.where('raceId').equals(RACE_ID).delete();
     await db.races.where('id').equals(RACE_ID).delete();
     await seedRace();
     await seedCheckpointRunners();
     await seedBaseStationRunners();
+    await seedWithdrawals();
     act(() =>
       useBaseOperationsStore.setState({ currentRaceId: RACE_ID, currentRace: RACE })
     );
@@ -158,7 +205,7 @@ describe('Base Station — Race Day Scenario (8 Mar 2026)', () => {
   it('reports the correct number of unique CP1 runners', async () => {
     await act(() => useBaseOperationsStore.getState().refreshData());
     const { stats } = useBaseOperationsStore.getState();
-    expect(stats.checkpointCounts[1]).toBe(CP1_UNIQUE.size);
+    expect(stats.checkpointCounts[1]).toBe(EXPECTED_CP1_COUNT);
   });
 
   it('reports the correct number of unique CP2 runners', async () => {
@@ -170,15 +217,16 @@ describe('Base Station — Race Day Scenario (8 Mar 2026)', () => {
   it('counts base-station (CP0) records as finished', async () => {
     await act(() => useBaseOperationsStore.getState().refreshData());
     const { stats } = useBaseOperationsStore.getState();
-    expect(stats.finished).toBe(CP0_UNIQUE.size);
+    // CP0_UNIQUE minus any withdrawal bibs whose base station record was removed
+    const finishedCount = CP0_UNIQUE.size - WITHDRAWAL_BIBS.filter(b => CP0_UNIQUE.has(b)).length;
+    expect(stats.finished).toBe(finishedCount);
   });
 
   it('does not double-count duplicate bib entries within a checkpoint', async () => {
     // 79 appears twice in CP1 batches; 65 appears twice; only 1 record each.
     await act(() => useBaseOperationsStore.getState().refreshData());
     const { stats } = useBaseOperationsStore.getState();
-    // If double-counting were happening the count would exceed the unique set
-    expect(stats.checkpointCounts[1]).toBeLessThanOrEqual(CP1_UNIQUE.size);
+    expect(stats.checkpointCounts[1]).toBeLessThanOrEqual(EXPECTED_CP1_COUNT);
   });
 
   it('finished runners are excluded from active count', async () => {
@@ -207,6 +255,31 @@ describe('Base Station — Race Day Scenario (8 Mar 2026)', () => {
     expect(stats.dns).toBeGreaterThanOrEqual(1);
   });
 
+  it('withdrawn runners (230, 240) are counted as dnf in stats', async () => {
+    await act(() => useBaseOperationsStore.getState().refreshData());
+    const { stats } = useBaseOperationsStore.getState();
+    // Both withdrawal bibs have their highest CP record as 'dnf'
+    expect(stats.dnf).toBeGreaterThanOrEqual(WITHDRAWAL_BIBS.length);
+  });
+
+  it('withdrawal records exist in the DB for both withdrawn runners', async () => {
+    const records = await db.withdrawal_records.where('raceId').equals(RACE_ID).toArray();
+    const withdrawnNums = records.map(r => r.runnerNumber);
+    expect(withdrawnNums).toContain(230);
+    expect(withdrawnNums).toContain(240);
+    expect(records.every(r => r.checkpoint === 1)).toBe(true);
+  });
+
+  it('240 CP2 record is marked dnf (transcription error superseded by withdrawal)', async () => {
+    const cp2record = await db.checkpoint_runners
+      .where('raceId').equals(RACE_ID)
+      .filter(r => r.checkpointNumber === 2 && r.number === 240)
+      .first();
+    // Record exists (it was in the raw batch data) but status reflects the withdrawal
+    expect(cp2record).toBeDefined();
+    expect(cp2record.status).toBe('dnf');
+  });
+
   describe('batch submission via submitRadioBatch', () => {
     it('adds CP1 batch to sessionBatches and updates checkpointCounts', async () => {
       const firstBatch = CP1_BATCHES[0]; // 07:55 — bibs 83, 45, 90, 87
@@ -221,8 +294,8 @@ describe('Base Station — Race Day Scenario (8 Mar 2026)', () => {
         bibs: firstBatch.bibs,
         voided: false,
       });
-      // The 4 bibs already existed in CP1 from seed — count is still CP1_UNIQUE.size
-      expect(stats.checkpointCounts[1]).toBe(CP1_UNIQUE.size);
+      // The 4 bibs already existed in CP1 from seed — count is still EXPECTED_CP1_COUNT
+      expect(stats.checkpointCounts[1]).toBe(EXPECTED_CP1_COUNT);
     });
 
     it('submitting all CP1 batches produces the correct runner count', async () => {
@@ -233,7 +306,7 @@ describe('Base Station — Race Day Scenario (8 Mar 2026)', () => {
         );
       }
       const { stats } = useBaseOperationsStore.getState();
-      expect(stats.checkpointCounts[1]).toBe(CP1_UNIQUE.size);
+      expect(stats.checkpointCounts[1]).toBe(EXPECTED_CP1_COUNT);
     });
 
     it('void a batch marks it voided and resets runner status to not-started', async () => {
@@ -252,7 +325,7 @@ describe('Base Station — Race Day Scenario (8 Mar 2026)', () => {
       // Voiding resets status to 'not-started' but the DB record still exists,
       // so checkpointCounts is unchanged (we count records, not statuses here).
       // The key effect is the batch is marked voided in the session log.
-      expect(stats.checkpointCounts[1]).toBe(CP1_UNIQUE.size);
+      expect(stats.checkpointCounts[1]).toBe(EXPECTED_CP1_COUNT);
 
       // Verify the individual bibs were reset to not-started in the DB
       const resetRunners = await db.checkpoint_runners
