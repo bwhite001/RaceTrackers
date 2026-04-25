@@ -230,28 +230,28 @@ test.describe('Full Confidence Check — Race Director + Volunteer + Base Statio
     await test.step('Pick race in modal and wait for operations page', async () => {
       await pickFirstRaceInModal(_page);
       await _page.waitForURL(/base-station\/operations/, { timeout: 20000 });
-      await _page.waitForSelector('#commonTime', { timeout: 20000 });
+      await _page.waitForSelector('#is-time', { timeout: 20000 });
       await _page.waitForTimeout(500);
     });
 
     await test.step(`Set common time to ${BATCH_TIME}`, async () => {
       // Select checkpoint 1 (required for canSubmit)
-      await _page.selectOption('#cpSelect', '1');
+      await _page.selectOption('#is-cp-select', '1');
       await _page.waitForTimeout(200);
-      await _page.locator('#commonTime').first().fill(BATCH_TIME);
+      await _page.locator('#is-time').first().fill(BATCH_TIME);
       await _page.waitForTimeout(200);
     });
 
     await test.step('Fill runner input with batch bibs and click Record Batch', async () => {
       // BibChipInput: type each bib and press Enter to add as a chip
-      const bibInput = _page.getByLabel('Bib number input').first();
+      const bibInput = _page.getByLabel('Bib Numbers').first();
       await bibInput.waitFor({ state: 'visible', timeout: 10000 });
       for (const bib of BATCH_RUNNERS) {
         await bibInput.fill(String(bib));
         await bibInput.press('Enter');
         await _page.waitForTimeout(150);
       }
-      await _page.getByRole('button', { name: /record batch/i }).first().click();
+      await _page.getByRole('button', { name: /record.*runner/i }).first().click();
       await _page.waitForTimeout(500);
     });
 
@@ -309,73 +309,63 @@ test.describe('Full Confidence Check — Race Director + Volunteer + Base Statio
   });
 
   // ───────────────────────────────────────────────────────────────────────────
-  // Phase 5 — Leaderboard (Base Station Coordinator)
+  // Phase 5 — Overview (Base Station Coordinator)
   // ───────────────────────────────────────────────────────────────────────────
 
-  test('Phase 5 — Base Station Coordinator: leaderboard tab loads', async () => {
+  test('Phase 5 — Base Station Coordinator: overview tab shows runner statuses', async () => {
     await test.step('Ensure we are on base station operations page', async () => {
-      if (!_page.url().includes('/base-station/operations')) {
-        await _page.goto(`${BASE}/base-station/operations`);
-        await _page.waitForSelector('[aria-label="Base station tabs"]', { timeout: 20000 });
-      }
+      // Always navigate fresh to ensure store is initialised for this phase
+      await _page.goto(`${BASE}/base-station/operations`);
+      await _page.waitForSelector('[aria-label="Base station tabs"]', { timeout: 20000 });
     });
 
-    await test.step('Click Leaderboard tab', async () => {
-      const leaderboardTab = _page.getByRole('tab', { name: /leaderboard/i }).first();
-      await leaderboardTab.waitFor({ state: 'visible', timeout: 10000 });
-      await leaderboardTab.click();
-      await _page.waitForTimeout(500);
+    await test.step('Click Overview tab', async () => {
+      // Use aria-label directly on the button within the base station nav
+      const overviewBtn = _page.locator('nav[aria-label="Base station tabs"] button[aria-label="Overview"]');
+      await overviewBtn.waitFor({ state: 'visible', timeout: 5000 });
+      await overviewBtn.click();
+      // Wait for tab to become selected
+      await _page.locator('nav[aria-label="Base station tabs"] button[aria-selected="true"][aria-label="Overview"]')
+        .waitFor({ state: 'visible', timeout: 5000 });
+      // Give the lazy-loaded RaceCourseMap and RaceOverview time to settle
+      await _page.waitForTimeout(1500);
     });
 
-    await test.step('Verify leaderboard content renders (runners or empty-state visible)', async () => {
-      // Accept: runner numbers from batch, time values, "Finished", or empty state text
-      const content = _page.getByText(
-        new RegExp(`${BATCH_RUNNERS[0]}|finished|leaderboard|no runners|position|rank`, 'i')
-      ).first();
-      await expect(content).toBeVisible({ timeout: 10000 });
+    await test.step('Verify overview stats grid renders', async () => {
+      // Stats grid always renders via RaceOverview component (data-testid="stats-grid")
+      await expect(_page.locator('[data-testid="stats-grid"]')).toBeVisible({ timeout: 10000 });
     });
 
-    await test.step('Verify no crash/error message on leaderboard', async () => {
+    await test.step('Verify no crash/error message on overview', async () => {
       await expect(_page.getByText(/unexpected error|something went wrong/i).first())
         .not.toBeVisible({ timeout: 3000 });
     });
   });
 
   // ───────────────────────────────────────────────────────────────────────────
-  // Phase 6 — Reports (Base Station Coordinator)
+  // Phase 6 — DNS Tab (Base Station Coordinator)
   // ───────────────────────────────────────────────────────────────────────────
 
-  test('Phase 6 — Base Station Coordinator: reports tab loads with checkpoint selector', async () => {
+  test('Phase 6 — Base Station Coordinator: DNS tab shows withdrawals', async () => {
     await test.step('Ensure we are on base station operations page', async () => {
       if (!_page.url().includes('/base-station/operations')) {
         await _page.goto(`${BASE}/base-station/operations`);
-        await _page.waitForSelector('[aria-label="Base station tabs"]', { timeout: 20000 });
       }
+      await _page.waitForSelector('[aria-label="Base station tabs"]', { timeout: 20000 });
     });
 
-    await test.step('Click Reports tab', async () => {
-      const reportsTab = _page.getByRole('tab', { name: /reports/i }).first();
-      await reportsTab.waitFor({ state: 'visible', timeout: 10000 });
-      await reportsTab.click();
+    await test.step('Click DNS tab', async () => {
+      await _page.getByRole('tab', { name: /dns/i }).click();
       await _page.waitForTimeout(500);
     });
 
-    await test.step('Verify reports content is visible', async () => {
-      const content = _page.getByText(/report|results|summary|generate|checkpoint/i).first();
-      await expect(content).toBeVisible({ timeout: 10000 });
+    await test.step('Verify DNS tab content is visible', async () => {
+      await expect(_page.getByText(/dns.*dnf|withdraw runner|out list/i).first()).toBeVisible({ timeout: 10000 });
     });
 
-    await test.step('Verify a checkpoint selector or report data is present', async () => {
-      // Look for a <select> element or a dropdown button indicating checkpoint selection
-      const selector = _page.locator('select').first();
-      const hasSelect = await selector.isVisible({ timeout: 3000 }).catch(() => false);
-      if (hasSelect) {
-        await expect(selector).toBeVisible();
-      } else {
-        // Fallback: just confirm no crash
-        await expect(_page.getByText(/report|checkpoint|summary/i).first())
-          .toBeVisible({ timeout: 5000 });
-      }
+    await test.step('Verify no crash/error on DNS tab', async () => {
+      await expect(_page.getByText(/unexpected error|something went wrong/i).first())
+        .not.toBeVisible({ timeout: 3000 });
     });
   });
 
@@ -462,11 +452,11 @@ test.describe('Full Confidence Check — Race Director + Volunteer + Base Statio
         } catch (_err) {
           // Export may open a dialog or inline preview instead of a file download;
           // as long as clicking it didn't crash, the test is satisfied.
-          await expect(_page.getByText(RACE.name)).toBeVisible({ timeout: 5000 });
+          await expect(_page.getByText(RACE.name).first()).toBeVisible({ timeout: 5000 });
         }
       } else {
         // Export button not found — verify data is still intact
-        await expect(_page.getByText(RACE.name)).toBeVisible({ timeout: 5000 });
+        await expect(_page.getByText(RACE.name).first()).toBeVisible({ timeout: 5000 });
         await expect(_page.getByText(/31\s*runners?/i).first()).toBeVisible({ timeout: 5000 });
       }
     });

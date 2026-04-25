@@ -25,5 +25,5 @@ export default function LiveLeadersBanner() {
 
   if (genderLeaders.length === 0) return null;
 
-  return <LiveLeadersWidget leaders={genderLeaders} />;
+  return <LiveLeadersWidget genderGroups={grouped.gender} />;
 }

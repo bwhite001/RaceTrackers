@@ -31,7 +31,7 @@
 
 // Use @playwright/test directly — no fixture auto-screenshots, but shared context works correctly
 import { test, expect } from '@playwright/test';
-import { pickFirstRaceInModal, fillReactInput } from './helpers.js';
+import { pickFirstRaceInModal, pickFirstCheckpointIfModal, fillReactInput } from './helpers.js';
 
 const BASE = process.env.E2E_BASE_URL || 'http://localhost:3000';
 
@@ -155,13 +155,27 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
       await _page.waitForTimeout(100);
       await _page.getByRole('button', { name: /add range/i }).click();
       await _page.waitForTimeout(200);
-      await _page.getByRole('button', { name: /create race/i }).click();
+      await _page.getByRole('button', { name: /next.*waves|next/i }).first().click();
     });
 
-    await test.step('Step 4 — confirm Waves/Batches step then create race', async () => {
-      const createBtn2 = _page.getByRole('button', { name: /create race/i });
-      if (await createBtn2.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await createBtn2.click();
+    await test.step('Step 4 — Waves: advance to Course Map', async () => {
+      const nextBtn = _page.getByRole('button', { name: /next.*course map|next/i }).first();
+      if (await nextBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await nextBtn.click();
+      }
+    });
+
+    await test.step('Step 5 — Course Map: skip', async () => {
+      const skipBtn = _page.getByRole('button', { name: /skip/i }).first();
+      if (await skipBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await skipBtn.click();
+      }
+    });
+
+    await test.step('Step 6 — Link Checkpoints: finish race creation', async () => {
+      const nextBtn = _page.getByRole('button', { name: /^next$/i }).first();
+      if (await nextBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await nextBtn.click();
       }
       await _page.waitForURL(/race-maintenance\/overview/, { timeout: 20000 });
     });
@@ -182,6 +196,8 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
       await _page.waitForSelector('h1', { timeout: 30000 });
       await _page.getByRole('button', { name: /checkpoint operations/i }).click();
       await pickFirstRaceInModal(_page);
+      // For multi-checkpoint races, a second modal asks which CP to operate
+      await pickFirstCheckpointIfModal(_page);
       await _page.waitForURL(/\/checkpoint\//, { timeout: 20000 });
       await _page.waitForSelector('nav[aria-label="Checkpoint tabs"]', { timeout: 20000 });
     });
@@ -264,7 +280,7 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
 
     await test.step('Base Station Data Entry tab — store initialises, stats show total 10', async () => {
       await _page.waitForURL(/base-station\/operations/, { timeout: 30000 });
-      await _page.waitForSelector('#commonTime', { timeout: 20000 });
+      await _page.waitForSelector('#is-time', { timeout: 20000 });
       await expect(_page.getByText(/total/i).first()).toBeVisible({ timeout: 15000 });
       await expect(_page.getByText('10').first()).toBeVisible({ timeout: 10000 });
     });
@@ -273,16 +289,16 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
   test('Phase 4b — Records finish time 10:45:00 for batch 103–108', async () => {
     await test.step('Navigate directly to base station operations', async () => {
       await _page.goto(`${BASE}/base-station/operations`);
-      await _page.waitForSelector('#commonTime', { timeout: 20000 });
+      await _page.waitForSelector('#is-time', { timeout: 20000 });
       await _page.waitForTimeout(500); // Let React store fully initialise
     });
 
     await test.step('Data Entry — select checkpoint, enter time 10:45:00 and runner batch', async () => {
       // Select checkpoint 1 (index 1 skips the blank placeholder option)
-      await _page.locator('#cpSelect').first().selectOption({ index: 1 });
-      await _page.locator('#commonTime').first().fill('10:45:00');
+      await _page.locator('#is-cp-select').first().selectOption({ index: 1 });
+      await _page.locator('#is-time').first().fill('10:45:00');
       // BibChipInput: type each bib and press Enter to add it as a chip
-      const bibInput = _page.getByLabel('Bib number input').first();
+      const bibInput = _page.getByLabel('Bib Numbers').first();
       for (const bib of ['103', '104', '105', '106', '107', '108']) {
         await bibInput.fill(bib);
         await bibInput.press('Enter');
@@ -291,8 +307,8 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
     });
 
     await test.step('Submit — verify chips clear, finished count increments', async () => {
-      await _page.getByRole('button', { name: /record batch/i }).first().click();
-      await expect(_page.getByLabel('Bib number input').first()).toHaveValue('', { timeout: 10000 });
+      await _page.getByRole('button', { name: /record.*runner/i }).first().click();
+      await expect(_page.getByLabel('Bib Numbers').first()).toHaveValue('', { timeout: 10000 });
       await expect(_page.getByText('6').first()).toBeVisible({ timeout: 10000 });
     });
   });
@@ -300,7 +316,7 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
   test('Phase 4c — Records DNF for runner 102 (heat exhaustion)', async () => {
     await test.step('Navigate to base station operations', async () => {
       await _page.goto(`${BASE}/base-station/operations`);
-      await _page.waitForSelector('#commonTime', { timeout: 20000 });
+      await _page.waitForSelector('#is-time', { timeout: 20000 });
     });
 
     await test.step('Open DNF withdrawal dialog via hotkey "d"', async () => {
@@ -309,10 +325,9 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
       await _page.locator('input#runnerNumber').waitFor({ state: 'visible', timeout: 8000 });
     });
 
-    await test.step('Dialog — enter runner 102 and reason, then submit', async () => {
+    await test.step('Dialog — enter runner 102 and submit (DNF has no reason field)', async () => {
       await _page.locator('input#runnerNumber').fill('102');
       await _page.waitForTimeout(200);
-      await _page.locator('select#reason').selectOption('Illness');
       await _page.getByRole('button', { name: /withdraw runner/i }).click();
       await _page.locator('input#runnerNumber').waitFor({ state: 'hidden', timeout: 8000 });
     });
@@ -325,20 +340,23 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
   test('Phase 4d — Marks runner 110 as DNS (non-starter)', async () => {
     await test.step('Navigate to base station operations', async () => {
       await _page.goto(`${BASE}/base-station/operations`);
-      await _page.waitForSelector('#commonTime', { timeout: 20000 });
+      await _page.waitForSelector('#is-time', { timeout: 20000 });
     });
 
-    await test.step('Open DNS dialog via hotkey Shift+D', async () => {
+    await test.step('Open DNS dialog via Shift+D (switches to DNS tab)', async () => {
       await _page.evaluate(() => document.activeElement?.blur());
       await _page.keyboard.press('Shift+d');
+      // Shift+D switches to the DNS tab; click "Withdraw Runner" to open dialog
+      await _page.getByRole('button', { name: /withdraw runner/i }).waitFor({ state: 'visible', timeout: 8000 });
+      await _page.getByRole('button', { name: /withdraw runner/i }).click();
       await _page.locator('input#runnerNumber').waitFor({ state: 'visible', timeout: 8000 });
     });
 
-    await test.step('Dialog — enter runner 110 and reason, then submit', async () => {
+    await test.step('Dialog — enter runner 110, select reason, then submit', async () => {
       await _page.locator('input#runnerNumber').fill('110');
       await _page.waitForTimeout(200);
       await _page.locator('select#reason').selectOption('Personal Emergency');
-      await _page.getByRole('button', { name: /withdraw runner/i }).click();
+      await _page.locator('button[form="withdrawal-form"]').click();
       await _page.locator('input#runnerNumber').waitFor({ state: 'hidden', timeout: 8000 });
     });
   });
@@ -346,7 +364,7 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
   test('Phase 4e — Records DNF for runner 101 (injured knee)', async () => {
     await test.step('Navigate to base station operations', async () => {
       await _page.goto(`${BASE}/base-station/operations`);
-      await _page.waitForSelector('#commonTime', { timeout: 20000 });
+      await _page.waitForSelector('#is-time', { timeout: 20000 });
     });
 
     await test.step('Open DNF dialog via "d" hotkey', async () => {
@@ -355,10 +373,9 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
       await _page.locator('input#runnerNumber').waitFor({ state: 'visible', timeout: 8000 });
     });
 
-    await test.step('Dialog — enter runner 101 and reason, then submit', async () => {
+    await test.step('Dialog — enter runner 101 and submit (DNF has no reason field)', async () => {
       await _page.locator('input#runnerNumber').fill('101');
       await _page.waitForTimeout(200);
-      await _page.locator('select#reason').selectOption('Injury');
       await _page.getByRole('button', { name: /withdraw runner/i }).click();
       await _page.locator('input#runnerNumber').waitFor({ state: 'hidden', timeout: 8000 });
     });
@@ -388,25 +405,17 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
     });
   });
 
-  test('Phase 4g — Reports tab renders race summary', async () => {
-    await test.step('Navigate to base station and switch to Reports tab', async () => {
+  test('Phase 4g — DNS tab shows runner list after withdrawals', async () => {
+    await test.step('Navigate to base station and switch to DNS tab', async () => {
       await _page.goto(`${BASE}/base-station/operations`);
       await _page.waitForSelector('[aria-label="Base station tabs"]', { timeout: 20000 });
-      await _page.getByRole('tab', { name: /reports/i }).click();
+      await _page.getByRole('tab', { name: /dns/i }).click();
     });
 
-    await test.step('Reports — content or generate button visible', async () => {
+    await test.step('DNS tab — out list or withdrawn runner visible', async () => {
       await expect(
-        _page.getByText(/report|results|summary|generate|no data/i).first()
+        _page.getByText(/dns.*dnf|withdraw runner|out list|no runners|101|102|110/i).first()
       ).toBeVisible({ timeout: 10000 });
-    });
-
-    await test.step('Reports — click generate if available', async () => {
-      const generateBtn = _page.getByRole('button', { name: /generate|view|build/i }).first();
-      if (await generateBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-        await generateBtn.click();
-        await expect(_page.getByText(/runner|total|passed|finished/i).first()).toBeVisible({ timeout: 5000 });
-      }
     });
   });
 });
