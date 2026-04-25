@@ -78,6 +78,12 @@ const SECTION_MAP = {
   'Receive tab shows scanner and file import fallback':                      'checkpoint',
   'back button returns to the checkpoint view':                              'checkpoint',
   'volunteer operates linked turnaround checkpoints from one interface':    'linked-checkpoints',
+  'checkpoint opens in Marker mode by default':                             'split-role',
+  'switching to Radio Operator mode replaces the runner grid with a scan zone': 'split-role',
+  'switching back to Marker mode restores the runner grid':                 'split-role',
+  'Share Batch button is visible in Marker mode with a QR icon':            'split-role',
+  'Share Batch button is hidden in Radio Operator mode':                    'split-role',
+  'Share Batch opens the batch share modal':                                'split-role',
 };
 
 const CHAPTERS = [
@@ -90,6 +96,7 @@ const CHAPTERS = [
   { key: 'settings',      title: 'Settings',                   intro: 'Personalise the app. Toggle dark mode and understand how preferences are saved.' },
   { key: 'simulation',    title: 'Complete Race Walkthrough',  intro: 'A full end-to-end race simulation: race director creates the race, checkpoint volunteers mark off runners, and the base station records finish times and statuses.' },
   { key: 'linked-checkpoints', title: 'Linked Checkpoints (Turnaround Point)', intro: 'How to operate two checkpoints at the same physical location — for example, an out-and-back turnaround where CP1 (outbound) and CP4 (return) are staffed by the same volunteers. Covers the checkpoint picker, dual view, tab switching, and cross-checkpoint overview.' },
+  { key: 'split-role', title: 'Split-Role Checkpoint Operations', intro: 'How two operators can share one checkpoint — a Marker records runner times and shares batches via QR code, while a Radio Operator scans the QR and calls runners in to base.' },
 ];
 
 function slugify(str) {

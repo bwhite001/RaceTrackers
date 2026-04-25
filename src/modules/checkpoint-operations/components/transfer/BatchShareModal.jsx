@@ -17,7 +17,8 @@ import QRDisplayFullscreen from './QRDisplayFullscreen';
  *   checkpointNumber {number}
  *   onClose          {function}
  */
-export default function BatchShareModal({ raceId, checkpointNumber, onClose }) {
+export default function BatchShareModal({ isOpen, raceId, checkpointNumber, onClose }) {
+  if (!isOpen) return null;
   const [phase, setPhase] = useState('preview'); // 'preview' | 'qr' | 'confirm'
   const [lastShare, setLastShare] = useState(null);
   const [isPendingRetry, setIsPendingRetry] = useState(false);
