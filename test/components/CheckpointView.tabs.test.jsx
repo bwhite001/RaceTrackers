@@ -26,6 +26,7 @@ vi.mock('modules/checkpoint-operations/store/checkpointStore', () => ({
     loadCheckpointData: vi.fn(() => Promise.resolve([])),
     pendingCallInCount: vi.fn(() => 0),
   })),
+  checkpointStore: { getState: vi.fn(() => ({ runners: [], currentRace: { id: 'race-1', name: 'Test Race' } })) },
 }));
 
 vi.mock('shared/store/settingsStore', () => ({
@@ -67,7 +68,31 @@ vi.mock('shared/components/ExitOperationModal', () => ({
     <Component {...props} onExitAttempt={vi.fn()} setHasUnsavedChanges={vi.fn()} />,
 }));
 
+vi.mock('store/useRaceStore', () => ({
+  useRaceStore: vi.fn(() => ({
+    loadRace: vi.fn(),
+    loadCheckpointRunners: vi.fn(),
+  })),
+}));
+
+vi.mock('modules/checkpoint-operations/components/RadioOperatorView', () => ({
+  default: () => <div data-testid="radio-operator-view">RadioOperatorView</div>,
+}));
+
+vi.mock('modules/checkpoint-operations/components/transfer/BatchShareModal', () => ({
+  default: ({ isOpen }) => isOpen ? <div data-testid="batch-share-modal">BatchShareModal</div> : null,
+}));
+
+vi.mock('modules/checkpoint-operations/services/TransferService', () => ({
+  default: {
+    getLastShareTimestamp: vi.fn(() => Promise.resolve(null)),
+    buildPayload: vi.fn(() => Promise.resolve({ count: 0 })),
+  },
+}));
+
 // ─── Render helper ────────────────────────────────────────────────────────────
+
+import TransferService from 'modules/checkpoint-operations/services/TransferService';
 
 // Import AFTER mocks
 import CheckpointView from 'views/CheckpointView.jsx';
@@ -137,5 +162,52 @@ describe('CheckpointView — 3-tab layout', () => {
   it('shows "Exit operation" button in header', () => {
     renderCheckpointView();
     expect(screen.getByRole('button', { name: 'Exit operation' })).toBeDefined();
+  });
+});
+
+describe('CheckpointView — role toggle', () => {
+  it('renders Marker and Radio Operator toggle buttons', () => {
+    renderCheckpointView();
+    expect(screen.getByRole('button', { name: 'Marker' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Radio Operator' })).toBeDefined();
+  });
+
+  it('defaults to Marker mode — shows runner grid, not RadioOperatorView', () => {
+    renderCheckpointView();
+    expect(screen.getByTestId('runner-grid')).toBeDefined();
+    expect(screen.queryByTestId('radio-operator-view')).toBeNull();
+  });
+
+  it('switching to Radio Operator mode shows RadioOperatorView and hides runner grid', () => {
+    renderCheckpointView();
+    fireEvent.click(screen.getByRole('button', { name: 'Radio Operator' }));
+    expect(screen.getByTestId('radio-operator-view')).toBeDefined();
+    expect(screen.queryByTestId('runner-grid')).toBeNull();
+  });
+
+  it('switching back to Marker mode shows runner grid again', () => {
+    renderCheckpointView();
+    fireEvent.click(screen.getByRole('button', { name: 'Radio Operator' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Marker' }));
+    expect(screen.getByTestId('runner-grid')).toBeDefined();
+    expect(screen.queryByTestId('radio-operator-view')).toBeNull();
+  });
+
+  it('shows Share Batch button in Marker mode', () => {
+    renderCheckpointView();
+    expect(screen.getByRole('button', { name: /share batch/i })).toBeDefined();
+  });
+
+  it('opens BatchShareModal when Share Batch is clicked', () => {
+    renderCheckpointView();
+    expect(screen.queryByTestId('batch-share-modal')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /share batch/i }));
+    expect(screen.getByTestId('batch-share-modal')).toBeDefined();
+  });
+
+  it('does NOT show Share Batch button in Radio Operator mode', () => {
+    renderCheckpointView();
+    fireEvent.click(screen.getByRole('button', { name: 'Radio Operator' }));
+    expect(screen.queryByRole('button', { name: /share batch/i })).toBeNull();
   });
 });

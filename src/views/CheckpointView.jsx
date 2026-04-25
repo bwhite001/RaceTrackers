@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowDownTrayIcon, ArrowsRightLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon, ArrowsRightLeftIcon, QrCodeIcon } from '@heroicons/react/24/outline';
 import { withOperationExit } from '../shared/components/ExitOperationModal';
 import useNavigationStore, { MODULE_TYPES } from '../shared/store/navigationStore';
 import useCheckpointStore, { checkpointStore } from '../modules/checkpoint-operations/store/checkpointStore';
@@ -16,6 +16,9 @@ import RunnerOverview from '../components/Shared/RunnerOverview';
 import LoadingSpinner from '../components/Layout/LoadingSpinner';
 import ErrorMessage from '../components/Layout/ErrorMessage';
 import ExportCheckpointResultsModal from '../modules/checkpoint-operations/components/ExportCheckpointResultsModal';
+import RadioOperatorView from '../modules/checkpoint-operations/components/RadioOperatorView';
+import BatchShareModal from '../modules/checkpoint-operations/components/transfer/BatchShareModal';
+import TransferService from '../modules/checkpoint-operations/services/TransferService';
 
 const TABS = [
   { id: 'mark-off', label: 'Mark Off' },
@@ -28,6 +31,9 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('mark-off');
   const [showExportModal, setShowExportModal] = useState(false);
+  const [role, setRole] = useState('marker'); // 'marker' | 'radio'
+  const [showBatchShare, setShowBatchShare] = useState(false);
+  const [unsharedCount, setUnsharedCount] = useState(0);
   
   // Store hooks
   const { startOperation } = useNavigationStore();
@@ -94,6 +100,24 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     setHasUnsavedChanges(false); // Reset on load
   }, [setHasUnsavedChanges]);
 
+  // Compute unshared runner count for Share Batch badge
+  useEffect(() => {
+    if (!currentRace?.id || !checkpointId) return;
+    const raceId = currentRace.id; // capture before async boundary
+    const cpNumber = parseInt(checkpointId);
+    let cancelled = false;
+    async function computeUnshared() {
+      const ts = await TransferService.getLastShareTimestamp(raceId, cpNumber);
+      const payload = await TransferService.buildPayload(raceId, cpNumber, {
+        isDelta: true,
+        sinceTimestamp: ts,
+      });
+      if (!cancelled) setUnsharedCount(payload.count);
+    }
+    computeUnshared().catch(() => {});
+    return () => { cancelled = true; };
+  }, [currentRace?.id, checkpointId, runners]);
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -107,6 +131,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   };
 
   const handleExportResults = () => setShowExportModal(true);
+
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
@@ -131,6 +156,34 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         ]}
       />
 
+      {/* Role toggle pill */}
+      <div className="flex justify-center py-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="inline-flex rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden text-sm font-medium">
+          <button
+            onClick={() => setRole('marker')}
+            className={`px-5 py-1.5 transition-colors ${
+              role === 'marker'
+                ? 'bg-navy-600 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
+          >
+            Marker
+          </button>
+          <button
+            onClick={() => setRole('radio')}
+            className={`px-5 py-1.5 transition-colors ${
+              role === 'radio'
+                ? 'bg-navy-600 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
+          >
+            Radio Operator
+          </button>
+        </div>
+      </div>
+
+      {role === 'marker' ? (
+        <>
       {/*
         Single tab nav — responsive position:
         mobile: fixed to bottom, flex row of compact tabs
@@ -193,6 +246,35 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         <div className="fixed bottom-[56px] left-0 right-0 z-20 md:static md:bottom-auto md:z-auto md:max-w-7xl md:w-full md:mx-auto md:px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3 shadow-lg md:shadow-none">
           <QuickEntryBar />
         </div>
+      )}
+
+      {/* Share Batch FAB — Marker mode */}
+      <button
+        onClick={() => setShowBatchShare(true)}
+        className="fixed bottom-[110px] right-4 z-30 md:bottom-6 md:right-6 flex items-center gap-2 px-4 py-2.5 rounded-full bg-navy-600 hover:bg-navy-700 text-white shadow-lg font-medium text-sm transition-colors"
+        aria-label="Share batch"
+      >
+        <QrCodeIcon className="w-5 h-5" />
+        Share Batch
+        {unsharedCount > 0 && (
+          <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">
+            {unsharedCount}
+          </span>
+        )}
+      </button>
+
+      <BatchShareModal
+        isOpen={showBatchShare}
+        raceId={currentRace?.id}
+        checkpointNumber={parseInt(checkpointId)}
+        onClose={() => setShowBatchShare(false)}
+      />
+      </>
+      ) : (
+        <RadioOperatorView
+          raceId={currentRace?.id}
+          checkpointNumber={parseInt(checkpointId)}
+        />
       )}
 
       <ExportCheckpointResultsModal
