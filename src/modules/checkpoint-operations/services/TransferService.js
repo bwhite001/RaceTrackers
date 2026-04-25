@@ -32,6 +32,30 @@ async function saveLastShareTimestamp(raceId, checkpointNumber) {
   await db.settings.put({ key, value: new Date().toISOString() });
 }
 
+// ─── Pending-batch flag ───────────────────────────────────────────────────────
+
+function pendingBatchKey(raceId, checkpointNumber, deviceId) {
+  return `transfer.pendingBatch.${raceId}.cp${checkpointNumber}.${deviceId}`;
+}
+
+async function getPendingBatch(raceId, checkpointNumber) {
+  const deviceId = await getOrCreateDeviceId();
+  const row = await db.settings.get(pendingBatchKey(raceId, checkpointNumber, deviceId));
+  return row?.value === 'true';
+}
+
+async function savePendingBatch(raceId, checkpointNumber) {
+  const deviceId = await getOrCreateDeviceId();
+  const key = pendingBatchKey(raceId, checkpointNumber, deviceId);
+  await db.settings.put({ key, value: 'true' });
+}
+
+async function clearPendingBatch(raceId, checkpointNumber) {
+  const deviceId = await getOrCreateDeviceId();
+  const key = pendingBatchKey(raceId, checkpointNumber, deviceId);
+  await db.settings.delete(key);
+}
+
 // ─── Checksum ─────────────────────────────────────────────────────────────────
 
 async function computeChecksum(str) {
@@ -226,6 +250,9 @@ const TransferService = {
   getOrCreateDeviceId,
   getLastShareTimestamp,
   saveLastShareTimestamp,
+  getPendingBatch,
+  savePendingBatch,
+  clearPendingBatch,
   buildPayload,
   compressAndEncode,
   decodeAndDecompress,

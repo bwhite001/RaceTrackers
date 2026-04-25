@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import TransferService from 'modules/checkpoint-operations/services/TransferService';
 import 'fake-indexeddb/auto';
 import Dexie from 'dexie';
 
@@ -294,5 +295,39 @@ describe('TransferService — applyToCheckpointRunners', () => {
     // Verify nothing was written
     const count = await db.checkpoint_runners.where('raceId').equals(raceId).count();
     expect(count).toBe(1); // only the original
+  });
+});
+
+describe('pending batch tracking', () => {
+  beforeEach(async () => {
+    const { default: schemaDb } = await import('../../src/shared/services/database/schema.js');
+    await schemaDb.settings.where('key').startsWith('transfer.pendingBatch.').delete();
+    await schemaDb.settings.where('key').equals('device.id').delete();
+  });
+
+  it('getPendingBatch returns false when no record exists', async () => {
+    const result = await TransferService.getPendingBatch(1, 1);
+    expect(result).toBe(false);
+  });
+
+  it('savePendingBatch sets flag; getPendingBatch returns true', async () => {
+    await TransferService.savePendingBatch(1, 2);
+    const result = await TransferService.getPendingBatch(1, 2);
+    expect(result).toBe(true);
+  });
+
+  it('clearPendingBatch removes flag; getPendingBatch returns false', async () => {
+    await TransferService.savePendingBatch(1, 3);
+    await TransferService.clearPendingBatch(1, 3);
+    const result = await TransferService.getPendingBatch(1, 3);
+    expect(result).toBe(false);
+  });
+
+  it('pending batch flag is scoped per checkpoint', async () => {
+    await TransferService.savePendingBatch(1, 10);
+    const cp10 = await TransferService.getPendingBatch(1, 10);
+    const cp11 = await TransferService.getPendingBatch(1, 11);
+    expect(cp10).toBe(true);
+    expect(cp11).toBe(false);
   });
 });
