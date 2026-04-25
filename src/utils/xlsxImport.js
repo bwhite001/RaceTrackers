@@ -131,9 +131,9 @@ export function applyMappingsToRows(rows, mappings) {
       ? genderUpper
       : (GENDER_MAP[genderUpper] ?? 'X');
 
-    // age
+    // age — only included when mapped (not ignored/absent)
     const rawAge = fieldToCol.age ? row[fieldToCol.age] : undefined;
-    const age = rawAge !== undefined ? (parseInt(rawAge, 10) || null) : null;
+    const age = rawAge !== undefined ? (parseInt(rawAge, 10) || null) : undefined;
 
     // batchNumber — numeric value wins; text labels use pre-scanned sequential map
     const rawBatch = fieldToCol.batchNumber ? row[fieldToCol.batchNumber] : '';
@@ -147,7 +147,7 @@ export function applyMappingsToRows(rows, mappings) {
       firstName,
       lastName,
       gender,
-      age,
+      ...(age !== undefined && { age }),
       batchNumber: resolvedBatch,
     });
   });

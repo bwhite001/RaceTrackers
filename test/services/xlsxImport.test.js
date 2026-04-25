@@ -37,9 +37,9 @@ describe('detectColumnMappings', () => {
   });
 
   it('sets unrecognised columns to "ignore"', () => {
-    const { mappings } = detectColumnMappings(['Running Club', 'Age']);
+    const { mappings } = detectColumnMappings(['Running Club', 'Team Name']);
     expect(mappings['Running Club']).toBe('ignore');
-    expect(mappings['Age']).toBe('ignore');
+    expect(mappings['Team Name']).toBe('ignore');
   });
 
   it('marks auto-detected columns in the autoDetected set', () => {

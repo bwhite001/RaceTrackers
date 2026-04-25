@@ -33,16 +33,6 @@ const STEP_BATCHES = 3;
 const STEP_COURSE = 4;
 const STEP_LINK_CHECKPOINTS = 5;
 
-import CourseMapStep from './CourseMapStep';
-
-// Step indices
-const STEP_TEMPLATE = 0;
-const STEP_DETAILS = 1;
-const STEP_RUNNERS = 2;
-const STEP_BATCHES = 3;
-const STEP_COURSE = 4;
-const STEP_LINK_CHECKPOINTS = 5;
-
 const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(STEP_TEMPLATE);
