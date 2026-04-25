@@ -59,7 +59,7 @@ export default function WebScorerImportWizard({ onClose }) {
   const [state, setState] = useState(INITIAL_STATE);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState('');
-  const { loadRaces } = useRaceMaintenanceStore();
+  const { loadAllRaces } = useRaceMaintenanceStore();
 
   // -------------------------------------------------------------------------
   // File parsing helpers
@@ -205,7 +205,7 @@ export default function WebScorerImportWizard({ onClose }) {
       }
 
       // Refresh race list in store and navigate
-      await loadRaces();
+      await loadAllRaces();
       navigate(`/race-maintenance/overview?raceId=${raceId}`);
       onClose();
     } catch (err) {
