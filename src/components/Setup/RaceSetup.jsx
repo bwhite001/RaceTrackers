@@ -13,46 +13,69 @@ import {
 } from '../../design-system/components';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
+import TemplateSelectionStep from './TemplateSelectionStep';
 import RaceDetailsStep from './RaceDetailsStep';
 import RunnerRangesStep from './RunnerRangesStep';
+import BatchConfigStep from './BatchConfigStep';
+import LinkCheckpointsStep from './LinkCheckpointsStep';
 import LoadingSpinner from '../Layout/LoadingSpinner';
 import ErrorMessage from '../Layout/ErrorMessage';
 import StepIndicator from './StepIndicator';
+import WebScorerImportWizard from '../../modules/race-maintenance/components/WebScorerImportWizard';
+
+import CourseMapStep from './CourseMapStep';
+
+// Step indices
+const STEP_TEMPLATE = 0;
+const STEP_DETAILS = 1;
+const STEP_RUNNERS = 2;
+const STEP_BATCHES = 3;
+const STEP_COURSE = 4;
+const STEP_LINK_CHECKPOINTS = 5;
 
 const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(STEP_TEMPLATE);
+  const [showWebScorerWizard, setShowWebScorerWizard] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     date: '',
     startTime: '',
     checkpoints: [],
-    runnerRanges: []
+    runnerRanges: [],
+    batches: []
   });
   
-  // Store hooks
   const { startOperation } = useNavigationStore();
   const { createRace, loading, error } = useRaceMaintenanceStore();
 
-  // Initialize race maintenance operation
   useEffect(() => {
     startOperation(MODULE_TYPES.RACE_MAINTENANCE);
   }, [startOperation]);
 
-  // Track form changes
   useEffect(() => {
     const hasChanges = formData.name || formData.date || formData.startTime || 
                       formData.checkpoints.length > 0 || formData.runnerRanges.length > 0;
     setHasUnsavedChanges(hasChanges);
   }, [formData, setHasUnsavedChanges]);
 
-  const handleNext = (stepData) => {
-    // Update form data with step data if provided
-    if (stepData) {
+  const handleTemplateSelect = (template) => {
+    if (template) {
       setFormData(prev => ({
         ...prev,
-        ...stepData
+        name: template.name || '',
+        startTime: template.defaultStartTime?.slice(0, 5) || '',
+        checkpoints: template.checkpoints || [],
+        runnerRanges: template.runnerRanges || [],
+        _templateBatches: template.defaultBatches || []
       }));
+    }
+    setCurrentStep(STEP_DETAILS);
+  };
+
+  const handleNext = (stepData) => {
+    if (stepData) {
+      setFormData(prev => ({ ...prev, ...stepData }));
     }
     setCurrentStep(prev => prev + 1);
   };
@@ -61,17 +84,91 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
     setCurrentStep(prev => prev - 1);
   };
 
-  const handleSubmit = async (runnerRanges) => {
+  const handleRunnersNext = (runnerRanges) => {
+    setFormData(prev => ({ ...prev, runnerRanges }));
+    // Build initial batches for step 3 from template or default single batch
+    const templateBatches = formData._templateBatches || [];
+    const raceDate = formData.date || new Date().toISOString().slice(0, 10);
+    const raceTime = formData.startTime || '00:00:00';
+    const raceStart = `${raceDate}T${raceTime.length === 5 ? raceTime + ':00' : raceTime}`;
+
+    let initialBatches;
+    if (templateBatches.length > 0) {
+      initialBatches = templateBatches.map(b => {
+        const [hh, mm] = raceStart.slice(11, 16).split(':').map(Number);
+        const offsetMin = b.defaultStartOffsetMinutes || 0;
+        const totalMin = hh * 60 + mm + offsetMin;
+        const startH = String(Math.floor(totalMin / 60) % 24).padStart(2, '0');
+        const startM = String(totalMin % 60).padStart(2, '0');
+        return {
+          batchNumber: b.batchNumber,
+          batchName: b.batchName,
+          startTime: `${raceDate}T${startH}:${startM}:00`
+        };
+      });
+    } else {
+      initialBatches = [{ batchNumber: 1, batchName: 'All Runners', startTime: raceStart }];
+    }
+
+    setFormData(prev => ({ ...prev, runnerRanges, batches: initialBatches }));
+    setCurrentStep(STEP_BATCHES);
+  };
+
+  const handleBatchesNext = () => {
+    setCurrentStep(STEP_COURSE);
+  };
+
+  const handleCourseNext = (courseData) => {
+    // Apply course data to formData
+    if (courseData) {
+      setFormData(prev => ({
+        ...prev,
+        courseGpx: courseData.courseGpx,
+        courseBounds: courseData.courseBounds,
+        checkpoints: (prev.checkpoints || []).map(cp => {
+          const coord = courseData.checkpointCoordinates?.find(c => c.number === cp.number);
+          return coord ? { ...cp, latitude: coord.latitude, longitude: coord.longitude } : cp;
+        }),
+      }));
+    }
+    // Show link step if ≥2 checkpoints
+    if ((formData.checkpoints?.length ?? 0) >= 2) {
+      setCurrentStep(STEP_LINK_CHECKPOINTS);
+    } else {
+      handleFinalSubmit(courseData ? {
+        courseGpx: courseData.courseGpx,
+        courseBounds: courseData.courseBounds,
+      } : {});
+    }
+  };
+
+  const handleLinkCheckpointsNext = (updatedCheckpoints) => {
+    handleFinalSubmit({ checkpoints: updatedCheckpoints });
+  };
+
+  const handleFinalSubmit = async (overrides = {}) => {
     try {
+      const merged = { ...formData, ...overrides };
+      const ranges = merged.runnerRanges || [];
+      // Compute minRunner/maxRunner for SharedRunnerGrid grouping
+      const allNumbers = ranges.flatMap(r =>
+        r.isIndividual && r.individualNumbers
+          ? r.individualNumbers
+          : Array.from({ length: r.max - r.min + 1 }, (_, i) => r.min + i)
+      );
       const completeFormData = {
-        ...formData,
-        runnerRanges: runnerRanges || formData.runnerRanges || []
+        ...merged,
+        runnerRanges: ranges,
+        ...(allNumbers.length > 0 && {
+          minRunner: Math.min(...allNumbers),
+          maxRunner: Math.max(...allNumbers),
+        }),
       };
       const raceId = await createRace(completeFormData);
       setHasUnsavedChanges(false);
-      navigate(`/race-maintenance/overview?raceId=${raceId}`);
-    } catch (error) {
-      console.error('Error creating race:', error);
+      navigate(`/race-maintenance/overview?raceId=${raceId}&fromWizard=true`);
+    } catch (err) {
+      console.error('Error creating race:', err);
     }
   };
 
@@ -96,21 +193,20 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
   }
 
   const steps = [
-    {
-      number: 1,
-      label: 'Race Details',
-      description: 'Configure race information and checkpoints'
-    },
-    {
-      number: 2,
-      label: 'Runner Setup',
-      description: 'Set up runner number ranges'
-    }
+    { number: 1, label: 'Template', description: 'Choose a starting template' },
+    { number: 2, label: 'Race Details', description: 'Configure race information' },
+    { number: 3, label: 'Runner Setup', description: 'Set up runner number ranges' },
+    { number: 4, label: 'Waves', description: 'Configure starting waves' },
+    { number: 5, label: 'Course Map', description: 'Import GPX course data (optional)' },
+    { number: 6, label: 'Link Checkpoints', description: 'Optional: group checkpoints at the same location' }
   ];
 
+  const stepLabels = ['Template', 'Race Details', 'Runner Setup', 'Waves', 'Course Map', 'Link Checkpoints'];
+  const totalSteps = (formData.checkpoints?.length ?? 0) >= 2 ? 6 : 5;
+
   return (
+    <>
     <Container maxWidth="xl" padding="normal">
-      {/* Header Section */}
       <Section spacing="tight" border="bottom">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -127,46 +223,91 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
                 Race Setup
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {currentStep === 0 ? 'Configure race details' : 'Set up runner numbers'}
+                {stepLabels[currentStep]}
               </p>
             </div>
           </div>
           <Badge variant="primary" size="lg">
-            Step {currentStep + 1} of 2
+            Step {currentStep + 1} of {totalSteps}
           </Badge>
         </div>
       </Section>
 
-      {/* Step Indicator */}
       <Section spacing="normal">
-        <StepIndicator steps={steps} currentStep={currentStep} />
+        <StepIndicator steps={steps.slice(0, totalSteps)} currentStep={currentStep} />
       </Section>
 
-      {/* Main Content */}
       <Section spacing="normal">
-        <Card>
+        <Card data-screenshot-target>
           <CardBody>
-            {currentStep === 0 && (
+            {currentStep === STEP_TEMPLATE && (
+              <TemplateSelectionStep
+                onSelect={handleTemplateSelect}
+                onImportFromWebScorer={() => setShowWebScorerWizard(true)}
+              />
+            )}
+            {currentStep === STEP_DETAILS && (
               <RaceDetailsStep
                 data={formData}
                 onNext={handleNext}
+                onBack={handleBack}
                 onCancel={onExitAttempt}
                 isLoading={loading}
               />
             )}
-            {currentStep === 1 && (
+            {currentStep === STEP_RUNNERS && (
               <RunnerRangesStep
                 raceDetails={formData}
                 initialRanges={formData.runnerRanges || []}
                 onBack={handleBack}
-                onCreate={handleSubmit}
+                onCreate={handleRunnersNext}
                 isLoading={loading}
+              />
+            )}
+            {currentStep === STEP_BATCHES && (
+              <div className="space-y-6">
+                <BatchConfigStep
+                  batches={formData.batches || []}
+                  onChange={batches => setFormData(prev => ({ ...prev, batches }))}
+                  raceStartTime={formData.startTime ? `${formData.date}T${formData.startTime}` : null}
+                />
+                <div className="flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <Button variant="outline" onClick={handleBack}>
+                    Back
+                  </Button>
+                  <Button variant="primary" onClick={handleBatchesNext} disabled={loading}>
+                    Next: Course Map
+                  </Button>
+                </div>
+              </div>
+            )}
+            {currentStep === STEP_COURSE && (
+              <CourseMapStep
+                checkpoints={formData.checkpoints || []}
+                initialData={formData}
+                onComplete={handleCourseNext}
+                onSkip={() => handleCourseNext(null)}
+              />
+            )}
+            {currentStep === STEP_LINK_CHECKPOINTS && (
+              <LinkCheckpointsStep
+                checkpoints={formData.checkpoints}
+                onNext={handleLinkCheckpointsNext}
+                onBack={handleBack}
               />
             )}
           </CardBody>
         </Card>
       </Section>
     </Container>
+
+    {/* WebScorer import wizard — rendered as a full-screen modal overlay */}
+    {showWebScorerWizard && (
+      <WebScorerImportWizard
+        onClose={() => setShowWebScorerWizard(false)}
+      />
+    )}
+  </>
   );
 };
 
