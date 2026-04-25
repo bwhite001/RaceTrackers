@@ -3,9 +3,13 @@ import RACE_TEMPLATES from '../../data/templates/index';
 
 /**
  * Step 0 of the race setup wizard.
- * User selects a template to pre-fill the form, or starts from scratch.
+ * User selects a template to pre-fill the form, imports from WebScorer, or starts from scratch.
+ *
+ * Props:
+ *   onSelect(template|null)   — proceed with template (or null = scratch)
+ *   onImportFromWebScorer()   — open the WebScorer import wizard
  */
-function TemplateSelectionStep({ onSelect }) {
+function TemplateSelectionStep({ onSelect, onImportFromWebScorer }) {
   return (
     <div className="space-y-6">
       <div>
@@ -13,10 +17,27 @@ function TemplateSelectionStep({ onSelect }) {
           Choose a Race Template
         </h2>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Start from an existing template or build your race from scratch.
-          Templates pre-fill checkpoints, runner ranges, and wave configuration.
+          Start from an existing template, import a WebScorer participant list, or build from scratch.
         </p>
       </div>
+
+      {/* Import from WebScorer */}
+      <button
+        onClick={onImportFromWebScorer}
+        className="w-full text-left p-4 rounded-lg border-2 border-green-300 dark:border-green-700 hover:border-green-500 dark:hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors group"
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">📥</span>
+          <div>
+            <p className="font-medium text-gray-900 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-300">
+              Import from WebScorer
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Create a race directly from a WebScorer participant export (.xlsx)
+            </p>
+          </div>
+        </div>
+      </button>
 
       {/* Start from scratch */}
       <button

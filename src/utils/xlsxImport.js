@@ -17,6 +17,7 @@ export const FIELD_OPTIONS = [
   { value: 'firstName',   label: 'First Name' },
   { value: 'lastName',    label: 'Last Name' },
   { value: 'gender',      label: 'Gender' },
+  { value: 'age',         label: 'Age' },
   { value: 'batchNumber', label: 'Wave / Batch' },
   { value: 'ignore',      label: '— ignore —' },
 ];
@@ -27,6 +28,7 @@ const FIELD_PATTERNS = {
   firstName:   ['first', 'first name', 'firstname', 'given', 'given name'],
   lastName:    ['last', 'last name', 'lastname', 'surname', 'family', 'family name'],
   gender:      ['sex', 'gender', 'm/f'],
+  age:         ['age', 'years', 'dob', 'date of birth'],
   batchNumber: ['wave', 'batch', 'batch number', 'batchnumber', 'category', 'sub-event', 'subevent', 'division'],
 };
 
@@ -121,9 +123,17 @@ export function applyMappingsToRows(rows, mappings) {
     // lastName
     const lastName = (fieldToCol.lastName ? (row[fieldToCol.lastName] ?? '') : '').toString().trim() || null;
 
-    // gender
-    const rawGender = (fieldToCol.gender ? (row[fieldToCol.gender] ?? '') : '').toString().trim().toUpperCase();
-    const gender = ALLOWED_GENDERS.has(rawGender) ? rawGender : 'X';
+    // gender — accept single-char (M/F/X) or full-word values (Male/Female/Non-Binary)
+    const rawGender = (fieldToCol.gender ? (row[fieldToCol.gender] ?? '') : '').toString().trim();
+    const genderUpper = rawGender.toUpperCase();
+    const GENDER_MAP = { MALE: 'M', FEMALE: 'F', 'NON-BINARY': 'X', NONBINARY: 'X', OTHER: 'X' };
+    const gender = ALLOWED_GENDERS.has(genderUpper)
+      ? genderUpper
+      : (GENDER_MAP[genderUpper] ?? 'X');
+
+    // age
+    const rawAge = fieldToCol.age ? row[fieldToCol.age] : undefined;
+    const age = rawAge !== undefined ? (parseInt(rawAge, 10) || null) : null;
 
     // batchNumber — numeric value wins; text labels use pre-scanned sequential map
     const rawBatch = fieldToCol.batchNumber ? row[fieldToCol.batchNumber] : '';
@@ -137,6 +147,7 @@ export function applyMappingsToRows(rows, mappings) {
       firstName,
       lastName,
       gender,
+      age,
       batchNumber: resolvedBatch,
     });
   });

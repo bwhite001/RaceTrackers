@@ -14,6 +14,7 @@ import RaceMaintenanceRepository from '../services/RaceMaintenanceRepository';
 const DEV_IMPORTS = [
   { label: 'Pinnacles Classic 2026', path: '/import/PinnaclesClassic2026.xlsx' },
   { label: 'Pinnacles Classic 2026 (WebScorer)', path: '/import/PinnaclesClassic2026WebScorer.xlsx' },
+  { label: 'BTM2026 (WebScorer)', path: '/import/BTM2026WebScorer.xlsx' },
 ];
 
 // Steps: 'idle' | 'map' | 'preview' | 'importing' | 'done'

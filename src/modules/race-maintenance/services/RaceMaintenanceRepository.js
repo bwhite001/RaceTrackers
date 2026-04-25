@@ -261,7 +261,8 @@ export class RaceMaintenanceRepository extends BaseRepository {
               firstName: row.firstName ?? existing.firstName,
               lastName: row.lastName ?? existing.lastName,
               gender: row.gender ?? existing.gender,
-              batchNumber: row.batchNumber ?? existing.batchNumber
+              batchNumber: row.batchNumber ?? existing.batchNumber,
+              ...(row.age != null && { age: row.age }),
             });
             updated++;
           } else {
@@ -273,7 +274,8 @@ export class RaceMaintenanceRepository extends BaseRepository {
                 firstName: row.firstName ?? null,
                 lastName: row.lastName ?? null,
                 gender: row.gender ?? 'X',
-                batchNumber: row.batchNumber ?? 1
+                batchNumber: row.batchNumber ?? 1,
+                ...(row.age != null && { age: row.age }),
               });
             created++;
           }

@@ -21,6 +21,17 @@ import LinkCheckpointsStep from './LinkCheckpointsStep';
 import LoadingSpinner from '../Layout/LoadingSpinner';
 import ErrorMessage from '../Layout/ErrorMessage';
 import StepIndicator from './StepIndicator';
+import WebScorerImportWizard from '../../modules/race-maintenance/components/WebScorerImportWizard';
+
+import CourseMapStep from './CourseMapStep';
+
+// Step indices
+const STEP_TEMPLATE = 0;
+const STEP_DETAILS = 1;
+const STEP_RUNNERS = 2;
+const STEP_BATCHES = 3;
+const STEP_COURSE = 4;
+const STEP_LINK_CHECKPOINTS = 5;
 
 import CourseMapStep from './CourseMapStep';
 
@@ -35,6 +46,7 @@ const STEP_LINK_CHECKPOINTS = 5;
 const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(STEP_TEMPLATE);
+  const [showWebScorerWizard, setShowWebScorerWizard] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     date: '',
@@ -203,6 +215,7 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const totalSteps = (formData.checkpoints?.length ?? 0) >= 2 ? 6 : 5;
 
   return (
+    <>
     <Container maxWidth="xl" padding="normal">
       <Section spacing="tight" border="bottom">
         <div className="flex items-center justify-between">
@@ -238,7 +251,10 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
         <Card data-screenshot-target>
           <CardBody>
             {currentStep === STEP_TEMPLATE && (
-              <TemplateSelectionStep onSelect={handleTemplateSelect} />
+              <TemplateSelectionStep
+                onSelect={handleTemplateSelect}
+                onImportFromWebScorer={() => setShowWebScorerWizard(true)}
+              />
             )}
             {currentStep === STEP_DETAILS && (
               <RaceDetailsStep
@@ -294,6 +310,14 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
         </Card>
       </Section>
     </Container>
+
+    {/* WebScorer import wizard — rendered as a full-screen modal overlay */}
+    {showWebScorerWizard && (
+      <WebScorerImportWizard
+        onClose={() => setShowWebScorerWizard(false)}
+      />
+    )}
+  </>
   );
 };
 
