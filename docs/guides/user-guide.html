@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RaceTracker Pro — User Guide</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+  .page-header { background: #1e3a5f; color: #fff; padding: 24px 32px; }
+  .page-header h1 { font-size: 1.5rem; }
+  .page-header p { font-size: .9rem; opacity: .8; margin-top: 4px; }
+  nav.toc { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 12px 32px; }
+  nav.toc a { color: #1e3a5f; text-decoration: none; margin-right: 20px; font-size: .9rem; font-weight: 500; }
+  nav.toc a:hover { text-decoration: underline; }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+  h2 { font-size: 1.3rem; color: #1e3a5f; margin: 40px 0 8px; border-bottom: 2px solid #1e3a5f; padding-bottom: 6px; }
+  .chapter-intro { color: #475569; margin-bottom: 24px; font-size: .95rem; }
+  .task { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px 24px; margin-bottom: 20px; }
+  .task h3 { font-size: 1rem; color: #0f172a; margin-bottom: 10px; }
+  .task .description { color: #475569; font-size: .9rem; margin-bottom: 16px; }
+  .filmstrip { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; }
+  .filmstrip figure { flex: 0 0 auto; text-align: center; }
+  .filmstrip img { width: 260px; border-radius: 6px; border: 1px solid #e2e8f0; display: block; }
+  .filmstrip figcaption { font-size: .75rem; color: #94a3b8; margin-top: 4px; }
+  .steps { display: flex; flex-direction: column; gap: 24px; }
+  .step { display: flex; flex-direction: column; gap: 8px; }
+  .step-instruction { font-weight: 600; font-size: .95rem; color: #1e293b; margin: 0; }
+  .step img { max-width: 100%; width: 640px; border-radius: 8px; border: 1px solid #e2e8f0; display: block; }
+  .page-footer { text-align: center; padding: 24px; font-size: .75rem; color: #94a3b8; border-top: 1px solid #e2e8f0; margin-top: 40px; }
+  @media (max-width: 640px) { .step img { width: 100%; } main { padding: 16px; } }
+</style>
+</head>
+<body>
+<header class="page-header">
+  <h1>&#x26A1; RaceTracker Pro — User Guide</h1>
+  <p>Auto-generated from Playwright journey tests &bull; All roles combined</p>
+</header>
+<nav class="toc">
+  <a href="#split-role">Split-Role Checkpoint Operations</a>
+</nav>
+<main>
+<div id="split-role">
+<h2>Split-Role Checkpoint Operations</h2>
+<p class="chapter-intro">How two operators can share one checkpoint — a Marker records runner times and shares batches via QR code, while a Radio Operator scans the QR and calls runners in to base.</p>
+<section class="task">
+<h3>Checkpoint opens in Marker mode by default</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Navigate to checkpoint 1</p><img src="assets/checkpoint-opens-in-marker-mode-by-default-step-01.jpg" alt="Navigate to checkpoint 1" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Role toggle is visible with Marker and Radio Operator buttons</p><img src="assets/checkpoint-opens-in-marker-mode-by-default-step-02.jpg" alt="Role toggle is visible with Marker and Radio Operator buttons" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Marker mode — runner grid is visible</p><img src="assets/checkpoint-opens-in-marker-mode-by-default-step-03.jpg" alt="Marker mode — runner grid is visible" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Switching to Radio Operator mode replaces the runner grid with a scan zone</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Navigate to checkpoint 1 in default Marker mode</p><img src="assets/switching-to-radio-operator-mode-replaces-the-runner-grid-with-a-scan-zone-step-01.jpg" alt="Navigate to checkpoint 1 in default Marker mode" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Click Radio Operator toggle button</p><img src="assets/switching-to-radio-operator-mode-replaces-the-runner-grid-with-a-scan-zone-step-02.jpg" alt="Click Radio Operator toggle button" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Radio Operator mode — scan zone is visible with Scan QR button</p><img src="assets/switching-to-radio-operator-mode-replaces-the-runner-grid-with-a-scan-zone-step-03.jpg" alt="Radio Operator mode — scan zone is visible with Scan QR button" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Switching back to Marker mode restores the runner grid</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Navigate to checkpoint 1 and switch to Radio Operator</p><img src="assets/switching-back-to-marker-mode-restores-the-runner-grid-step-01.jpg" alt="Navigate to checkpoint 1 and switch to Radio Operator" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Click Marker toggle to switch back</p><img src="assets/switching-back-to-marker-mode-restores-the-runner-grid-step-02.jpg" alt="Click Marker toggle to switch back" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Marker mode — runner grid tabs are restored</p><img src="assets/switching-back-to-marker-mode-restores-the-runner-grid-step-03.jpg" alt="Marker mode — runner grid tabs are restored" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Share Batch button is visible in Marker mode with a QR icon</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Navigate to checkpoint 1 in Marker mode</p><img src="assets/share-batch-button-is-visible-in-marker-mode-with-a-qr-icon-step-01.jpg" alt="Navigate to checkpoint 1 in Marker mode" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Share Batch FAB is visible with QR icon</p><img src="assets/share-batch-button-is-visible-in-marker-mode-with-a-qr-icon-step-02.jpg" alt="Share Batch FAB is visible with QR icon" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Share Batch button is hidden in Radio Operator mode</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Navigate to checkpoint 1 in Marker mode</p><img src="assets/share-batch-button-is-hidden-in-radio-operator-mode-step-01.jpg" alt="Navigate to checkpoint 1 in Marker mode" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Switch to Radio Operator mode</p><img src="assets/share-batch-button-is-hidden-in-radio-operator-mode-step-02.jpg" alt="Switch to Radio Operator mode" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Share Batch button is no longer visible</p><img src="assets/share-batch-button-is-hidden-in-radio-operator-mode-step-03.jpg" alt="Share Batch button is no longer visible" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Share Batch opens the batch share modal</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Navigate to checkpoint 1 in Marker mode</p><img src="assets/share-batch-opens-the-batch-share-modal-step-01.jpg" alt="Navigate to checkpoint 1 in Marker mode" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Click Share Batch button</p><img src="assets/share-batch-opens-the-batch-share-modal-step-02.jpg" alt="Click Share Batch button" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Batch share modal appears with Share Batch heading</p><img src="assets/share-batch-opens-the-batch-share-modal-step-03.jpg" alt="Batch share modal appears with Share Batch heading" loading="lazy"></div>
+</div>
+</section>
+</div>
+</main>
+<footer class="page-footer">Generated by generate-guide.js &bull; Regenerate with <code>npm run generate:guide</code></footer>
+</body>
+</html>

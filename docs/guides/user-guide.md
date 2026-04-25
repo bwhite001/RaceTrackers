@@ -1,174 +1,101 @@
-# Race Tracker User Guide
+# RaceTracker Pro — User Guide
 
-## Overview
-This guide provides comprehensive instructions for using the Race Tracker application, including all operational modes and features.
+> This guide is auto-generated from the Playwright journey tests.
+> Screenshots show the actual app at each key step.
+> Regenerate with: `npm run generate:guide`
 
-## Getting Started
+## Split-Role Checkpoint Operations
 
-### Initial Setup
-1. Access the application
-2. Navigate to "Race Maintenance"
-3. Click "Get Started"
+How two operators can share one checkpoint — a Marker records runner times and shares batches via QR code, while a Radio Operator scans the QR and calls runners in to base.
 
-### Creating a Race
-1. Fill in race details:
-   - Race Name
-   - Date
-   - Start Time
-   - Number of Checkpoints
-2. Configure runner ranges
-3. Click "Create Race"
+### Checkpoint opens in Marker mode by default
 
-## Operation Modes
 
-### Race Maintenance
-- View race overview
-- Manage runner data
-- Configure settings
-- Generate reports
 
-### Checkpoint Operations
-- Track runner progress
-- Record timestamps
-- View checkpoint statistics
-- Generate checkpoint reports
+**Navigate to checkpoint 1**
 
-### Base Station Operations
-- Monitor overall race status
-- Process runner data
-- Handle withdrawals
-- Generate comprehensive reports
+![Navigate to checkpoint 1](assets/checkpoint-opens-in-marker-mode-by-default-step-01.jpg)
 
-## Features Guide
+**Role toggle is visible with Marker and Radio Operator buttons**
 
-### Runner Management
-1. Adding Runners
-   - Enter runner number
-   - Verify range validity
-   - Save runner data
+![Role toggle is visible with Marker and Radio Operator buttons](assets/checkpoint-opens-in-marker-mode-by-default-step-02.jpg)
 
-2. Tracking Progress
-   - Update runner status
-   - Record checkpoint times
-   - Note withdrawals
+**Marker mode — runner grid is visible**
 
-3. Generating Reports
-   - Select report type
-   - Configure filters
-   - Export data
+![Marker mode — runner grid is visible](assets/checkpoint-opens-in-marker-mode-by-default-step-03.jpg)
 
-### Data Entry
+### Switching to Radio Operator mode replaces the runner grid with a scan zone
 
-#### Base Station Entry
-1. Select runner number
-2. Enter checkpoint data
-3. Record status updates
-4. Save changes
 
-#### Checkpoint Entry
-1. Record runner arrival
-2. Update status
-3. Note any issues
-4. Submit data
 
-### Reports and Analysis
+**Navigate to checkpoint 1 in default Marker mode**
 
-#### Available Reports
-- Runner Status Summary
-- Checkpoint Statistics
-- Withdrawal Report
-- Time Analysis
+![Navigate to checkpoint 1 in default Marker mode](assets/switching-to-radio-operator-mode-replaces-the-runner-grid-with-a-scan-zone-step-01.jpg)
 
-#### Export Options
-- CSV format
-- PDF reports
-- Data backup
+**Click Radio Operator toggle button**
 
-## User Interface
+![Click Radio Operator toggle button](assets/switching-to-radio-operator-mode-replaces-the-runner-grid-with-a-scan-zone-step-02.jpg)
 
-### Navigation
-- Use breadcrumb navigation
-- Switch between modes
-- Access settings
-- Exit operations
+**Radio Operator mode — scan zone is visible with Scan QR button**
 
-### Common Tasks
-1. Switching Modes
-   - Click mode selection
-   - Confirm switch
-   - Navigate to new mode
+![Radio Operator mode — scan zone is visible with Scan QR button](assets/switching-to-radio-operator-mode-replaces-the-runner-grid-with-a-scan-zone-step-03.jpg)
 
-2. Data Management
-   - Enter data
-   - Verify entries
-   - Save changes
-   - Generate reports
+### Switching back to Marker mode restores the runner grid
 
-3. Settings Configuration
-   - Access settings
-   - Modify preferences
-   - Save changes
 
-## Troubleshooting
 
-### Common Issues
-1. Data Entry Problems
-   - Verify runner number
-   - Check input format
-   - Confirm changes saved
+**Navigate to checkpoint 1 and switch to Radio Operator**
 
-2. Navigation Issues
-   - Use proper exit buttons
-   - Confirm mode switches
-   - Check active operations
+![Navigate to checkpoint 1 and switch to Radio Operator](assets/switching-back-to-marker-mode-restores-the-runner-grid-step-01.jpg)
 
-3. Report Generation
-   - Verify data selection
-   - Check export format
-   - Confirm file location
+**Click Marker toggle to switch back**
 
-### Error Messages
-- Invalid runner number
-- Duplicate entry
-- Missing required data
-- Operation conflicts
+![Click Marker toggle to switch back](assets/switching-back-to-marker-mode-restores-the-runner-grid-step-02.jpg)
 
-## Best Practices
+**Marker mode — runner grid tabs are restored**
 
-### Data Entry
-1. Verify all inputs
-2. Use proper formats
-3. Save frequently
-4. Check for errors
+![Marker mode — runner grid tabs are restored](assets/switching-back-to-marker-mode-restores-the-runner-grid-step-03.jpg)
 
-### Operation Management
-1. Complete current tasks
-2. Exit properly
-3. Verify changes
-4. Back up data
+### Share Batch button is visible in Marker mode with a QR icon
 
-### Report Generation
-1. Check data completeness
-2. Verify filters
-3. Review output
-4. Save exports
 
-## Keyboard Shortcuts
 
-### Global
-- `Esc`: Exit current operation
-- `Ctrl+S`: Save changes
-- `Ctrl+H`: Show help
+**Navigate to checkpoint 1 in Marker mode**
 
-### Data Entry
-- `Tab`: Next field
-- `Enter`: Submit entry
-- `Alt+N`: New entry
-- `Alt+S`: Save entry
+![Navigate to checkpoint 1 in Marker mode](assets/share-batch-button-is-visible-in-marker-mode-with-a-qr-icon-step-01.jpg)
 
-## Support
-For application support:
-- Check documentation
-- Review error messages
-- Contact system administrator
-- Submit bug reports
+**Share Batch FAB is visible with QR icon**
+
+![Share Batch FAB is visible with QR icon](assets/share-batch-button-is-visible-in-marker-mode-with-a-qr-icon-step-02.jpg)
+
+### Share Batch button is hidden in Radio Operator mode
+
+
+
+**Navigate to checkpoint 1 in Marker mode**
+
+![Navigate to checkpoint 1 in Marker mode](assets/share-batch-button-is-hidden-in-radio-operator-mode-step-01.jpg)
+
+**Switch to Radio Operator mode**
+
+![Switch to Radio Operator mode](assets/share-batch-button-is-hidden-in-radio-operator-mode-step-02.jpg)
+
+**Share Batch button is no longer visible**
+
+![Share Batch button is no longer visible](assets/share-batch-button-is-hidden-in-radio-operator-mode-step-03.jpg)
+
+### Share Batch opens the batch share modal
+
+
+
+**Navigate to checkpoint 1 in Marker mode**
+
+![Navigate to checkpoint 1 in Marker mode](assets/share-batch-opens-the-batch-share-modal-step-01.jpg)
+
+**Click Share Batch button**
+
+![Click Share Batch button](assets/share-batch-opens-the-batch-share-modal-step-02.jpg)
+
+**Batch share modal appears with Share Batch heading**
+
+![Batch share modal appears with Share Batch heading](assets/share-batch-opens-the-batch-share-modal-step-03.jpg)

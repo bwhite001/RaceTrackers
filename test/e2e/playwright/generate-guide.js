@@ -1,0 +1,308 @@
+#!/usr/bin/env node
+/**
+ * generate-guide.js
+ * Reads playwright-report/journey-report.html, extracts passing tests,
+ * and writes docs/guides/user-guide.md + docs/guides/user-guide.html
+ * + docs/guides/assets/*.png
+ *
+ * Usage: node test/e2e/playwright/generate-guide.js
+ */
+
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, '../../..');
+const REPORT_PATH = path.join(ROOT, 'playwright-report', 'journey-report.html');
+const OUT_DIR = path.join(ROOT, 'docs', 'guides');
+const ASSETS_DIR = path.join(OUT_DIR, 'assets');
+
+const SECTION_MAP = {
+  'creates a new race from scratch and verifies the overview':           'setup',
+  'step indicator advances correctly through setup wizard':              'setup',
+  'back button on step 2 returns to race details with data preserved':   'setup',
+  'race management page lists created races':                            'setup',
+  'clicking a race opens its overview':                                  'setup',
+  'creates a second race from the management page':                      'setup',
+  'race overview shows correct runner and checkpoint counts':            'setup',
+  'navigates to checkpoint and sees runner grid':                        'checkpoint',
+  'marks off a single runner via the runner grid':                       'checkpoint',
+  'marks off multiple runners via Quick Entry':                          'checkpoint',
+  'switches to Callout Sheet tab':                                       'checkpoint',
+  'switches to Overview tab and shows runner counts':                    'checkpoint',
+  'can export checkpoint results':                                       'checkpoint',
+  'navigates from race overview to a checkpoint':                        'checkpoint',
+  'runner name/gender section appears after adding a range':             'setup',
+  'waves step shows default wave and allows adding more':                'setup',
+  'wave name and time fields are editable and save':                     'setup',
+  'callout sheet tab shows runners who passed but not called in':        'checkpoint',
+  'pending count badge decrements when runner is called in':             'checkpoint',
+  'home page landing shows the race management module card':             'navigation',
+  'home page module cards are all accessible when no operation is active': 'navigation',
+  'unknown routes redirect to home':                                     'navigation',
+  'navigates from race overview to base station':                        'navigation',
+  'shows protection modal when leaving active checkpoint operation':     'navigation',
+  'allows navigation after confirming exit from active operation':       'navigation',
+  'opens and closes the Settings modal':                                 'settings',
+  'toggles dark mode on and off':                                        'settings',
+  'settings persist after closing and reopening the modal':              'settings',
+  'navigates to base station and sees data entry form':                  'base-station',
+  'enters a common time and runner batch, then verifies in overview':    'base-station',
+  'records a DNF via the withdrawal dialog':                             'base-station',
+  'opens the Checkpoint Matrix tab':                                     'base-station',
+  'switches to Reports tab and renders a report':                        'base-station',
+  'exports base station data':                                           'base-station',
+  'leaderboard tab shows group-by controls and empty state':             'leaderboard',
+  'leaderboard grouping mode can be switched':                           'leaderboard',
+  'export modal opens from base station header':                         'import-export',
+  'downloads a race configuration JSON file':                            'import-export',
+  'imports a race configuration and restores data':                      'import-export',
+  'Phase 1 — Race Director creates race with 10 runners and 2 checkpoints': 'simulation',
+  'Phase 2 — CP1 Volunteer marks runners 101–109 passed via quick entry':   'simulation',
+  'Phase 3 — CP2 Volunteer marks runners 101, 103–109 passed (102 absent)': 'simulation',
+  'Phase 4a — Base Station initialises and runner list loads (10 runners)':  'simulation',
+  'Phase 4b — Records finish time 10:45:00 for batch 103–108':               'simulation',
+  'Phase 4c — Records DNF for runner 102 (heat exhaustion)':                 'simulation',
+  'Phase 4d — Marks runner 110 as DNS (non-starter)':                        'simulation',
+  'Phase 4e — Records DNF for runner 101 (injured knee)':                    'simulation',
+  'Phase 4f — Overview tab shows correct runner statuses':                   'simulation',
+  'Phase 4g — Reports tab renders race summary':                             'simulation',
+  'records a batch of runners at base station and views history':            'base-station',
+  // Transfer Data (QR device-to-device sync)
+  'Transfer Data button appears in checkpoint header':                       'checkpoint',
+  'navigates to transfer view and shows Send and Receive tabs':              'checkpoint',
+  'shows empty state warning when no runners are marked off':                'checkpoint',
+  'generates a QR code when marked runners are present':                    'checkpoint',
+  'delta scope shows only entries newer than last share timestamp':          'checkpoint',
+  'Receive tab shows scanner and file import fallback':                      'checkpoint',
+  'back button returns to the checkpoint view':                              'checkpoint',
+  'volunteer operates linked turnaround checkpoints from one interface':    'linked-checkpoints',
+  'checkpoint opens in Marker mode by default':                             'split-role',
+  'switching to Radio Operator mode replaces the runner grid with a scan zone': 'split-role',
+  'switching back to Marker mode restores the runner grid':                 'split-role',
+  'Share Batch button is visible in Marker mode with a QR icon':            'split-role',
+  'Share Batch button is hidden in Radio Operator mode':                    'split-role',
+  'Share Batch opens the batch share modal':                                'split-role',
+};
+
+const CHAPTERS = [
+  { key: 'setup',         title: 'Setting Up a Race',          intro: 'Use these steps to create and manage races. This section covers the full setup wizard, runner ranges, checkpoints, waves, and the race overview.' },
+  { key: 'checkpoint',    title: 'Running a Checkpoint',       intro: 'Steps for checkpoint volunteers. Covers opening a checkpoint, marking off runners individually and in bulk, reviewing counts, exporting data, and transferring data to another device via QR code.' },
+  { key: 'base-station',  title: 'Operating the Base Station', intro: 'Steps for the base station operator. Record finish times, mark DNF/DNS runners, and review race-wide status from the Overview and Reports tabs.' },
+  { key: 'leaderboard',   title: 'Race Leaderboard',           intro: 'View live race standings grouped by gender, wave, or overall. Switch between grouping modes and track leaders as finishers are recorded.' },
+  { key: 'import-export', title: 'Importing & Exporting Data', intro: 'Transfer race configurations and results between devices. Export from the base station header or race management page; import to restore a race.' },
+  { key: 'navigation',    title: 'Navigating the App',         intro: 'How to move between modules, what to expect on the home screen, and how the app protects active operations from accidental navigation.' },
+  { key: 'settings',      title: 'Settings',                   intro: 'Personalise the app. Toggle dark mode and understand how preferences are saved.' },
+  { key: 'simulation',    title: 'Complete Race Walkthrough',  intro: 'A full end-to-end race simulation: race director creates the race, checkpoint volunteers mark off runners, and the base station records finish times and statuses.' },
+  { key: 'linked-checkpoints', title: 'Linked Checkpoints (Turnaround Point)', intro: 'How to operate two checkpoints at the same physical location — for example, an out-and-back turnaround where CP1 (outbound) and CP4 (return) are staffed by the same volunteers. Covers the checkpoint picker, dual view, tab switching, and cross-checkpoint overview.' },
+  { key: 'split-role', title: 'Split-Role Checkpoint Operations', intro: 'How two operators can share one checkpoint — a Marker records runner times and shares batches via QR code, while a Radio Operator scans the QR and calls runners in to base.' },
+];
+
+function slugify(str) {
+  return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+function unescapeHtml(str) {
+  return str
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function extractPassingTests(html) {
+  const tests = [];
+  const re = /<article class="test pass">([\s\S]*?)<\/article>/g;
+  let m;
+  while ((m = re.exec(html)) !== null) {
+    const block = m[1];
+    const titleMatch = block.match(/class="test-title">([^<]+)<\/h3>/);
+    const descMatch  = block.match(/class="test-description">([^<]+)<\/p>/);
+    // Extract { dataUri, label } pairs — src and alt are always adjacent in reporter output
+    const figRe = /<img src="(data:image\/(?:png|jpeg);base64,[^"]+)" alt="([^"]+)"/g;
+    const allScreenshots = [];
+    let im;
+    while ((im = figRe.exec(block)) !== null) {
+      allScreenshots.push({ dataUri: im[1], label: unescapeHtml(im[2]) });
+    }
+    // Keep only the "after-step" captures: labels like "01-B Step title"
+    // These show the result state the user should see after each action.
+    const screenshots = allScreenshots.filter(s => /^\d{2}-B /.test(s.label))
+      .map(s => ({ dataUri: s.dataUri, label: s.label.replace(/^\d{2}-B /, '') }));
+    if (titleMatch) {
+      tests.push({
+        title: titleMatch[1].trim(),
+        description: descMatch ? descMatch[1].trim() : '',
+        screenshots,
+      });
+    }
+  }
+  return tests;
+}
+
+function saveScreenshot(dataUri, filename) {
+  // Strip MIME prefix regardless of image type (png or jpeg)
+  const base64 = dataUri.replace(/^data:image\/(?:png|jpeg);base64,/, '');
+  // Preserve the correct extension based on MIME type
+  const ext = dataUri.startsWith('data:image/jpeg') ? 'jpg' : 'png';
+  const finalName = filename.replace(/\.png$/, `.${ext}`);
+  fs.writeFileSync(path.join(ASSETS_DIR, finalName), Buffer.from(base64, 'base64'));
+  return `assets/${finalName}`;
+}
+
+function main() {
+  if (!fs.existsSync(REPORT_PATH)) {
+    console.error(`ERROR: ${REPORT_PATH} not found.\nRun: npm run test:e2e first.`);
+    process.exit(1);
+  }
+
+  fs.mkdirSync(ASSETS_DIR, { recursive: true });
+
+  const html = fs.readFileSync(REPORT_PATH, 'utf8');
+  const tests = extractPassingTests(html);
+  console.log(`Found ${tests.length} passing tests.`);
+
+  const chapters = {};
+  for (const ch of CHAPTERS) chapters[ch.key] = [];
+
+  for (const test of tests) {
+    const chapter = SECTION_MAP[test.title];
+    if (!chapter) {
+      console.warn(`  WARN: no chapter mapping for "${test.title}" — skipping`);
+      continue;
+    }
+    const screenshotPaths = test.screenshots.map((shot, i) => {
+      const filename = `${slugify(test.title)}-step-${String(i + 1).padStart(2, '0')}.png`;
+      return { path: saveScreenshot(shot.dataUri, filename), label: shot.label };
+    });
+    chapters[chapter].push({ ...test, screenshotPaths });
+  }
+
+  // ── Completeness check ────────────────────────────────────────────────
+  const found = new Set(tests.map(t => t.title));
+  const missing = Object.keys(SECTION_MAP).filter(t => !found.has(t));
+  if (missing.length) {
+    console.warn(`\nWARN: ${missing.length} mapped test(s) not found in report (maybe skipped or renamed):`);
+    missing.forEach(t => console.warn(`  - "${t}"`));
+  }
+
+  // ── Markdown ──────────────────────────────────────────────────────────
+  const mdLines = [
+    '# RaceTracker Pro — User Guide',
+    '',
+    '> This guide is auto-generated from the Playwright journey tests.',
+    '> Screenshots show the actual app at each key step.',
+    '> Regenerate with: `npm run generate:guide`',
+    '',
+  ];
+
+  for (const ch of CHAPTERS) {
+    const items = chapters[ch.key];
+    if (!items.length) continue;
+    mdLines.push(`## ${ch.title}`, '', ch.intro, '');
+    for (const test of items) {
+      mdLines.push(`### ${capitalize(test.title)}`, '', unescapeHtml(test.description), '');
+      for (const { path, label } of test.screenshotPaths) {
+        mdLines.push(`**${unescapeHtml(label)}**`, '', `![${unescapeHtml(label)}](${path})`, '');
+      }
+    }
+  }
+
+  fs.writeFileSync(path.join(OUT_DIR, 'user-guide.md'), mdLines.join('\n'), 'utf8');
+  console.log('Written: docs/guides/user-guide.md');
+
+  // ── HTML ──────────────────────────────────────────────────────────────
+  const chapterBlocks = [];
+  for (const ch of CHAPTERS) {
+    const items = chapters[ch.key];
+    if (!items.length) continue;
+    let block = `<div id="${ch.key}">\n<h2>${ch.title}</h2>\n<p class="chapter-intro">${ch.intro}</p>\n`;
+    for (const test of items) {
+      const desc = escapeHtml(unescapeHtml(test.description));
+      block += `<section class="task">\n<h3>${capitalize(test.title)}</h3>\n<p class="description">${desc}</p>\n<div class="steps">\n`;
+      for (const { path, label } of test.screenshotPaths) {
+        const escapedLabel = escapeHtml(unescapeHtml(label));
+        block += `<div class="step"><p class="step-instruction">${escapedLabel}</p><img src="${path}" alt="${escapedLabel}" loading="lazy"></div>\n`;
+      }
+      block += `</div>\n</section>\n`;
+    }
+    block += `</div>`;
+    chapterBlocks.push(block);
+  }
+
+  const tocLinks = CHAPTERS
+    .filter(ch => chapters[ch.key].length)
+    .map(ch => `  <a href="#${ch.key}">${ch.title}</a>`)
+    .join('\n');
+
+  const finalHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RaceTracker Pro — User Guide</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+  .page-header { background: #1e3a5f; color: #fff; padding: 24px 32px; }
+  .page-header h1 { font-size: 1.5rem; }
+  .page-header p { font-size: .9rem; opacity: .8; margin-top: 4px; }
+  nav.toc { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 12px 32px; }
+  nav.toc a { color: #1e3a5f; text-decoration: none; margin-right: 20px; font-size: .9rem; font-weight: 500; }
+  nav.toc a:hover { text-decoration: underline; }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+  h2 { font-size: 1.3rem; color: #1e3a5f; margin: 40px 0 8px; border-bottom: 2px solid #1e3a5f; padding-bottom: 6px; }
+  .chapter-intro { color: #475569; margin-bottom: 24px; font-size: .95rem; }
+  .task { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px 24px; margin-bottom: 20px; }
+  .task h3 { font-size: 1rem; color: #0f172a; margin-bottom: 10px; }
+  .task .description { color: #475569; font-size: .9rem; margin-bottom: 16px; }
+  .filmstrip { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; }
+  .filmstrip figure { flex: 0 0 auto; text-align: center; }
+  .filmstrip img { width: 260px; border-radius: 6px; border: 1px solid #e2e8f0; display: block; }
+  .filmstrip figcaption { font-size: .75rem; color: #94a3b8; margin-top: 4px; }
+  .steps { display: flex; flex-direction: column; gap: 24px; }
+  .step { display: flex; flex-direction: column; gap: 8px; }
+  .step-instruction { font-weight: 600; font-size: .95rem; color: #1e293b; margin: 0; }
+  .step img { max-width: 100%; width: 640px; border-radius: 8px; border: 1px solid #e2e8f0; display: block; }
+  .page-footer { text-align: center; padding: 24px; font-size: .75rem; color: #94a3b8; border-top: 1px solid #e2e8f0; margin-top: 40px; }
+  @media (max-width: 640px) { .step img { width: 100%; } main { padding: 16px; } }
+</style>
+</head>
+<body>
+<header class="page-header">
+  <h1>&#x26A1; RaceTracker Pro — User Guide</h1>
+  <p>Auto-generated from Playwright journey tests &bull; All roles combined</p>
+</header>
+<nav class="toc">
+${tocLinks}
+</nav>
+<main>
+${chapterBlocks.join('\n')}
+</main>
+<footer class="page-footer">Generated by generate-guide.js &bull; Regenerate with <code>npm run generate:guide</code></footer>
+</body>
+</html>`;
+
+  fs.writeFileSync(path.join(OUT_DIR, 'user-guide.html'), finalHtml, 'utf8');
+  console.log('Written: docs/guides/user-guide.html');
+
+  const imgCount = fs.readdirSync(ASSETS_DIR).filter(f => f.endsWith('.png') || f.endsWith('.jpg')).length;
+  console.log(`Written: ${imgCount} screenshots to docs/guides/assets/`);
+  console.log('\nDone! Open docs/guides/user-guide.html in a browser.');
+}
+
+main();

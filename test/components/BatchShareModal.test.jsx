@@ -37,6 +37,7 @@ import TransferService from 'modules/checkpoint-operations/services/TransferServ
 
 describe('BatchShareModal', () => {
   const defaultProps = {
+    isOpen: true,
     raceId: 1,
     checkpointNumber: 3,
     onClose: vi.fn(),
