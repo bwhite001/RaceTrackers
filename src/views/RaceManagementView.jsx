@@ -386,13 +386,13 @@ const RaceListItem = ({ race, onView, onEdit, onDuplicate, onExport, onDelete })
   return (
     <Card variant="elevated" hoverable>
       <CardBody>
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-3 mb-2">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white truncate">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white truncate flex-1 min-w-0">
                 {race.name}
               </h3>
-              <Badge className={statusColor}>
+              <Badge className={`${statusColor} shrink-0`}>
                 {status}
               </Badge>
             </div>
@@ -421,7 +421,7 @@ const RaceListItem = ({ race, onView, onEdit, onDuplicate, onExport, onDelete })
           </div>
 
           {/* Action Buttons */}
-          <div className="ml-4 flex items-center space-x-2">
+          <div className="flex items-center gap-2 sm:ml-4 sm:shrink-0">
             <Button
               variant="secondary"
               onClick={onView}
