@@ -36,7 +36,7 @@ export default function BatchShareModal({ raceId, checkpointNumber, onClose }) {
       ]);
       if (cancelled) return;
       setLastShare(ts);
-      setIsPendingRetry(pending);
+      setIsPendingRetry(pending ?? false);
       const p = await TransferService.buildPayload(raceId, checkpointNumber, {
         isDelta: true,
         sinceTimestamp: ts,
