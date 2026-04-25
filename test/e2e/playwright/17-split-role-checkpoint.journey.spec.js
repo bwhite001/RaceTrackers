@@ -61,9 +61,7 @@ test.describe('Split-Role Checkpoint Journey', () => {
     });
 
     await step('Click Radio Operator toggle button', async () => {
-      const radioBtn = page.getByRole('button', { name: /^Radio Operator$/i });
-      await radioBtn.scrollIntoViewIfNeeded();
-      await radioBtn.click();
+      await page.getByRole('button', { name: /^Radio Operator$/i }).click();
     });
 
     await step('Radio Operator mode — scan zone is visible with Scan QR button', async () => {
@@ -80,16 +78,12 @@ test.describe('Split-Role Checkpoint Journey', () => {
       await page.goto(`/checkpoint/1`);
       await page.waitForURL(/\/checkpoint\/1/);
       await page.waitForSelector('text=Mark Off', { timeout: 10000 });
-      const radioBtn = page.getByRole('button', { name: /^Radio Operator$/i });
-      await radioBtn.scrollIntoViewIfNeeded();
-      await radioBtn.click();
+      await page.getByRole('button', { name: /^Radio Operator$/i }).click();
       await expect(page.getByRole('button', { name: /scan qr/i })).toBeVisible({ timeout: 10000 });
     });
 
     await step('Click Marker toggle to switch back', async () => {
-      const markerBtn = page.getByRole('button', { name: /^Marker$/i });
-      await markerBtn.scrollIntoViewIfNeeded();
-      await markerBtn.click();
+      await page.getByRole('button', { name: /^Marker$/i }).click();
     });
 
     await step('Marker mode — runner grid tabs are restored', async () => {
@@ -124,9 +118,7 @@ test.describe('Split-Role Checkpoint Journey', () => {
     });
 
     await step('Switch to Radio Operator mode', async () => {
-      const radioBtn = page.getByRole('button', { name: /^Radio Operator$/i });
-      await radioBtn.scrollIntoViewIfNeeded();
-      await radioBtn.click();
+      await page.getByRole('button', { name: /^Radio Operator$/i }).click();
       await expect(page.getByRole('button', { name: /scan qr/i })).toBeVisible({ timeout: 5000 });
     });
 
