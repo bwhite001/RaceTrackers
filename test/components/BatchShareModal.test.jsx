@@ -78,13 +78,19 @@ describe('BatchShareModal', () => {
 
   it('clicking Generate QR sets pending batch flag and shows QR display', async () => {
     render(<BatchShareModal {...defaultProps} />);
-    await waitFor(() => screen.getByRole('button', { name: /generate qr/i }));
+    // Wait for the async useEffect to load entryCount (button is disabled until then)
+    await waitFor(() => {
+      const btn = screen.getByRole('button', { name: /generate qr/i });
+      expect(btn).not.toBeDisabled();
+    });
 
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /generate qr/i }));
     });
 
-    expect(TransferService.savePendingBatch).toHaveBeenCalledWith(1, 3);
+    await waitFor(() => {
+      expect(TransferService.savePendingBatch).toHaveBeenCalledWith(1, 3);
+    });
     expect(screen.getByTestId('qr-display')).toBeInTheDocument();
   });
 

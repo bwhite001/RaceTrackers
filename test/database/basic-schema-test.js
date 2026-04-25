@@ -7,7 +7,7 @@ import db from '../../src/shared/services/database/schema.js';
 
 describe('Database Schema v8 - Basic Validation', () => {
   it('should be at schema version 8', () => {
-    expect(db.verno).toBe(8);
+    expect(db.verno).toBe(10);
   });
 
   it('should create all 13 required tables', () => {
