@@ -1,5 +1,6 @@
 import db from '../shared/services/database/schema.js';
 import { BASE_STATION_CP } from '../types/index.js';
+import TimeUtils from './timeUtils.js';
 
 // Storage service for managing race data
 export class StorageService {
@@ -682,25 +683,58 @@ export class StorageService {
     }
   }
 
-  static async markCheckpointRunner(raceId, checkpointNumber, runnerNumber, callInTime = null, markOffTime = null, status = 'passed') {
+  /**
+   * Build the checkpoint_runners field set for a mark operation.
+   *
+   * The Callout Sheet groups runners by `commonTimeLabel`, so any write that
+   * omits it produces a runner that is marked off but invisible to the callout
+   * workflow. Computed here so every caller of markCheckpointRunner and
+   * bulkMarkCheckpointRunners gets the segment fields, matching what
+   * CheckpointRepository.markRunner writes.
+   */
+  static buildCheckpointMarkFields(callInTime, markOffTime, status) {
+    // Unmarking routes through here too (status not-started). Clear the times
+    // rather than stamping "now" on a runner who has not been seen.
+    if (status === 'not-started') {
+      return {
+        status,
+        actualTime: null,
+        commonTime: null,
+        commonTimeLabel: null,
+        calledIn: false,
+        callInTime: null,
+        markOffTime: null
+      };
+    }
+
     const timestamp = markOffTime || callInTime || new Date().toISOString();
-    return this.updateCheckpointRunner(raceId, checkpointNumber, runnerNumber, {
+    const actualTime = markOffTime || callInTime || timestamp;
+    const { commonTime, commonTimeLabel } = TimeUtils.getCommonTimeLabel(actualTime);
+
+    return {
       status,
+      actualTime,
+      commonTime,
+      commonTimeLabel,
+      calledIn: false,
       callInTime: callInTime || timestamp,
       markOffTime: markOffTime || timestamp
-    });
+    };
+  }
+
+  static async markCheckpointRunner(raceId, checkpointNumber, runnerNumber, callInTime = null, markOffTime = null, status = 'passed') {
+    return this.updateCheckpointRunner(
+      raceId, checkpointNumber, runnerNumber,
+      this.buildCheckpointMarkFields(callInTime, markOffTime, status)
+    );
   }
 
   static async bulkMarkCheckpointRunners(raceId, checkpointNumber, runnerNumbers, callInTime = null, markOffTime = null, status = 'passed') {
     try {
-      const timestamp = markOffTime || callInTime || new Date().toISOString();
-      
+      const fields = this.buildCheckpointMarkFields(callInTime, markOffTime, status);
+
       for (const runnerNumber of runnerNumbers) {
-        await this.updateCheckpointRunner(raceId, checkpointNumber, runnerNumber, {
-          status,
-          callInTime: callInTime || timestamp,
-          markOffTime: markOffTime || timestamp
-        });
+        await this.updateCheckpointRunner(raceId, checkpointNumber, runnerNumber, fields);
       }
     } catch (error) {
       console.error('Error bulk marking checkpoint runners:', error);

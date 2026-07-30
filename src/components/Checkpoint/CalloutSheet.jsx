@@ -56,21 +56,25 @@ const CalloutSheet = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Subtitle sits under the heading, not opposite it */}
+      <div>
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           Callout Sheet
         </h3>
-        <div className="text-sm text-gray-600 dark:text-gray-300">
+        <p className="text-sm text-gray-600 dark:text-gray-300">
           {SEGMENT_DURATION_MINUTES}-minute segments
-        </div>
+        </p>
       </div>
 
       {/* Uncalled Segments */}
       {uncalledSegments.length > 0 ? (
         <div className="space-y-4">
-          <h4 className="font-medium text-gray-900 dark:text-white">
-            Pending Callouts ({uncalledSegments.length})
-          </h4>
+          {/* Sticky so the operator can still see what the list is while scrolling */}
+          <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 py-2">
+            <h4 className="font-medium text-gray-900 dark:text-white">
+              Pending Callouts ({uncalledSegments.length})
+            </h4>
+          </div>
           <div className="space-y-3">
             {uncalledSegments.map((segment) => {
               const isProcessing = callingSegment === segment.commonTimeLabel;
@@ -112,6 +116,12 @@ const CalloutSheet = () => {
             })}
           </div>
         </div>
+      ) : calledSegments.length > 0 ? (
+        // Nothing pending, but history exists — "No pending callouts" above a
+        // list of called segments read as a contradiction.
+        <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+          All segments called in.
+        </p>
       ) : (
         <div className="card p-6 text-center">
           <div className="text-gray-500 dark:text-gray-400">

@@ -33,7 +33,10 @@ const SharedRunnerGrid = ({
         settings?.runnerViewMode || "grid"
     );
     const [groupSize, setGroupSize] = useState(settings?.groupSize || 50);
-    const [expandedGroups, setExpandedGroups] = useState(new Set());
+    // null = operator has not touched the groups yet, so the first one shows
+    // expanded (an all-collapsed grid opens as a wall of headers). Any toggle
+    // replaces this with a real Set, which keeps collapsing group 1 possible.
+    const [expandedGroups, setExpandedGroups] = useState(null);
     const [editingTime, setEditingTime] = useState(null); // runnerNumber being edited
     const [editTimeValue, setEditTimeValue] = useState("");
     const [clickTimeout, setClickTimeout] = useState(null);
@@ -115,6 +118,23 @@ const SharedRunnerGrid = ({
                 });
             }
         }
+
+        // A range that does not divide evenly leaves a stub trailing group —
+        // "Runners 200-200 (0/1)" reads as a bug. Fold a stub back into the
+        // group before it. Threshold is a tenth of a group; anything larger is
+        // a real group worth its own header.
+        const stubLimit = Math.max(1, Math.floor(groupSize / 10));
+        if (groups.length > 1) {
+            const last = groups[groups.length - 1];
+            if (last.end - last.start + 1 <= stubLimit) {
+                const prev = groups[groups.length - 2];
+                prev.end = last.end;
+                prev.label = `${prev.start}-${prev.end}`;
+                prev.runners = prev.runners.concat(last.runners);
+                groups.pop();
+            }
+        }
+
         return groups;
     }, [filteredRunners, raceConfig, groupSize, searchTerm]);
 
@@ -262,8 +282,16 @@ const SharedRunnerGrid = ({
         return <div className="flex flex-col items-center">{content}</div>;
     };
 
+    /** Groups currently open, defaulting to the first group before any toggle. */
+    const effectiveExpandedGroups = useMemo(
+        () => expandedGroups ?? new Set(
+            groupedRunners.length > 0 ? [groupedRunners[0].start] : []
+        ),
+        [expandedGroups, groupedRunners]
+    );
+
     const toggleGroup = (groupStart) => {
-        const newExpanded = new Set(expandedGroups);
+        const newExpanded = new Set(effectiveExpandedGroups);
         if (newExpanded.has(groupStart)) {
             newExpanded.delete(groupStart);
         } else {
@@ -328,7 +356,7 @@ const SharedRunnerGrid = ({
             <div className="space-y-4">
                 {groupedRunners.map((group) => {
                     const isExpanded =
-                        expandedGroups.has(group.start) ||
+                        effectiveExpandedGroups.has(group.start) ||
                         groupedRunners.length === 1;
                     const stats = getGroupStats(group.runners);
                     return (
