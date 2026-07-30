@@ -142,7 +142,7 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
     setAllRunnerNumbers(newNumbers);
   };
 
-  const handleCreateRace = () => {
+  const handleNextStep = () => {
     if (ranges.length === 0) {
       setValidationErrors({ general: 'At least one runner range is required' });
       return;
@@ -393,7 +393,7 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
         <ButtonGroup>
           <Button
             variant="primary"
-            onClick={handleCreateRace}
+            onClick={handleNextStep}
             loading={isLoading}
             disabled={ranges.length === 0}
           >

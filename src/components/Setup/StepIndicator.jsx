@@ -38,9 +38,10 @@ const StepIndicator = ({ steps, currentStep }) => {
             <div className="mt-3 text-center">
               <p className={`
                 text-sm font-medium mb-1 transition-colors duration-200
-                ${index === currentStep ? 'text-navy-900 dark:text-white' : 
-                  index < currentStep ? 'text-green-700 dark:text-green-400' : 
-                  'text-gray-500 dark:text-gray-400'}
+                ${index === currentStep ? 'text-navy-900 dark:text-white' :
+                  index < currentStep ? 'text-green-700 dark:text-green-400' :
+                  /* upcoming: readable, but subordinate to current/completed */
+                  'text-gray-600 dark:text-gray-300'}
               `}>
                 {step.label}
               </p>
