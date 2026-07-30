@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import TimeUtils from '../../../services/timeUtils';
 import { Button } from '../../../design-system/components';
+import useRaceMaintenanceStore from '../../race-maintenance/store/raceMaintenanceStore';
+import { getCheckpointName } from '../../../utils/checkpointName';
 
 /**
  * ReportsPanel - Generate and export various race reports
@@ -126,6 +128,9 @@ const ReportsPanel = () => {
     loading
   } = useBaseOperationsStore();
 
+  // Checkpoint list comes from the race config, not a hardcoded 1-5 range
+  const { checkpoints = [] } = useRaceMaintenanceStore();
+
   const handleGenerate = async () => {
     setGenerating(true);
     try {
@@ -247,9 +252,9 @@ const ReportsPanel = () => {
                 onChange={(e) => setCheckpoint(parseInt(e.target.value))}
                 className="form-input w-full"
               >
-                {[1, 2, 3, 4, 5].map(cp => (
-                  <option key={cp} value={cp}>
-                    Checkpoint {cp}
+                {checkpoints.map(cp => (
+                  <option key={cp.number} value={cp.number}>
+                    {getCheckpointName(checkpoints, cp.number)}
                   </option>
                 ))}
               </select>

@@ -8,6 +8,7 @@ import useSettingsStore from '../shared/store/settingsStore';
 import useRaceMaintenanceStore, { raceMaintenanceStore } from '../modules/race-maintenance/store/raceMaintenanceStore';
 import { useRaceStore } from '../store/useRaceStore.js';
 import PageHeader from '../shared/components/PageHeader';
+import { getCheckpointName } from '../utils/checkpointName';
 
 import RunnerGrid from '../components/Checkpoint/RunnerGrid';
 import QuickEntryBar from '../components/Checkpoint/QuickEntryBar';
@@ -31,7 +32,10 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   
   // Store hooks
   const { startOperation } = useNavigationStore();
-  const { currentRace, loadCurrentRace } = useRaceMaintenanceStore();
+  const { currentRace, checkpoints, loadCurrentRace } = useRaceMaintenanceStore();
+
+  // Operators identify checkpoints by their configured name, not the number
+  const checkpointName = getCheckpointName(checkpoints, checkpointId);
   const { 
     runners, 
     loading, 
@@ -115,7 +119,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         variant="operational"
         title={currentRace?.name}
         moduleType={MODULE_TYPES.CHECKPOINT}
-        moduleLabel={`Checkpoint ${checkpointId}`}
+        moduleLabel={checkpointName}
         onExit={onExitAttempt}
         actions={[
           {
@@ -194,7 +198,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         isOpen={showExportModal}
         raceId={currentRace?.id}
         checkpointNumber={parseInt(checkpointId)}
-        checkpointName={`Checkpoint ${checkpointId}`}
+        checkpointName={checkpointName}
         raceName={currentRace?.name ?? ''}
         onClose={() => setShowExportModal(false)}
       />

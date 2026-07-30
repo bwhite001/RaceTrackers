@@ -1,6 +1,7 @@
 import { BaseRepository } from '../../../shared/services/database/BaseRepository';
 import db from '../../../shared/services/database/schema';
 import { BASE_STATION_CP } from '../../../types/index.js';
+import { getCheckpointName, slugifyCheckpointName } from '../../../utils/checkpointName.js';
 
 export class BaseOperationsRepository extends BaseRepository {
   constructor() {
@@ -745,12 +746,13 @@ export class BaseOperationsRepository extends BaseRepository {
     try {
       const race = await db.races.get(raceId);
       const missingRunners = await this.getMissingRunners(raceId, checkpoint);
-      
+      const cpName = await this.getCheckpointDisplayName(raceId, checkpoint);
+
       const content = [
         `Missing Numbers Report`,
         `Race: ${race.name}`,
         `Date: ${race.date}`,
-        `Checkpoint: ${checkpoint}`,
+        `Checkpoint: ${cpName}`,
         `Generated: ${new Date().toLocaleString()}`,
         ``,
         `Total Missing: ${missingRunners.length}`,
@@ -761,8 +763,8 @@ export class BaseOperationsRepository extends BaseRepository {
       
       return {
         content,
-        filename: `missing-numbers-cp${checkpoint}-${race.date}.txt`,
-        mimeType: 'text/plain'
+        filename: `missing-numbers-${slugifyCheckpointName(cpName)}-${race.date}.csv`,
+        mimeType: 'text/csv'
       };
     } catch (error) {
       console.error('Error generating missing numbers report:', error);
@@ -818,9 +820,19 @@ export class BaseOperationsRepository extends BaseRepository {
     }
   }
 
+  /**
+   * Resolve a checkpoint's configured name for report headers and filenames.
+   * Reports are read by officials on paper — a bare number tells them nothing.
+   */
+  async getCheckpointDisplayName(raceId, checkpoint) {
+    const checkpoints = await db.checkpoints.where('raceId').equals(raceId).toArray();
+    return getCheckpointName(checkpoints, checkpoint);
+  }
+
   async generateCheckpointLogReport(raceId, checkpoint) {
     try {
       const race = await db.races.get(raceId);
+      const cpName = await this.getCheckpointDisplayName(raceId, checkpoint);
       const entries = await db.base_station_runners
         .where(['raceId', 'checkpointNumber'])
         .equals([raceId, checkpoint])
@@ -839,7 +851,7 @@ export class BaseOperationsRepository extends BaseRepository {
       const csvContent = [
         `# Checkpoint Log Report`,
         `# Race: ${race.name}`,
-        `# Checkpoint: ${checkpoint}`,
+        `# Checkpoint: ${cpName}`,
         `# Date: ${race.date}`,
         `# Generated: ${new Date().toLocaleString()}`,
         `# Total Entries: ${entries.length}`,
@@ -852,7 +864,7 @@ export class BaseOperationsRepository extends BaseRepository {
       
       return {
         content: csvContent,
-        filename: `checkpoint-${checkpoint}-log-${race.date}.csv`,
+        filename: `checkpoint-${slugifyCheckpointName(cpName)}-log-${race.date}.csv`,
         mimeType: 'text/csv'
       };
     } catch (error) {
