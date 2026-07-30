@@ -3,8 +3,9 @@
  *
  * M-2 / #13 the race subtitle printed the raw stored date ("2026-03-04 • 08:00")
  * M-2 / #15 the "Race Created Successfully!" banner could not be dismissed
- *
- * (M-3 issues #12, #14 and #16 are added to this file by task M-3.)
+ * M-3 / #12 runner ranges expanded into a full inline list of every bib number
+ * M-3 / #14 "Exit to Homepage" was an unremarkable secondary button
+ * M-3 / #16 "Go to Checkpoint" did not navigate
  */
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -35,8 +36,11 @@ vi.mock('modules/race-maintenance/store/raceMaintenanceStore', () => ({
   }),
 }));
 
+const mockEndOperation = vi.fn();
+const mockStartOperation = vi.fn();
+
 vi.mock('shared/store/navigationStore', () => ({
-  default: () => ({ endOperation: vi.fn(), startOperation: vi.fn() }),
+  default: () => ({ endOperation: mockEndOperation, startOperation: mockStartOperation }),
   MODULE_TYPES: {
     CHECKPOINT: 'checkpoint',
     BASE_STATION: 'base_station',
@@ -67,6 +71,8 @@ import RaceOverview from 'views/RaceOverview';
 
 const resetMocks = () => {
   mockNavigate.mockClear();
+  mockEndOperation.mockClear();
+  mockStartOperation.mockClear();
   mockSearchParams = new URLSearchParams('');
   mockRace = {
     id: 1,
@@ -135,5 +141,108 @@ describe('M-2 / #15: "Race Created Successfully!" banner is dismissible', () => 
 
     expect(screen.getByText('Autumn Trail 50')).toBeInTheDocument();
     expect(screen.getByText('Select Operation Mode')).toBeInTheDocument();
+  });
+});
+
+describe('M-3 / #12: runner ranges display compactly', () => {
+  beforeEach(resetMocks);
+
+  it('shows a range as "min–max (count runners)" rather than every number', () => {
+    render(<RaceOverview />);
+    expect(screen.getByText('100–200 (101 runners)')).toBeInTheDocument();
+  });
+
+  it('does not expand a range into an inline list of bib numbers', () => {
+    mockRace = {
+      ...mockRace,
+      runnerRanges: [{
+        min: 1,
+        max: 5,
+        isIndividual: true,
+        individualNumbers: [1, 2, 3, 4, 5],
+      }],
+    };
+    render(<RaceOverview />);
+
+    expect(screen.queryByText(/1, 2, 3, 4, 5/)).not.toBeInTheDocument();
+    expect(screen.getByText('5 individual numbers')).toBeInTheDocument();
+  });
+
+  it('renders a plain string range as-is', () => {
+    mockRace = { ...mockRace, runnerRanges: ['100-200'] };
+    render(<RaceOverview />);
+    expect(screen.getByText('100-200')).toBeInTheDocument();
+  });
+
+  it('falls back to the description when min/max are absent', () => {
+    mockRace = { ...mockRace, runnerRanges: [{ description: 'Elite wave' }] };
+    render(<RaceOverview />);
+    expect(screen.getByText('Elite wave')).toBeInTheDocument();
+  });
+
+  it('counts a single-number range correctly', () => {
+    mockRace = { ...mockRace, runnerRanges: [{ min: 42, max: 42 }] };
+    render(<RaceOverview />);
+    expect(screen.getByText('42–42 (1 runners)')).toBeInTheDocument();
+  });
+});
+
+describe('M-3 / #14: "Exit to Homepage" is prominent', () => {
+  beforeEach(resetMocks);
+
+  it('renders with a visible outline border and a back arrow', () => {
+    render(<RaceOverview />);
+
+    const exit = screen.getByRole('button', { name: /exit to homepage/i });
+    expect(exit.className).toContain('border');
+    expect(exit.querySelector('svg')).toBeTruthy();
+  });
+
+  it('ends the operation and navigates home when clicked', () => {
+    render(<RaceOverview />);
+
+    fireEvent.click(screen.getByRole('button', { name: /exit to homepage/i }));
+
+    expect(mockEndOperation).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith('/');
+  });
+});
+
+describe('M-3 / #16: "Go to Checkpoint" navigates', () => {
+  beforeEach(resetMocks);
+
+  it('navigates to the checkpoint route', () => {
+    render(<RaceOverview />);
+
+    fireEvent.click(screen.getByRole('button', { name: /go to checkpoint/i }));
+
+    expect(mockNavigate).toHaveBeenCalledWith('/checkpoint/1');
+  });
+
+  it('releases the operation lock before navigating so ProtectedRoute allows it', () => {
+    render(<RaceOverview />);
+
+    fireEvent.click(screen.getByRole('button', { name: /go to checkpoint/i }));
+
+    expect(mockEndOperation).toHaveBeenCalled();
+  });
+
+  it('does NOT pre-start the checkpoint operation — CheckpointView owns that', () => {
+    render(<RaceOverview />);
+
+    fireEvent.click(screen.getByRole('button', { name: /go to checkpoint/i }));
+
+    // Starting it here left ProtectedRoute reading an intermediate state and
+    // bounced the navigation; CheckpointView calls startOperation on mount.
+    expect(mockStartOperation).not.toHaveBeenCalled();
+  });
+
+  it('still pre-starts the base station operation (BaseStationView does not)', () => {
+    render(<RaceOverview />);
+
+    fireEvent.click(screen.getByRole('button', { name: /go to base station|base station/i }));
+
+    expect(mockStartOperation).toHaveBeenCalledWith('base_station');
+    expect(mockNavigate).toHaveBeenCalledWith('/base-station/operations');
   });
 });

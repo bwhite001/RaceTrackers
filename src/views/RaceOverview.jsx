@@ -8,7 +8,7 @@ import RosterImport from '../modules/race-maintenance/components/RosterImport.js
 import DistributeRaceModal from '../modules/race-maintenance/components/DistributeRaceModal.jsx';
 import { Card, CardHeader, CardBody, Button } from '../design-system/components';
 import { formatLocaleDateTime } from '../utils/raceStatistics';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 const RaceOverview = () => {
   const navigate = useNavigate();
@@ -67,8 +67,10 @@ const RaceOverview = () => {
   })();
 
   const handleGoToCheckpoint = (checkpointNumber) => {
-    endOperation(); // End current operation
-    startOperation(MODULE_TYPES.CHECKPOINT);
+    // Only release the lock here. Starting the checkpoint operation before the
+    // route change left ProtectedRoute evaluating an intermediate state and
+    // bounced the navigation; CheckpointView calls startOperation on mount.
+    endOperation();
     navigate(`/checkpoint/${checkpointNumber}`);
   };
 
@@ -188,22 +190,27 @@ const RaceOverview = () => {
               </p>
               <div className="flex flex-wrap gap-2">
                 {raceConfig.runnerRanges.map((range, index) => {
-                  // Handle both string format (e.g., "100-200") and object format
+                  // Summarise rather than expand — a 101-runner range printed as
+                  // "100, 101, 102, ..." floods the card and tells the operator
+                  // less than the range and its count do.
                   let displayText;
                   if (typeof range === 'string') {
                     displayText = range;
                   } else if (range && typeof range === 'object') {
-                    if (range.individualNumbers && range.individualNumbers.length > 0) {
-                      displayText = range.individualNumbers.join(', ');
-                    } else if (range.min !== undefined && range.max !== undefined) {
-                      displayText = `${range.min}-${range.max}`;
+                    if (range.isIndividual && range.individualNumbers?.length > 0) {
+                      displayText = `${range.individualNumbers.length} individual numbers`;
+                    } else if (range.min != null && range.max != null) {
+                      const count = range.max - range.min + 1;
+                      displayText = `${range.min}–${range.max} (${count} runners)`;
+                    } else if (range.individualNumbers?.length > 0) {
+                      displayText = `${range.individualNumbers.length} individual numbers`;
                     } else {
                       displayText = range.description || 'Range';
                     }
                   } else {
                     displayText = 'Unknown';
                   }
-                  
+
                   return (
                     <span
                       key={index}
@@ -224,7 +231,11 @@ const RaceOverview = () => {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Select Operation Mode
         </h1>
-        <Button variant="secondary" onClick={handleExitToHome}>
+        <Button
+          variant="outline"
+          onClick={handleExitToHome}
+          leftIcon={<ArrowLeftIcon className="w-4 h-4" />}
+        >
           Exit to Homepage
         </Button>
       </div>
