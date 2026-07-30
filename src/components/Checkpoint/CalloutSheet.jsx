@@ -68,9 +68,12 @@ const CalloutSheet = () => {
       {/* Uncalled Segments */}
       {uncalledSegments.length > 0 && (
         <div className="space-y-4">
-          <h4 className="font-medium text-gray-900 dark:text-white">
-            Pending Callouts ({uncalledSegments.length})
-          </h4>
+          {/* Sticky so the operator can still see what the list is while scrolling */}
+          <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 py-2">
+            <h4 className="font-medium text-gray-900 dark:text-white">
+              Pending Callouts ({uncalledSegments.length})
+            </h4>
+          </div>
           <div className="space-y-3">
             {uncalledSegments.map((segment) => {
               const isProcessing = callingSegment === segment.commonTimeLabel;

@@ -123,6 +123,10 @@ const RunnerOverview = ({ runners: runnersProp } = {}) => {
            (mode === APP_MODES.CHECKPOINT && runner.status !== RUNNER_STATUSES.PASSED);
   };
 
+  // Don't render an Actions column header over a column of blanks — in
+  // checkpoint mode every action is unavailable once a runner has passed.
+  const hasAnyActions = filteredAndSortedRunners.some(canChangeStatus);
+
   const getAvailableStatuses = (currentStatus) => {
     if (mode === APP_MODES.BASE_STATION) {
       return [
@@ -290,9 +294,11 @@ const RunnerOverview = ({ runners: runnersProp } = {}) => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Elapsed
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Actions
-                </th>
+                {hasAnyActions && (
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
@@ -337,6 +343,7 @@ const RunnerOverview = ({ runners: runnersProp } = {}) => {
                   <td className="px-6 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     {getRaceElapsedTime(runner.recordedTime)}
                   </td>
+                  {hasAnyActions && (
                   <td className="px-6 py-1 whitespace-nowrap text-right text-sm font-medium">
                     {canChangeStatus(runner) && (
                       <div className="flex items-center justify-end space-x-2">
@@ -361,6 +368,7 @@ const RunnerOverview = ({ runners: runnersProp } = {}) => {
                       </div>
                     )}
                   </td>
+                  )}
                 </tr>
               ))}
             </tbody>

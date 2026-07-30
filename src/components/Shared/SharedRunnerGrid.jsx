@@ -115,6 +115,22 @@ const SharedRunnerGrid = ({
                 });
             }
         }
+        // A range that does not divide evenly leaves a stub trailing group —
+        // "Runners 200-200 (0/1)" reads as a bug. Fold a stub back into the
+        // group before it. Threshold is a tenth of a group; anything larger is
+        // a real group worth its own header.
+        const stubLimit = Math.max(1, Math.floor(groupSize / 10));
+        if (groups.length > 1) {
+            const last = groups[groups.length - 1];
+            if (last.end - last.start + 1 <= stubLimit) {
+                const prev = groups[groups.length - 2];
+                prev.end = last.end;
+                prev.label = `${prev.start}-${prev.end}`;
+                prev.runners = prev.runners.concat(last.runners);
+                groups.pop();
+            }
+        }
+
         return groups;
     }, [filteredRunners, raceConfig, groupSize, searchTerm]);
 
