@@ -1,6 +1,7 @@
 import { BaseRepository } from '../../../shared/services/database/BaseRepository';
 import db from '../../../shared/services/database/schema';
 import TimeUtils from '../../../services/timeUtils';
+import { useRaceStore } from '../../../store/useRaceStore.js';
 
 export class CheckpointRepository extends BaseRepository {
   constructor() {
@@ -95,7 +96,7 @@ export class CheckpointRepository extends BaseRepository {
     const actualTime = markOffTime || callInTime || new Date().toISOString();
     const { commonTime, commonTimeLabel } = TimeUtils.getCommonTimeLabel(actualTime);
 
-    return this.updateRunner(raceId, checkpointNumber, runnerNumber, {
+    await this.updateRunner(raceId, checkpointNumber, runnerNumber, {
       status,
       actualTime,
       commonTime,
@@ -103,6 +104,11 @@ export class CheckpointRepository extends BaseRepository {
       markOffTime: actualTime, // keep for back-compat
       callInTime: callInTime || null
     });
+    // Keep useRaceStore.runners live — Home counters, Race Overview and the
+    // Report views all read that shared table. Non-blocking.
+    try {
+      await useRaceStore.getState().markRunnerStatus(runnerNumber, status);
+    } catch (_) { /* non-blocking */ }
   }
 
   async bulkMarkRunners(raceId, checkpointNumber, runnerNumbers, callInTime = null, markOffTime = null, status = 'passed') {
@@ -122,6 +128,12 @@ export class CheckpointRepository extends BaseRepository {
           });
         }
       });
+      // Sync every marked runner into the shared runners table
+      try {
+        for (const runnerNumber of runnerNumbers) {
+          await useRaceStore.getState().markRunnerStatus(runnerNumber, status);
+        }
+      } catch (_) { /* non-blocking */ }
     } catch (error) {
       console.error('Error bulk marking checkpoint runners:', error);
       throw new Error('Failed to bulk mark checkpoint runners');
