@@ -59,7 +59,7 @@ const RaceOverview = () => {
                   data-testid={`cp-count-${cp.number}`}
                   className="flex-1 min-w-[4rem] px-2 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border-t-4 border-t-indigo-400 text-center"
                 >
-                  <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide leading-tight truncate">
+                  <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 tracking-wide leading-tight truncate">
                     CP {cp.number}
                   </div>
                   <div className="mt-0.5 text-lg font-bold text-gray-900 dark:text-white leading-none">
@@ -85,7 +85,7 @@ const RaceOverview = () => {
               data-testid={`stat-${key}`}
               className={`px-3 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border-t-4 ${accentClass}`}
             >
-              <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide leading-tight">
+              <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 tracking-wide leading-tight">
                 {key === 'notStarted' ? notStartedLabel(raceStarted) : (STAT_LABELS[key] ?? key)}
               </div>
               <div className="mt-0.5 text-xl font-bold text-gray-900 dark:text-white">
@@ -99,7 +99,7 @@ const RaceOverview = () => {
       {/* Per-wave breakdown — only shown when multiple waves exist */}
       {stats.waveBreakdown?.length > 0 && (
         <div>
-          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 tracking-wide mb-2">
             By Wave
           </h3>
           <div className="space-y-1">

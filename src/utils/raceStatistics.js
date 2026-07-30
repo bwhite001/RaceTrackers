@@ -300,7 +300,14 @@ export const getRunnerRange = (race) => {
     return race.runnerRanges.map(r => {
       if (!r) return null;
       if (typeof r === 'string') return r;
-      if (r.isIndividual) return r.individualNumbers?.join(', ') ?? '?';
+      // Summarise rather than expand — a 100-entry individual range printed as
+      // "1, 2, 3, ..." floods the card and tells the operator less than a count.
+      if (r.isIndividual) {
+        const count = r.individualNumbers?.length ?? 0;
+        if (count === 0) return '?';
+        if (count <= 3) return r.individualNumbers.join(', ');
+        return `${count} individual numbers`;
+      }
       if (r.min != null) return `${r.min}–${r.max}`;
       return null;
     }).filter(Boolean).join(', ');
