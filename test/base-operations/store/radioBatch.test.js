@@ -30,9 +30,14 @@ describe('submitRadioBatch', () => {
     );
   });
 
-  it('does NOT write to base_station_runners', async () => {
+  // CC-1 / issue #58: radio-called runners never pass through data entry, so
+  // submitRadioBatch also records them at the base station (cp 0). Without this
+  // the finisher stats stay at zero for radio-only races.
+  it('also writes to base_station_runners at checkpoint 0 so stats count finishers', async () => {
     await act(() => useBaseOperationsStore.getState().submitRadioBatch([42], '10:30', 3));
-    expect(StorageService.updateBaseStationRunner).not.toHaveBeenCalled();
+    expect(StorageService.updateBaseStationRunner).toHaveBeenCalledWith(
+      'r1', 0, 42, expect.objectContaining({ status: 'passed', commonTime: '10:30' })
+    );
   });
 
   it('records the batch in sessionBatches', async () => {
