@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Badge } from '../../../design-system/components/Badge';
 import { Card } from '../../../design-system/components/Card';
 import { RUNNER_STATUSES } from '../../../types';
+import TimeUtils from '../../../services/timeUtils';
 
 const statusVariant = {
   [RUNNER_STATUSES.FINISHED]: 'success',
@@ -16,6 +17,12 @@ const statusLabel = {
   [RUNNER_STATUSES.DNF]: 'DNF',
   [RUNNER_STATUSES.ACTIVE]: 'Active',
   [RUNNER_STATUSES.NOT_STARTED]: 'Not Started',
+};
+
+/** Format an ISO timestamp as HH:MM:SS for display. */
+const formatFinishTime = (isoTime) => {
+  if (!isoTime) return '—';
+  return TimeUtils.formatTime(isoTime);
 };
 
 /**
@@ -53,16 +60,16 @@ const Leaderboard = ({ runners = [] }) => {
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">
                     Position
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">
                     Bib #
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">
                     Time
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">
                     Status
                   </th>
                 </tr>
@@ -77,7 +84,7 @@ const Leaderboard = ({ runners = [] }) => {
                       {runner.number}
                     </td>
                     <td className="px-4 py-3 text-sm font-mono text-gray-700 dark:text-gray-300">
-                      {runner.commonTime}
+                      {formatFinishTime(runner.commonTime)}
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant={statusVariant[runner.status] ?? 'default'} size="sm">
@@ -125,10 +132,10 @@ const Leaderboard = ({ runners = [] }) => {
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">
                     Bib #
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">
                     Status
                   </th>
                 </tr>

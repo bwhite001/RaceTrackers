@@ -74,7 +74,7 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
       <div className="hidden lg:flex h-full gap-4">
         <div className="w-[45%] border border-gray-200 dark:border-gray-700 rounded-xl overflow-y-auto">{entryPane}</div>
         <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl overflow-y-auto p-4">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Session History</h3>
+          <h3 className="text-sm font-semibold text-gray-500 tracking-wide mb-3">Session History</h3>
           {historyPane}
         </div>
       </div>

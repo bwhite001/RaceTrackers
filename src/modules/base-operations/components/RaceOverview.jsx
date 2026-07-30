@@ -162,7 +162,7 @@ const RaceOverview = () => {
               data-testid={`stat-${key}`}
               className={`p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border-t-4 ${accentClass}`}
             >
-              <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+              <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 tracking-wide">
                 {STAT_LABELS[key] ?? key}
               </div>
               <div className="mt-1 text-3xl font-bold text-gray-900 dark:text-white">
@@ -179,17 +179,17 @@ const RaceOverview = () => {
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-900/50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">
                   Runner
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">
                   Status
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">
                   Time
                 </th>
                 {isDesktop && (
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">
                     Notes
                   </th>
                 )}
