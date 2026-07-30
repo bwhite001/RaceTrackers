@@ -43,11 +43,13 @@ describe('CheckpointGroupingView', () => {
     vi.clearAllMocks();
   });
 
-  it('shows empty state when no data imported', async () => {
+  // Wording changed by M-5 #60/#62: the matrix now also falls back to live
+  // checkpoint_runners, so the message is no longer import-specific.
+  it('shows empty state when there is no checkpoint data', async () => {
     mockDbQuery.mockResolvedValue([]);
     render(<CheckpointGroupingView />);
     await waitFor(() =>
-      expect(screen.getByText(/no checkpoint data imported yet/i)).toBeDefined()
+      expect(screen.getByText(/no checkpoint data yet/i)).toBeDefined()
     );
   });
 

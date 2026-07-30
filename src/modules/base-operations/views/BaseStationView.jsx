@@ -24,6 +24,7 @@ import StatusStrip from '../../../components/Layout/StatusStrip';
 import SettingsModal from '../../../components/Settings/SettingsModal';
 import HelpDialog from '../components/HelpDialog';
 import HeadsUpGrid from '../components/HeadsUpGrid';
+import { buildHeadsUpRunners } from '../utils/buildHeadsUpRunners';
 import Leaderboard from '../components/Leaderboard';
 
 const TABS = [
@@ -163,6 +164,9 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
                      md:border-t-0 md:border-b md:border-gray-200 md:dark:border-gray-700
                      shadow-[0_-4px_12px_rgba(0,0,0,0.08)] md:shadow-sm"
           aria-label="Base station tabs"
+          /* Home-indicator inset on iOS: without it the bottom tab row sits
+             under the gesture bar and the last tab is hard to hit. */
+          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
         >
           <div className="md:container md:mx-auto md:px-4 flex md:flex md:items-end">
             <div role="tablist" className="flex flex-1 md:flex-1">
@@ -230,11 +234,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             {activeTab === 'overview' && (
               <div className="space-y-6">
                 <HeadsUpGrid
-                  runners={(runners ?? []).map(r => ({
-                    number: r.number,
-                    status: r.status,
-                    checkpointStatuses: r.checkpoints ?? {},
-                  }))}
+                  runners={buildHeadsUpRunners(runners)}
                   checkpoints={checkpoints ?? []}
                 />
                 <RaceOverview />

@@ -18,8 +18,10 @@ const MODULE_BADGE = {
     classes: 'bg-blue-500/20 text-blue-200 ring-1 ring-blue-400/30',
   },
   [MODULE_TYPES.BASE_STATION]: {
+    // Matches the Checkpoint badge — green read as a status ("all good")
+    // rather than as a module identifier.
     label: 'Base Station',
-    classes: 'bg-emerald-500/20 text-emerald-200 ring-1 ring-emerald-400/30',
+    classes: 'bg-blue-500/20 text-blue-200 ring-1 ring-blue-400/30',
   },
   [MODULE_TYPES.RACE_MAINTENANCE]: {
     label: 'Race Maintenance',

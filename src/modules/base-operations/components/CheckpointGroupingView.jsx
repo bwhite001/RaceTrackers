@@ -24,6 +24,42 @@ function formatTime(isoString) {
   }
 }
 
+/**
+ * Build the same shape as `imported_checkpoint_results` from live
+ * `checkpoint_runners` records, so the matrix works without an import.
+ */
+export async function buildLiveMatrixData(raceId) {
+  try {
+  const checkpoints = await db.checkpoints.where('raceId').equals(raceId).toArray();
+  checkpoints.sort((a, b) => a.number - b.number);
+
+  const built = await Promise.all(checkpoints.map(async (cp) => {
+    const runners = await db.checkpoint_runners
+      .where(['raceId', 'checkpointNumber'])
+      .equals([raceId, cp.number])
+      .and(r => r.status === 'passed')
+      .toArray();
+
+    return {
+      checkpointNumber: cp.number,
+      checkpointName: cp.name || `CP${cp.number}`,
+      runners: runners.map(r => ({
+        number: r.number,
+        time: r.actualTime || r.markOffTime || r.callInTime || null,
+      })),
+    };
+  }));
+
+  // Drop checkpoints nobody has passed yet — an all-empty matrix is noise
+  return built.some(cp => cp.runners.length > 0) ? built : [];
+  } catch (err) {
+    // Best-effort fallback: if live data is unavailable, fall through to the
+    // empty state rather than replacing it with an error screen.
+    console.warn('Live checkpoint matrix unavailable:', err?.message);
+    return [];
+  }
+}
+
 const CheckpointGroupingView = () => {
   const { currentRaceId } = useBaseOperationsStore();
   const [importedData, setImportedData] = useState([]); // array of { checkpointNumber, runners }
@@ -46,7 +82,11 @@ const CheckpointGroupingView = () => {
 
         // Sort by checkpointNumber
         rows.sort((a, b) => a.checkpointNumber - b.checkpointNumber);
-        setImportedData(rows);
+
+        // Nothing imported does not mean nothing happened — checkpoints that
+        // radioed in live have checkpoint_runners records. Fall back to those
+        // so the matrix reflects the race rather than only the import history.
+        setImportedData(rows.length > 0 ? rows : await buildLiveMatrixData(currentRaceId));
       } catch (err) {
         setError(err.message);
       } finally {
@@ -96,8 +136,21 @@ const CheckpointGroupingView = () => {
 
   if (importedData.length === 0) {
     return (
-      <div className="py-8 text-center text-gray-500 dark:text-gray-400 text-sm">
-        No checkpoint data imported yet. Use the "Import Checkpoint Results" panel above.
+      <div className="py-12 text-center text-gray-500 dark:text-gray-400">
+        <svg
+          className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600"
+          fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+            d="M3 10h18M3 14h18M7 6v12M12 6v12M17 6v12M4 6h16a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z"
+          />
+        </svg>
+        <p className="text-base font-medium mb-1">No checkpoint data yet</p>
+        <p className="text-sm">
+          Import checkpoint results from the Import Checkpoint Results panel on this tab,
+          or mark runners as passed at a checkpoint.
+        </p>
       </div>
     );
   }
