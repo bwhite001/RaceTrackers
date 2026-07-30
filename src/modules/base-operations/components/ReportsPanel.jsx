@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import TimeUtils from '../../../services/timeUtils';
+import { Button } from '../../../design-system/components';
 
 /**
  * ReportsPanel - Generate and export various race reports
@@ -307,25 +308,19 @@ const ReportsPanel = () => {
 
       {/* Generate Button */}
       <div className="flex items-center justify-end space-x-3">
-        <button
+        <Button
+          variant="primary"
           onClick={handleGenerate}
           disabled={generating || loading}
-          className="btn-primary"
+          loading={generating || loading}
+          leftIcon={
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          }
         >
-          {generating || loading ? (
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span>Generating...</span>
-            </div>
-          ) : (
-            <>
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Generate Report
-            </>
-          )}
-        </button>
+          {generating || loading ? 'Generating...' : 'Generate Report'}
+        </Button>
       </div>
 
       {/* Info */}

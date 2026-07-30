@@ -37,19 +37,11 @@ function normalizeRange(r) {
 
 const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCreate, isLoading }) => {
 
-  // Initialize with default range if no initial ranges provided
-  const defaultRange = initialRanges.length === 0 ? [{
-    min: 100,
-    max: 200,
-    description: 'Runners 100-200',
-    count: 101,
-    individualNumbers: Array.from({ length: 101 }, (_, i) => 100 + i)
-  }] : [];
-  
+  // Start with no default range — users should define their own runner ranges
   const [ranges, setRanges] = useState(
-    initialRanges.length > 0 ? initialRanges.map(normalizeRange) : defaultRange
+    initialRanges.length > 0 ? initialRanges.map(normalizeRange) : []
   );
-  const [newRange, setNewRange] = useState({ min: '201', max: '300', description: '' });
+  const [newRange, setNewRange] = useState({ min: '1', max: '100', description: '' });
   const [validationErrors, setValidationErrors] = useState({});
   const [rangeInput, setRangeInput] = useState('');
   const [showNameFields, setShowNameFields] = useState(false);
@@ -58,9 +50,9 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
   const updateRunnerPersonalData = useRaceStore(s => s.updateRunnerPersonalData);
   const raceId = raceDetails?.id || raceDetails?.raceId || null;
 
-  // Add new state for tracking all individual runner numbers
+  // Track all individual runner numbers derived from the active ranges
   const [allRunnerNumbers, setAllRunnerNumbers] = useState(new Set(
-    (initialRanges.length > 0 ? initialRanges.map(normalizeRange) : defaultRange).flatMap(range =>
+    (initialRanges.length > 0 ? initialRanges.map(normalizeRange) : []).flatMap(range =>
       range.individualNumbers ||
       Array.from({ length: range.max - range.min + 1 }, (_, i) => range.min + i)
     )
@@ -393,7 +385,7 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
       {/* Action Buttons */}
       <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
         <Button
-          variant="ghost"
+          variant="outline"
           onClick={onBack}
         >
           Back: Race Details
@@ -405,7 +397,7 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
             loading={isLoading}
             disabled={ranges.length === 0}
           >
-            Create Race
+            Next: Waves
           </Button>
         </ButtonGroup>
       </div>

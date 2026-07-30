@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import useCheckpointStore from '../../modules/checkpoint-operations/store/checkpointStore';
+import { Button } from '../../design-system/components';
 import TimeUtils from '../../services/timeUtils.js';
 import { SEGMENT_DURATION_MINUTES } from '../../types/index.js';
 
@@ -95,20 +96,16 @@ const CalloutSheet = () => {
                         {formatRunnerList(segment.runners)}
                       </div>
                     </div>
-                    <button
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      className="ml-4"
                       onClick={() => handleMarkCalled(segment)}
                       disabled={loading || isProcessing}
-                      className="ml-4 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                      loading={isProcessing}
                     >
-                      {isProcessing ? (
-                        <div className="flex items-center space-x-2">
-                          <div className="w-4 h-4 spinner"></div>
-                          <span>Calling...</span>
-                        </div>
-                      ) : (
-                        'Mark Called'
-                      )}
-                    </button>
+                      {isProcessing ? 'Calling...' : 'Mark Called'}
+                    </Button>
                   </div>
                 </div>
               );
