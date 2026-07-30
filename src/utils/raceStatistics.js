@@ -208,6 +208,45 @@ export const formatRaceDate = (date, options = {}) => {
 };
 
 /**
+ * Formats a race date as DD/MM/YYYY.
+ *
+ * Race dates are stored as plain ISO date strings and were being rendered raw
+ * in some views. Parsed via the date parts rather than `new Date(iso)` so a
+ * date-only string is not shifted by the viewer's timezone.
+ *
+ * @param {string} isoDateString - e.g. "2026-03-04"
+ * @returns {string} "04/03/2026", or "No date" / "Invalid date"
+ */
+export const formatLocaleDate = (isoDateString) => {
+  if (!isoDateString) return 'No date';
+
+  const [year, month, day] = String(isoDateString).split('-').map(Number);
+  if (!year || !month || !day) return 'Invalid date';
+
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${pad(day)}/${pad(month)}/${year}`;
+};
+
+/**
+ * Formats a race date and 24-hour start time for display.
+ *
+ * @param {string} isoDateString - e.g. "2026-03-04"
+ * @param {string} [timeString] - 24-hour "HH:mm"; omitted returns date only
+ * @returns {string} e.g. "04/03/2026 • 8:00 AM"
+ */
+export const formatLocaleDateTime = (isoDateString, timeString) => {
+  const dateStr = formatLocaleDate(isoDateString);
+  if (!timeString) return dateStr;
+
+  const [h, m] = String(timeString).split(':').map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return dateStr;
+
+  const period = h >= 12 ? 'PM' : 'AM';
+  const displayH = h % 12 || 12;
+  return `${dateStr} • ${displayH}:${String(m).padStart(2, '0')} ${period}`;
+};
+
+/**
  * Gets a human-readable status for a race
  * @param {Object} race - Race object
  * @returns {string} Status string ('Active', 'Upcoming', 'Completed')

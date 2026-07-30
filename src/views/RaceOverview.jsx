@@ -7,12 +7,15 @@ import RunnerOverview from '../components/Shared/RunnerOverview.jsx';
 import RosterImport from '../modules/race-maintenance/components/RosterImport.jsx';
 import DistributeRaceModal from '../modules/race-maintenance/components/DistributeRaceModal.jsx';
 import { Card, CardHeader, CardBody, Button } from '../design-system/components';
+import { formatLocaleDateTime } from '../utils/raceStatistics';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 const RaceOverview = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const raceId = searchParams.get('raceId');
   const [showDistribute, setShowDistribute] = useState(false);
+  const [showSuccessBanner, setShowSuccessBanner] = useState(true);
   
   const {
     currentRace: raceConfig,
@@ -119,8 +122,8 @@ const RaceOverview = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      {/* Success Message */}
-      {raceId && (
+      {/* Success Message — dismissible; it is confirmation, not a permanent state */}
+      {raceId && showSuccessBanner && (
         <Card variant="elevated" className="mb-6 border-l-4 border-green-500">
           <CardBody>
             <div className="flex items-start">
@@ -137,6 +140,14 @@ const RaceOverview = () => {
                   Your race has been configured. Select an operation mode below to begin.
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowSuccessBanner(false)}
+                aria-label="Dismiss"
+                className="ml-4 flex-shrink-0 p-1 rounded text-green-600 hover:text-green-800 hover:bg-green-50 dark:text-green-300 dark:hover:text-green-100 dark:hover:bg-green-900/30"
+              >
+                <XMarkIcon className="w-5 h-5" aria-hidden="true" />
+              </button>
             </div>
           </CardBody>
         </Card>
@@ -146,7 +157,7 @@ const RaceOverview = () => {
       <Card variant="elevated" className="mb-6">
         <CardHeader
           title={raceConfig.name}
-          subtitle={`${raceConfig.date} • ${raceConfig.startTime || 'No start time set'}`}
+          subtitle={formatLocaleDateTime(raceConfig.date, raceConfig.startTime)}
         />
         <CardBody>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
