@@ -742,29 +742,47 @@ export class BaseOperationsRepository extends BaseRepository {
   // REPORTS GENERATION
   // ============================================================================
 
-  async generateMissingNumbersReport(raceId, checkpoint) {
+  async generateMissingNumbersReport(raceId, checkpoint, options = {}) {
     try {
       const race = await db.races.get(raceId);
       const missingRunners = await this.getMissingRunners(raceId, checkpoint);
       const cpName = await this.getCheckpointDisplayName(raceId, checkpoint);
+      const isHtml = options.format === 'html';
 
-      const content = [
-        `Missing Numbers Report`,
-        `Race: ${race.name}`,
-        `Date: ${race.date}`,
-        `Checkpoint: ${cpName}`,
-        `Generated: ${new Date().toLocaleString()}`,
-        ``,
-        `Total Missing: ${missingRunners.length}`,
-        ``,
-        `Missing Runner Numbers:`,
-        missingRunners.map(r => r.number).join(', ')
-      ].join('\n');
-      
+      const meta = [
+        ['Missing Numbers Report', ''],
+        ['Race', race.name],
+        ['Date', race.date],
+        ['Checkpoint', cpName],
+        ['Generated', new Date().toLocaleString()],
+        ['Total Missing', String(missingRunners.length)],
+      ];
+      const numbers = missingRunners.map(r => r.number);
+
+      const content = isHtml
+        ? [
+            '<h1>Missing Numbers Report</h1>',
+            '<table>',
+            ...meta.slice(1).map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`),
+            '</table>',
+            '<h2>Missing Runner Numbers</h2>',
+            '<table>',
+            '<tr><th>Runner Number</th></tr>',
+            ...numbers.map(n => `<tr><td>${n}</td></tr>`),
+            '</table>',
+          ].join('\n')
+        : [
+            // Metadata as comment lines so spreadsheets still parse the column
+            ...meta.map(([k, v]) => (v ? `# ${k}: ${v}` : `# ${k}`)),
+            '',
+            'Runner Number',
+            ...numbers,
+          ].join('\n');
+
       return {
         content,
-        filename: `missing-numbers-${slugifyCheckpointName(cpName)}-${race.date}.csv`,
-        mimeType: 'text/csv'
+        filename: `missing-numbers-${slugifyCheckpointName(cpName)}-${race.date}.${isHtml ? 'html' : 'csv'}`,
+        mimeType: isHtml ? 'text/html' : 'text/csv'
       };
     } catch (error) {
       console.error('Error generating missing numbers report:', error);
@@ -829,10 +847,11 @@ export class BaseOperationsRepository extends BaseRepository {
     return getCheckpointName(checkpoints, checkpoint);
   }
 
-  async generateCheckpointLogReport(raceId, checkpoint) {
+  async generateCheckpointLogReport(raceId, checkpoint, options = {}) {
     try {
       const race = await db.races.get(raceId);
       const cpName = await this.getCheckpointDisplayName(raceId, checkpoint);
+      const isHtml = options.format === 'html';
       const entries = await db.base_station_runners
         .where(['raceId', 'checkpointNumber'])
         .equals([raceId, checkpoint])
@@ -862,10 +881,24 @@ export class BaseOperationsRepository extends BaseRepository {
         ).join(','))
       ].join('\n');
       
+      const htmlContent = [
+        '<h1>Checkpoint Log Report</h1>',
+        '<table>',
+        `<tr><th>Race</th><td>${race.name}</td></tr>`,
+        `<tr><th>Checkpoint</th><td>${cpName}</td></tr>`,
+        `<tr><th>Date</th><td>${race.date}</td></tr>`,
+        `<tr><th>Total Entries</th><td>${entries.length}</td></tr>`,
+        '</table>',
+        '<table>',
+        `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`,
+        ...rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`),
+        '</table>',
+      ].join('\n');
+
       return {
-        content: csvContent,
-        filename: `checkpoint-${slugifyCheckpointName(cpName)}-log-${race.date}.csv`,
-        mimeType: 'text/csv'
+        content: isHtml ? htmlContent : csvContent,
+        filename: `checkpoint-${slugifyCheckpointName(cpName)}-log-${race.date}.${isHtml ? 'html' : 'csv'}`,
+        mimeType: isHtml ? 'text/html' : 'text/csv'
       };
     } catch (error) {
       console.error('Error generating checkpoint log report:', error);

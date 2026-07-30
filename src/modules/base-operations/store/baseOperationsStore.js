@@ -283,11 +283,11 @@ const useBaseOperationsStore = create(
         const repo = new BaseOperationsRepository();
         switch (reportType) {
           case 'missing':
-            return repo.generateMissingNumbersReport(currentRaceId, options.checkpoint ?? 1);
+            return repo.generateMissingNumbersReport(currentRaceId, options.checkpoint ?? 1, options);
           case 'outList':
             return repo.generateOutListReport(currentRaceId);
           case 'checkpointLog':
-            return repo.generateCheckpointLogReport(currentRaceId, options.checkpoint ?? 1);
+            return repo.generateCheckpointLogReport(currentRaceId, options.checkpoint ?? 1, options);
           case 'summary':
             return repo.generateRaceResults(currentRaceId, options.format ?? 'csv');
           case 'finisherList':

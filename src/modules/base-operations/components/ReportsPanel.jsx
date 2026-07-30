@@ -171,16 +171,17 @@ const ReportsPanel = () => {
           <button
             key={type}
             onClick={() => setSelectedReport(type)}
-            className={`p-4 rounded-lg border-2 text-left flex items-start space-x-4 ${
+            className={`p-4 rounded-lg border-2 text-left flex items-start space-x-4 cursor-pointer transition-colors ${
               selectedReport === type
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                : 'border-gray-200 dark:border-gray-700'
+                : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-gray-50 dark:hover:bg-gray-800'
             }`}
           >
+            {/* Unselected cards stay full-strength — dimming them read as disabled */}
             <div className={`mt-1 ${
               selectedReport === type
                 ? 'text-primary-500'
-                : 'text-gray-400 dark:text-gray-500'
+                : 'text-gray-600 dark:text-gray-300'
             }`}>
               {icon}
             </div>
@@ -206,16 +207,16 @@ const ReportsPanel = () => {
             <button
               key={format}
               onClick={() => setSelectedFormat(format)}
-              className={`p-4 rounded-lg border-2 text-left flex items-start space-x-4 ${
+              className={`p-4 rounded-lg border-2 text-left flex items-start space-x-4 cursor-pointer transition-colors ${
                 selectedFormat === format
                   ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                  : 'border-gray-200 dark:border-gray-700'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-gray-50 dark:hover:bg-gray-800'
               }`}
             >
               <div className={`mt-1 ${
                 selectedFormat === format
                   ? 'text-primary-500'
-                  : 'text-gray-400 dark:text-gray-500'
+                  : 'text-gray-600 dark:text-gray-300'
               }`}>
                 {icon}
               </div>
@@ -333,7 +334,8 @@ const ReportsPanel = () => {
         <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
           About Reports
         </h4>
-        <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+        {/* Body text, not link colour — none of these bullets are clickable */}
+        <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
           <li>• <strong>Missing Numbers Report:</strong> Shows runners who haven't checked in</li>
           <li>• <strong>Out List Report:</strong> Lists withdrawn and vetted-out runners</li>
           <li>• <strong>Checkpoint Log:</strong> Detailed log of all checkpoint crossings</li>
