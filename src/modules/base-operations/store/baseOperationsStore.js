@@ -5,6 +5,23 @@ import db from '../../../shared/services/database/schema.js';
 import StorageService from '../../../services/storage.js';
 import { BaseOperationsRepository } from '../services/BaseOperationsRepository';
 import { getRunnerTotal } from '../../../utils/raceStatistics';
+import { useRaceStore } from '../../../store/useRaceStore.js';
+
+/**
+ * Mirror a base station status change into useRaceStore.runners.
+ *
+ * Home counters, Race Overview and the Report views all read that shared
+ * table; without this write-through they keep showing "not started".
+ * Non-blocking — a sync failure must never fail the base station operation.
+ */
+const syncStatusToRaceStore = async (runnerNumbers, status) => {
+  if (!status) return;
+  try {
+    for (const num of runnerNumbers) {
+      await useRaceStore.getState().markRunnerStatus(Number(num), status);
+    }
+  } catch (_) { /* non-blocking */ }
+};
 
 /**
  * Base Operations Store
@@ -188,6 +205,7 @@ const useBaseOperationsStore = create(
             );
           }
           await get().refreshData();
+          await syncStatusToRaceStore(runnerNumbers, updates.status);
         } catch (error) {
           set({ error: error.message, loading: false });
           throw error;
@@ -221,6 +239,7 @@ const useBaseOperationsStore = create(
             );
           }
           await get().refreshData();
+          await syncStatusToRaceStore(runnerNumbers, updates.status);
         } catch (error) {
           set({ error: error.message, loading: false });
           throw error;
@@ -430,6 +449,12 @@ const useBaseOperationsStore = create(
               currentRaceId, checkpointNumber, Number(num),
               { status: RUNNER_STATUSES.PASSED, markOffTime: time, callInTime: time }
             );
+            // Also record at the base station (cp 0) so finisher stats count
+            // radio-called runners — they never pass through data entry.
+            await StorageService.updateBaseStationRunner(
+              currentRaceId, 0, Number(num),
+              { status: RUNNER_STATUSES.PASSED, commonTime: time }
+            );
           }
           const newBatch = {
             id: `batch-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -440,6 +465,7 @@ const useBaseOperationsStore = create(
           };
           set(state => ({ sessionBatches: [newBatch, ...state.sessionBatches] }));
           await get().refreshData();
+          await syncStatusToRaceStore(runnerNumbers, RUNNER_STATUSES.PASSED);
         } catch (error) {
           set({ error: error.message, loading: false });
           throw error;

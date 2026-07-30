@@ -37,7 +37,9 @@ const BatchCard = ({ batch, checkpointName, batchNumber, isHighlighted, onEdit, 
         </button>
         <div className="flex-1 min-w-0">
           <span className="font-semibold text-sm">{checkpointName}</span>
-          <span className="ml-2 text-sm text-gray-500">⏰ {batch.commonTime}</span>
+          {/* Labelled to match "Recorded:" below — two bare times on one card
+              left the radio time and the entry time indistinguishable. */}
+          <span className="ml-2 text-sm text-gray-500">⏰ Common: {batch.commonTime}</span>
           {isEdited && (
             <span title="Edited" className="ml-2 text-xs text-orange-500">✏️</span>
           )}

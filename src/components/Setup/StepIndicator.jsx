@@ -41,7 +41,8 @@ const StepIndicator = ({ steps, currentStep }) => {
                 max-w-[56px] sm:max-w-none truncate sm:whitespace-normal
                 ${index === currentStep ? 'text-navy-900 dark:text-white' : 
                   index < currentStep ? 'text-green-700 dark:text-green-400' : 
-                  'text-gray-500 dark:text-gray-400'}
+                  /* upcoming: readable, but subordinate to current/completed */
+                  'text-gray-600 dark:text-gray-300'}
               `}>
                 {step.label}
               </p>
