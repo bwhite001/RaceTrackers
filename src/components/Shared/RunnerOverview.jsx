@@ -168,7 +168,12 @@ const RunnerOverview = () => {
         </div>
         
         <div className="card p-4 text-center">
-          <div className="text-2xl font-bold text-red-500 dark:text-red-400">
+          {/* Alert colour only once there is something to alert about */}
+          <div className={`text-2xl font-bold ${
+            counts.nonStarter + counts.dnf > 0
+              ? 'text-red-500 dark:text-red-400'
+              : 'text-gray-500 dark:text-gray-400'
+          }`}>
             {counts.nonStarter + counts.dnf}
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-300">

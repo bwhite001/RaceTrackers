@@ -257,7 +257,12 @@ const DataEntry = ({ onUnsavedChanges }) => {
           </div>
           <div>
             <span className="text-gray-500 dark:text-gray-400">DNF/DNS:</span>
-            <span className="ml-2 font-medium text-red-600 dark:text-red-400">
+            {/* Alert colour only once there is something to alert about */}
+            <span className={`ml-2 font-medium ${
+              stats.dnf + stats.dns > 0
+                ? 'text-red-600 dark:text-red-400'
+                : 'text-gray-500 dark:text-gray-400'
+            }`}>
               {stats.dnf + stats.dns}
             </span>
           </div>
