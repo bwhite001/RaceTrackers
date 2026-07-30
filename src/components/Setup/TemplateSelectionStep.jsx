@@ -37,7 +37,8 @@ function TemplateSelectionStep({ onSelect }) {
       </button>
 
       {/* Template cards */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      {/* 3-up so an odd template count does not orphan a half-width card */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
         {RACE_TEMPLATES.map(template => (
           <button
             key={template.id}
