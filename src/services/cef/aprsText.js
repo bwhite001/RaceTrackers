@@ -3,7 +3,7 @@
  * Spec: docs/protocol/checkpoint-event-format.md §6.1
  */
 
-import { EVENT_TYPES, validateRecord } from './record';
+import { EVENT_TYPES, REASON_RE, validateRecord } from './record';
 
 export const APRS_MAX_LENGTH = 67;
 
@@ -139,8 +139,6 @@ export const VERBS = Object.freeze({
 const VERB_FOR_EVENT = Object.freeze(
   Object.fromEntries(Object.entries(VERBS).map(([verb, event]) => [event, verb]))
 );
-
-const REASON_RE = /^[A-Z][A-Z0-9_]*$/;
 
 /** Reference grammar, spec §6.1.4. */
 export const APRS_LINE_RE =

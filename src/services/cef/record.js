@@ -19,7 +19,7 @@ export const STOP_EVENTS = Object.freeze([
 ]);
 
 const COMPETITOR_RE = /^[0-9A-Za-z]+$/;
-const REASON_RE = /^[A-Z][A-Z0-9_]*$/;
+export const REASON_RE = /^[A-Z][A-Z0-9_]*$/;
 
 // Field order for the JSON profile — spec §6.2 lists them in this order.
 const FIELDS = ['site', 'competitor', 'event', 'time', 'reason', 'source', 'relays', 'msgId'];

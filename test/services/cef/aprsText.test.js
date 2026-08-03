@@ -141,6 +141,11 @@ describe('decodeAprs', () => {
     expect(() => decodeAprs('CP3T@am0qWAW123 234', RECEIVED)).toThrow(/one competitor/i);
   });
 
+  it('rejects a stop event with too many items (invalid reason code not uppercase)', () => {
+    // Distinguish the items.length === 2 with invalid reason format case
+    expect(() => decodeAprs('CP3T@am0qWAW123 lowercase', RECEIVED)).toThrow(/one competitor/i);
+  });
+
   it('rejects a line with no items', () => {
     expect(() => decodeAprs('CP3T@am0qWAN', RECEIVED)).toThrow();
   });
