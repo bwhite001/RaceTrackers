@@ -1,0 +1,70 @@
+{
+  "version": "0.1",
+  "note": "Conformance vectors for docs/protocol/checkpoint-event-format.md. receivedAt is the assumed instant of receipt, used to resolve dateless clock-time forms.",
+  "receivedAt": "2026-08-01T00:00:00Z",
+  "epochVectors": [
+    { "iso": "2026-07-31T23:06:00.000Z", "epoch": 1785539160, "token": "@am0qWA" },
+    { "iso": "2026-07-31T23:06:42.000Z", "epoch": 1785539202, "token": "@am0qgg" }
+  ],
+  "lineVectors": [
+    {
+      "line": "CP3T@am0qWAN123 234 345 456",
+      "canonical": true,
+      "records": [
+        { "site": { "checkpoint": 3 }, "competitor": "123", "event": "SEEN", "time": "2026-07-31T23:06:00.000Z" },
+        { "site": { "checkpoint": 3 }, "competitor": "234", "event": "SEEN", "time": "2026-07-31T23:06:00.000Z" },
+        { "site": { "checkpoint": 3 }, "competitor": "345", "event": "SEEN", "time": "2026-07-31T23:06:00.000Z" },
+        { "site": { "checkpoint": 3 }, "competitor": "456", "event": "SEEN", "time": "2026-07-31T23:06:00.000Z" }
+      ]
+    },
+    {
+      "line": "CP 3T2306ZN123",
+      "canonical": false,
+      "records": [
+        { "site": { "checkpoint": 3 }, "competitor": "123", "event": "SEEN", "time": "2026-07-31T23:06:00.000Z" }
+      ]
+    },
+    {
+      "line": "LC2T@am0qWAN123",
+      "canonical": true,
+      "records": [
+        { "site": { "location": 2 }, "competitor": "123", "event": "SEEN", "time": "2026-07-31T23:06:00.000Z" }
+      ]
+    },
+    {
+      "line": "CP3T@am0qggV234 LAME",
+      "canonical": true,
+      "records": [
+        { "site": { "checkpoint": 3 }, "competitor": "234", "event": "VET_OUT", "reason": "LAME", "time": "2026-07-31T23:06:42.000Z" }
+      ]
+    },
+    {
+      "line": "CP3T0906KN123",
+      "canonical": false,
+      "records": [
+        { "site": { "checkpoint": 3 }, "competitor": "123", "event": "SEEN", "time": "2026-07-31T23:06:00.000Z" }
+      ]
+    },
+    {
+      "line": "CP3T@am0qWAW123",
+      "canonical": true,
+      "records": [
+        { "site": { "checkpoint": 3 }, "competitor": "123", "event": "WITHDRAWN", "time": "2026-07-31T23:06:00.000Z" }
+      ]
+    },
+    {
+      "line": "CP1T@am0qWAS456",
+      "canonical": true,
+      "records": [
+        { "site": { "checkpoint": 1 }, "competitor": "456", "event": "NON_STARTER", "time": "2026-07-31T23:06:00.000Z" }
+      ]
+    },
+    {
+      "line": "CP3T@am0qWAF345",
+      "canonical": true,
+      "records": [
+        { "site": { "checkpoint": 3 }, "competitor": "345", "event": "DNF", "time": "2026-07-31T23:06:00.000Z" }
+      ]
+    }
+  ]
+}
