@@ -69,6 +69,36 @@ describe('validateRecord', () => {
     expect(validateRecord({ ...SEEN, time: 'yesterday' }).valid).toBe(false);
   });
 
+  it('rejects an ISO date-time with no UTC offset', () => {
+    // Date.parse reads an offset-less date-time as LOCAL time — spec §6.2
+    // requires an explicit offset at every module boundary.
+    expect(validateRecord({ ...SEEN, time: '2026-07-31T23:06:00' }).valid).toBe(false);
+  });
+
+  it('rejects a date-only string', () => {
+    expect(validateRecord({ ...SEEN, time: '2026-07-31' }).valid).toBe(false);
+  });
+
+  it('rejects a non-ISO date string accepted by the Date.parse fallback', () => {
+    expect(validateRecord({ ...SEEN, time: 'Jul 31 2026' }).valid).toBe(false);
+  });
+
+  it('accepts a +HH:MM offset as well as Z', () => {
+    expect(validateRecord({ ...SEEN, time: '2026-08-01T09:06:00+10:00' }).valid).toBe(true);
+  });
+
+  it('rejects a non-string source', () => {
+    expect(validateRecord({ ...SEEN, source: {} }).valid).toBe(false);
+  });
+
+  it('rejects a non-integer msgId', () => {
+    expect(validateRecord({ ...SEEN, msgId: 'abc' }).valid).toBe(false);
+  });
+
+  it('rejects relays containing a non-string entry', () => {
+    expect(validateRecord({ ...SEEN, relays: [{}] }).valid).toBe(false);
+  });
+
   it('rejects a reason on a SEEN event', () => {
     const { valid, errors } = validateRecord({ ...SEEN, reason: 'LAME' });
     expect(valid).toBe(false);
@@ -136,6 +166,13 @@ describe('mergeRecords', () => {
 
   it('returns an empty array for no input', () => {
     expect(mergeRecords([])).toEqual([]);
+  });
+
+  it('never lets an unparseable time displace a valid one, regardless of order', () => {
+    const bad = { ...SEEN, time: 'not-a-time' };
+    const good = { ...SEEN, time: '2026-07-31T23:06:00Z' };
+    expect(mergeRecords([bad, good])[0].time).toBe(good.time);
+    expect(mergeRecords([good, bad])[0].time).toBe(good.time);
   });
 });
 

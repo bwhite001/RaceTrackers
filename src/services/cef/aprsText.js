@@ -254,19 +254,34 @@ export function decodeAprs(line, receivedAt) {
   const items = itemsRaw.trim().split(/\s+/).filter(Boolean);
   if (items.length === 0) throw new Error(`Line carries no competitors: ${line}`);
 
+  let records;
   if (event === EVENT_TYPES.SEEN) {
-    return items.map(competitor => ({ site, competitor, event, time }));
+    records = items.map(competitor => ({ site, competitor, event, time }));
+  } else {
+    // Stop event: one competitor, optional reason code.
+    if (items.length === 1 && REASON_RE.test(items[0])) {
+      throw new Error(
+        `Stop event line carries only a reason code, no competitor number: ${line}`
+      );
+    }
+    if (items.length > 2) {
+      throw new Error(`A stop event carries one competitor and an optional reason: ${line}`);
+    }
+    if (items.length === 2 && !REASON_RE.test(items[1])) {
+      throw new Error(`A stop event carries one competitor and an optional reason: ${line}`);
+    }
+    const [competitor, reason] = items;
+    const record = { site, competitor, event, time };
+    if (reason !== undefined) record.reason = reason;
+    records = [record];
   }
 
-  // Stop event: one competitor, optional reason code.
-  if (items.length > 2) {
-    throw new Error(`A stop event carries one competitor and an optional reason: ${line}`);
+  // decodeAprs is an untrusted-input boundary — validate every record before
+  // it can reach the rest of the system, same as decodeJson does.
+  for (const record of records) {
+    const { valid, errors } = validateRecord(record);
+    if (!valid) throw new Error(`Invalid CEF record decoded from APRS line: ${errors.join('; ')}`);
   }
-  if (items.length === 2 && !REASON_RE.test(items[1])) {
-    throw new Error(`A stop event carries one competitor and an optional reason: ${line}`);
-  }
-  const [competitor, reason] = items;
-  const record = { site, competitor, event, time };
-  if (reason !== undefined) record.reason = reason;
-  return [record];
+
+  return records;
 }

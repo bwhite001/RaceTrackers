@@ -159,6 +159,21 @@ describe('decodeAprs', () => {
     expect(tooLong.length).toBeGreaterThan(APRS_MAX_LENGTH);
     expect(() => decodeAprs(tooLong, RECEIVED)).toThrow(/length|67/i);
   });
+
+  it('rejects a stop event whose sole item is a bare reason code with no competitor', () => {
+    // 'LAME' alone would otherwise be read as a competitor number named "LAME".
+    expect(() => decodeAprs('CP3T@am0qWAW LAME', RECEIVED)).toThrow();
+  });
+
+  it('rejects a decoded competitor number containing an underscore', () => {
+    // APRS_LINE_RE's [ \w]+ items group is looser than validateRecord's
+    // alphanumeric-only competitor rule; decodeAprs must validate its own output.
+    expect(() => decodeAprs('CP3T@am0qWAN12_3', RECEIVED)).toThrow();
+  });
+
+  it('rejects a decoded competitor number that is only an underscore', () => {
+    expect(() => decodeAprs('CP3T@am0qWAN_', RECEIVED)).toThrow();
+  });
 });
 
 describe('APRS_LINE_RE', () => {

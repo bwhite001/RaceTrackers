@@ -21,6 +21,12 @@ export const STOP_EVENTS = Object.freeze([
 const COMPETITOR_RE = /^[0-9A-Za-z]+$/;
 export const REASON_RE = /^[A-Z][A-Z0-9_]*$/;
 
+// ISO 8601 date-time with a mandatory explicit UTC offset (Z, or ±HH:MM/±HHMM).
+// Spec §6.2 / plan Global Constraints: no offset-less time may cross a module
+// boundary — it would parse as local time on the receiving host (§5.2).
+const ISO_OFFSET_TIME_RE =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})$/;
+
 // Field order for the JSON profile — spec §6.2 lists them in this order.
 const FIELDS = ['site', 'competitor', 'event', 'time', 'reason', 'source', 'relays', 'msgId'];
 
@@ -65,8 +71,12 @@ export function validateRecord(record) {
     errors.push(`event must be one of ${Object.values(EVENT_TYPES).join(', ')}`);
   }
 
-  if (typeof record.time !== 'string' || Number.isNaN(Date.parse(record.time))) {
-    errors.push('time must be an ISO 8601 string');
+  if (
+    typeof record.time !== 'string' ||
+    !ISO_OFFSET_TIME_RE.test(record.time) ||
+    Number.isNaN(Date.parse(record.time))
+  ) {
+    errors.push('time must be an ISO 8601 date-time string with an explicit UTC offset');
   }
 
   if (record.reason !== undefined) {
@@ -77,8 +87,18 @@ export function validateRecord(record) {
     }
   }
 
-  if (record.relays !== undefined && !Array.isArray(record.relays)) {
-    errors.push('relays must be an array');
+  if (record.source !== undefined && typeof record.source !== 'string') {
+    errors.push('source must be a string');
+  }
+
+  if (record.msgId !== undefined && !Number.isInteger(record.msgId)) {
+    errors.push('msgId must be an integer');
+  }
+
+  if (record.relays !== undefined) {
+    if (!Array.isArray(record.relays) || !record.relays.every(r => typeof r === 'string')) {
+      errors.push('relays must be an array of strings');
+    }
   }
 
   return { valid: errors.length === 0, errors };
@@ -111,9 +131,18 @@ export function mergeRecords(records) {
   for (const record of records) {
     const key = naturalKey(record);
     const existing = byKey.get(key);
-    if (!existing || Date.parse(record.time) < Date.parse(existing.time)) {
+    if (!existing) {
       byKey.set(key, record);
+      continue;
     }
+    const recordTime = Date.parse(record.time);
+    const existingTime = Date.parse(existing.time);
+    const existingValid = !Number.isNaN(existingTime);
+    const recordValid = !Number.isNaN(recordTime);
+    // An unparseable time must never win: it can't be compared meaningfully,
+    // so it must lose to any valid time regardless of which arrived first.
+    const replace = recordValid && (!existingValid || recordTime < existingTime);
+    if (replace) byKey.set(key, record);
   }
   return [...byKey.values()];
 }

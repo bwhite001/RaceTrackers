@@ -99,6 +99,12 @@ A stop event MAY carry a reason code: a short uppercase token, no whitespace.
 The vocabulary is an open question (§8); the encodings support the field so that
 agreeing the vocabulary later requires no format change.
 
+The token MUST match `[A-Z][A-Z0-9_]*` — an uppercase letter followed by zero or
+more uppercase letters, digits or underscores. This resolves what would
+otherwise be an ambiguous line: without this grammar it is unclear whether
+`CP3T@am0qWAW123 234` is a withdrawal of competitor 123 with reason `234`, or a
+malformed line.
+
 ## 5. Semantics
 
 ### 5.1 Site reference
@@ -354,15 +360,18 @@ under the single-code threshold.
 
 ## 9. Test vectors
 
-For checking an implementation against another. All times UTC.
+For checking an implementation against another. All times UTC. Clock-time forms
+(§6.1.1) resolve against a fixed receipt instant of `2026-08-01T00:00:00Z` — the
+same constant used in `docs/protocol/test-vectors.json` — so the rows below are
+verifiable without external context.
 
 | Encoded | Site | Competitors | Event | Time |
 |---|---|---|---|---|
 | `CP3T@am0qWAN123 234 345 456` | checkpoint 3 | 123, 234, 345, 456 | `SEEN` | 2026-07-31T23:06:00Z |
-| `CP 3T2306ZN123` | checkpoint 3 | 123 | `SEEN` | 23:06:00Z, date from context |
+| `CP 3T2306ZN123` | checkpoint 3 | 123 | `SEEN` | 2026-07-31T23:06:00Z |
 | `LC2T@am0qWAN123` | location 2 | 123 | `SEEN` | 2026-07-31T23:06:00Z |
 | `CP3T@am0qggV234 LAME` | checkpoint 3 | 234 | `VET_OUT`, reason `LAME` | 2026-07-31T23:06:42Z |
-| `CP3T0906KN123` | checkpoint 3 | 123 | `SEEN` | 23:06:00Z (09:06 UTC+10) |
+| `CP3T0906KN123` | checkpoint 3 | 123 | `SEEN` | 2026-07-31T23:06:00Z (09:06 UTC+10) |
 
 Epoch conversions, for checking a base64 time implementation:
 

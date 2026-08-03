@@ -7,6 +7,7 @@
 export {
   EVENT_TYPES,
   STOP_EVENTS,
+  REASON_RE,
   validateRecord,
   naturalKey,
   mergeRecords,
