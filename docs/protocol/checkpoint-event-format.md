@@ -358,6 +358,37 @@ under the single-code threshold.
 5. **Zero as a checkpoint number.** Some implementations use checkpoint 0 to mean
    base or finish. Should the format reserve it?
 
+The remaining questions were raised by an implementation review of this draft.
+Each is a place where two independent implementers would reasonably disagree, so
+each needs settling before anyone else builds against the document.
+
+6. **§6.1.4's items group is looser than §4.1.** The reference grammar uses `\w`,
+   which admits `_` in a competitor number while §4.1 says "alphanumeric". It also
+   admits a leading space and a lone reason code with no competitor. Suggested
+   replacement: `((?: ?[0-9A-Za-z]+)+)` for `SEEN`, with an explicit
+   competitor-plus-optional-reason production for stop events.
+7. **§6.1.4's time production admits forms §6.1.1 does not list.** Each separator
+   dot is independently optional, so `23.0600Z` and `2306.00Z` match the grammar
+   but appear in none of the four listed forms. Either list them or tie the dots
+   together.
+8. **The `@` form has four spare bits.** Six base64 characters carry 36 bits for a
+   32-bit value, so sixteen distinct tokens decode to each instant. Without a
+   normative rule, byte-for-byte reproducibility between implementations is not
+   guaranteed. Proposed: senders MUST zero the trailing bits; receivers SHOULD
+   reject tokens where they are non-zero.
+9. **A `J`-zone record from a station whose offset the receiver does not know.**
+   §5.2 puts out-of-band offset publication outside the format, which leaves `J`
+   decoding formally undefined in the one case that matters — the state-border
+   scenario §5.2 itself warns about. Resolving `J` against the *receiver's* offset
+   is only correct when both ends share one. Proposed: a receiver MUST reject a
+   `J`-zone record unless it knows the sender's offset. This has an implementation
+   consequence, so it needs deciding rather than leaving implicit.
+10. **§5.1's "last recorded checkpoint" is ambiguous** — chronologically last, or
+    highest-numbered? For a competitor whose records arrived out of order, the two
+    readings resolve the same location to different checkpoints, which diverges the
+    natural key and so breaks deduplication. §5.1 should also state whether
+    "history" means all checkpoints or only those hosted at that location.
+
 ## 9. Test vectors
 
 For checking an implementation against another. All times UTC. Clock-time forms
