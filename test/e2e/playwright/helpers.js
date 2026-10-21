@@ -371,6 +371,19 @@ export async function pickFirstRaceInModal(page) {
 }
 
 /**
+ * For multi-checkpoint races the Checkpoint module asks which checkpoint to
+ * operate ("Select Your Checkpoint"). Pick the first one if that dialog shows;
+ * single-checkpoint races navigate straight in, so do nothing.
+ * (08-complete-race-simulation imported this helper but it was never added.)
+ */
+export async function pickFirstCheckpointIfModal(page) {
+  const picker = page.getByRole('dialog').filter({ hasText: /select your checkpoint/i });
+  const shown = await picker.waitFor({ state: 'visible', timeout: 3000 }).then(() => true).catch(() => false);
+  if (!shown) return;
+  await picker.getByRole('button').filter({ hasText: /^CP\d/ }).first().click();
+}
+
+/**
  * Wait for the race-selection modal and pick a race by name.
  */
 export async function pickRaceInModalByName(page, raceName) {

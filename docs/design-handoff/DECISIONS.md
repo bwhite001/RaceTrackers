@@ -119,3 +119,24 @@ conflicted with existing behaviour, or didn't match the repo. Each entry: what, 
 - **Tests updated for replaced behaviour:**
   - `BaseStationView.test.jsx`: the Overview tab is mocked as `BaseOverview`.
   - `04-race-management › navigates from race overview to base station` looked for "Data Entry" text and now checks Receive's "Who's calling?".
+
+## Phase 6 — Reports and data checks
+
+- **Reports tab = new `BaseReports`.** A sidebar lists the four reports (Overdue runners, Still on course, Times by checkpoint, Call log) and the six "Needs attention" checks. Each check shows a red count, or ✓ when clear, with a gold total. Each report has CSV (via the existing `downloadReport`) and Print (`window.print()`). The previous `ReportsPanel` (finisher list, results, split times, officials' report) is kept as a fifth sidebar entry, **Exports**, so no existing report was removed.
+- **Checks** (`services/dataChecks.js`, one function each, stable `issueKey`s):
+  - Duplicates: same bib, same checkpoint, more than one live base record.
+  - Out of order: consecutive recorded checkpoints in course order.
+  - Skipped: a checkpoint missing before the furthest one seen.
+  - Seen after DNF / DNS: sighting time later than the withdrawal time, or any sighting while DNS.
+  - Unknown bibs: `radio_calls.rejected` entries with reason "Not in race", on calls that weren't undone.
+  - Impossible pace: over 20 km/h between checkpoints with `distanceKm` set. Finish uses `race.distanceKm`. The limit is overridable by `race.paceLimitKmh`. Legs without distances are skipped.
+- **Resolving never deletes data.**
+  - "Keep A / Keep B", "Merge" and "Remove CPx time" set the other base rows to `status: 'superseded'` (with `supersededAt` and a reason) instead of deleting them. Those rows stop counting everywhere (the store drops them from `runners`) and Undo puts them back exactly.
+  - "Clear DNF / DNS" uses the Phase 5 clear (Undo restores it).
+  - Acknowledgements ("Ask CPx", "Mark checked", "Remove" / "Keep for review" for unknown bibs) are rows in `data_issue_resolutions`, so they stay resolved after a reload. Undo deletes the resolution.
+  - Data-changing resolutions don't need a resolution row: once the data is fixed the issue is gone. All of these are audit-logged.
+- **"Remove CPx time"** is only offered when base has its own record at that checkpoint. A sighting that exists only in imported checkpoint data offers "Mark checked" instead (base doesn't edit checkpoint data).
+- **"Ask CPx"** records that a radio check was asked for and clears the item, as the design does. There's no separate queue of pending radio checks; the resolution row says "ask CPx".
+- **Overdue → "View runners"** on the Overview opens Reports with Overdue runners selected.
+- **Bug fix: `08-complete-race-simulation` couldn't load** (`pickFirstCheckpointIfModal` was missing from `helpers.js`; H6). The helper was added (it picks the first checkpoint when the picker dialog appears). The spec was updated for the new UI: tiles pinned by aria-label, the base batch received as a Finish call, the DNF count read from the DNF / DNS tab, and the overview checked via the leaders table and progress bars instead of the removed StatusStrip. All 10 phases pass.
+- **New journey:** `23-base-reports-checks` (spec journey 9, plus the four reports).

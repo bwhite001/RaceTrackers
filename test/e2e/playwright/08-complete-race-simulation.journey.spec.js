@@ -213,9 +213,8 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
     });
 
     await test.step('Verify — at least one runner shows marked state', async () => {
-      const markedRunner = _page.locator('button, [role="button"]')
-        .filter({ hasText: /^10[1-9]$/ })
-        .first();
+      // Passed tiles show "Runner N, HH:MM" (VK4WIP redesign shows the time on the tile)
+      const markedRunner = _page.getByRole('button', { name: /^Runner 10[1-9], \d\d:\d\d$/ }).first();
       await markedRunner.waitFor({ state: 'visible', timeout: 5000 });
       // Confirm runner 110 is still unmarked (non-starter)
       const runner110 = _page.locator('button, [role="button"]').filter({ hasText: /^110$/ }).first();
@@ -251,15 +250,9 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
     });
 
     await test.step('Verify — runner 103 visible as marked, navigation confirms CP2', async () => {
-      // Wait for CP2 context to be fully active in the legacy store
-      // by waiting for the CP2 heading to appear in the RunnerGrid
-      await _page.waitForSelector('h3', { timeout: 10000 });
-      // Runner 103 should be visible (was just marked via quick entry)
-      const runner103 = _page.locator('button, [role="button"]').filter({ hasText: /^103$/ }).first();
-      if (await runner103.isVisible({ timeout: 3000 }).catch(() => false)) {
-        // Just verify runner 103 is present — the class may lag behind
-        await runner103.waitFor({ state: 'visible', timeout: 3000 });
-      }
+      await expect(_page.getByRole('heading', { name: 'Checkpoint 2' })).toBeVisible({ timeout: 10000 });
+      await expect(_page.getByRole('button', { name: /^Runner 103, \d\d:\d\d$/ })).toBeVisible({ timeout: 5000 });
+      await expect(_page.getByRole('button', { name: /^Runner 102, to come$/ })).toBeVisible();
     });
   });
 
@@ -278,45 +271,42 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
       await pickFirstRaceInModal(_page);
     });
 
-    await test.step('Base Station Data Entry tab — store initialises, stats show total 10', async () => {
+    await test.step('Base Station Receive tab — board shows what CP1 and CP2 recorded', async () => {
       await _page.waitForURL(/base-station\/operations/, { timeout: 30000 });
-      await _page.waitForSelector('#is-time', { timeout: 20000 });
-      await expect(_page.getByText(/total/i).first()).toBeVisible({ timeout: 15000 });
-      await expect(_page.getByText('10').first()).toBeVisible({ timeout: 10000 });
+      await _page.getByRole('heading', { name: /who's calling/i }).waitFor({ timeout: 20000 });
+      await expect(_page.getByTestId('board-count-CP1')).toHaveText('9', { timeout: 15000 });
+      await expect(_page.getByTestId('board-count-CP2')).toHaveText('8');
     });
   });
 
   test('Phase 4b — Records finish time 10:45:00 for batch 103–108', async () => {
     await test.step('Navigate directly to base station operations', async () => {
       await _page.goto(`${BASE}/base-station/operations`);
-      await _page.waitForSelector('#is-time', { timeout: 20000 });
-      await _page.waitForTimeout(500); // Let React store fully initialise
+      await _page.getByRole('heading', { name: /who's calling/i }).waitFor({ timeout: 20000 });
     });
 
-    await test.step('Data Entry — select checkpoint, enter time 10:45:00 and runner batch', async () => {
-      // Select checkpoint 1 (index 1 skips the blank placeholder option)
-      await _page.locator('#is-cp-select').first().selectOption({ index: 1 });
-      await _page.locator('#is-time').first().fill('10:45:00');
-      // BibChipInput: type each bib and press Enter to add it as a chip
-      const bibInput = _page.getByLabel('Bib Numbers').first();
-      for (const bib of ['103', '104', '105', '106', '107', '108']) {
-        await bibInput.fill(bib);
-        await bibInput.press('Enter');
-        await _page.waitForTimeout(100);
+    // VK4WIP redesign: the finish line is "Finish" on Receive; times are the
+    // current 5-minute block (an exact past time can be typed if needed).
+    await test.step('Receive — Finish calls; add 103–108', async () => {
+      await _page.getByRole('button', { name: /^Finish,/ }).click();
+      for (const bib of [103, 104, 105, 106, 107, 108]) {
+        await _page.fill('#bib-heard', String(bib));
+        await _page.keyboard.press('Enter');
       }
     });
 
-    await test.step('Submit — verify chips clear, finished count increments', async () => {
-      await _page.getByRole('button', { name: /record.*runner/i }).first().click();
-      await expect(_page.getByLabel('Bib Numbers').first()).toHaveValue('', { timeout: 10000 });
-      await expect(_page.getByText('6').first()).toBeVisible({ timeout: 10000 });
+    await test.step('Complete — 6 recorded at Finish', async () => {
+      await _page.getByRole('button', { name: 'Complete · 6' }).click();
+      await expect(_page.getByText('6 recorded at Finish')).toBeVisible({ timeout: 10000 });
+      await _page.getByRole('button', { name: 'Next call' }).click();
+      await expect(_page.getByTestId('board-count-Finish')).toHaveText('6');
     });
   });
 
   test('Phase 4c — Records DNF for runner 102 (heat exhaustion)', async () => {
     await test.step('Navigate to base station operations', async () => {
       await _page.goto(`${BASE}/base-station/operations`);
-      await _page.waitForSelector('#is-time', { timeout: 20000 });
+      await _page.getByRole('heading', { name: /who's calling/i }).waitFor({ timeout: 20000 });
     });
 
     await test.step('Open DNF withdrawal dialog via hotkey "d"', async () => {
@@ -333,14 +323,15 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
     });
 
     await test.step('Stats — DNF/DNS count shows at least 1', async () => {
-      await expect(_page.getByText(/dnf.*dns|dnf.{1,5}dns/i).first()).toBeVisible({ timeout: 5000 });
+      await _page.getByRole('tab', { name: 'DNF / DNS' }).click();
+      await expect(_page.getByText(/\d+ DNS · [1-9]\d* DNF/)).toBeVisible({ timeout: 5000 });
     });
   });
 
   test('Phase 4d — Marks runner 110 as DNS (non-starter)', async () => {
     await test.step('Navigate to base station operations', async () => {
       await _page.goto(`${BASE}/base-station/operations`);
-      await _page.waitForSelector('#is-time', { timeout: 20000 });
+      await _page.getByRole('heading', { name: /who's calling/i }).waitFor({ timeout: 20000 });
     });
 
     await test.step('Open DNS dialog via Shift+D (switches to DNS tab)', async () => {
@@ -364,7 +355,7 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
   test('Phase 4e — Records DNF for runner 101 (injured knee)', async () => {
     await test.step('Navigate to base station operations', async () => {
       await _page.goto(`${BASE}/base-station/operations`);
-      await _page.waitForSelector('#is-time', { timeout: 20000 });
+      await _page.getByRole('heading', { name: /who's calling/i }).waitFor({ timeout: 20000 });
     });
 
     await test.step('Open DNF dialog via "d" hotkey', async () => {
@@ -388,20 +379,18 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
       await _page.getByRole('tab', { name: /overview/i }).click();
     });
 
-    await test.step('Overview — runners 103–108 visible with Finished status', async () => {
-      for (const num of [103, 104, 105]) {
-        await expect(_page.getByText(String(num)).first()).toBeVisible({ timeout: 5000 });
-      }
-      await expect(_page.getByText(/passed/i).first()).toBeVisible({ timeout: 5000 });
+    await test.step('Overview — runners 103–108 lead the race at the Finish', async () => {
+      const leaders = _page.locator('table tbody tr');
+      await expect(leaders.first()).toContainText('Finish', { timeout: 5000 });
+      await expect(_page.getByTestId('stats-grid')).toContainText('6');
     });
 
     await test.step('Overview — DNF status label visible', async () => {
       await expect(_page.getByText(/dnf/i).first()).toBeVisible({ timeout: 5000 });
     });
 
-    await test.step('Status strip — total of 10 runners shown', async () => {
-      await expect(_page.getByText(/total/i).first()).toBeVisible();
-      await expect(_page.getByText('10').first()).toBeVisible({ timeout: 5000 });
+    await test.step('Checkpoint progress — 10 runners in the race', async () => {
+      await expect(_page.getByRole('img', { name: /^Finish: 6 of 10$/ })).toBeVisible({ timeout: 5000 });
     });
   });
 

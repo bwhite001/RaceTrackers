@@ -196,6 +196,50 @@ export class BaseOperationsRepository extends BaseRepository {
     });
   }
 
+  // ── Data checks: resolutions and superseded rows (spec §4.12) ────────────
+
+  async getResolutions(raceId) {
+    return db.data_issue_resolutions.where('raceId').equals(raceId).toArray();
+  }
+
+  async addResolution(raceId, issueKey, resolution) {
+    const id = await db.data_issue_resolutions.add({ raceId, issueKey, resolution, resolvedAt: TimeUtils.getCurrentTimestamp() });
+    await this.logAudit(raceId, 'resolve-issue', 'data_issue', issueKey, { resolution });
+    return id;
+  }
+
+  async removeResolution(id) {
+    const row = await db.data_issue_resolutions.get(id);
+    if (!row) return;
+    await db.data_issue_resolutions.delete(id);
+    await this.logAudit(row.raceId, 'reopen-issue', 'data_issue', row.issueKey, { resolution: row.resolution });
+  }
+
+  /**
+   * Set base rows aside (status 'superseded') instead of deleting them, so a
+   * duplicate or a wrong sighting stops counting but the record is kept.
+   * @returns {Promise<object[]>} the rows as they were, for restoreBaseRows()
+   */
+  async supersedeBaseRows(raceId, ids, reason) {
+    const before = (await db.base_station_runners.bulkGet(ids)).filter(Boolean);
+    await db.transaction('rw', db.base_station_runners, db.audit_log, async () => {
+      for (const r of before) {
+        await db.base_station_runners.update(r.id, {
+          status: 'superseded', supersededAt: TimeUtils.getCurrentTimestamp(), supersededReason: reason,
+        });
+      }
+      await this.logAudit(raceId, 'supersede', 'base_station', ids.join(','), { reason });
+    });
+    return before;
+  }
+
+  async restoreBaseRows(raceId, rows) {
+    await db.transaction('rw', db.base_station_runners, db.audit_log, async () => {
+      for (const r of rows) await db.base_station_runners.put(r);
+      await this.logAudit(raceId, 'restore', 'base_station', rows.map(r => r.id).join(','), {});
+    });
+  }
+
   async getRadioCalls(raceId) {
     return db.radio_calls.where('raceId').equals(raceId).toArray();
   }

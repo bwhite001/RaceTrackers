@@ -61,6 +61,8 @@ const useBaseOperationsStore = create(
       outList: [],
       raceRunnerNumbers: [],
       radioCalls: [],
+      baseRows: [],
+      resolutions: [],
       receive: EMPTY_RECEIVE,
 
       // Actions - Initialization
@@ -113,7 +115,8 @@ const useBaseOperationsStore = create(
             StorageService.getCheckpointRunners(raceId),
             StorageService.getBaseStationRunners(raceId),
           ]);
-          return [...checkpointRunners, ...baseStationRunners];
+          // Rows set aside when resolving a data check don't count anywhere
+          return [...checkpointRunners, ...baseStationRunners.filter(r => r.status !== 'superseded')];
         } catch (error) {
           console.error('Failed to load runners:', error);
           return [];
@@ -141,10 +144,12 @@ const useBaseOperationsStore = create(
             console.warn(`Base refresh: could not load ${label}`, err);
             return [];
           });
-          const [raceRunnerRows, radioCalls, outList] = await Promise.all([
+          const [raceRunnerRows, radioCalls, outList, baseRows, resolutions] = await Promise.all([
             soft('race runners', () => db.runners.where('raceId').equals(raceKey).toArray()),
             soft('radio calls', () => repo.getRadioCalls(raceKey)),
             soft('out list', () => repo.getOutList(raceKey)),
+            soft('base records', () => repo.getBaseStationRunners(raceKey)),
+            soft('resolutions', () => repo.getResolutions(raceKey)),
           ]);
           const stats = get().calculateStats(runners);
 
@@ -182,6 +187,8 @@ const useBaseOperationsStore = create(
             raceRunnerNumbers: raceRunnerRows.map(r => r.number),
             radioCalls,
             outList,
+            baseRows,
+            resolutions,
             loading: false,
             lastSync: new Date().toISOString()
           });
@@ -394,6 +401,30 @@ const useBaseOperationsStore = create(
         else if (record.kind === 'withdrawal') {
           await repo.withdrawRunner(raceKey, record.number, record.checkpoint ?? null, record.reason || '', '', record.time || undefined);
         }
+      },
+
+      // Actions - data-check resolutions (spec §4.12)
+      addResolution: async (issueKey, resolution) => {
+        const repo = new BaseOperationsRepository();
+        const id = await repo.addResolution(raceKeyOf(get().currentRaceId), issueKey, resolution);
+        await get().refreshData({ silent: true });
+        return id;
+      },
+
+      removeResolution: async (id) => {
+        await new BaseOperationsRepository().removeResolution(id);
+        await get().refreshData({ silent: true });
+      },
+
+      supersedeBaseRows: async (ids, reason) => {
+        const before = await new BaseOperationsRepository().supersedeBaseRows(raceKeyOf(get().currentRaceId), ids, reason);
+        await get().refreshData({ silent: true });
+        return before;
+      },
+
+      restoreBaseRows: async (rows) => {
+        await new BaseOperationsRepository().restoreBaseRows(raceKeyOf(get().currentRaceId), rows);
+        await get().refreshData({ silent: true });
       },
 
       // Actions - UI State

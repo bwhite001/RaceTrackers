@@ -101,6 +101,9 @@ const SECTION_MAP = {
   // VK4WIP redesign — Phase 5 (DNF / DNS, overview)
   'base marks a pasted list DNF with checks, clears one and undoes':        'base-status',
   'base overview shows tiles, checkpoint progress and current leaders':     'base-status',
+  // VK4WIP redesign — Phase 6 (reports & data checks)
+  'base resolves a duplicate and an out-of-order time until checks are clear': 'base-reports',
+  'base reports show still on course, times by checkpoint and the call log': 'base-reports',
 };
 
 const CHAPTERS = [
@@ -109,6 +112,7 @@ const CHAPTERS = [
   { key: 'base-station',  title: 'Operating the Base Station', intro: 'Steps for the base station operator. Record finish times, mark DNF/DNS runners, and review race-wide status from the Overview and Reports tabs.' },
   { key: 'base-receive',  title: 'Base Station: Receiving Calls', intro: 'Take a Scores Checkpoint call one checkpoint at a time: pick who is calling, take each number as it is read in its 5-minute block, check the coloured chips, and Complete. Undo, Clear and Cancel fix mistakes.' },
   { key: 'base-status',   title: 'Base Station: DNF, DNS and Overview', intro: 'Base keeps the race-wide out list. Mark runners DNF or DNS in bulk by typing or pasting numbers, check the warnings, and clear anyone who is back in. The Overview shows who is on course, overdue alerts, checkpoint progress and the current leaders.' },
+  { key: 'base-reports',  title: 'Base Station: Reports and Data Checks', intro: 'Overdue runners, who is still on course, times by checkpoint and the call log — each as CSV or print. Needs attention lists duplicates, out-of-order times, skipped checkpoints, sightings after DNF / DNS, unknown bibs and impossible pace; resolve each in place, with Undo.' },
   { key: 'leaderboard',   title: 'Race Leaderboard',           intro: 'View live race standings grouped by gender, wave, or overall. Switch between grouping modes and track leaders as finishers are recorded.' },
   { key: 'import-export', title: 'Importing & Exporting Data', intro: 'Transfer race configurations and results between devices. Export from the base station header or race management page; import to restore a race.' },
   { key: 'navigation',    title: 'Navigating the App',         intro: 'How to move between modules, what to expect on the home screen, and how the app protects active operations from accidental navigation.' },

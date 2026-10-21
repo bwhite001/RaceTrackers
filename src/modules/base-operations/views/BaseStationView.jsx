@@ -15,7 +15,7 @@ import ImportExportModal from '../../../components/ImportExport/ImportExportModa
 
 // Components
 import BaseReceive from '../components/BaseReceive';
-import ReportsPanel from '../components/ReportsPanel';
+import BaseReports from '../components/BaseReports';
 import BaseOverview from '../components/BaseOverview';
 import WithdrawalDialog from '../components/WithdrawalDialog';
 import BaseStatusView from '../components/BaseStatusView';
@@ -110,6 +110,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
   // Handle tab change
   const handleTabChange = useCallback((tab) => {
+    if (tab !== 'reports') setReportFocus(null);
     setActiveTab(tab);
   }, []);
 
@@ -198,7 +199,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
                 raceRunners={raceRunners ?? []}
                 mapCheckpoints={checkpoints ?? []}
                 groupedRunners={groupedRunners}
-                onViewOverdue={() => { setReportFocus('overdue'); handleTabChange('reports'); }}
+                onViewOverdue={() => { setReportFocus('missing'); handleTabChange('reports'); }}
               />
             )}
 
@@ -207,9 +208,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             )}
 
             {activeTab === 'reports' && (
-              <div className="max-w-[1280px] mx-auto px-3 pt-3">
-                <ReportsPanel />
-              </div>
+              <BaseReports key={reportFocus ?? 'reports'} initialReport={reportFocus ?? 'missing'} />
             )}
 
           </div>
