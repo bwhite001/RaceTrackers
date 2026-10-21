@@ -93,6 +93,30 @@ test.describe('Missed runners', () => {
     });
   });
 
+  test('stand-down check puts a checked runner back on the missed list', async ({ page, step }) => {
+    await openBase(page);
+    await call(page, 'CP1', [100]);
+    await call(page, 'CP2', [100, 150]);
+
+    await step('Reports › Skipped a checkpoint — Mark checked on 150: off CP1\'s missed list', async () => {
+      await page.getByRole('tab', { name: 'Reports' }).click();
+      await page.getByRole('button', { name: /^Skipped a checkpoint/ }).click();
+      await page.getByTestId('issue-row').filter({ hasText: /^150/ }).getByRole('button', { name: 'Mark checked' }).click();
+      await page.getByRole('tab', { name: 'Receive' }).click();
+      await expect(page.getByTestId('missed-CP1')).toHaveCount(0);
+    });
+
+    await step('Stand-down check on CP1 — 150 seen further on; one tap adds it back; Undo', async () => {
+      await page.getByRole('button', { name: 'Stand-down check CP1' }).click();
+      const sheet = page.getByRole('dialog', { name: 'Stand-down check · CP1' });
+      await expect(sheet.getByTestId('seen-further')).toContainText('150 · CP2');
+      await sheet.getByRole('button', { name: 'Add 150 to the missed list' }).click();
+      await expect(page.getByTestId('missed-CP1')).toHaveText('Missed: 150 (seen CP2)');
+      await sheet.getByRole('status').getByRole('button', { name: 'Undo' }).click();
+      await expect(page.getByTestId('missed-CP1')).toHaveCount(0);
+    });
+  });
+
   test('checkpoint records a runner base says it missed', async ({ page, step }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await seedRace(page, BASE);

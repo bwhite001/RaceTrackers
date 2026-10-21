@@ -44,7 +44,7 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
   const sightings = useMemo(() => sightingsByCheckpoint(runners), [runners]);
   const out = useMemo(() => outStatusMap(outList, runners), [outList, runners]);
   const meta = useMemo(() => new Map(raceRunners.map(r => [r.number, r])), [raceRunners]);
-  const upTo = useMemo(() => reportedUpTo(runners), [runners]);
+  const upTo = useMemo(() => reportedUpTo(runners, radioCalls), [runners, radioCalls]);
   const lateRows = useMemo(() => overdueRunners({
     sightings, order, out, now, upTo, graceMinutes: currentRace?.overdueGraceMinutes ?? OVERDUE_GRACE_MINUTES,
   }), [sightings, order, out, now, upTo, currentRace?.overdueGraceMinutes]);

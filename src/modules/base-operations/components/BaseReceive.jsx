@@ -605,6 +605,13 @@ const BaseReceive = () => {
         return (
           <StandDownSheet row={row} lists={lists} missedHere={missed.get(standDownCp) ?? []}
             onStandDown={() => recordStandDown(standDownCp)} onUndo={(callId) => undoCall(callId)}
+            onAddToMissed={async (numbers) => {
+              // Off the list only because base resolved them earlier (asked / checked): reopen those
+              const keys = new Set(numbers.map(n => `skip:${n}:${standDownCp}`));
+              const rows = resolutions.filter(r => keys.has(r.issueKey));
+              for (const r of rows) await removeResolution(r.id);
+              return async () => { for (const r of rows) await addResolution(r.issueKey, r.resolution); };
+            }}
             onClose={() => setStandDownCp(null)} />
         );
       })()}
@@ -617,10 +624,12 @@ const BaseReceive = () => {
  * before it packs down. Stand down (two taps) marks it Closed on base only;
  * runners still listed stay on Overdue / Still on course.
  */
-const StandDownSheet = ({ row, lists, missedHere, onStandDown, onUndo, onClose }) => {
+const StandDownSheet = ({ row, lists, missedHere, onStandDown, onUndo, onAddToMissed, onClose }) => {
   const [confirm, setConfirm] = useState(false);
   const [done, setDone] = useState(null); // callId once stood down
+  const [added, setAdded] = useState(null); // { count, undo } after Add to missed list
   const onMissedList = new Set(missedHere.map(m => m.number));
+  const notOnList = lists.seenFurther.filter(r => !onMissedList.has(r.number)).map(r => r.number);
   const standDown = async () => {
     if (!confirm) { setConfirm(true); return; }
     setDone(await onStandDown());
@@ -637,7 +646,20 @@ const StandDownSheet = ({ row, lists, missedHere, onStandDown, onUndo, onClose }
           {!lists.seenFurther.length && <span className="text-[13px] text-vk-muted">None</span>}
         </div>
         {lists.seenFurther.some(r => onMissedList.has(r.number)) && (
-          <div className="text-xs text-vk-muted">These are on {row.short}&apos;s missed list — ask about them on the call.</div>
+          <div className="text-xs text-vk-muted">On {row.short}&apos;s missed list: {lists.seenFurther.filter(r => onMissedList.has(r.number)).map(r => r.number).join(', ')} — ask about them on the call.</div>
+        )}
+        {notOnList.length > 0 && (
+          <button type="button" onClick={async () => setAdded({ count: notOnList.length, undo: await onAddToMissed(notOnList) })}
+            className="self-start min-h-[40px] px-3 rounded-btn bg-vk-blue text-white font-bold text-xs">
+            Add {notOnList.join(', ')} to the missed list
+          </button>
+        )}
+        {added && (
+          <div className="flex items-center gap-2 text-xs" role="status">
+            <span className="flex-1">{added.count} added to {row.short}&apos;s missed list</span>
+            <button type="button" onClick={async () => { await added.undo(); setAdded(null); }}
+              className="min-h-[32px] px-3 rounded-lg bg-vk-ink text-white font-bold text-xs">Undo</button>
+          </div>
         )}
       </section>
       <section className="flex flex-col gap-1.5" data-testid="not-seen-past">

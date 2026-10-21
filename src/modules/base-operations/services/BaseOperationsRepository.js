@@ -202,6 +202,8 @@ export class BaseOperationsRepository extends BaseRepository {
         raceId, checkpointNumber, receivedAt, kind: 'correction',
         blocks: [], recorded: notPassed ? [] : [number], skipped: [], rejected: [],
         corrections: [{ number, from, to: notPassed ? null : time, notPassed }],
+        // "Not passed" writes no new row, so the call keeps the block for "up to"
+        ...(notPassed && upToBlock && { upToBlock }),
         undoneAt: null,
         replaced: live.map(r => ({ id: r.id, before: { ...r } })),
       });

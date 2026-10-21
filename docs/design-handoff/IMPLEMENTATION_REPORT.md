@@ -201,17 +201,18 @@ From Brandon's answers after 3.17.0 (`RACE_DAY_FIXES.md`). Judgement calls are i
 | B3 | Bibs assigned on the day; Mt Glorious range removed | d0ab5ed | `32` › a race with bibs assigned on the day; › the Mt Glorious template has no fixed bib range |
 | C | Vet-out wording removed (code kept unmounted) | 152c20d | `33-housekeeping` › no vet-out wording |
 | D | Green/blue state collisions fixed; palette guard widened; report corrected; 3.18.0 | d776d44 | `33` › success and passed look different; `palette.test.js` |
-| E1 | Missed-runner reminders on Receive; They have it / Not seen there | Part E (`feat: race-day Part E — runners a checkpoint missed`) | `34-missed-runners` › base reminds a checkpoint of a runner it missed; › not seen there shows missed in the times table |
-| E2 | Stand-down check and Stand down | Part E | `34` › stand-down check before a checkpoint packs down; `missed.test.js` |
-| E3 | Checkpoint "Missed — passed earlier" | Part E | `34` › checkpoint records a runner base says it missed |
-| E4 | Radio procedure: Missed runners | Part E | guide (radio procedure) |
+| E1 | Missed-runner reminders on Receive; They have it / Not seen there | 08e3780 | `34-missed-runners` › base reminds a checkpoint of a runner it missed; › not seen there shows missed in the times table |
+| E2 | Stand-down check and Stand down | 08e3780 | `34` › stand-down check before a checkpoint packs down; `missed.test.js` |
+| E3 | Checkpoint "Missed — passed earlier" | 08e3780 | `34` › checkpoint records a runner base says it missed |
+| E4 | Radio procedure: Missed runners | 08e3780 | guide (radio procedure) |
+| E2+ | Stand-down "Add to missed list"; "not passed" keeps "up to"; bulk-add typing bug | follow-up (`feat: race-day follow-up — …`) | `34` › stand-down check puts a checked runner back on the missed list; `corrections.test.js`; `BaseStatusView.typing.test.jsx` |
 
 **Test results:**
-- **Unit:** 1,193 tests in 111 files, all passing.
-- **Playwright** (retries off): 136 passed, 16 failed, 11 skipped. The 16 failures are the same pre-existing ones as the original baseline; new specs 31–34 all pass.
+- **Unit:** 1,195 tests in 112 files, all passing.
+- **Playwright** (retries off): 137 passed, 16 failed, 11 skipped. The 16 failures are the same pre-existing ones as the original baseline; new specs 31–34 all pass.
 - **Offline suite:** passes 5 out of 5 straight after a fresh build.
 - **Offline flake found and fixed:** the suite used to fail intermittently after a rebuild. Its own reload raced the app's automatic reload when the service worker took control, so it now waits for the app's reload instead.
-- **Validation pack:** regenerated with 159 events, all completed, with no gaps in the evidence. The guide is regenerated too.
+- **Validation pack:** regenerated with 162 events, all completed, with no gaps in the evidence. The guide is regenerated too.
 
 **Still open (for Brandon):**
 1. N3: the wording for base asking a checkpoint about a missed runner (marked "to be confirmed" in the guide).

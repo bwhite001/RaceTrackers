@@ -62,8 +62,14 @@ export function outStatusMap(outList = [], records = []) {
  * think 10:25–10:45 were received.
  * @returns {Map<number, string>} cp → block ISO
  */
-export function reportedUpTo(records) {
+export function reportedUpTo(records, radioCalls = []) {
   const out = new Map();
+  // A "not passed" correction writes no row; its call keeps the block it removed
+  for (const c of radioCalls) {
+    if (c.kind !== 'correction' || c.undoneAt || !c.upToBlock) continue;
+    const cur = out.get(c.checkpointNumber);
+    if (!cur || c.upToBlock > cur) out.set(c.checkpointNumber, c.upToBlock);
+  }
   for (const r of records) {
     // A correction row counts with the block it replaced, so a correction
     // never moves "up to" in either direction
@@ -160,7 +166,7 @@ export function checkCall(entries, ctx) {
 export function buildBoard({ checkpoints, records, radioCalls = [], now, raceStart, fieldSize, outCount = 0, dueMinutes = CALL_DUE_MINUTES }) {
   const cps = boardCheckpoints(checkpoints);
   const seen = sightingsByCheckpoint(records);
-  const upTo = reportedUpTo(records);
+  const upTo = reportedUpTo(records, radioCalls);
   const nowBlock = toBlock(now);
   const activeField = Math.max(0, (fieldSize ?? 0) - outCount);
   const raceStarted = raceStart && raceStart <= now;

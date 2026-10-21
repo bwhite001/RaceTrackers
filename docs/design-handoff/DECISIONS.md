@@ -251,7 +251,7 @@ Part A — corrections by radio:
 - **Checkpoint data:** call-in now stores the block base was given (`calledInBlock`), which is the "was" on the Corrections card. It also means an edit back into that block cancels the pending correction, because base already has it. A runner unmarked after being called in gets `notPassedCorrection`, and marking them again at base's block cancels that. Corrections are excluded from `pendingRunners`, so they are never in "Base copied — mark sent" or Read-out, and never make a call due on their own. The Callout badge and the "To call in" tile count them.
 - **"Correction sent" button:** gold only when there's no normal call waiting; otherwise blue outline, so there's still one gold primary.
 - **Base data:** a correction is a `radio_calls` row with `kind: 'correction'` and `corrections: [{ number, from, to, notPassed }]`. It reuses the call's `replaced` list, so `undoCall` restores the exact previous rows. Old rows are superseded (`supersededReason: 'correction'`, `supersededBy`), never deleted.
-- **"Up to" never moves:** the new row carries `correction: true` and `upToBlock`, the block it replaced, and `reportedUpTo` counts that instead of the new time. So a correction can't move "up to" earlier or later. One limit: "Not passed" writes no new row, so if that runner was the only one in the latest block reported, "up to" drops to the block before. Logged rather than special-cased.
+- **"Up to" never moves:** the new row carries `correction: true` and `upToBlock`, the block it replaced, and `reportedUpTo` counts that instead of the new time. So a correction can't move "up to" earlier or later. "Not passed" writes no new row, so its correction call keeps the removed block (`upToBlock`), and `reportedUpTo` reads it from the calls. "Up to" holds exactly then too (completed after Part E).
 - **Due timing:** the brief's two phrases point different ways ("doesn't reset last call" / "count it as a call"). A correction is a radio contact, so it counts as the checkpoint's last call. The Call log shows Scores calls and corrections in separate columns.
 - **Correction mode:**
   - The correction draft and its Undo live in the persisted Receive draft, alongside the call in progress, so a tab switch or reload keeps both.
@@ -313,3 +313,11 @@ Part E — runners a checkpoint missed (N4: reminders raised automatically):
 - **Offline suite flake:** after a rebuild, the first-visit step reloaded the page at the same moment as the app's own reload when the service worker took control (`main.jsx`), giving `ERR_ABORTED` or "interrupted by another navigation". The step now waits for the app's reload instead of racing it. It passes 5 out of 5 on fresh builds.
 - **Validation pack** regenerated: 159 events (corrections, late entries, missed runners and stand-down added), all completed, none with missing evidence.
 - **Guide:** the "no vet-out wording" test is a regression check, not a user task, so it isn't a guide section. Its heading would have put "vet" back into the guide.
+
+Completed after Part E (the two simplifications from the first pass):
+- **"Not passed" and "up to":** the correction call stores the block it removed, so "up to" no longer drops (see Part A).
+- **Stand-down check, "Add to missed list":** a runner seen further on can be off the missed list only because base resolved it earlier (Asked, or Mark checked). The sheet now offers "Add 150 to the missed list", which reopens those resolutions, with Undo.
+- **Bug found by the validation pack:** in DNF / DNS bulk add, "Mark N as …" cleared the whole list when the save finished, so numbers typed while it saved were lost. It now removes only what it applied. There's a component test that fails without the fix.
+- **Still not built:** the base → checkpoint "Field changes" broadcast. The brief excluded it, and it depends on the sharing spec, which isn't in this repo.
+- **Validation pack:** regenerated with 162 events, all completed, with no gaps in the evidence.
+

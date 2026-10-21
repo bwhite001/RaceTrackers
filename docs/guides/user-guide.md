@@ -256,13 +256,9 @@ At the end of a checkpoint shift, a volunteer may need to export their recorded 
 
 From the race overview, a race director can jump straight to any checkpoint's live mark-off screen. This test clicks the Checkpoint 1 link and confirms the checkpoint mark-off screen opens.
 
-**Navigate directly to checkpoint 1**
-
-![Navigate directly to checkpoint 1](assets/navigates-from-race-overview-to-a-checkpoint-step-01.jpg)
-
 **Checkpoint view — mark-off screen for CP1 open**
 
-![Checkpoint view — mark-off screen for CP1 open](assets/navigates-from-race-overview-to-a-checkpoint-step-02.jpg)
+![Checkpoint view — mark-off screen for CP1 open](assets/navigates-from-race-overview-to-a-checkpoint-step-01.jpg)
 
 ### Callout sheet tab shows runners who passed but not called in
 
@@ -683,6 +679,18 @@ Take a Scores Checkpoint call one checkpoint at a time: pick who is calling, tak
 **Stand down (two taps) — CP2 is Closed; Undo reopens it**
 
 ![Stand down (two taps) — CP2 is Closed; Undo reopens it](assets/stand-down-check-before-a-checkpoint-packs-down-step-02.jpg)
+
+### Stand-down check puts a checked runner back on the missed list
+
+
+
+**Reports › Skipped a checkpoint — Mark checked on 150: off CP1's missed list**
+
+![Reports › Skipped a checkpoint — Mark checked on 150: off CP1's missed list](assets/stand-down-check-puts-a-checked-runner-back-on-the-missed-list-step-01.jpg)
+
+**Stand-down check on CP1 — 150 seen further on; one tap adds it back; Undo**
+
+![Stand-down check on CP1 — 150 seen further on; one tap adds it back; Undo](assets/stand-down-check-puts-a-checked-runner-back-on-the-missed-list-step-02.jpg)
 
 ## Base Station: DNF, DNS and Overview
 

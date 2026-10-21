@@ -75,9 +75,11 @@ const BaseStatusView = ({ onWithdrawDetails }) => {
     try {
       const numbers = checked.filter(c => c.kind !== 'bad').map(c => c.num);
       const lateNumbers = numbers.filter(n => late.has(n));
+      const applied = pending.length;
       const ops = await applyOutStatus({ mode, numbers, where, reason, time: dnfTime, prev: outMap, late: lateNumbers });
-      setPending([]);
-      setLate(new Set());
+      // Clear only what was applied: numbers typed while it saved stay in the list
+      setPending(cur => cur.slice(applied));
+      setLate(cur => new Set([...cur].filter(n => !lateNumbers.includes(n))));
       setFlash(`${numbers.length} marked ${label}`);
       setUndo({ run: () => undoOutStatus(ops) });
     } catch (err) {

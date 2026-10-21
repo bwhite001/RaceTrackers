@@ -176,6 +176,7 @@ const SECTION_MAP = {
   'not seen there shows missed in the times table':                         'base-reports',
   'stand-down check before a checkpoint packs down':                        'base-receive',
   'checkpoint records a runner base says it missed':                        'checkpoint-fixes',
+  'stand-down check puts a checked runner back on the missed list':         'base-receive',
 };
 
 const CHAPTERS = [

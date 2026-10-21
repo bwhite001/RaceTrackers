@@ -58,6 +58,14 @@ describe('recordCorrection', () => {
     expect((await db.radio_calls.get(callId)).undoneAt).toBeTruthy();
   });
 
+  it('not passed of the only runner in the latest block still leaves "up to" where it was', async () => {
+    const callId = await repo.recordCorrection(RACE, 3, { number: 102, notPassed: true }, NOW);
+    const calls = await db.radio_calls.toArray();
+    expect(reportedUpTo(await live(), calls).get(3)).toBe(B1105);
+    await repo.undoCall(callId);
+    expect(reportedUpTo(await live(), await db.radio_calls.toArray()).get(3)).toBe(B1105);
+  });
+
   it('not passed supersedes base\'s time with no replacement', async () => {
     await repo.recordCorrection(RACE, 3, { number: 101, notPassed: true }, NOW);
     expect((await live()).filter(r => r.number === 101)).toEqual([]);

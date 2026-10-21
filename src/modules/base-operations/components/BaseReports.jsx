@@ -60,7 +60,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
   const distances = useMemo(() => checkpointDistances(checkpoints, currentRace), [checkpoints, currentRace]);
   const resolvedKeys = useMemo(() => new Set(resolutions.map(r => r.issueKey)), [resolutions]);
 
-  const upTo = useMemo(() => reportedUpTo(runners), [runners]);
+  const upTo = useMemo(() => reportedUpTo(runners, radioCalls), [runners, radioCalls]);
   const lateRows = useMemo(() => overdueRunners({
     sightings, order, out, now, upTo, graceMinutes: currentRace?.overdueGraceMinutes ?? OVERDUE_GRACE_MINUTES,
   }), [sightings, order, out, now, upTo, currentRace?.overdueGraceMinutes]);

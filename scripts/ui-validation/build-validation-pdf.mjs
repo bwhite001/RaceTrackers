@@ -729,6 +729,19 @@ async function run() {
   await ev('RP-13', '§4.12 / Fixes D1', 'Click "Skipped a checkpoint"', 'Has later CP time, missing an earlier CP (128: seen CP2, never at CP1) → Ask CPx / Mark checked.',
     async p => { await p.getByRole('button', { name: /^Skipped a checkpoint/ }).click(); },
     { show: [S('128', issueRow(128))] });
+  await ev('RP-13b', 'Race-day E2', 'Click "Mark checked" on 128', 'A resolved skip leaves the checkpoint\'s missed list.',
+    async p => { await issueRow(128)(p).getByRole('button', { name: 'Mark checked' }).click(); },
+    { show: [rflash] });
+  await ev('RP-13c', 'Race-day E2', 'Receive → board "Stand-down check" for CP1 → "Add 128 to the missed list"', 'Seen further on (missed here) — bibs + where seen; one tap adds them to the missed list.',
+    async p => {
+      await p.getByRole('tab', { name: 'Receive' }).click();
+      await p.getByRole('button', { name: 'Stand-down check CP1' }).click();
+      await p.getByRole('button', { name: /^Add .*128.* to the missed list$/ }).click();
+    },
+    { show: [S('Sheet status', p => p.getByRole('dialog').getByRole('status')), S('Board note', T('missed-CP1'))] });
+  await ev('RP-13d', 'Race-day E2', 'Close the sheet; back to Reports', 'Back to Reports.',
+    async p => { await p.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).last().click(); await p.getByRole('tab', { name: 'Reports' }).click(); },
+    { show: [S('Report heading', p => p.locator('#rephd'))] });
   await ev('RP-14', '§4.12', 'Click "Seen after DNF / DNS"', 'Checkpoint time after DNF time, or any time while DNS → Clear DNF/DNS / Remove that time.',
     async p => { await p.getByRole('button', { name: /^Seen after DNF/ }).click(); },
     { show: [S('101', p => issueRow(101)(p).first()), S('108', issueRow(108))] });
