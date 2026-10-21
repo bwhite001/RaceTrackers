@@ -89,6 +89,25 @@ class RaceTrackerDB extends Dexie {
             });
         });
 
+    // Version 11: VK4WIP redesign (additive only — no data rewritten, no .upgrade()).
+    //  checkpoint_runners: index `correction`; new data columns originalTime, editedAt,
+    //    unmarkedAt, unmarkedTime (restore after an accidental unmark)
+    //  base_station_runners: index `callId` (Undo a received call); data column manualTime
+    //  radio_calls: one row per base Receive call {blocks, recorded, skipped, rejected, undoneAt}
+    //  data_issue_resolutions: resolved base data-check issues {issueKey, resolution}
+    //  readout_progress: resume an interrupted checkpoint read-out {tickedNumbers, overIndex}
+    //  races / checkpoints / withdrawal_records gain nullable data columns only
+    //    (baseCallsign, frequency, callDueMinutes, overSize; operatorCallsigns, distanceKm,
+    //    locationName; reason) — no index needed.
+    this.version(11)
+        .stores({
+            checkpoint_runners: "++id, [raceId+checkpointNumber+number], raceId, checkpointNumber, number, actualTime, commonTime, calledIn, markOffTime, callInTime, status, notes, correction",
+            base_station_runners: "++id, [raceId+checkpointNumber+number], raceId, checkpointNumber, number, commonTime, markOffEntryTime, status, notes, callId",
+            radio_calls: "++id, [raceId+checkpointNumber], raceId, checkpointNumber, receivedAt, undoneAt",
+            data_issue_resolutions: "++id, [raceId+issueKey], raceId, issueKey, resolvedAt",
+            readout_progress: "++id, [raceId+checkpointNumber+blockTime], raceId, checkpointNumber, blockTime"
+        });
+
     // Version 9: Add GPS course data to races and checkpoint coordinates (non-breaking, additive)
     this.version(10)
         .stores({

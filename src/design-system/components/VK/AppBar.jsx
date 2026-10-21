@@ -5,10 +5,10 @@ import { cn } from '../../utils/classNames';
 const BADGE_SRC = `${import.meta.env.BASE_URL}pwa-512x512.png`;
 
 /** Gold dot + "Saved" — data is written straight to IndexedDB. */
-export const SavedIndicator = ({ label = 'Saved' }) => (
+export const SavedIndicator = ({ label = 'Saved', compact = false }) => (
   <span className="flex items-center gap-1.5 text-xs font-semibold text-vk-on-navy whitespace-nowrap">
     <span className="w-2 h-2 rounded-full bg-vk-gold" aria-hidden="true" />
-    {label}
+    <span className={compact ? 'sr-only sm:not-sr-only' : ''}>{label}</span>
   </span>
 );
 

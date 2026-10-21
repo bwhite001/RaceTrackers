@@ -30,3 +30,17 @@ describe('parseBibs', () => {
     expect(parseBibs('abc, 101, xyz')).toEqual([101]);
   });
 });
+
+import { parseBibList } from '../../src/shared/utils/parseBibs.js';
+
+describe('parseBibList (individual numbers only)', () => {
+  it('splits on commas, spaces, semicolons and newlines', () => {
+    expect(parseBibList('212, 218 224;230\n231').numbers).toEqual([212, 218, 224, 230, 231]);
+  });
+  it('never expands ranges', () => {
+    expect(parseBibList('100-105')).toEqual({ numbers: [], rejected: ['100-105'] });
+  });
+  it('keeps duplicates so callers can flag "listed twice"', () => {
+    expect(parseBibList('5 5').numbers).toEqual([5, 5]);
+  });
+});

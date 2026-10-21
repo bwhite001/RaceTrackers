@@ -9,10 +9,14 @@ export class CheckpointRepository extends BaseRepository {
 
   async getCheckpointRunners(raceId, checkpointNumber) {
     try {
-      return await this.table
+      const rows = await this.table
         .where('[raceId+checkpointNumber+number]')
         .between([raceId, checkpointNumber, -Infinity], [raceId, checkpointNumber, Infinity])
         .toArray();
+      // Older builds could seed a checkpoint twice. Keep the first row per bib —
+      // the same row every update targets — and ignore (not delete) the rest.
+      const seen = new Set();
+      return rows.filter(r => !seen.has(r.number) && seen.add(r.number));
     } catch (error) {
       console.error('Error getting checkpoint runners:', error);
       return [];
@@ -31,22 +35,30 @@ export class CheckpointRepository extends BaseRepository {
         raceRunners = raceRunners.filter(r => checkpoint.allowedBatches.includes(r.batchNumber));
       }
 
-      const checkpointRunners = raceRunners.map(runner => ({
-        raceId,
-        checkpointNumber,
-        number: runner.number,
-        status: 'not-started',
-        actualTime: null,
-        commonTime: null,
-        commonTimeLabel: null,
-        calledIn: false,
-        callInTime: null,
-        markOffTime: null,
-        notes: null
-      }));
+      // Seed only bibs that have no row yet, inside one rw transaction, so two
+      // concurrent initialisations can't create duplicate rows.
+      return await db.transaction('rw', db.checkpoint_runners, async () => {
+        const have = new Set((await db.checkpoint_runners
+          .where('[raceId+checkpointNumber+number]')
+          .between([raceId, checkpointNumber, -Infinity], [raceId, checkpointNumber, Infinity])
+          .toArray()).map(r => r.number));
+        const checkpointRunners = raceRunners.filter(runner => !have.has(runner.number)).map(runner => ({
+          raceId,
+          checkpointNumber,
+          number: runner.number,
+          status: 'not-started',
+          actualTime: null,
+          commonTime: null,
+          commonTimeLabel: null,
+          calledIn: false,
+          callInTime: null,
+          markOffTime: null,
+          notes: null
+        }));
 
-      await this.bulkAdd(checkpointRunners);
-      return checkpointRunners;
+        if (checkpointRunners.length) await this.bulkAdd(checkpointRunners);
+        return checkpointRunners;
+      });
     } catch (error) {
       console.error('Error initializing checkpoint runners:', error);
       throw new Error('Failed to initialize checkpoint runners');
@@ -150,6 +162,161 @@ export class CheckpointRepository extends BaseRepository {
       console.error('Error marking group called in:', error);
       throw new Error('Failed to mark group as called in');
     }
+  }
+
+  // ── VK4WIP redesign: per-bib edits, each undoable via an exact snapshot ──
+
+  async _get(raceId, checkpointNumber, number) {
+    return this.table
+      .where(['raceId', 'checkpointNumber', 'number'])
+      .equals([raceId, checkpointNumber, number])
+      .first();
+  }
+
+  /** Exact copies of these runners' records (null where none) for Undo. */
+  async snapshot(raceId, checkpointNumber, numbers) {
+    return Promise.all(numbers.map(async number => ({
+      number,
+      record: (await this._get(raceId, checkpointNumber, number)) ?? null,
+    })));
+  }
+
+  /** Put records back exactly as snapshotted; delete rows that didn't exist. */
+  async restoreSnapshot(raceId, checkpointNumber, snap) {
+    await db.transaction('rw', this.table, async () => {
+      for (const { number, record } of snap) {
+        if (record) {
+          await this.table.put(record);
+        } else {
+          const added = await this._get(raceId, checkpointNumber, number);
+          if (added) await this.table.delete(added.id);
+        }
+      }
+    });
+  }
+
+  /** Mark bibs passed at `time` (ISO). Clears any call-in / restore state. */
+  async markPassed(raceId, checkpointNumber, numbers, time) {
+    const { commonTime, commonTimeLabel } = TimeUtils.getCommonTimeLabel(time);
+    await db.transaction('rw', this.table, async () => {
+      for (const number of numbers) {
+        const existing = await this._get(raceId, checkpointNumber, number);
+        await this.updateRunner(raceId, checkpointNumber, number, {
+          status: 'passed',
+          actualTime: time,
+          commonTime,
+          commonTimeLabel,
+          markOffTime: time,
+          calledIn: false,
+          callInTime: null,
+          correction: false,
+          originalTime: existing?.originalTime ?? time,
+          editedAt: null,
+          unmarkedAt: null,
+          unmarkedTime: null,
+        });
+      }
+    });
+  }
+
+  /**
+   * Change a passed runner's time. If base already had it (called in), it goes
+   * back on the callout sheet as a correction.
+   */
+  async editTime(raceId, checkpointNumber, number, time) {
+    const r = await this._get(raceId, checkpointNumber, number);
+    if (!r) throw new Error(`Runner ${number} not found at checkpoint ${checkpointNumber}`);
+    const { commonTime, commonTimeLabel } = TimeUtils.getCommonTimeLabel(time);
+    const patch = {
+      status: 'passed',
+      actualTime: time,
+      commonTime,
+      commonTimeLabel,
+      markOffTime: time,
+      editedAt: TimeUtils.getCurrentTimestamp(),
+      originalTime: r.originalTime ?? r.actualTime ?? time,
+    };
+    if (r.calledIn) Object.assign(patch, { calledIn: false, correction: true });
+    await this.update(r.id, patch);
+  }
+
+  /** Unmark (or reset) a runner; keeps the old time so it can be restored. */
+  async unmark(raceId, checkpointNumber, number) {
+    const r = await this._get(raceId, checkpointNumber, number);
+    if (!r) return;
+    await this.update(r.id, {
+      status: 'not-started',
+      actualTime: null,
+      commonTime: null,
+      commonTimeLabel: null,
+      markOffTime: null,
+      calledIn: false,
+      callInTime: null,
+      correction: false,
+      unmarkedAt: TimeUtils.getCurrentTimestamp(),
+      unmarkedTime: r.actualTime ?? r.unmarkedTime ?? null,
+    });
+  }
+
+  /** Mark bibs as copied by base (or undo that). Clears the correction flag. */
+  async setCalledIn(raceId, checkpointNumber, numbers, calledIn = true) {
+    const callInTime = calledIn ? TimeUtils.getCurrentTimestamp() : null;
+    await db.transaction('rw', this.table, async () => {
+      for (const number of numbers) {
+        const r = await this._get(raceId, checkpointNumber, number);
+        if (!r) continue;
+        await this.update(r.id, calledIn
+          ? { calledIn: true, callInTime, correction: false }
+          : { calledIn: false, callInTime: null });
+      }
+    });
+  }
+
+  /** Mark DNS ('non-starter') or DNF at this checkpoint. */
+  async setOut(raceId, checkpointNumber, number, status) {
+    if (status !== 'non-starter' && status !== 'dnf') throw new Error(`Invalid status ${status}`);
+    await this.updateRunner(raceId, checkpointNumber, number, {
+      status, calledIn: false, correction: false,
+    });
+  }
+
+  /** Clear DNS / DNF — back to not passed. */
+  async clearOut(raceId, checkpointNumber, number) {
+    const r = await this._get(raceId, checkpointNumber, number);
+    if (!r) return;
+    await this.update(r.id, {
+      status: 'not-started',
+      actualTime: null,
+      commonTime: null,
+      commonTimeLabel: null,
+      markOffTime: null,
+      calledIn: false,
+      callInTime: null,
+      correction: false,
+    });
+  }
+
+  // ── Read-out progress (resume an interrupted read) ───────────────────────
+
+  async getReadout(raceId, checkpointNumber, blockTime) {
+    return db.readout_progress
+      .where('[raceId+checkpointNumber+blockTime]')
+      .equals([raceId, checkpointNumber, blockTime])
+      .first();
+  }
+
+  async saveReadout(raceId, checkpointNumber, blockTime, { tickedNumbers, overIndex }) {
+    const existing = await this.getReadout(raceId, checkpointNumber, blockTime);
+    const row = { raceId, checkpointNumber, blockTime, tickedNumbers, overIndex, updatedAt: TimeUtils.getCurrentTimestamp() };
+    if (existing) await db.readout_progress.update(existing.id, row);
+    else await db.readout_progress.add(row);
+  }
+
+  async clearReadout(raceId, checkpointNumber, blockTime) {
+    await db.readout_progress
+      .where('[raceId+checkpointNumber+blockTime]')
+      .equals([raceId, checkpointNumber, blockTime])
+      .delete();
   }
 
   async exportCheckpointData(raceId, checkpointNumber) {

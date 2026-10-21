@@ -19,3 +19,20 @@ export function parseBibs(raw) {
   }
   return results;
 }
+
+/**
+ * Parse individually typed or pasted bib numbers (spec G1 — no ranges outside
+ * Race setup). Separators: commas, spaces, semicolons, newlines.
+ * "212, 218 224" → { numbers: [212, 218, 224], rejected: [] }
+ * "100-105"      → { numbers: [], rejected: ['100-105'] }
+ */
+export function parseBibList(raw) {
+  const numbers = [];
+  const rejected = [];
+  for (const token of String(raw ?? '').split(/[\s,;]+/)) {
+    if (!token) continue;
+    if (/^\d+$/.test(token) && Number(token) > 0) numbers.push(Number(token));
+    else rejected.push(token);
+  }
+  return { numbers, rejected };
+}

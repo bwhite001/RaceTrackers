@@ -18,8 +18,11 @@ vi.mock('../../src/shared/services/database/schema.js', () => ({
     checkpoint_runners: {
       where: () => ({
         equals: () => ({ toArray: async () => mockCheckpointRunners }),
+        between: () => ({ toArray: async () => mockCheckpointRunners }),
       }),
     },
+    // initializeCheckpoint seeds inside a rw transaction (no duplicate rows)
+    transaction: async (...args) => args[args.length - 1](),
   },
 }));
 

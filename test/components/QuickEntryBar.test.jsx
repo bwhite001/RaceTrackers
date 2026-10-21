@@ -1,117 +1,52 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { vi, describe, it, expect } from 'vitest';
 import QuickEntryBar from 'components/Checkpoint/QuickEntryBar.jsx';
 
-// ─── Mock checkpointStore ─────────────────────────────────────────────────────
+// The VK4WIP redesign (spec §4.5.6) made the quick entry accept several
+// numbers at once ("157, 161 163"). Parsing, validation and marking moved to
+// Mark off (RunnerGrid) — QuickEntryBar just collects the text.
 
-const mockMarkRunner = vi.fn();
-let mockRunners = [
-  { number: 101, status: 'NOT_STARTED' },
-  { number: 102, status: 'NOT_STARTED' },
-];
-
-vi.mock('modules/checkpoint-operations/store/checkpointStore', () => ({
-  default: vi.fn(() => ({
-    markRunner: mockMarkRunner,
-    runners: mockRunners,
-  })),
-}));
-
-import useCheckpointStore from 'modules/checkpoint-operations/store/checkpointStore';
-
-beforeEach(() => {
-  vi.clearAllMocks();
-  mockMarkRunner.mockResolvedValue(undefined);
-  useCheckpointStore.mockImplementation(() => ({
-    markRunner: mockMarkRunner,
-    runners: mockRunners,
-  }));
-});
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function renderBar() {
-  return render(<QuickEntryBar />);
-}
-
-function getInput() {
-  return screen.getByLabelText('Runner number');
-}
-
-function getMarkButton() {
-  return screen.getByRole('button', { name: 'Mark' });
-}
-
-async function typeAndSubmit(value) {
-  const input = getInput();
-  fireEvent.change(input, { target: { value } });
-  fireEvent.submit(input.closest('form'));
-}
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
+const getInput = () => screen.getByLabelText('Bib numbers');
+const getMark = () => screen.getByRole('button', { name: 'Mark' });
 
 describe('QuickEntryBar', () => {
-  it('renders an auto-focused input and a Mark button', () => {
-    renderBar();
-    expect(getInput()).toBeDefined();
-    expect(getMarkButton()).toBeDefined();
+  it('renders a bib numbers input and a Mark button', () => {
+    render(<QuickEntryBar onMark={vi.fn()} />);
+    expect(getInput()).toHaveAttribute('id', 'quick-entry-input');
+    expect(getInput()).toHaveAttribute('inputmode', 'numeric');
+    expect(getMark()).toBeDefined();
   });
 
-  it('Mark button is disabled when input is empty', () => {
-    renderBar();
-    expect(getMarkButton()).toHaveProperty('disabled', true);
-  });
-
-  it('Mark button is enabled when input has a value', () => {
-    renderBar();
+  it('Mark is disabled until something is typed', () => {
+    render(<QuickEntryBar onMark={vi.fn()} />);
+    expect(getMark()).toHaveProperty('disabled', true);
     fireEvent.change(getInput(), { target: { value: '101' } });
-    expect(getMarkButton()).toHaveProperty('disabled', false);
+    expect(getMark()).toHaveProperty('disabled', false);
   });
 
-  it('calls markRunner with the entered number on submit', async () => {
-    renderBar();
-    await typeAndSubmit('101');
-    expect(mockMarkRunner).toHaveBeenCalledWith(101);
-  });
-
-  it('clears the input after a successful mark', async () => {
-    renderBar();
-    fireEvent.change(getInput(), { target: { value: '101' } });
-    fireEvent.click(getMarkButton());
+  it('passes the whole entry (several numbers) to onMark and clears', async () => {
+    const onMark = vi.fn().mockResolvedValue(undefined);
+    render(<QuickEntryBar onMark={onMark} />);
+    fireEvent.change(getInput(), { target: { value: '157, 161 163' } });
+    fireEvent.submit(getInput().closest('form'));
+    await waitFor(() => expect(onMark).toHaveBeenCalledWith('157, 161 163'));
     await waitFor(() => expect(getInput().value).toBe(''));
   });
 
-  it('shows success feedback after marking', async () => {
-    renderBar();
-    await typeAndSubmit('101');
-    await waitFor(() => expect(screen.getByText('Runner 101 marked')).toBeDefined());
+  it('Enter in the input submits', async () => {
+    const onMark = vi.fn().mockResolvedValue(undefined);
+    render(<QuickEntryBar onMark={onMark} />);
+    fireEvent.change(getInput(), { target: { value: '101' } });
+    fireEvent.click(getMark());
+    await waitFor(() => expect(onMark).toHaveBeenCalledWith('101'));
   });
 
-  it('shows error feedback for a zero/negative input', async () => {
-    renderBar();
-    await typeAndSubmit('0');
-    await waitFor(() =>
-      expect(screen.getByText(/"0" is not a valid runner number/)).toBeDefined()
-    );
-    expect(mockMarkRunner).not.toHaveBeenCalled();
-  });
-
-  it('shows error feedback when runner is not in the checkpoint list', async () => {
-    renderBar();
-    await typeAndSubmit('999');
-    await waitFor(() =>
-      expect(screen.getByText(/Runner 999 not found/)).toBeDefined()
-    );
-    expect(mockMarkRunner).not.toHaveBeenCalled();
-  });
-
-  it('shows error feedback when markRunner throws', async () => {
-    mockMarkRunner.mockRejectedValue(new Error('DB error'));
-    renderBar();
-    await typeAndSubmit('101');
-    await waitFor(() =>
-      expect(screen.getByText(/Failed to mark runner 101/)).toBeDefined()
-    );
+  it('ignores a blank entry', () => {
+    const onMark = vi.fn();
+    render(<QuickEntryBar onMark={onMark} />);
+    fireEvent.change(getInput(), { target: { value: '   ' } });
+    fireEvent.submit(getInput().closest('form'));
+    expect(onMark).not.toHaveBeenCalled();
   });
 });

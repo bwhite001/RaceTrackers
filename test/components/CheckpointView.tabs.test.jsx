@@ -51,8 +51,12 @@ vi.mock('components/Checkpoint/CalloutSheet', () => ({
   default: () => <div data-testid="callout-sheet">CalloutSheet</div>,
 }));
 
-vi.mock('components/Shared/RunnerOverview', () => ({
-  default: () => <div data-testid="runner-overview">RunnerOverview</div>,
+vi.mock('components/Checkpoint/CheckpointOverview', () => ({
+  default: () => <div data-testid="runner-overview">CheckpointOverview</div>,
+}));
+
+vi.mock('modules/checkpoint-operations/components/ReadOutView', () => ({
+  default: () => <div data-testid="readout-view">ReadOutView</div>,
 }));
 
 vi.mock('components/Layout/LoadingSpinner', () => ({
@@ -112,8 +116,8 @@ function renderCheckpointView(checkpointId = '1') {
 describe('CheckpointView — 3-tab layout', () => {
   it('renders three tab buttons', () => {
     renderCheckpointView();
-    expect(screen.getByRole('button', { name: 'Mark Off' })).toBeDefined();
-    expect(screen.getByRole('button', { name: 'Callout Sheet' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Mark off' })).toBeDefined();
+    expect(screen.getByRole('button', { name: /^Callout/ })).toBeDefined();
     expect(screen.getByRole('button', { name: 'Overview' })).toBeDefined();
   });
 
@@ -129,7 +133,7 @@ describe('CheckpointView — 3-tab layout', () => {
 
   it('switches to CalloutSheet when "Callout Sheet" tab is clicked', () => {
     renderCheckpointView();
-    fireEvent.click(screen.getByRole('button', { name: 'Callout Sheet' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Callout/ }));
     expect(screen.getByTestId('callout-sheet')).toBeDefined();
     expect(screen.queryByTestId('runner-grid')).toBeNull();
   });
@@ -143,8 +147,8 @@ describe('CheckpointView — 3-tab layout', () => {
 
   it('switches back to RunnerGrid when "Mark Off" tab is clicked after switching', () => {
     renderCheckpointView();
-    fireEvent.click(screen.getByRole('button', { name: 'Callout Sheet' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Mark Off' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Callout/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Mark off' }));
     expect(screen.getByTestId('runner-grid')).toBeDefined();
     expect(screen.queryByTestId('callout-sheet')).toBeNull();
   });
@@ -159,9 +163,9 @@ describe('CheckpointView — 3-tab layout', () => {
     expect(screen.getByText('Checkpoint 3')).toBeDefined();
   });
 
-  it('shows "Exit operation" button in header', () => {
+  it('shows the "Leave checkpoint" back button in the header', () => {
     renderCheckpointView();
-    expect(screen.getByRole('button', { name: 'Exit operation' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Leave checkpoint' })).toBeDefined();
   });
 });
 

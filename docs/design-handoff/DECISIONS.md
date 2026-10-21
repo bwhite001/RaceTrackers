@@ -39,3 +39,34 @@ conflicted with existing behaviour, or didn't match the repo. Each entry: what, 
   - Role buttons "Checkpoint Operations" / "Race Maintenance" → "Checkpoint" / "Race setup": `00`, `01`, `02`, `04`, `05`, `08-complete`, `13`, `16-linked`.
   - The dark-mode switch is now the Theme control (`aria-pressed`): `06-settings`.
 - **New journey:** `18-vk4wip-home-settings` (home roles, theme + colour reset, share race). Registered in `generate-guide.js`.
+
+## Phase 2 — Checkpoint Mark off, Overview, Callout; Dexie v11
+
+- **Dexie v11 is one additive block.** It adds every v11 table and index from spec §5 (`radio_calls`, `data_issue_resolutions`, `readout_progress`, plus the `correction` and `callId` indexes). There is no `.upgrade()`: new fields are nullable data columns, so existing rows are untouched. A migration test opens a v10 database with data, reopens it at v11, and checks every row survives. `basic-schema-test.js` and `simple-test.js` asserted `verno === 10`. They were bumped to 11, but they don't match the vitest include pattern so they never ran. Files: `schema.js`, `test/database/schemaV11.test.js`.
+- **Bug found and fixed: duplicate checkpoint rows.** Opening a checkpoint could seed `checkpoint_runners` twice. The init effect re-runs when the race finishes loading, and the module seeder and the legacy `StorageService.initializeCheckpointRunners` both seed (the legacy one used `bulkPut` without ids, which simply inserts). Each runner then had two rows, and updates hit one while the UI showed the other.
+  - Both seeders now run in one read-write transaction and only add bibs with no row yet.
+  - Reads (`CheckpointRepository.getCheckpointRunners`, `StorageService.getCheckpointRunners`) keep the first row per bib, which is the row every update targets, and ignore the rest.
+  - Existing duplicates are **not deleted** (never rewrite user data). They're just ignored.
+  - `test/checkpoint-operations/CheckpointRepository.test.js`'s DB mock gained `transaction` and `between()` so it can run the transactional seeder. Its assertions are unchanged.
+- **Mark off and the Callout move to the module store.** Mark off now uses `checkpointStore` → `CheckpointRepository` (CLAUDE.md: new module work goes through the Repository) instead of the legacy `useRaceStore` → `StorageService` path. Both write the same `checkpoint_runners` rows, so data from older builds still shows. The legacy store is still loaded for the radio operator and transfer views.
+- **Called in = `calledIn: true`.** The old grid set `callInTime` at mark-off, so "called in" was unreliable. The new screens use `calledIn` (already in v8) as the source of truth. `callInTime` is set when base copies the call.
+- **Corrections only after call-in.** Editing a time base hasn't received is just a time change. Editing a called-in time sets `calledIn: false, correction: true` (spec §3.3 and §4.5.3). The design's demo marks every edit with ✎; the spec's state table only marks corrections, and the spec was followed.
+- **Undo** is an exact snapshot of the affected rows, put back on Undo (`snapshot` / `restoreSnapshot`). Rows that didn't exist before are deleted on Undo. Single-level per screen (spec §6). Tapping a tile to mark it shows a status line rather than an Undo bar (as in the design). Bulk quick entry, time edits, unmark, mark-sent and every Overview action offer Undo.
+- **The new store actions don't toggle `loading`.** CheckpointView swaps to a full-screen spinner while `loading` is true, which would flash on every tap.
+- **Header controls kept.** The Marker / Radio Operator toggle, Transfer Data, Export Results and Share Batch are existing features with journeys (16-transfer, 17-split-role). The toggle is a segmented control in the navy header, Transfer and Export are labelled icon buttons in the app bar, and Share Batch is a navy pill shown on the Mark off tab only (it covered content on Callout and Overview).
+- **Quick entry takes individual numbers only** (`parseBibList`): commas, spaces, semicolons. A range like `100-105` is refused with "type each number on its own" (G1). The old `parseBibs` (which expands ranges) is unchanged for the legacy base components still using it.
+- **Group chips** chunk the checkpoint's sorted bibs into groups of 20 and label them "first–last". That's a navigation label, not a call, so G1 doesn't apply.
+- **Overview DNS/DNF note.** The design says clearing a status base already has "will be flagged on the callout sheet". There's no checkpoint-side record of what base has for DNS/DNF, so the note tells the operator to tell base instead. A runner marked "Passed now" after clearing does go on the callout sheet as normal.
+- **Callout "Official message" / "Request stand down"** open a sheet that saves an entry (from, to, message number, time, text) to an on-device checkpoint log in the `settings` table (`checkpointLog:<race>:<cp>`). Spec v1 option: "simple notes modal / log entry". No radio wording is pre-filled.
+- **`isCallDue`** lives in `checkpointStats.js` with the other pure checkpoint derivations, rather than a separate `services/callout.js`.
+- **Tests updated for replaced behaviour:**
+  - `QuickEntryBar.test.jsx`: the bar now takes several numbers and hands the text to Mark off. The old one-number validation messages are gone.
+  - `CheckpointView.tabs.test.jsx`: tab labels "Mark off" / "Callout", back button "Leave checkpoint" (was "Exit operation"), and the Overview mock now points at `CheckpointOverview`.
+  - `02-checkpoint-operations`: the single-tile test re-located the tile by text, which changes once the time label appears. It now pins the tile by its aria-label.
+  - `10-callout-sheet`: the per-block "Mark Called" button became "Base copied — mark sent" (spec §4.6).
+
+## Phase 3 — Read-out
+
+- **Read-out covers every pending block in one session**, block by block. An over never mixes two common times, and the first over of each block says "Common time", later ones "Continuing". The list is frozen when read-out opens, so runners marked meanwhile don't reshuffle the overs; they appear on the callout sheet afterwards.
+- **Base copied is recorded at the end** (spec: "Finishing the last over … marks the block called in"). Leaving mid-read saves the ticks and the current over to `readout_progress`, keyed by the first block's time, and reopening resumes there. Finishing clears the saved progress.
+- **`overSize`** comes from race config (default 5), clamped to 3–10.

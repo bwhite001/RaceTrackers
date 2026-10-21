@@ -60,17 +60,21 @@ test.describe('Checkpoint Volunteer – Mark-Off Journey', () => {
       }).catch(() => {});
     });
 
-    // Click the first runner card/button
-    const firstRunner = page.locator('button, [role="button"]').filter({ hasText: /^20\d$/ }).first();
+    // Click the first runner tile. Passed tiles also show their time, so pin
+    // the tile by bib (aria-label "Runner N, …") rather than by its text.
+    const firstRunner = page.getByRole('button', { name: /^Runner 20\d, / }).first();
+    let bib;
 
     await step('Runner grid — tap first runner tile (200s range)', async () => {
       await firstRunner.waitFor({ timeout: 5000 });
+      bib = (await firstRunner.getAttribute('aria-label')).match(/^Runner (\d+)/)[1];
       await firstRunner.click();
     });
 
     await step('Runner tile — marked state applied', async () => {
-      // The runner should now show a marked/checked visual state
-      await expect(firstRunner).toHaveClass(/marked|checked|passed|green/i);
+      const tile = page.getByRole('button', { name: new RegExp(`^Runner ${bib}, \\d\\d:\\d\\d`) });
+      await expect(tile).toBeVisible();
+      await expect(tile).toHaveClass(/marked|checked|passed|green/i);
     });
   });
 

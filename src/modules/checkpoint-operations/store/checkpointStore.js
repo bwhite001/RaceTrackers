@@ -187,6 +187,33 @@ const useCheckpointStore = create((set, get) => ({
     }
   },
 
+  // ── VK4WIP redesign actions ───────────────────────────────────────────────
+  // These don't toggle `loading` (the view swaps to a spinner while loading),
+  // so taps stay instant. Each returns after the runner list is refreshed.
+
+  _run: async (op) => {
+    const { currentRaceId, checkpointNumber } = get();
+    if (!currentRaceId || !checkpointNumber) throw new Error('No active checkpoint session');
+    try {
+      const result = await op(currentRaceId, checkpointNumber);
+      const runners = await CheckpointRepository.getCheckpointRunners(currentRaceId, checkpointNumber);
+      set({ runners, error: null, lastSync: new Date().toISOString() });
+      return result;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
+  },
+
+  snapshot: (numbers) => get()._run((raceId, cp) => CheckpointRepository.snapshot(raceId, cp, numbers)),
+  restoreSnapshot: (snap) => get()._run((raceId, cp) => CheckpointRepository.restoreSnapshot(raceId, cp, snap)),
+  markPassed: (numbers, time) => get()._run((raceId, cp) => CheckpointRepository.markPassed(raceId, cp, numbers, time)),
+  editTime: (number, time) => get()._run((raceId, cp) => CheckpointRepository.editTime(raceId, cp, number, time)),
+  unmarkRunner: (number) => get()._run((raceId, cp) => CheckpointRepository.unmark(raceId, cp, number)),
+  setCalledIn: (numbers, calledIn = true) => get()._run((raceId, cp) => CheckpointRepository.setCalledIn(raceId, cp, numbers, calledIn)),
+  setOut: (number, status) => get()._run((raceId, cp) => CheckpointRepository.setOut(raceId, cp, number, status)),
+  clearOut: (number) => get()._run((raceId, cp) => CheckpointRepository.clearOut(raceId, cp, number)),
+
   // Export checkpoint data
   exportData: async () => {
     try {

@@ -7,7 +7,7 @@
  *   3. Switch to the Callout Sheet tab
  *   4. Verify the pending count badge on the tab
  *   5. Verify runners appear grouped in callout segments
- *   6. Click "Mark Called" to mark a segment as called in
+ *   6. Tap "Base copied — mark sent" to mark the next call as copied by base
  *   7. Verify the pending count decreases
  */
 
@@ -113,56 +113,19 @@ test.describe('Callout Sheet', () => {
       await page.waitForTimeout(500);
     });
 
-    await step('Callout Sheet — click Mark Called if a pending segment exists', async () => {
-      const calloutHeading = page.getByText(/callout sheet/i).first();
-      const headingVisible = await calloutHeading.isVisible({ timeout: 5000 }).catch(() => false);
-      if (!headingVisible) {
-        test.skip(true, 'Callout Sheet component did not render');
-        return;
-      }
-
-      // Look for "Mark Called" button on a pending segment
-      const markCalledBtn = page.getByRole('button', { name: /mark called/i }).first();
-      const btnVisible = await markCalledBtn.isVisible({ timeout: 3000 }).catch(() => false);
-
-      if (!btnVisible) {
-        // No pending segments — runners may not have commonTimeLabel (feature gap)
-        const emptyState = await page.getByText(/no pending callout/i).isVisible({ timeout: 2000 }).catch(() => false);
-        if (emptyState) {
-          // Expected when runners don't have commonTimeLabel set from quick entry
-          return;
-        }
-        test.skip(true, 'No "Mark Called" button found — callout segments require runners with commonTimeLabel');
-        return;
-      }
-
-      // Read count before clicking
+    await step('Callout Sheet — Base copied — mark sent clears the pending call', async () => {
+      // VK4WIP redesign: one "Base copied — mark sent" for the whole next call
+      // replaces the old per-block "Mark Called" buttons (spec §4.6).
       const tabBar = page.locator('[aria-label="Checkpoint tabs"]');
-      const badgeBefore = tabBar.locator('span').filter({ hasText: /^\d+$/ }).first();
-      const countBefore = await badgeBefore.textContent({ timeout: 1000 }).catch(() => null);
+      await expect(page.getByRole('heading', { name: /next call/i })).toBeVisible({ timeout: 5000 });
+      await expect(tabBar.getByLabel(/to call in/)).toHaveText('1');
 
-      await markCalledBtn.click();
-      await page.waitForTimeout(800);
+      await page.getByRole('button', { name: /base copied — mark sent/i }).click();
 
-      await step('Callout Sheet — verify segment moved to called history', async () => {
-        // After marking called, the segment should disappear from pending
-        const pendingHeader = page.getByText(/pending callouts/i);
-        const segmentGone = !(await pendingHeader.isVisible({ timeout: 2000 }).catch(() => false));
-        const calledHistory = await page.getByText(/called segments|called history/i).isVisible({ timeout: 2000 }).catch(() => false);
-
-        // Either the pending section disappears or called history appears
-        if (countBefore !== null) {
-          const badgeAfter = tabBar.locator('span').filter({ hasText: /^\d+$/ }).first();
-          const countAfterVisible = await badgeAfter.isVisible({ timeout: 2000 }).catch(() => false);
-          if (countAfterVisible) {
-            const countAfterText = await badgeAfter.textContent();
-            expect(parseInt(countAfterText, 10)).toBeLessThan(parseInt(countBefore, 10));
-          } else {
-            // Badge gone — count dropped to 0
-            expect(segmentGone || calledHistory).toBeTruthy();
-          }
-        }
-      });
+      await expect(page.getByText('Nothing to call in')).toBeVisible({ timeout: 5000 });
+      await expect(tabBar.getByLabel(/to call in/)).toHaveCount(0);
+      // Called block now shows as a compact sent row
+      await expect(page.getByText(/^Sent \d\d:\d\d$/)).toBeVisible();
     });
   });
 });

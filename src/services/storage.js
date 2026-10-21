@@ -617,14 +617,19 @@ export class StorageService {
   // Checkpoint runners methods (new simplified structure)
   static async getCheckpointRunners(raceId, checkpointNumber = null) {
     try {
-      if (checkpointNumber !== null) {
-        return await db.checkpoint_runners
+      const rows = checkpointNumber !== null
+        ? await db.checkpoint_runners
           .where('[raceId+checkpointNumber+number]')
           .between([raceId, checkpointNumber, -Infinity], [raceId, checkpointNumber, Infinity])
-          .toArray();
-      } else {
-        return await db.checkpoint_runners.where('raceId').equals(raceId).toArray();
-      }
+          .toArray()
+        : await db.checkpoint_runners.where('raceId').equals(raceId).sortBy('id');
+      // Ignore (don't delete) duplicate rows older builds could seed; keep the
+      // first per checkpoint + bib, which is the row updates target.
+      const seen = new Set();
+      return rows.filter(r => {
+        const k = `${r.checkpointNumber}:${r.number}`;
+        return !seen.has(k) && seen.add(k);
+      });
     } catch (error) {
       console.error('Error getting checkpoint runners:', error);
       return [];
@@ -636,19 +641,26 @@ export class StorageService {
       // Get all race runners and create checkpoint-specific entries
       const raceRunners = await this.getRunners(raceId);
       
-      const checkpointRunners = raceRunners.map(runner => ({
-        raceId,
-        checkpointNumber,
-        number: runner.number,
-        status: 'not-started',
-        callInTime: null,
-        markOffTime: null,
-        notes: null
-      }));
-
-      // Use bulkPut to handle concurrent initialization calls safely (avoids ConstraintError)
-      await db.checkpoint_runners.bulkPut(checkpointRunners);
-      return checkpointRunners;
+      // Seed only bibs with no row yet, in one rw transaction, so concurrent
+      // calls (this and CheckpointRepository.initializeCheckpoint) can't duplicate rows.
+      return await db.transaction('rw', db.checkpoint_runners, async () => {
+        const existing = await db.checkpoint_runners
+          .where('[raceId+checkpointNumber+number]')
+          .between([raceId, checkpointNumber, -Infinity], [raceId, checkpointNumber, Infinity])
+          .toArray();
+        const have = new Set(existing.map(r => r.number));
+        const checkpointRunners = raceRunners.filter(r => !have.has(r.number)).map(runner => ({
+          raceId,
+          checkpointNumber,
+          number: runner.number,
+          status: 'not-started',
+          callInTime: null,
+          markOffTime: null,
+          notes: null
+        }));
+        if (checkpointRunners.length) await db.checkpoint_runners.bulkAdd(checkpointRunners);
+        return [...existing, ...checkpointRunners];
+      });
     } catch (error) {
       console.error('Error initializing checkpoint runners:', error);
       throw new Error('Failed to initialize checkpoint runners');
