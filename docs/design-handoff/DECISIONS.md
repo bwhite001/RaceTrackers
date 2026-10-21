@@ -272,3 +272,7 @@ Part B — bibs can change on the day (N2: a safety net for both late changes an
 - **Bibs assigned on the day:** a checkbox on the runner step allows zero runners. In such a race with no setup bibs, the checkpoint shows a hint and "Still to come —", and base shows "On course —" and "— not seen yet" until the field has bibs.
 - **Mt Glorious template:** the fixed 1–128 range is removed. The card says "Bibs set at setup", and the runner step starts empty.
 - **Validation script:** chip locators accept the new "Record …" / "Add …" names, and RX-05 now shows tap-to-record.
+
+Part C — vet-out removed from the UI:
+- Vet-out is for horse races and isn't part of this project yet (Brandon). The DNF / DNS link reads "Withdraw runner with comments…", the withdrawal sheet always says "Comments", and the Help dialog no longer lists "Vet Out". The out list's disabled-Clear tooltip already read "Recorded at a checkpoint — clear it there".
+- **Kept unmounted for a possible horse-race mode:** `VetOutDialog`, `vetOutRunner`, the `vet_out_records` table and its import / export paths. An old vet-out record (for example from an imported file) shows on the out list as "Medical", so no vet wording reaches the screen.

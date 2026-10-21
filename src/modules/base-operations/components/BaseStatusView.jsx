@@ -189,7 +189,7 @@ const BaseStatusView = ({ onWithdrawDetails }) => {
 
         {onWithdrawDetails && (
           <button type="button" onClick={onWithdrawDetails} className="self-start text-[13px] font-semibold text-vk-blue min-h-[32px]">
-            Withdraw runner with comments or vet-out details…
+            Withdraw runner with comments…
           </button>
         )}
       </section>

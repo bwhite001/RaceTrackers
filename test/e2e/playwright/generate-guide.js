@@ -168,6 +168,8 @@ const SECTION_MAP = {
   'base records a late entry and adds an unknown bib to the field':         'base-receive',
   'a race with bibs assigned on the day':                                   'setup',
   'the Mt Glorious template has no fixed bib range':                        'setup',
+  // Race-day fixes — Parts C / D (housekeeping)
+  'no vet-out wording':                                                     'base-status',
 };
 
 const CHAPTERS = [

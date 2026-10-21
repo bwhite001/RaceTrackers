@@ -162,7 +162,6 @@ const HelpDialog = ({ isOpen, onClose, initialSection = 'quickStart' }) => {
                 <li><strong>Active:</strong> Currently on course</li>
                 <li><strong>Passed:</strong> Cleared checkpoint</li>
                 <li><strong>Withdrawn:</strong> Voluntarily stopped</li>
-                <li><strong>Vet Out:</strong> Failed veterinary check</li>
                 <li><strong>DNF:</strong> Did not finish</li>
               </ul>
 
@@ -187,7 +186,7 @@ const HelpDialog = ({ isOpen, onClose, initialSection = 'quickStart' }) => {
               <h4>Available Reports</h4>
               <ul className="list-disc pl-4">
                 <li><strong>Missing Numbers:</strong> Not checked in</li>
-                <li><strong>Out List:</strong> Withdrawn/Vet out</li>
+                <li><strong>Out List:</strong> DNF and DNS runners</li>
                 <li><strong>Checkpoint Log:</strong> All crossings</li>
                 <li><strong>Summary Report:</strong> Overall stats</li>
               </ul>

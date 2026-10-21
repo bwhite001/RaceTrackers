@@ -86,6 +86,7 @@ test.describe('Corrections', () => {
     await expect(page.getByRole('heading', { name: /who's calling/i })).toBeVisible({ timeout: 15000 });
     const had = await blockAgo(page, 30);
     const fixed = await blockAgo(page, 35);
+    await expect(page.getByTestId('board-CP2')).toContainText(/Up to \d\d:\d\d/);
     const upTo = (await page.getByTestId('board-CP2').innerText()).match(/Up to \d\d:\d\d/)[0];
 
     await step('CP2 → Correction → 101: base had the earlier call\'s time', async () => {

@@ -31,7 +31,8 @@ export function outRecords(outList = []) {
     const w = r.withdrawalDetails;
     const v = r.vetOutDetails;
     const checkpoint = w ? w.checkpoint : v ? v.checkpoint : null;
-    const reason = reasonLabel(w?.reason) || (v ? 'Vet out' : '');
+    // A legacy vet-out record (horse-race code path, not offered) reads as Medical
+    const reason = reasonLabel(w?.reason) || (v ? 'Medical' : '');
     const time = w?.withdrawalTime || v?.vetOutTime || null;
     const parts = [checkpoint != null ? `CP${checkpoint}` : (w ? 'On course' : ''), reason, time ? hhmm(time) : ''].filter(Boolean);
     return {
