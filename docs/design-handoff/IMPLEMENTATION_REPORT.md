@@ -1,6 +1,6 @@
 # VK4WIP UI redesign — implementation report
 
-Branch: `feature/vk4wip-ui` (from `main` at `541e690`). Not pushed; no PR.
+Branch: `feature/vk4wip-ui` (from `main` at `541e690`). Merged to `main` and released as **3.16.0** (the redesign) and **3.17.0** (the validation fixes); the race-day fixes below are on the branch, not yet released.
 Spec: `IMPLEMENTATION_SPEC.md`. Every judgement call is in `DECISIONS.md`, and the summary at the end points to it.
 
 ## What was built, by phase
@@ -173,11 +173,11 @@ From the review of the validation pack (`VALIDATION_FIXES.md`). Judgement calls 
 | C6 | Footer "Ipswich & District Radio Club · VK4WIP" | cd5fb4c | `29` › footer names the club |
 | C7 | Mt Glorious template per spec §10 (bibs unchanged) | cd5fb4c | `29` › mt glorious template matches the brief; `normaliseTemplate.test.js` |
 | D1 | Seed data: 108 at CP2, skip moved to 128, Merge and checkpoint-DNF cases | b437688 | validation pack ST-04, RP-10, RP-13, ST-14 |
-| D2 | "App showed" = per-event evidence; status lines separate | b437688 | validation pack (152 events, all completed) |
+| D2 | "App showed" = per-event evidence; status lines separate | b437688 | validation pack (148 events at Phase D, 152 after Phase E's four Ask-reminder events; all completed) |
 | D3/D4 | Events + tests for every gap listed | b437688 | `30-coverage-gaps` (20 tests) |
-| E1 | Corrections section with WICEN placeholder | Phase E | `radio-procedure.md` (in the guide) |
-| E2 | Official message: date, originator, signed; checkpoint log list | Phase E | `27` › official message has the WICEN fields and a log |
-| E3 | "Ask CPx" reminder on Receive, "Asked" with Undo | Phase E | `28` › ask reminder; `reports.test.js` › ask reminders |
+| E1 | Corrections section with WICEN placeholder | e870f1f | `radio-procedure.md` (in the guide) |
+| E2 | Official message: date, originator, signed; checkpoint log list | e870f1f | `27` › official message has the WICEN fields and a log |
+| E3 | "Ask CPx" reminder on Receive, "Asked" with Undo | e870f1f | `28` › ask reminder; `reports.test.js` › ask reminders |
 
 **Still open (for Brandon):**
 1. D1: how base accepts a corrected time, and the WICEN wording. A proposal is in DECISIONS.md.

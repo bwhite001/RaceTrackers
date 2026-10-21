@@ -225,7 +225,7 @@ Phase D notes:
   - The skipped-checkpoint runner moved from 120 to 128, because RX-03 records 120 at CP1 and filled the gap.
   - The seed also adds an identical duplicate (115, for Merge) and a DNF recorded by CP2 itself (145, for the disabled Clear).
   - `seedRace` takes `cpPasses` and `overSize` for the two-block read-out.
-- **D2: "App showed" is evidence, not page chrome.** Each event reads the element it is about: text, accessible name, pressed / disabled / invalid state, and the computed colour or border where the plan names one. Measured values (page width, axe result, CSV first lines, mailto length) are labelled. A separate "Status line" row keeps live status and alert text, capped at 160 characters, so the generic modal text has gone. The pack now has 148 events (was 109), every one completed, and none has an empty or missing piece of evidence.
+- **D2: "App showed" is evidence, not page chrome.** Each event reads the element it is about: text, accessible name, pressed / disabled / invalid state, and the computed colour or border where the plan names one. Measured values (page width, axe result, CSV first lines, mailto length) are labelled. A separate "Status line" row keeps live status and alert text, capped at 160 characters, so the generic modal text has gone. At Phase D the pack had 148 events (was 109), every one completed, and none had an empty or missing piece of evidence. Phase E added four Ask-reminder events (152).
 - **D3/D4:** every gap the brief lists is a pack event and a test in `30-coverage-gaps.spec.js`. There are 20 tests: Receive, DNF / DNS, data checks, the two-block read-out, Settings Cancel and persistence, phone layouts and accessibility. Phase A–C fixes have their own events, marked "Fixes A1 …" in the Plan column.
 - **The overdue alert in the pack:** the seeded calls leave CP2 only behind on calls. So BO-01 now shows the gold "hasn't reported past" note (A1), and BO-04 has CP2 report up to now before the red alert appears.
 
@@ -276,3 +276,18 @@ Part B — bibs can change on the day (N2: a safety net for both late changes an
 Part C — vet-out removed from the UI:
 - Vet-out is for horse races and isn't part of this project yet (Brandon). The DNF / DNS link reads "Withdraw runner with comments…", the withdrawal sheet always says "Comments", and the Help dialog no longer lists "Vet Out". The out list's disabled-Clear tooltip already read "Recorded at a checkpoint — clear it there".
 - **Kept unmounted for a possible horse-race mode:** `VetOutDialog`, `vetOutRunner`, the `vet_out_records` table and its import / export paths. An old vet-out record (for example from an imported file) shows on the out list as "Medical", so no vet wording reaches the screen.
+
+Part D — housekeeping:
+- **C2 follow-up, green vs blue meaning two states.** I checked the 21 mounted files where both a green and a blue class were remapped to navy. Real collisions, fixed:
+  - **HeadsUpGrid** on base Overview: "Active" and "Passed" badges were identical. Passed is now solid club blue and Active a blue tint. DNF / DNS also used orange / red, the reverse of the club states, so they're now red outline / muted dashed.
+  - **WarningBox:** success and info were identical. Success is band with a navy border; info stays blue tint.
+  - **Badge:** success and info were identical. Success is navy and info club blue.
+  - **Toast:** success and info bars were near-identical. The icons and labels already differed; the success bar is now navy.
+  - **Home race card:** current and upcoming borders were identical. Current is gold and upcoming blue.
+  - **LiveDashboardView:** the same finished / active clash in `STATUS_STYLES`. The map is unused (no element reads it), but it was fixed anyway so it's right if it's ever wired up.
+- **Checked, no clash:** the import / export modals, the transfer panels, the setup steps, DualRunnerGrid and DualCalloutSheet. In each, green and blue were on unrelated elements, not two states side by side.
+- **Gap in the C2 guard, fixed:** the guard missed side-specific classes, so `border-l-green-500` in DualCalloutSheet got through. The guard now also matches `border-l/r/t/b/x/y-`, `ring-offset-` and similar. Called-in segments use club navy.
+- **Corrections to `IMPLEMENTATION_REPORT.md`:** the header now says the work was merged and released as 3.16.0 / 3.17.0, the Phase E rows show commit `e870f1f`, and the event count reads 148 at Phase D and 152 after Phase E. The `DECISIONS.md` note is dated to match.
+- **Version 3.18.0** in `package.json` and both `package-lock.json` fields; not tagged. The 3.17.0 bump had missed the lock file's second field, which still said 3.16.0.
+- **User guide:** the "A number that isn't in the setup" section is added to the radio procedure. The guide is regenerated once, with Part E, because Part E adds the Missed runners and Stand-down sections the brief also asks for.
+- `docs/racetracker-validation-fixes.md` had already been deleted (21 Oct).

@@ -138,7 +138,7 @@ const DualCalloutSheet = () => {
           </h4>
           <div className="space-y-2">
             {calledSegments.map((segment) => (
-              <div key={segment.commonTimeLabel} className="card p-3 border-l-4 border-l-green-500 bg-navy-50 dark:bg-navy-900/20">
+              <div key={segment.commonTimeLabel} className="card p-3 border-l-4 border-l-vk-navy bg-navy-50 dark:bg-navy-900/20">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-4">

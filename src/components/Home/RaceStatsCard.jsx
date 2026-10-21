@@ -45,8 +45,8 @@ const RaceStatsCard = ({
 
   // Variant-specific styling
   const variantStyles = {
-    current: 'border-l-4 border-navy-500',
-    upcoming: 'border-l-4 border-navy-500',
+    current: 'border-l-4 border-vk-gold',
+    upcoming: 'border-l-4 border-vk-blue',
     past: 'border-l-4 border-gray-400',
     default: '',
   };

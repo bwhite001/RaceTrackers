@@ -8,7 +8,8 @@ import fs from 'fs';
 import path from 'path';
 
 const ROOT = path.resolve(__dirname, '../..');
-const OFF_PALETTE = /\b(?:bg|text|border|ring|from|to|via|fill|stroke|divide|outline|accent|placeholder|shadow|decoration)-(?:green|emerald|teal|yellow|amber|indigo|blue)-\d{2,3}\b/g;
+// Side- and offset-specific forms too (border-l-, ring-offset-, divide-x-…)
+const OFF_PALETTE = /\b(?:bg|text|border|ring|from|to|via|fill|stroke|divide|outline|accent|placeholder|shadow|decoration)(?:-(?:l|r|t|b|x|y|s|e|offset))?-(?:green|emerald|teal|yellow|amber|indigo|blue)-\d{2,3}\b/g;
 
 // Legacy components no screen imports any more (checked from src/main.jsx).
 // Remove a file from here when it is mounted again — it must then be restyled.

@@ -170,6 +170,7 @@ const SECTION_MAP = {
   'the Mt Glorious template has no fixed bib range':                        'setup',
   // Race-day fixes — Parts C / D (housekeeping)
   'no vet-out wording':                                                     'base-status',
+  'success and passed look different':                                      'base-status',
 };
 
 const CHAPTERS = [

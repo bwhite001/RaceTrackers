@@ -192,10 +192,11 @@ const HeadsUpGrid = ({ runners = [], checkpoints = [], showNames = false }) => {
 const OverallStatusBadge = ({ status }) => {
   const map = {
     [RUNNER_STATUSES.NOT_STARTED]: { label: 'Not Started', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' },
-    [RUNNER_STATUSES.ACTIVE]: { label: 'Active', cls: 'bg-navy-100 text-navy-700 dark:bg-navy-900/40 dark:text-navy-400' },
-    [RUNNER_STATUSES.PASSED]: { label: 'Passed', cls: 'bg-navy-100 text-navy-700 dark:bg-navy-900/40 dark:text-navy-400' },
-    [RUNNER_STATUSES.DNF]: { label: 'DNF', cls: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' },
-    [RUNNER_STATUSES.DNS]: { label: 'DNS', cls: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400' },
+    // Club states (§3.3): passed = solid club blue, active = blue tint, DNF red, DNS muted
+    [RUNNER_STATUSES.ACTIVE]: { label: 'Active', cls: 'bg-vk-blue-tint text-vk-blue dark:text-navy-300' },
+    [RUNNER_STATUSES.PASSED]: { label: 'Passed', cls: 'bg-vk-blue text-white' },
+    [RUNNER_STATUSES.DNF]: { label: 'DNF', cls: 'bg-vk-red-tint text-vk-red border border-vk-red' },
+    [RUNNER_STATUSES.DNS]: { label: 'DNS', cls: 'bg-vk-paper text-vk-muted border border-dashed border-vk-muted dark:bg-gray-800' },
     [RUNNER_STATUSES.NON_STARTER]: { label: 'Non-Starter', cls: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400' },
   };
   const entry = map[status] ?? { label: status ?? '—', cls: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400' };

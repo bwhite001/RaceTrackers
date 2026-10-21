@@ -64,10 +64,11 @@ const Badge = ({
       outline: 'border border-gold-500 text-gold-700 dark:border-gold-600 dark:text-gold-400',
       soft: 'bg-gold-50 text-gold-700 dark:bg-gold-900 dark:text-gold-300',
     },
+    // success is navy (strong) and info club-blue tint, so the two never look alike
     success: {
-      solid: 'bg-navy-500 text-white dark:bg-navy-600',
-      outline: 'border border-navy-500 text-navy-700 dark:border-navy-600 dark:text-navy-400',
-      soft: 'bg-navy-100 text-navy-700 dark:bg-navy-900/40 dark:text-navy-400',
+      solid: 'bg-vk-navy text-white',
+      outline: 'border border-vk-navy text-vk-navy dark:border-navy-300 dark:text-navy-200',
+      soft: 'bg-vk-band text-vk-navy border border-vk-navy dark:bg-navy-900/40 dark:text-navy-200',
     },
     warning: {
       solid: 'bg-gold-500 text-white dark:bg-gold-600',
@@ -80,9 +81,9 @@ const Badge = ({
       soft: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
     },
     info: {
-      solid: 'bg-navy-500 text-white dark:bg-navy-600',
-      outline: 'border border-navy-500 text-navy-700 dark:border-navy-600 dark:text-navy-400',
-      soft: 'bg-navy-50 text-navy-700 dark:bg-navy-900 dark:text-navy-300',
+      solid: 'bg-vk-blue text-white',
+      outline: 'border border-vk-blue text-vk-blue dark:border-navy-400 dark:text-navy-300',
+      soft: 'bg-vk-blue-tint text-vk-blue dark:text-navy-300',
     },
     // Runner status variants — Fluent tinted soft-container style
     'status-not-started': {
@@ -138,7 +139,7 @@ const Badge = ({
     default: 'bg-gray-400 dark:bg-gray-500',
     primary: 'bg-navy-600 dark:bg-navy-500',
     secondary: 'bg-gold-500 dark:bg-gold-600',
-    success: 'bg-navy-500 dark:bg-navy-600',
+    success: 'bg-vk-navy dark:bg-navy-200',
     warning: 'bg-gold-500 dark:bg-gold-600',
     danger: 'bg-red-600 dark:bg-red-700',
     info: 'bg-navy-500 dark:bg-navy-600',

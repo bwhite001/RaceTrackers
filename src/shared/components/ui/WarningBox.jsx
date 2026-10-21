@@ -64,9 +64,10 @@ const WarningBox = ({
       )
     },
     success: {
-      container: 'bg-navy-50 dark:bg-navy-900/20 border-navy-200 dark:border-navy-800',
-      icon: 'text-navy-600 dark:text-navy-400',
-      title: 'text-navy-800 dark:text-navy-300',
+      // Distinct from info (blue tint): band with a navy border
+      container: 'bg-vk-band dark:bg-navy-900/40 border-vk-navy dark:border-navy-300',
+      icon: 'text-vk-navy dark:text-navy-300',
+      title: 'text-vk-navy dark:text-navy-200',
       message: 'text-navy-700 dark:text-navy-400',
       defaultIcon: (
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">

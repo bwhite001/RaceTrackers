@@ -84,10 +84,11 @@ function LiveDashboardView() {
   };
 
   const STATUS_STYLES = {
-    finished:    'bg-navy-100 dark:bg-navy-900/30 text-navy-700 dark:text-navy-300',
-    active:      'bg-navy-100 dark:bg-navy-900/30 text-navy-700 dark:text-navy-300',
-    dnf:         'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
-    dns:         'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
+    // Club states (§3.3): finished navy, active blue tint, DNF red, DNS muted
+    finished:    'bg-vk-navy text-white',
+    active:      'bg-vk-blue-tint text-vk-blue dark:text-navy-300',
+    dnf:         'bg-vk-red-tint text-vk-red border border-vk-red',
+    dns:         'bg-vk-paper text-vk-muted border border-dashed border-vk-muted dark:bg-gray-800',
     'not-started': 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400',
   };
 

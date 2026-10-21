@@ -29,4 +29,28 @@ test.describe('Housekeeping', () => {
       await noVet(dialog);
     });
   });
+
+  test('success and passed look different', async ({ page, step }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await seedRace(page, BASE, { withBaseData: true });
+    await page.goto(`${BASE}/base-station/operations`);
+    await expect(page.getByRole('heading', { name: /who's calling/i })).toBeVisible({ timeout: 15000 });
+
+    await step('Finish receives 100 — heads-up grid: Passed (solid club blue) and Active (blue tint) differ', async () => {
+      await page.getByRole('button', { name: /^Finish,/ }).click();
+      await page.fill('#bib-heard', '100');
+      await page.keyboard.press('Enter');
+      await page.getByRole('button', { name: 'Complete · 1' }).click();
+      await page.getByRole('button', { name: 'Next call' }).click();
+      await page.getByRole('tab', { name: 'Overview' }).click();
+      const badge = (n, label) => page.getByRole('row', { name: new RegExp(`^${n} `) }).getByText(label, { exact: true });
+      const passed = badge(100, 'Passed');
+      const active = badge(101, 'Active');
+      await expect(passed).toBeVisible();
+      await expect(active).toBeVisible();
+      const bg = (loc) => loc.evaluate(el => getComputedStyle(el).backgroundColor);
+      expect(await bg(passed)).toBe('rgb(30, 92, 179)');
+      expect(await bg(active)).not.toBe(await bg(passed));
+    });
+  });
 });

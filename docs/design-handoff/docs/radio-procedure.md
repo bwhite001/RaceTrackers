@@ -60,6 +60,15 @@ Sent as a separate call, one runner at a time, never mixed into a Scores call:
 - A runner called in by mistake who never passed: "Checkpoint [n] correction, runner [bib], not passed." The checkpoint's card shows "142 · not passed · was 11:00"; base taps **Not passed** before **Apply correction**.
 - In a normal Scores call, a number base already has shows gold **Had HH:MM** and is skipped. Without the word "correction" it's treated as a mistake, not a new time.
 
+## A number that isn't in the setup
+
+Bib ranges can change on the day, and some races only know bibs at registration. A runner whose number isn't in the setup is still recorded, never lost.
+
+- Checkpoint: type the number in quick entry as usual. It's marked and its tile gets a small gold corner ("not in setup"). A number longer than any bib in the race (or over 9999) asks "Mark 51212? It isn't in the setup" first, in case it's a typo. Read it to base like any other number.
+- Base: in a call, the number shows gold **Not in setup — tap to record**. Tap it if the checkpoint confirms the number; it's recorded as a **Late entry** and joins the field. Leave it untapped to skip it; it then appears in **Reports › Needs attention › Unknown bibs**, where **Add to field** records it later.
+- DNF / DNS: a number outside the field shows **Not in setup — tap to add**.
+- Race setup: tick **Bibs assigned on the day** for a race with no bib list yet. Counts that need the field show "—" until bibs are known.
+
 ## Fixing mistakes
 
 Checkpoint:
