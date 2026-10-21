@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import db from '../../src/shared/services/database/schema.js';
 import CheckpointRepository from '../../src/modules/checkpoint-operations/services/CheckpointRepository.js';
 import TimeUtils from '../../src/services/timeUtils.js';
+import { correctionRows, pendingRunners } from '../../src/modules/checkpoint-operations/services/checkpointStats.js';
 
 const RACE = 1;
 const CP = 3;
@@ -137,7 +138,7 @@ describe('A3 — same-block edits are not corrections', () => {
 
   it('a called-in time moved inside the same block stays called in', async () => {
     const res = await CheckpointRepository.editTime(RACE, CP, 101, at(11, 3));
-    expect(res).toEqual({ correction: false, sameBlock: true });
+    expect(res).toMatchObject({ correction: false, sameBlock: true });
     expect(await get(101)).toMatchObject({ actualTime: at(11, 3), calledIn: true });
     expect((await get(101)).correction).toBeFalsy();
     expect((await get(101)).editedAt).toBeTruthy();
@@ -145,7 +146,57 @@ describe('A3 — same-block edits are not corrections', () => {
 
   it('a called-in time moved to another block becomes a correction', async () => {
     const res = await CheckpointRepository.editTime(RACE, CP, 101, at(10, 58));
-    expect(res).toEqual({ correction: true, sameBlock: false });
+    expect(res).toMatchObject({ correction: true, sameBlock: false });
     expect(await get(101)).toMatchObject({ calledIn: false, correction: true });
+  });
+});
+
+describe('Race-day A1 — corrections card', () => {
+  beforeEach(async () => {
+    await db.checkpoint_runners.clear();
+    await db.checkpoint_runners.bulkAdd([101, 142].map(number => ({ raceId: RACE, checkpointNumber: CP, number, status: 'not-started', calledIn: false })));
+    await CheckpointRepository.markPassed(RACE, CP, [101, 142], at(11, 4));
+    await CheckpointRepository.setCalledIn(RACE, CP, [101, 142], true);
+  });
+
+  it('call-in keeps the block base has; a moved time shows now / was and leaves the normal call', async () => {
+    expect((await get(101)).calledInBlock).toBe(at(11, 0));
+    await CheckpointRepository.editTime(RACE, CP, 101, at(10, 58));
+    const runners = await db.checkpoint_runners.toArray();
+    expect(correctionRows(runners).map(c => [c.r.number, c.kind, c.now, c.was])).toEqual([[101, 'time', at(10, 55), at(11, 0)]]);
+    expect(pendingRunners(runners)).toEqual([]);
+  });
+
+  it('moving a pending correction back to base\'s block cancels it', async () => {
+    await CheckpointRepository.editTime(RACE, CP, 101, at(10, 58));
+    const res = await CheckpointRepository.editTime(RACE, CP, 101, at(11, 2));
+    expect(res.cancelled).toBe(true);
+    expect(await get(101)).toMatchObject({ calledIn: true, correction: false });
+  });
+
+  it('correction sent: called in at the new block, "was" updated; Undo is the snapshot', async () => {
+    await CheckpointRepository.editTime(RACE, CP, 101, at(10, 58));
+    const snap = await CheckpointRepository.snapshot(RACE, CP, [101]);
+    await CheckpointRepository.sendCorrections(RACE, CP, [101]);
+    expect(await get(101)).toMatchObject({ calledIn: true, correction: false, calledInBlock: at(10, 55) });
+    await CheckpointRepository.restoreSnapshot(RACE, CP, snap);
+    expect(await get(101)).toMatchObject({ calledIn: false, correction: true, calledInBlock: at(11, 0) });
+  });
+
+  it('unmarking a called-in runner puts "not passed · was" on the card; restoring before it is sent removes it', async () => {
+    await CheckpointRepository.unmark(RACE, CP, 142);
+    let rows = correctionRows(await db.checkpoint_runners.toArray());
+    expect(rows.map(c => [c.r.number, c.kind, c.now, c.was])).toEqual([[142, 'not-passed', null, at(11, 0)]]);
+    // Restored at its original time: base already has that, nothing to send
+    await CheckpointRepository.markPassed(RACE, CP, [142], at(11, 4));
+    rows = correctionRows(await db.checkpoint_runners.toArray());
+    expect(rows).toEqual([]);
+    expect(await get(142)).toMatchObject({ calledIn: true, notPassedCorrection: false });
+  });
+
+  it('a not-passed correction, once sent, clears without marking the runner', async () => {
+    await CheckpointRepository.unmark(RACE, CP, 142);
+    await CheckpointRepository.sendCorrections(RACE, CP, [142]);
+    expect(await get(142)).toMatchObject({ status: 'not-started', notPassedCorrection: false, calledInBlock: null });
   });
 });

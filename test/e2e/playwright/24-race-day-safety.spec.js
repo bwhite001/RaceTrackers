@@ -121,7 +121,7 @@ test.describe('Race-day safety', () => {
       await expect(sheet.getByTestId('correction-warning')).toBeVisible();
       await sheet.getByRole('button', { name: /^Save / }).click();
       await page.getByRole('button', { name: /^Callout/ }).click();
-      await expect(page.getByTestId('pending-block').getByText('Correction')).toBeVisible();
+      await expect(page.getByTestId('correction-row')).toContainText(/^101/);
     });
   });
 

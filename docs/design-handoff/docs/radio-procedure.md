@@ -51,12 +51,14 @@ For the user guide. Radio wording is deliberately **not** shown in the app scree
 
 ## Corrections
 
-**Brandon to supply WICEN wording** for sending a corrected time and for base acknowledging it.
+Sent as a separate call, one runner at a time, never mixed into a Scores call:
+"Checkpoint [n] correction, runner [bib], time is now [HH:MM]." Give the new common time (5-minute block) unless an exact time was recorded.
 
-What the app does today:
-- Checkpoint: changing the time of a runner base already has only counts as a correction when it moves the runner into a **different 5-minute block** — base only ever hears the common time. A minute's change inside the same block stays called in ("Same common time — base doesn't need a correction").
-- A correction goes back on the Callout sheet tagged **Correction** and is sent with the next call.
-- Base: a number already logged at that checkpoint shows gold **Had HH:MM** and is skipped (kept on the call record). Base can't yet replace the logged time with the correction — that needs the wording above first.
+- Checkpoint: corrections appear in their own card on the Callout sheet ("101 · now 10:55 · was 11:00"). Tap **Base copied — correction sent** once base has it.
+- Base: tap the checkpoint, tap **Correction**, type the bib, check what base had, pick the new time and tap **Apply correction**. Undo is available.
+- A time edit inside the same 5-minute block is not a correction and nothing needs to be sent.
+- A runner called in by mistake who never passed: "Checkpoint [n] correction, runner [bib], not passed." The checkpoint's card shows "142 · not passed · was 11:00"; base taps **Not passed** before **Apply correction**.
+- In a normal Scores call, a number base already has shows gold **Had HH:MM** and is skipped. Without the word "correction" it's treated as a mistake, not a new time.
 
 ## Fixing mistakes
 
@@ -64,7 +66,7 @@ Checkpoint:
 - Tap a marked runner on **Mark off** to change its time (−5/−1/+1/+5) or unmark it. Unmarking shows Undo.
 - An unmarked runner keeps "was HH:MM"; tapping it restores the original time or uses now.
 - **Overview**: tap any runner to change time, undo call-in, reset to not passed, or mark DNS/DNF. Every change has Undo.
-- Changing a time base already has into another 5-minute block sends it back to the callout sheet as a correction (see Corrections).
+- Changing a time base already has into another 5-minute block puts it on the Corrections card (see Corrections).
 
 Base:
 - **DNF / DNS** tab: bulk add by typing or pasting numbers, choose where and why, apply; Clear any entry to put a runner back in the race.

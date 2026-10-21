@@ -158,6 +158,11 @@ const SECTION_MAP = {
   // Validation fixes — Phase E
   'ask reminder':                                                           'base-receive',
   'official message has the WICEN fields and a log':                        'checkpoint',
+  // Race-day fixes — Part A (corrections)
+  'checkpoint corrections card':                                            'checkpoint-fixes',
+  'unmarking a called-in runner is a not-passed correction':                'checkpoint-fixes',
+  'base applies a correction':                                              'base-receive',
+  'a normal call still skips a number base already has':                    'base-receive',
 };
 
 const CHAPTERS = [

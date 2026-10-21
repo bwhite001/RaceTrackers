@@ -99,8 +99,10 @@ const RunnerGrid = () => {
       if (draft === orig) return;
       let result;
       await withUndo([number], `${number} time changed`, async () => { result = await editTime(number, draft); }, `${number} back to ${hhmm(orig)}`);
-      setMessage(result?.correction
-        ? `${number} changed to ${hhmm(draft)} — back on callout as a correction`
+      setMessage(result?.cancelled
+        ? `${number} back to the time base has — nothing to send`
+        : result?.correction
+        ? `${number} changed to ${hhmm(draft)} — on the Corrections card`
         : called
           ? `${number} time changed — same common time, nothing to send`
           : `${number} time changed to ${hhmm(draft)}`);
@@ -111,11 +113,11 @@ const RunnerGrid = () => {
   };
 
   const alt = async () => {
-    const { number, mode, orig } = sheet;
+    const { number, mode, orig, called } = sheet;
     closeSheet();
     if (mode === 'edit') {
       await withUndo([number], `${number} unmarked`, () => unmarkRunner(number), `${number} restored at ${hhmm(orig)}`);
-      setMessage('');
+      setMessage(called ? `${number} unmarked — base had it, so it's on the Corrections card as not passed` : '');
     } else {
       const t = now();
       await withUndo([number], `${number} marked`, () => markPassed([number], t));

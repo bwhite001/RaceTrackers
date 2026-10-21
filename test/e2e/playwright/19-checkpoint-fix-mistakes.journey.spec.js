@@ -96,15 +96,13 @@ test.describe('Checkpoint — fix mistakes', () => {
       await expect(sheet(page).getByText(/base already has/i)).toBeVisible();
       await expect(sheet(page).getByText(/goes back on the callout sheet as a correction/i)).toBeVisible();
       await sheet(page).getByRole('button', { name: /^Save / }).click();
-      await expect(page.getByTestId('markoff-status')).toContainText('back on callout as a correction');
+      await expect(page.getByTestId('markoff-status')).toContainText('on the Corrections card');
       await expect(tile(page, 104)).toHaveAccessibleName(/^Runner 104, ✎ \d\d:\d\d$/);
     });
 
-    await step('Callout sheet — 104 is back in the next call, tagged Correction', async () => {
+    await step('Callout sheet — 104 is on the Corrections card, sent as its own call', async () => {
       await page.getByRole('button', { name: /^Callout/ }).click();
-      const pending = page.getByTestId('pending-block');
-      await expect(pending).toContainText('104');
-      await expect(pending.getByText('Correction')).toBeVisible();
+      await expect(page.getByTestId('correction-row')).toContainText(/^104/);
     });
   });
 

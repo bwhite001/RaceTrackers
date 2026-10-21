@@ -169,7 +169,7 @@ An independent code review of the branch found these. Each was checked against t
 
 Brief: `VALIDATION_FIXES.md` (the full prompt from the review of the validation pack). Defaults used where the brief left a decision open:
 
-- **D1 — base accepting a checkpoint's corrected time: proposal only, not built.** Proposal: when a number already logged at that checkpoint is heard with a different block, Receive shows a gold "Had HH:MM" chip instead of silently skipping it. One tap replaces the time with the correction. The old row is kept and marked superseded, never deleted. The call records the correction and the change is audit-logged. Undo restores the exact previous row. The WICEN voice wording for a correction is still needed. The radio procedure has a placeholder for it (Phase E).
+- **D1 — base accepting a checkpoint's corrected time: superseded by Race-day fixes Part A (built).** Corrections are their own radio call, so base never has to guess from a "Had HH:MM" chip; see "Race-day fixes" below.
 - **D2 — "On course" means in the race and not finished.** That is everyone not DNS, DNF or finished, including runners not seen at any checkpoint yet. The Overview tile shows "N not seen yet" under the count. The tile and Reports › Still on course use one shared selector (`raceCounts` in `reports.js`).
 - **D3 — overdue grace is 10 minutes** (`OVERDUE_GRACE_MINUTES`). A runner is overdue only when their next checkpoint has reported up to at least 10 minutes past their expected time. Before that the runner shows as "awaiting report" in gold, with no red alert. A race can override it with `race.overdueGraceMinutes`. Nothing in the UI sets that yet, so in practice it is always 10.
 
@@ -241,3 +241,21 @@ Phase E notes:
   - "Asked" sets `askedAt` on the resolution, an additive data column with no index or schema change, and is audit-logged. Undo clears it.
   - The issue stays resolved in Reports either way; the reminder is only about the radio call.
   - The user guide has a line under "Base: receiving a call".
+
+## Race-day fixes
+
+Brief: `RACE_DAY_FIXES.md` (from Brandon's answers after 3.17.0). Branch `feature/vk4wip-ui`; not pushed or tagged.
+
+Part A — corrections by radio:
+- **How it works on air (Brandon):** a correction is its own call, one runner at a time: "Checkpoint [n] correction, runner [bib], time is now [HH:MM]". So the gold "Had HH:MM" chip in a normal Scores call stays a skip, with no tap-to-replace.
+- **Checkpoint data:** call-in now stores the block base was given (`calledInBlock`), which is the "was" on the Corrections card. It also means an edit back into that block cancels the pending correction, because base already has it. A runner unmarked after being called in gets `notPassedCorrection`, and marking them again at base's block cancels that. Corrections are excluded from `pendingRunners`, so they are never in "Base copied — mark sent" or Read-out, and never make a call due on their own. The Callout badge and the "To call in" tile count them.
+- **"Correction sent" button:** gold only when there's no normal call waiting; otherwise blue outline, so there's still one gold primary.
+- **Base data:** a correction is a `radio_calls` row with `kind: 'correction'` and `corrections: [{ number, from, to, notPassed }]`. It reuses the call's `replaced` list, so `undoCall` restores the exact previous rows. Old rows are superseded (`supersededReason: 'correction'`, `supersededBy`), never deleted.
+- **"Up to" never moves:** the new row carries `correction: true` and `upToBlock`, the block it replaced, and `reportedUpTo` counts that instead of the new time. So a correction can't move "up to" earlier or later. One limit: "Not passed" writes no new row, so if that runner was the only one in the latest block reported, "up to" drops to the block before. Logged rather than special-cased.
+- **Due timing:** the brief's two phrases point different ways ("doesn't reset last call" / "count it as a call"). A correction is a radio contact, so it counts as the checkpoint's last call. The Call log shows Scores calls and corrections in separate columns.
+- **Correction mode:**
+  - The correction draft and its Undo live in the persisted Receive draft, alongside the call in progress, so a tab switch or reload keeps both.
+  - Typing a bib moves the picker to the block base had.
+  - Validation warns but allows: a number not in the field shows "Not in race — check the number" until Part B, and DNF / DNS shows the status.
+- **N1 wording:** the decisions table gives it ("Checkpoint [n] correction, runner [bib], not passed"), so the radio procedure uses it. The brief's A3 placeholder text was older.
+

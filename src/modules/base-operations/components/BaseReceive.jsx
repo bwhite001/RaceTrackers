@@ -36,7 +36,7 @@ const BaseReceive = () => {
   const store = useBaseOperationsStore();
   const {
     currentRace, checkpoints = [], runners = [], radioCalls = [], outList = [], raceRunnerNumbers = [], resolutions = [],
-    receive, setReceive, resetReceive, recordCall, undoCall, setResolutionsAsked,
+    receive, setReceive, resetReceive, recordCall, undoCall, setResolutionsAsked, recordCorrection,
   } = store;
   const now = useNow(10000);
   const inputRef = useRef(null);
@@ -93,7 +93,7 @@ const BaseReceive = () => {
 
   const pickCheckpoint = (row) => {
     const next = row.lastBlock ? TimeUtils.addMinutes(row.lastBlock, BLOCK_MINUTES) : nowBlock;
-    setReceive({ step: 'rx', cp: row.number, entries: [], ctime: next > nowBlock ? nowBlock : next, manual: false, manualText: '', summary: null, lastCallId: null, raceId: store.currentRaceId });
+    setReceive({ step: 'rx', cp: row.number, entries: [], ctime: next > nowBlock ? nowBlock : next, manual: false, manualText: '', summary: null, lastCallId: null, raceId: store.currentRaceId, corr: null });
     clearTransient();
     setFlash('');
     setTimeout(() => inputRef.current?.focus(), 0);
@@ -159,12 +159,58 @@ const BaseReceive = () => {
   const onExact = (value) => {
     const v = value.replace(/[^\d:]/g, '').slice(0, 5);
     setExactInvalid(false);
-    if (!/^\d{4}$|^\d{1,2}:\d{2}$/.test(v)) { setReceive({ manualText: v }); return; }
+    const setText = (text) => (rx.corr ? setCorr({ manualText: text }) : setReceive({ manualText: text }));
+    if (!/^\d{4}$|^\d{1,2}:\d{2}$/.test(v)) { setText(v); return; }
     const t = parseExactTime(v, now);
-    if (t && t >= earliest && t <= now) { setBlock(t, true, hhmm(t)); return; }
-    setReceive({ manualText: '' });
+    if (t && t >= earliest && t <= now) {
+      if (rx.corr) setCorr({ ctime: t, manual: true, manualText: hhmm(t) });
+      else setBlock(t, true, hhmm(t));
+      return;
+    }
+    setText('');
     setExactInvalid(true);
     setFlash(t ? `Time must be between ${hhmm(earliest)} and now` : `${v} isn't a time — type HH:MM`);
+  };
+
+  // ── Correction mode (its own call, one runner at a time) ─────────────────
+  // The call in progress is kept in the draft and comes back on "Back to call".
+  const setCorr = (patch) => setReceive(r => ({ corr: { ...r.corr, ...patch } }));
+  const openCorrection = () => {
+    setReceive({ corr: { num: '', ctime: nowBlock, manual: false, manualText: '', notPassed: false } });
+    setFlash(''); setExactInvalid(false);
+  };
+  const closeCorrection = () => { setReceive({ corr: null }); setFlash(''); setExactInvalid(false); };
+  const corrNum = rx.corr?.num ? Number(rx.corr.num) : null;
+  const corrHad = cur && corrNum ? (sightings.get(cur.number)?.get(corrNum) ?? null) : null;
+  const corrWarn = corrNum == null ? null
+    : !raceNumbers.has(corrNum) ? 'Not in race — check the number'
+      : out.has(corrNum) ? `Marked ${out.get(corrNum)} — base decides` : null;
+  const setCorrNum = (num) => {
+    // Pick up what base had, so the picker starts on it
+    const had = cur && num ? sightings.get(cur.number)?.get(Number(num)) : null;
+    setCorr({ num, ...(had && { ctime: toBlock(had), manual: false, manualText: '' }) });
+  };
+  const applyCorrection = async () => {
+    if (!corrNum || busy) return;
+    setBusy(true);
+    try {
+      const { ctime, manual, notPassed } = rx.corr;
+      const callId = await recordCorrection(cur.number, { number: corrNum, time: notPassed ? null : ctime, manual, notPassed });
+      const text = `${corrNum} at ${cur.short}: ${corrHad ? hhmm(corrHad) : 'no time'} → ${notPassed ? 'not passed' : hhmm(ctime)}`;
+      setReceive(r => ({ corr: { ...r.corr, num: '', notPassed: false, undo: { callId, text } } }));
+      setFlash(`Correction recorded — ${text}`);
+    } catch (err) {
+      setFlash(`Could not record the correction: ${err.message}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const corrUndo = rx.corr?.undo ?? null; // kept in the persisted draft, like the done card's Undo
+  const undoCorrection = async () => {
+    const u = corrUndo;
+    setCorr({ undo: null });
+    await undoCall(u.callId);
+    setFlash(`Correction undone — ${u.text}`);
   };
 
   const complete = async () => {
@@ -204,11 +250,12 @@ const BaseReceive = () => {
     const from = start < toBlock(earliest) ? toBlock(earliest) : start;
     const used = new Set(rx.entries.map(e => e.t));
     const nextKey = cur.lastBlock ? TimeUtils.addMinutes(cur.lastBlock, BLOCK_MINUTES) : null;
+    const sel = rx.corr ?? rx;
     blocks = blocksBetween(from, now).slice(-MAX_BLOCKS).map(b => {
       const done = !!cur.lastBlock && b <= cur.lastBlock;
-      const has = used.has(b);
+      const has = !rx.corr && used.has(b);
       return {
-        key: b, label: hhmm(b), selected: !rx.manual && rx.ctime === b, done, has,
+        key: b, label: hhmm(b), selected: !sel.manual && sel.ctime === b, done, has,
         sub: done ? 'done' : has ? 'this call' : b === nextKey ? 'next' : '',
       };
     });
@@ -251,12 +298,66 @@ const BaseReceive = () => {
           </div>
         )}
 
-        {rx.step === 'rx' && cur && (
+        {rx.step === 'rx' && cur && rx.corr && (
+          <div className="bg-white dark:bg-gray-800 border-2 border-vk-gold rounded-card p-3 flex flex-col gap-2.5" data-testid="correction-panel">
+            <div className="flex items-center gap-2.5">
+              <h1 id="rxhd" className="font-display font-extrabold text-xl text-vk-navy dark:text-white">{cur.short} · Correction</h1>
+              <div className="text-[13px] text-vk-muted flex-1 min-w-0 truncate">One runner at a time</div>
+              <button type="button" onClick={closeCorrection}
+                className="min-h-[40px] px-3 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs dark:bg-gray-800 dark:text-gray-100">
+                Back to call{rx.entries.length ? ` · ${rx.entries.length}` : ''}
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-3 items-stretch">
+              <div className="flex-[1_1_240px] min-w-0 flex flex-col gap-2">
+                <label htmlFor="corr-bib" className="text-xs font-bold text-vk-muted uppercase tracking-[0.8px]">Runner</label>
+                <input id="corr-bib" type="text" inputMode="numeric" autoComplete="off" value={rx.corr.num ?? ''}
+                  onChange={e => setCorrNum(e.target.value.replace(/\D/g, '').slice(0, MAX_DIGITS))}
+                  placeholder="Number"
+                  className="font-display font-extrabold text-[26px] text-vk-ink bg-white border-2 border-vk-blue rounded-btn px-3 py-1 min-h-[52px] dark:bg-gray-900 dark:text-white" />
+                <div className="text-sm font-semibold min-h-[20px]" data-testid="corr-had">
+                  {corrNum ? (corrHad ? `Had ${hhmm(corrHad)}` : 'No earlier time') : ''}
+                </div>
+                {corrWarn && <div className="text-xs font-bold text-vk-ink bg-vk-gold-tint border border-vk-gold rounded-btn px-2 py-1" data-testid="corr-warning">{corrWarn}</div>}
+                <div className="text-xs font-bold text-vk-muted uppercase tracking-[0.8px] mt-1">New time</div>
+                <BlockPicker blocks={blocks} onPick={(t) => setCorr({ ctime: t, manual: false, manualText: '', notPassed: false })}
+                  exactText={rx.corr.manualText} onExactChange={onExact} exactActive={rx.corr.manual && !rx.corr.notPassed} exactInvalid={exactInvalid} />
+                <button type="button" aria-pressed={!!rx.corr.notPassed} onClick={() => setCorr({ notPassed: !rx.corr.notPassed })}
+                  className={`self-start min-h-[44px] px-3.5 rounded-btn font-bold text-[13px] ${rx.corr.notPassed ? 'bg-vk-navy text-white' : 'bg-white text-vk-ink border border-vk-muted dark:bg-gray-800 dark:text-gray-100'}`}>
+                  Not passed
+                </button>
+              </div>
+              <div className="flex-[0_1_220px]">
+                <NumberPad
+                  onDigit={d => setCorrNum(((rx.corr.num ?? '') + d).slice(0, MAX_DIGITS))}
+                  onBackspace={() => setCorrNum((rx.corr.num ?? '').slice(0, -1))}
+                  onAdd={applyCorrection}
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2 min-h-[28px]">
+              <span className="flex-1 text-xs font-semibold text-vk-blue" aria-live="polite" data-testid="rx-flash">{flash}</span>
+              {corrUndo && (
+                <button type="button" onClick={undoCorrection} className="min-h-[32px] px-3 rounded-lg bg-vk-ink text-white font-bold text-xs">Undo</button>
+              )}
+            </div>
+            <button type="button" onClick={applyCorrection} disabled={!corrNum || busy}
+              className={`${actionBtn} ${!corrNum || busy ? LOCKED : 'bg-vk-gold text-vk-ink shadow-btn'}`}>
+              {rx.corr.notPassed ? 'Apply correction · not passed' : `Apply correction${corrNum ? ` · ${hhmm(rx.corr.ctime)}` : ''}`}
+            </button>
+          </div>
+        )}
+
+        {rx.step === 'rx' && cur && !rx.corr && (
           <div className="bg-white dark:bg-gray-800 border-2 border-vk-gold rounded-card p-3 flex flex-col gap-2.5">
             <div className="flex items-center gap-2.5">
               <h1 id="rxhd" className="font-display font-extrabold text-xl text-vk-navy dark:text-white">{cur.short}</h1>
               <div className="text-[13px] text-vk-muted flex-1 min-w-0 truncate">{[cur.ops[0], cur.name].filter(Boolean).join(' · ')}</div>
               <div className="text-[13px] font-bold text-vk-blue whitespace-nowrap">{goodCount} to record</div>
+              <button type="button" onClick={openCorrection}
+                className="min-h-[40px] px-3 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs dark:bg-gray-800 dark:text-gray-100">
+                Correction
+              </button>
             </div>
 
             <BlockPicker

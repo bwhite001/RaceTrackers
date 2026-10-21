@@ -26,10 +26,30 @@ export function computeStats(runners) {
   return s;
 }
 
-/** Passed but not called in — what base still needs. Oldest first. */
+/**
+ * Corrections go to base as their own call, one runner at a time: a changed
+ * time, a runner base had who didn't pass, or a runner base says was missed.
+ */
+export function isCorrection(r) {
+  if (!r) return false;
+  if (r.notPassedCorrection) return true;
+  return checkpointRunnerState(r) === RUNNER_STATE.PASSED && (!!r.correction || !!r.missedReport);
+}
+
+/** The Corrections card, in bib order: { r, kind: 'time'|'not-passed'|'missed', now, was }. */
+export function correctionRows(runners) {
+  return runners.filter(isCorrection).sort((a, b) => a.number - b.number).map(r => ({
+    r,
+    kind: r.notPassedCorrection ? 'not-passed' : r.missedReport ? 'missed' : 'time',
+    now: r.notPassedCorrection ? null : r.commonTime ?? null,
+    was: r.missedReport ? null : r.calledInBlock ?? null,
+  }));
+}
+
+/** Passed but not called in — what base still needs in a Scores call (no corrections). Oldest first. */
 export function pendingRunners(runners) {
   return runners
-    .filter(r => checkpointRunnerState(r) === RUNNER_STATE.PASSED)
+    .filter(r => checkpointRunnerState(r) === RUNNER_STATE.PASSED && !isCorrection(r))
     .sort((a, b) => (runnerTime(a) ?? '').localeCompare(runnerTime(b) ?? '') || a.number - b.number);
 }
 

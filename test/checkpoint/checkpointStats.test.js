@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import TimeUtils from '../../src/services/timeUtils.js';
 import { hhmm } from '../../src/services/blocks.js';
 import {
-  computeStats, pendingRunners, groupByBlock, calledBlocks, isCallDue, oldestWaitingMinutes, bibGroups,
+  computeStats, pendingRunners, correctionRows, groupByBlock, calledBlocks, isCallDue, oldestWaitingMinutes, bibGroups,
 } from '../../src/modules/checkpoint-operations/services/checkpointStats.js';
 
 const at = (h, m) => TimeUtils.atLocalTime('2026-11-08T00:00:00.000Z', h, m);
@@ -22,14 +22,15 @@ describe('checkpointStats', () => {
     expect(computeStats(R)).toEqual({ total: 8, passed: 4, called: 2, toCall: 2, toCome: 2, dns: 1, dnf: 1 });
   });
 
-  it('pending = passed not called in, oldest first', () => {
-    expect(pendingRunners(R).map(r => r.number)).toEqual([143, 142]);
+  it('pending = passed not called in, oldest first; corrections go on their own card (race-day A1)', () => {
+    expect(pendingRunners(R).map(r => r.number)).toEqual([143]);
+    expect(correctionRows(R).map(c => [c.r.number, c.kind])).toEqual([[142, 'time']]);
   });
 
   it('groups by 5-minute block with individual numbers in bib order', () => {
     const groups = groupByBlock(pendingRunners(R));
     expect(groups.map(g => hhmm(g.block))).toEqual(['07:40']);
-    expect(groups[0].runners.map(r => r.number)).toEqual([142, 143]);
+    expect(groups[0].runners.map(r => r.number)).toEqual([143]);
   });
 
   it('called blocks carry the send time', () => {

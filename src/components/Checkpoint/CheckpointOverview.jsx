@@ -100,7 +100,8 @@ const CheckpointOverview = () => {
           const isOpen = open === r.number;
           const t = runnerTime(r);
           const hasTime = state === RUNNER_STATE.PASSED || state === RUNNER_STATE.CALLED;
-          const flag = state === RUNNER_STATE.PASSED ? (r.correction ? 'Correction' : 'Not called') : '';
+          const flag = r.notPassedCorrection || r.correction || r.missedReport ? 'Correction'
+            : state === RUNNER_STATE.PASSED ? 'Not called' : '';
           const now = nowIso();
           const pending = isOpen && draft && !sameMinute(draft, t) ? draft : null;
           const actions = [];

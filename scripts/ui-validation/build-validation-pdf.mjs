@@ -324,9 +324,9 @@ async function run() {
   await ev('CO-05', '§4.5 Behaviour 3', 'Tap 101 again → "−5"', 'Block changes → warning box "Base already has 07:31. A changed time goes back on the callout sheet as a correction."',
     async p => { await tile(p, 101).click(); await p.getByLabel('5 minutes earlier').click(); },
     { show: [S('Warning', T('correction-warning'), ['bg', 'border'])] });
-  await ev('CO-06', '§4.5 Behaviour 3 / §4.6', 'Tap "Save HH:MM", then the "Callout" tab', 'Saving sets correction = true; tile shows ✎; corrections appear in the pending list tagged "Correction".',
+  await ev('CO-06', 'Race-day A1', 'Tap "Save HH:MM", then the "Callout" tab', 'Corrections leave the normal block cards and go in a Corrections card above "Next call", one row per runner: "101 · now 10:55 · was 11:00". Its own button "Base copied — correction sent".',
     async p => { await p.getByRole('button', { name: /^Save / }).click(); await cpTab(p, 'Callout').click(); },
-    { show: [S('Pending block', T('pending-block'))] });
+    { show: [S('Correction row', T('correction-row')), S('Correction sent', btn(/^Base copied — corrections? sent$/), ['bg', 'border'])] });
   await ev('CO-07', '§4.6 / Fixes E2', 'Tap "Official message"; type a message, the originator, tick "Signed by originator"', 'Official message: Date (prefilled, en-AU), Originator (name/role, required), "Signed by originator" checkbox; local log. WICEN: sender, recipient, message number, date/time, originator\'s signature.',
     async p => {
       await p.getByRole('button', { name: 'Official message' }).click();
@@ -347,7 +347,7 @@ async function run() {
   await ev('RO-01', '§4.7 / Fixes C1', 'Cancel; send the pending correction; mark 12 runners (130–141); tap "Read out"', 'Numbers split into overs of up to 5, each bib its own row. Lead "Common time 07:45". Base copied — next locked (dashed) until every number is ticked ("Tick each number as you read · 0 of 5").',
     async p => {
       await p.getByRole('button', { name: 'Cancel' }).click();
-      await p.getByRole('button', { name: /base copied — mark sent/i }).click();
+      await p.getByRole('button', { name: /^Base copied — corrections? sent$/ }).click();
       await cpTab(p, 'Mark off').click();
       await quick(p, '130 131 132 133 134 135 136 137 138 139 140 141');
       await cpTab(p, 'Callout').click();
@@ -519,6 +519,15 @@ async function run() {
   await ev('RX-17', '§4.9', 'Tap "Complete", then "Next call"', 'Next call returns to "Who\'s calling?"; board updated.',
     async p => { await p.getByRole('button', { name: /^Complete · \d+$/ }).click(); await p.getByRole('button', { name: 'Next call' }).click(); },
     { show: [S('CP1 button', btn(/^CP1,/)), S('Board CP1', T('board-CP1'))] });
+  await ev('RX-C1', 'Race-day A2', 'Tap "CP1" → "Correction" → type 101', 'A Correction button beside the block picker switches to correction mode (the call draft is kept). Bib input + NumberPad → shows what base has at that checkpoint ("Had 11:00" or "No earlier time").',
+    async p => { await p.getByRole('button', { name: /^CP1,/ }).click(); await p.getByRole('button', { name: 'Correction', exact: true }).click(); await p.fill('#corr-bib', '101'); },
+    { show: [S('Heading', p => p.locator('#rxhd')), S('Base had', T('corr-had')), S('Selected block', p => p.getByRole('group', { name: 'Common time block' }).locator('[aria-pressed="true"]'))] });
+  await ev('RX-C2', 'Race-day A2', 'Pick the first block and tap "Apply correction"', 'Old row superseded (kept), new row on a correction call, audit-logged; never moves "up to".',
+    async p => { await p.getByRole('group', { name: 'Common time block' }).getByRole('button').first().click(); await p.getByRole('button', { name: /^Apply correction/ }).click(); },
+    { show: [S('Status line', T('rx-flash')), S('Board CP1', T('board-CP1'))] });
+  await ev('RX-C3', 'Race-day A2', 'Tap "Undo", then "Back to call", "Cancel call"', 'Undo restores the exact previous rows.',
+    async p => { await p.getByRole('button', { name: 'Undo', exact: true }).click(); await p.fill('#corr-bib', '101'); },
+    { show: [S('Base had', T('corr-had')), async p => { await p.getByRole('button', { name: /^Back to call/ }).click(); await p.getByRole('button', { name: 'Cancel call' }).click(); return 'Back on Who\'s calling'; }] });
   await ev('RX-18', 'Fixes D3 / §4.9 validation table', 'Tap "CP3", add 115 (reported at CP1, never at CP2)', 'Not seen at the previous checkpoint → info (blue, recorded) "Not seen CP2".',
     async p => { await p.getByRole('button', { name: /^CP3,/ }).click(); await add(p, [115]); },
     { show: [S('Chip 115', chipOf(115), ['bg', 'border']), S('Complete', btn(/^Complete/))] });

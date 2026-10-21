@@ -63,8 +63,10 @@ export function outStatusMap(outList = [], records = []) {
 export function reportedUpTo(records) {
   const out = new Map();
   for (const r of records) {
-    const t = recordTime(r);
-    if (!t || r.manualTime === true) continue;
+    // A correction row counts with the block it replaced, so a correction
+    // never moves "up to" in either direction
+    const t = r.correction ? r.upToBlock : recordTime(r);
+    if (!t || (!r.correction && r.manualTime === true)) continue;
     const b = toBlock(t);
     const cur = out.get(r.checkpointNumber);
     if (!cur || b > cur) out.set(r.checkpointNumber, b);

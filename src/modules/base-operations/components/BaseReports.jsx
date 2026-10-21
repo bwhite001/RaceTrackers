@@ -152,7 +152,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
         ...lateRows.map(o => [o.number, o.status === 'overdue' ? 'Overdue' : 'Awaiting report', o.lastCp.short, hhmm(o.lastTime), o.nextCp.short, hhmm(o.expectedAt), o.overdueMinutes, hhmm(o.upTo)])];
       case 'oncourse': return [['Group', 'Count', 'Bibs'], ...onCourse.map(g => [g.label, g.numbers.length, g.numbers.join(' ')])];
       case 'results': return [['Bib', 'Status', ...cps], ...matrix.map(r => [r.number, r.status, ...r.cells.map(c => c.text)])];
-      case 'calls': return [['Checkpoint', 'Calls', 'Numbers', 'Last call', 'Up to'], ...calls.map(c => [c.short, c.calls, c.numbers, hhmm(c.lastCall), hhmm(c.upTo)])];
+      case 'calls': return [['Checkpoint', 'Calls', 'Numbers', 'Corrections', 'Last call', 'Up to'], ...calls.map(c => [c.short, c.calls, c.numbers, c.corrections, hhmm(c.lastCall), hhmm(c.upTo)])];
       default: return [];
     }
   };
@@ -282,13 +282,14 @@ const BaseReports = ({ initialReport = 'missing' }) => {
         {sel === 'calls' && (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm min-w-[520px]">
-              <thead><tr className="bg-vk-band dark:bg-gray-700 text-left"><Th first>Checkpoint</Th><Th>Calls</Th><Th>Numbers</Th><Th>Last call</Th><Th>Up to</Th></tr></thead>
+              <thead><tr className="bg-vk-band dark:bg-gray-700 text-left"><Th first>Checkpoint</Th><Th>Calls</Th><Th>Numbers</Th><Th>Corrections</Th><Th>Last call</Th><Th>Up to</Th></tr></thead>
               <tbody>
                 {calls.map(c => (
                   <tr key={c.number} className="border-b border-vk-border dark:border-gray-700">
                     <td className="pl-3.5 pr-2 py-2.5 font-bold">{c.short}</td>
                     <td className="px-2 py-2.5">{c.calls}</td>
                     <td className="px-2 py-2.5">{c.numbers}</td>
+                    <td className="px-2 py-2.5">{c.corrections}</td>
                     <td className="px-2 py-2.5">{hhmm(c.lastCall) || '—'}</td>
                     <td className="px-2 py-2.5">{hhmm(c.upTo) || '—'}</td>
                   </tr>

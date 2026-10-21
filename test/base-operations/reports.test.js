@@ -89,7 +89,7 @@ describe('base reports', () => {
       ],
       board: [{ number: 1, short: 'CP1', lastBlock: at(7, 10) }],
     });
-    expect(log).toEqual([{ number: 1, short: 'CP1', calls: 2, numbers: 3, lastCall: at(7, 15), upTo: at(7, 10) }]);
+    expect(log).toEqual([{ number: 1, short: 'CP1', calls: 2, numbers: 3, corrections: 0, lastCall: at(7, 15), upTo: at(7, 10) }]);
   });
 
   it('leaders: furthest first, then fastest; elapsed from race start', () => {

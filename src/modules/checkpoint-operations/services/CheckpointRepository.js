@@ -201,15 +201,20 @@ export class CheckpointRepository extends BaseRepository {
     await db.transaction('rw', this.table, async () => {
       for (const number of numbers) {
         const existing = await this._get(raceId, checkpointNumber, number);
+        // Unmarked after base had it, and not yet sent as "not passed": marking
+        // again at base's block cancels it; any other block is a time correction.
+        const baseHad = existing?.notPassedCorrection ? existing.calledInBlock : null;
         await this.updateRunner(raceId, checkpointNumber, number, {
           status: 'passed',
           actualTime: time,
           commonTime,
           commonTimeLabel,
           markOffTime: time,
-          calledIn: false,
-          callInTime: null,
-          correction: false,
+          calledIn: !!baseHad && baseHad === commonTime,
+          callInTime: baseHad && baseHad === commonTime ? existing.callInTime ?? null : null,
+          correction: !!baseHad && baseHad !== commonTime,
+          notPassedCorrection: false,
+          calledInBlock: baseHad ?? null,
           originalTime: existing?.originalTime ?? time,
           editedAt: null,
           unmarkedAt: null,
@@ -241,16 +246,27 @@ export class CheckpointRepository extends BaseRepository {
     };
     const sameBlock = !!r.commonTime && r.commonTime === commonTime;
     const correction = !!r.calledIn && !sameBlock;
-    if (correction) Object.assign(patch, { calledIn: false, correction: true });
+    if (correction) Object.assign(patch, { calledIn: false, correction: true, calledInBlock: r.calledInBlock ?? r.commonTime });
+    // A pending correction moved back to the block base already has: nothing to send
+    const cancelled = !!r.correction && !!r.calledInBlock && r.calledInBlock === commonTime && !r.missedReport;
+    if (cancelled) Object.assign(patch, { calledIn: true, correction: false });
     await this.update(r.id, patch);
-    return { correction, sameBlock };
+    return { correction: correction || (!!r.correction && !cancelled), sameBlock, cancelled };
   }
 
-  /** Unmark (or reset) a runner; keeps the old time so it can be restored. */
+  /**
+   * Unmark (or reset) a runner; keeps the old time so it can be restored.
+   * If base already had them, base must be told they didn't pass: they go on
+   * the Corrections card as "not passed".
+   */
   async unmark(raceId, checkpointNumber, number) {
     const r = await this._get(raceId, checkpointNumber, number);
     if (!r) return;
+    const baseHas = r.calledIn || (r.correction && r.calledInBlock && !r.missedReport);
     await this.update(r.id, {
+      notPassedCorrection: !!baseHas,
+      calledInBlock: baseHas ? (r.calledInBlock ?? r.commonTime) : null,
+      missedReport: false,
       status: 'not-started',
       actualTime: null,
       commonTime: null,
@@ -272,8 +288,25 @@ export class CheckpointRepository extends BaseRepository {
         const r = await this._get(raceId, checkpointNumber, number);
         if (!r) continue;
         await this.update(r.id, calledIn
-          ? { calledIn: true, callInTime, correction: false }
-          : { calledIn: false, callInTime: null });
+          ? { calledIn: true, callInTime, correction: false, calledInBlock: r.commonTime ?? null, missedReport: false }
+          : { calledIn: false, callInTime: null, calledInBlock: null });
+      }
+    });
+  }
+
+  /**
+   * Base copied the corrections (Corrections card). A time correction or a
+   * missed runner becomes called in at its new block; "not passed" is cleared.
+   */
+  async sendCorrections(raceId, checkpointNumber, numbers) {
+    const callInTime = TimeUtils.getCurrentTimestamp();
+    await db.transaction('rw', this.table, async () => {
+      for (const number of numbers) {
+        const r = await this._get(raceId, checkpointNumber, number);
+        if (!r) continue;
+        await this.update(r.id, r.notPassedCorrection
+          ? { notPassedCorrection: false, calledInBlock: null }
+          : { calledIn: true, callInTime, correction: false, missedReport: false, calledInBlock: r.commonTime ?? null });
       }
     });
   }

@@ -181,6 +181,44 @@ export class BaseOperationsRepository extends BaseRepository {
   }
 
   /** Undo a received call: remove its rows, restore any reused rows, mark the call undone. */
+  /**
+   * A correction call (one runner): the checkpoint gives a new time, or says
+   * the runner didn't pass. Base's live rows for that bib at that checkpoint
+   * are superseded (kept, never deleted) and, unless notPassed, one new row is
+   * written. undoCall() reverses it exactly. The new row keeps the replaced
+   * block (upToBlock) so a correction never moves the board's "up to".
+   * @returns {Promise<number>} the radio_calls id
+   */
+  async recordCorrection(raceId, checkpointNumber, { number, time = null, manual = false, notPassed = false }, receivedAt) {
+    return db.transaction('rw', db.base_station_runners, db.radio_calls, db.audit_log, async () => {
+      const live = (await db.base_station_runners.where('raceId').equals(raceId).toArray())
+        .filter(r => r.checkpointNumber === checkpointNumber && r.number === number && r.status !== 'superseded' && (r.commonTime || r.markOffEntryTime));
+      const from = live.map(r => r.commonTime).filter(Boolean).sort().at(-1) ?? null;
+      const upToBlock = live.filter(r => r.manualTime !== true && r.commonTime).map(r => r.commonTime).sort().at(-1) ?? null;
+      const callId = await db.radio_calls.add({
+        raceId, checkpointNumber, receivedAt, kind: 'correction',
+        blocks: [], recorded: notPassed ? [] : [number], skipped: [], rejected: [],
+        corrections: [{ number, from, to: notPassed ? null : time, notPassed }],
+        undoneAt: null,
+        replaced: live.map(r => ({ id: r.id, before: { ...r } })),
+      });
+      for (const r of live) {
+        await db.base_station_runners.update(r.id, {
+          status: 'superseded', supersededAt: receivedAt, supersededReason: 'correction', supersededBy: callId,
+        });
+      }
+      if (!notPassed) {
+        await db.base_station_runners.add({
+          raceId, checkpointNumber, number, status: 'passed', commonTime: time, markOffEntryTime: receivedAt,
+          callId, notes: null, correction: true, upToBlock,
+          ...(manual && { manualTime: true }),
+        });
+      }
+      await this.logAudit(raceId, 'correction', 'base_station', String(number), { checkpointNumber, from, to: notPassed ? 'not passed' : time, callId });
+      return callId;
+    });
+  }
+
   async undoCall(callId) {
     await db.transaction('rw', db.base_station_runners, db.radio_calls, db.audit_log, async () => {
       const call = await db.radio_calls.get(callId);

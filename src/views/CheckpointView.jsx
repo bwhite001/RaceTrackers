@@ -7,7 +7,7 @@ import useCheckpointStore from '../modules/checkpoint-operations/store/checkpoin
 import useSettingsStore from '../shared/store/settingsStore';
 import useRaceMaintenanceStore, { raceMaintenanceStore } from '../modules/race-maintenance/store/raceMaintenanceStore';
 import { useRaceStore } from '../store/useRaceStore.js';
-import { computeStats, pendingRunners, oldestWaitingMinutes, isCallDue } from '../modules/checkpoint-operations/services/checkpointStats';
+import { computeStats, pendingRunners, correctionRows, oldestWaitingMinutes, isCallDue } from '../modules/checkpoint-operations/services/checkpointStats';
 import useNow from '../shared/hooks/useNow';
 import { AppBar, SavedIndicator, StatTile, CheckpointTabBar } from '../design-system/components/VK';
 
@@ -61,6 +61,9 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const checkpoint = checkpoints.find(cp => cp.number === cpNumber);
   const stats = useMemo(() => computeStats(runners), [runners]);
   const waiting = useMemo(() => pendingRunners(runners).length, [runners]);
+  // Badge and tile count corrections too; only normal waiting runners make a call due
+  const correctionCount = useMemo(() => correctionRows(runners).length, [runners]);
+  const toCall = waiting + correctionCount;
   const oldest = useMemo(() => oldestWaitingMinutes(runners, now), [runners, now]);
   const callDue = isCallDue({ waiting, oldestMinutes: oldest }, { minutes: currentRace?.callDueMinutes ?? 5 });
 
@@ -129,7 +132,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         <div className="grid grid-cols-3 gap-2">
           <StatTile variant="onNavy" value={stats.passed} label="Passed" />
           <StatTile variant="onNavy" value={stats.toCome} label="Still to come" />
-          <StatTile variant="gold" value={stats.toCall} label="To call in" />
+          <StatTile variant="gold" value={toCall} label="To call in" />
         </div>
       ),
     },
@@ -188,7 +191,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             {activeTab === 'overview' && <CheckpointOverview />}
           </main>
 
-          <CheckpointTabBar active={activeTab} onChange={setActiveTab} calloutCount={stats.toCall} />
+          <CheckpointTabBar active={activeTab} onChange={setActiveTab} calloutCount={toCall} />
 
           <BatchShareModal
             isOpen={showBatchShare}

@@ -149,16 +149,18 @@ export function timesMatrix({ sightings, order, out, raceNumbers }) {
   });
 }
 
-/** Calls received per checkpoint: count, numbers recorded, last call, up to. */
+/** Calls received per checkpoint: Scores calls, numbers recorded, corrections, last call, up to. */
 export function callLog({ radioCalls, board }) {
   return board.map(row => {
-    const calls = radioCalls.filter(c => c.checkpointNumber === row.number && !c.undoneAt);
+    const all = radioCalls.filter(c => c.checkpointNumber === row.number && !c.undoneAt);
+    const calls = all.filter(c => c.kind !== 'correction');
     return {
       number: row.number,
       short: row.short,
       calls: calls.length,
       numbers: calls.reduce((n, c) => n + (c.recorded?.length ?? 0), 0),
-      lastCall: calls.map(c => c.receivedAt).sort().at(-1) ?? null,
+      corrections: all.filter(c => c.kind === 'correction').length,
+      lastCall: all.map(c => c.receivedAt).sort().at(-1) ?? null,
       upTo: row.lastBlock,
     };
   });

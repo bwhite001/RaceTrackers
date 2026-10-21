@@ -215,6 +215,14 @@ const useBaseOperationsStore = create(
         return callId;
       },
 
+      recordCorrection: async (checkpointNumber, correction) => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) throw new Error('No active race');
+        const callId = await new BaseOperationsRepository().recordCorrection(raceKeyOf(currentRaceId), checkpointNumber, correction, TimeUtils.getCurrentTimestamp());
+        await get().refreshData({ silent: true });
+        return callId;
+      },
+
       undoCall: async (callId) => {
         const repo = new BaseOperationsRepository();
         await repo.undoCall(callId);

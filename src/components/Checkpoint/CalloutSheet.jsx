@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import useCheckpointStore from '../../modules/checkpoint-operations/store/checkpointStore';
-import { pendingRunners, groupByBlock, calledBlocks } from '../../modules/checkpoint-operations/services/checkpointStats';
+import { pendingRunners, groupByBlock, calledBlocks, correctionRows } from '../../modules/checkpoint-operations/services/checkpointStats';
 import SettingsRepository from '../../shared/services/database/SettingsRepository';
 import TimeUtils from '../../services/timeUtils.js';
 import { hhmm, BLOCK_MINUTES } from '../../services/blocks.js';
@@ -17,7 +17,7 @@ const RECENT_CALLED = 2;
  * never as a range. No radio phrases on screen (they live in the user guide).
  */
 const CalloutSheet = ({ onReadOut }) => {
-  const { runners = [], setCalledIn, snapshot, restoreSnapshot } = useCheckpointStore();
+  const { runners = [], setCalledIn, sendCorrections, snapshot, restoreSnapshot } = useCheckpointStore();
   const ctx = useCheckpointContext();
   const undo = useUndo();
   const [showAllCalled, setShowAllCalled] = useState(false);
@@ -25,6 +25,7 @@ const CalloutSheet = ({ onReadOut }) => {
   const [message, setMessage] = useState('');
 
   const pending = pendingRunners(runners);
+  const corrections = correctionRows(runners);
   const blocks = groupByBlock(pending);
   const called = calledBlocks(runners);
   const shownCalled = showAllCalled ? called : called.slice(-RECENT_CALLED);
@@ -38,6 +39,18 @@ const CalloutSheet = ({ onReadOut }) => {
     undo.offer(`${numbers.length} marked sent`, async () => {
       await restoreSnapshot(snap);
       setMessage('Back on the callout sheet');
+    });
+  };
+
+  const markCorrectionsSent = async () => {
+    const numbers = corrections.map(c => c.r.number);
+    if (!numbers.length) return;
+    const snap = await snapshot(numbers);
+    await sendCorrections(numbers);
+    setMessage(`${numbers.length} correction${numbers.length === 1 ? '' : 's'} copied by base`);
+    undo.offer(`${numbers.length} correction${numbers.length === 1 ? '' : 's'} marked sent`, async () => {
+      await restoreSnapshot(snap);
+      setMessage('Back on the corrections card');
     });
   };
 
@@ -62,6 +75,32 @@ const CalloutSheet = ({ onReadOut }) => {
         </div>
       ))}
 
+      {corrections.length > 0 && (
+        <section aria-labelledby="corrections-hd" className="bg-white dark:bg-gray-800 border-2 border-vk-gold rounded-card p-3.5 flex flex-col gap-2.5" data-testid="corrections-card">
+          <div className="flex items-center justify-between gap-2">
+            <h2 id="corrections-hd" className="font-display font-extrabold text-lg text-vk-navy dark:text-white">Corrections</h2>
+            <span className="text-xs font-bold text-vk-muted">One call per runner</span>
+          </div>
+          <ul className="flex flex-col gap-1.5">
+            {corrections.map(c => (
+              <li key={c.r.number} className="bg-vk-gold-tint rounded-btn px-3 py-2 flex items-baseline gap-2 flex-wrap" data-testid="correction-row">
+                <span className="font-display font-extrabold text-[22px] tabular-nums">{c.r.number}</span>
+                <span className="text-sm font-semibold">
+                  {[
+                    c.kind === 'not-passed' ? 'not passed' : c.kind === 'missed' ? 'missed' : null,
+                    c.now ? `now ${hhmm(c.now)}` : null,
+                    c.was ? `was ${hhmm(c.was)}` : null,
+                  ].filter(Boolean).join(' · ')}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <Button variant={blocks.length ? 'blueOutline' : 'gold'} size="primary" className="!text-[13px]" onClick={markCorrectionsSent}>
+            Base copied — correction{corrections.length === 1 ? '' : 's'} sent
+          </Button>
+        </section>
+      )}
+
       {blocks.length > 0 ? (
         <section aria-labelledby="next-call-hd" className="bg-vk-gold-tint border-2 border-vk-gold rounded-card p-3.5 flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2">
@@ -80,12 +119,7 @@ const CalloutSheet = ({ onReadOut }) => {
                   {g.runners.map((r, i) => (
                     <React.Fragment key={r.number}>
                       {i > 0 && <span className="text-vk-muted" aria-hidden="true">·</span>}
-                      <span className="inline-flex items-center gap-1">
-                        {r.number}
-                        {r.correction && (
-                          <span className="font-sans text-[11px] font-bold tracking-normal border border-vk-gold rounded-chip px-1.5 py-0.5 text-vk-ink">Correction</span>
-                        )}
-                      </span>
+                      <span>{r.number}</span>
                     </React.Fragment>
                   ))}
                 </div>
@@ -97,7 +131,7 @@ const CalloutSheet = ({ onReadOut }) => {
             <Button variant="gold" size="primary" className="flex-[2] !text-[13px]" onClick={markSent}>Base copied — mark sent</Button>
           </div>
         </section>
-      ) : (
+      ) : corrections.length ? null : (
         <div className="bg-white dark:bg-gray-800 border border-vk-border dark:border-gray-700 rounded-card p-5 text-center">
           <div className="font-display font-bold text-vk-navy dark:text-white">Nothing to call in</div>
           <div className="text-[13px] text-vk-muted mt-1">Runners appear here as you mark them off.</div>
