@@ -88,7 +88,8 @@
     "generate:journey:pdfs": "node test/e2e/playwright/generate-journey-pdfs.js",
     "generate:journeys": "node test/e2e/playwright/generate-journey-docs.js",
     "generate:gpx-guide": "node scripts/generate-gpx-guide.js",
-    "validation:pdf": "node scripts/ui-validation/build-validation-pdf.mjs"
+    "validation:pdf": "node scripts/ui-validation/build-validation-pdf.mjs",
+    "test:e2e:offline": "playwright test --config playwright.offline.config.js"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

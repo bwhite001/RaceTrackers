@@ -3,7 +3,7 @@ import useCheckpointStore from '../../modules/checkpoint-operations/store/checkp
 import { bibGroups, runnerTime } from '../../modules/checkpoint-operations/services/checkpointStats';
 import { parseBibList } from '../../shared/utils/parseBibs';
 import TimeUtils from '../../services/timeUtils.js';
-import { hhmm } from '../../services/blocks.js';
+import { hhmm, toBlock } from '../../services/blocks.js';
 import {
   checkpointRunnerState, stateClasses, numberClasses, stateLabel, RUNNER_STATE, STATE_NAMES,
 } from '../../design-system/statusStyles';
@@ -97,10 +97,13 @@ const RunnerGrid = () => {
     closeSheet();
     if (mode === 'edit') {
       if (draft === orig) return;
-      await withUndo([number], `${number} time changed`, () => editTime(number, draft), `${number} back to ${hhmm(orig)}`);
-      setMessage(called
+      let result;
+      await withUndo([number], `${number} time changed`, async () => { result = await editTime(number, draft); }, `${number} back to ${hhmm(orig)}`);
+      setMessage(result?.correction
         ? `${number} changed to ${hhmm(draft)} — back on callout as a correction`
-        : `${number} time changed to ${hhmm(draft)}`);
+        : called
+          ? `${number} time changed — same common time, nothing to send`
+          : `${number} time changed to ${hhmm(draft)}`);
     } else {
       await withUndo([number], `${number} marked`, () => markPassed([number], draft));
       setMessage(`${number} marked at ${hhmm(draft)}`);
@@ -217,9 +220,14 @@ const EditSheet = ({ sheet, earliest, onDraft, onSave, onAlt, onClose }) => {
         </div>
       </div>
 
-      {edit && called && changed && (
-        <div className="bg-vk-gold-tint border border-vk-gold rounded-btn px-3 py-2.5 text-[13px] leading-normal">
+      {edit && called && changed && toBlock(draft) !== toBlock(orig) && (
+        <div className="bg-vk-gold-tint border border-vk-gold rounded-btn px-3 py-2.5 text-[13px] leading-normal" data-testid="correction-warning">
           Base already has <strong>{hhmm(orig)}</strong>. A changed time goes back on the callout sheet as a correction.
+        </div>
+      )}
+      {edit && called && changed && toBlock(draft) === toBlock(orig) && (
+        <div className="bg-vk-band rounded-btn px-3 py-2.5 text-[13px] leading-normal" data-testid="same-block-note">
+          Same common time ({hhmm(toBlock(orig))}) — base doesn&apos;t need a correction.
         </div>
       )}
 

@@ -220,8 +220,11 @@ export class CheckpointRepository extends BaseRepository {
   }
 
   /**
-   * Change a passed runner's time. If base already had it (called in), it goes
-   * back on the callout sheet as a correction.
+   * Change a passed runner's time. If base already had it (called in) and the
+   * common time (5-minute block) changes, it goes back on the callout sheet as
+   * a correction. A change inside the same block isn't a correction — base's
+   * common time is still right — so it stays called in.
+   * @returns {{ correction: boolean, sameBlock: boolean }}
    */
   async editTime(raceId, checkpointNumber, number, time) {
     const r = await this._get(raceId, checkpointNumber, number);
@@ -236,8 +239,11 @@ export class CheckpointRepository extends BaseRepository {
       editedAt: TimeUtils.getCurrentTimestamp(),
       originalTime: r.originalTime ?? r.actualTime ?? time,
     };
-    if (r.calledIn) Object.assign(patch, { calledIn: false, correction: true });
+    const sameBlock = !!r.commonTime && r.commonTime === commonTime;
+    const correction = !!r.calledIn && !sameBlock;
+    if (correction) Object.assign(patch, { calledIn: false, correction: true });
     await this.update(r.id, patch);
+    return { correction, sameBlock };
   }
 
   /** Unmark (or reset) a runner; keeps the old time so it can be restored. */

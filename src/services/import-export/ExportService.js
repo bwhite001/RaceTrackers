@@ -247,6 +247,31 @@ export class ExportService {
    * @param {number|string} raceId - The race ID to export
    * @returns {Promise<Object>} Legacy export format
    */
+  /**
+   * Race setup only — race, checkpoints and runner roster, no results (no
+   * checkpoint or base records, withdrawals, call-ins or audit). Used to share
+   * a race with volunteer devices; full backups keep using exportRace().
+   */
+  static async exportRaceSetup(raceId) {
+    const full = await this.exportRace(raceId);
+    const { races, runners, checkpoints } = full.data;
+    const data = { races, runners, checkpoints };
+    return {
+      version: full.version,
+      exportDate: full.exportDate,
+      checksum: this.generateChecksum(data),
+      deviceId: full.deviceId,
+      exportType: 'race-config',
+      data,
+      metadata: {
+        totalRaces: 1,
+        totalRunners: runners.length,
+        totalCheckpoints: checkpoints.length,
+        exportedBy: 'RaceTracker Pro',
+      },
+    };
+  }
+
   static async exportRaceConfigLegacy(raceId) {
     try {
       const race = await db.races.get(raceId);

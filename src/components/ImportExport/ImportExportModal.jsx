@@ -217,15 +217,18 @@ const ImportExportModal = ({ isOpen, onClose, initialTab = 'export', startScanne
     const file = event.target.files[0];
     if (!file) return;
 
-    if (file.type !== 'application/json') {
-      setError('Please select a JSON file');
-      return;
-    }
-
+    // Judge the file by its content, not file.type: mail apps and phones often
+    // hand over a .json as application/octet-stream, text/plain or no type.
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
         const content = e.target.result;
+        try {
+          JSON.parse(content);
+        } catch {
+          setError('That file isn\'t a race file (it should contain JSON).');
+          return;
+        }
         setImportText(content);
         setError('');
         setSuccess('File loaded successfully. Click "Import Configuration" to proceed.');
@@ -627,7 +630,7 @@ const ImportExportModal = ({ isOpen, onClose, initialTab = 'export', startScanne
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".json,application/json"
+                    accept=".json,application/json,application/octet-stream,text/plain"
                     onChange={handleFileUpload}
                     className="hidden"
                   />

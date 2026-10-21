@@ -104,6 +104,14 @@ const SECTION_MAP = {
   // VK4WIP redesign — Phase 6 (reports & data checks)
   'base resolves a duplicate and an out-of-order time until checks are clear': 'base-reports',
   'base reports show still on course, times by checkpoint and the call log': 'base-reports',
+  // Validation fixes — Phase A (race-day safety, sharing)
+  'overdue waits for the checkpoint to report':                             'base-status',
+  'exact time does not move up-to':                                         'base-receive',
+  'same-block edit is not a correction':                                    'checkpoint-fixes',
+  'on course count matches report':                                         'base-status',
+  'matrix keeps times for DNS runners':                                     'base-reports',
+  'email share stays short':                                                'import-export',
+  'import accepts octet-stream':                                            'import-export',
 };
 
 const CHAPTERS = [

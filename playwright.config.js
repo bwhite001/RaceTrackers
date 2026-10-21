@@ -3,6 +3,8 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './test/e2e/playwright',
+  // The offline suite needs service workers; it has its own config
+  testIgnore: /25-offline\.spec\.js/,
   // Tests within a file run sequentially (required by 08-complete-race-simulation
   // which shares _page across tests). Files run in parallel — each worker gets
   // its own Chromium context with isolated IndexedDB.

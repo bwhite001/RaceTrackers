@@ -42,11 +42,21 @@ export function legMedians(sightings, order) {
   });
 }
 
+export const OVERDUE_GRACE_MINUTES = 10;
+
 /**
- * Overdue: passed a checkpoint but not at the next one by last seen + the
- * typical (median) split for that leg. Legs nobody has completed yet are skipped.
+ * Runners past their expected time at the next checkpoint (expected = last
+ * seen + the median split for that leg; legs nobody has completed are skipped).
+ *
+ * - **overdue**: the next checkpoint has reported up to at least expected +
+ *   grace and the runner isn't there — a real safety concern.
+ * - **awaiting**: past the expected time, but the next checkpoint hasn't
+ *   reported that far yet (or at all) — it's just behind on calls.
+ *
+ * @param {Map<number,string>} upTo  cp → last block received (receive.reportedUpTo)
+ * @returns {Array<{ number, lastCp, lastTime, nextCp, expectedAt, overdueMinutes, status, upTo }>}
  */
-export function overdueRunners({ sightings, order, out, now }) {
+export function overdueRunners({ sightings, order, out, now, upTo = new Map(), graceMinutes = OVERDUE_GRACE_MINUTES }) {
   const seen = lastSeen(sightings, order);
   const medians = legMedians(sightings, order);
   const rows = [];
@@ -55,12 +65,48 @@ export function overdueRunners({ sightings, order, out, now }) {
     const typical = medians[idx];
     if (typical == null) continue;
     const expectedAt = TimeUtils.addMinutes(time, Math.round(typical));
-    const overdue = TimeUtils.minutesBetween(expectedAt, now);
-    if (overdue > 0) {
-      rows.push({ number, lastCp: cp, lastTime: time, nextCp: order[idx + 1], expectedAt, overdueMinutes: overdue });
-    }
+    const late = TimeUtils.minutesBetween(expectedAt, now);
+    if (late <= 0) continue;
+    const nextCp = order[idx + 1];
+    const reported = upTo.get(nextCp.number) ?? null;
+    const status = reported && reported >= TimeUtils.addMinutes(expectedAt, graceMinutes) ? 'overdue' : 'awaiting';
+    rows.push({ number, lastCp: cp, lastTime: time, nextCp, expectedAt, overdueMinutes: late, status, upTo: reported });
   }
   return rows.sort((a, b) => b.overdueMinutes - a.overdueMinutes || a.number - b.number);
+}
+
+/** Awaiting-report runners grouped by the checkpoint that hasn't reported. */
+export function awaitingByCheckpoint(rows) {
+  const groups = new Map();
+  for (const r of rows.filter(x => x.status === 'awaiting')) {
+    if (!groups.has(r.nextCp.number)) groups.set(r.nextCp.number, { cp: r.nextCp, upTo: r.upTo, numbers: [] });
+    groups.get(r.nextCp.number).numbers.push(r.number);
+  }
+  return [...groups.values()];
+}
+
+/**
+ * One definition of the race-wide counts, shared by the Overview tiles and the
+ * Reports sidebar (D2): on course = in the race (not DNS, not DNF, not finished).
+ */
+export function raceCounts({ sightings, out, raceNumbers }) {
+  const finished = new Set([...(sightings.get(BASE_STATION_CP)?.keys() ?? [])].filter(n => !out.has(n)));
+  const seen = new Set([...sightings.values()].flatMap(m => [...m.keys()]));
+  const statuses = [...out.values()].map(v => (typeof v === 'string' ? v : v.status));
+  let onCourse = 0;
+  let notSeen = 0;
+  for (const n of raceNumbers) {
+    if (out.has(n) || finished.has(n)) continue;
+    onCourse++;
+    if (!seen.has(n)) notSeen++;
+  }
+  return {
+    onCourse,
+    notSeen,
+    finished: finished.size,
+    dns: statuses.filter(s => s === 'DNS').length,
+    dnf: statuses.filter(s => s === 'DNF').length,
+  };
 }
 
 /** Not finished and not out, grouped by last checkpoint passed (for sweep / stand-down). */
@@ -78,21 +124,28 @@ export function stillOnCourse({ sightings, order, out, raceNumbers }) {
   return [...groups, notSeen];
 }
 
-/** Bib × checkpoint matrix of common times; DNF / DNS shown in place. */
+/**
+ * Bib × checkpoint matrix of common times. A recorded time is never replaced:
+ * DNF shows only in an empty cell at the withdrawal checkpoint, and a time
+ * recorded while DNS or after the DNF time is flagged.
+ * @param {Map<number,{status:'DNF'|'DNS', checkpoint?:number|null, time?:string|null}>} out
+ * @returns {Array<{ number, status: string, cells: Array<{ text: string, flag: boolean }> }>}
+ */
 export function timesMatrix({ sightings, order, out, raceNumbers }) {
   return [...raceNumbers].sort((a, b) => a - b).map(number => {
+    const o = out.get(number);
     const cells = order.map(cp => {
       const t = sightings.get(cp.number)?.get(number);
-      return t ? hhmm(t) : '';
+      if (t) {
+        const flag = o?.status === 'DNS' || (o?.status === 'DNF' && !!o.time && t > o.time);
+        return { text: hhmm(t), flag };
+      }
+      if (o?.status === 'DNF' && o.checkpoint != null && o.checkpoint === cp.number) return { text: 'DNF', flag: false };
+      return { text: '—', flag: false };
     });
-    const o = out.get(number);
-    if (o?.status === 'DNS') { cells.fill(''); cells[0] = 'DNS'; }
-    else if (o?.status === 'DNF') {
-      const at = o.checkpoint != null ? order.findIndex(cp => cp.number === o.checkpoint) : cells.findIndex(c => !c);
-      const i = at >= 0 ? at : cells.findIndex(c => !c);
-      if (i >= 0 && !cells[i]) cells[i] = 'DNF';
-    }
-    return { number, cells: cells.map(c => c || '—') };
+    const status = !o ? '' : o.status === 'DNS' ? 'DNS'
+      : o.checkpoint != null ? `DNF @${order.find(c => c.number === o.checkpoint)?.short ?? `CP${o.checkpoint}`}` : 'DNF';
+    return { number, status, cells };
   });
 }
 

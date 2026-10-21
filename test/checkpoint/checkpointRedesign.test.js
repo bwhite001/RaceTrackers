@@ -42,9 +42,10 @@ describe('checkpoint mark off — redesign', () => {
     await CheckpointRepository.setCalledIn(RACE, CP, [141], true);
     expect((await get(141)).calledIn).toBe(true);
 
-    await CheckpointRepository.editTime(RACE, CP, 141, at(7, 33));
+    // 07:31 → 07:36 crosses into the 07:35 block (same-block edits aren't corrections — A3)
+    await CheckpointRepository.editTime(RACE, CP, 141, at(7, 36));
     const r = await get(141);
-    expect(r).toMatchObject({ status: 'passed', actualTime: at(7, 33), calledIn: false, correction: true, originalTime: at(7, 31) });
+    expect(r).toMatchObject({ status: 'passed', actualTime: at(7, 36), calledIn: false, correction: true, originalTime: at(7, 31) });
     expect(r.editedAt).toBeTruthy();
 
     // Calling it in again clears the correction
@@ -123,5 +124,28 @@ describe('clearing DNS / DNF keeps a pass time (review fix)', () => {
     await CheckpointRepository.setOut(RACE, CP, 150, 'dnf');
     await CheckpointRepository.clearOut(RACE, CP, 150);
     expect(await get(150)).toMatchObject({ status: 'passed', actualTime: at(10, 5), calledIn: false });
+  });
+});
+
+describe('A3 — same-block edits are not corrections', () => {
+  beforeEach(async () => {
+    await db.checkpoint_runners.clear();
+    await db.checkpoint_runners.add({ raceId: RACE, checkpointNumber: CP, number: 101, status: 'not-started', calledIn: false });
+    await CheckpointRepository.markPassed(RACE, CP, [101], at(11, 4));
+    await CheckpointRepository.setCalledIn(RACE, CP, [101], true);
+  });
+
+  it('a called-in time moved inside the same block stays called in', async () => {
+    const res = await CheckpointRepository.editTime(RACE, CP, 101, at(11, 3));
+    expect(res).toEqual({ correction: false, sameBlock: true });
+    expect(await get(101)).toMatchObject({ actualTime: at(11, 3), calledIn: true });
+    expect((await get(101)).correction).toBeFalsy();
+    expect((await get(101)).editedAt).toBeTruthy();
+  });
+
+  it('a called-in time moved to another block becomes a correction', async () => {
+    const res = await CheckpointRepository.editTime(RACE, CP, 101, at(10, 58));
+    expect(res).toEqual({ correction: true, sameBlock: false });
+    expect(await get(101)).toMatchObject({ calledIn: false, correction: true });
   });
 });

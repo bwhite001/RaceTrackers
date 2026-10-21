@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode.react';
 import { ArrowDownTrayIcon, EnvelopeIcon, DocumentDuplicateIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ExportService } from '../../services/import-export/ExportService.js';
+import { setupFileName, shareEmailUrl } from './shareRace.js';
 import { Button } from '../../design-system/components';
 import AppBar from '../../design-system/components/VK/AppBar';
 
@@ -23,7 +24,8 @@ const ShareRaceModal = ({ isOpen, raceId, onClose, onImport }) => {
     if (!isOpen || !raceId) return;
     setPkg(null);
     setError(null);
-    ExportService.exportRace(raceId).then(setPkg).catch(e => setError(e.message));
+    // Setup only (no results) — what a volunteer device needs to load the race
+    ExportService.exportRaceSetup(raceId).then(setPkg).catch(e => setError(e.message));
   }, [isOpen, raceId]);
 
   if (!isOpen) return null;
@@ -33,7 +35,7 @@ const ShareRaceModal = ({ isOpen, raceId, onClose, onImport }) => {
   const runnerCount = pkg?.metadata?.totalRunners ?? 0;
   const cpCount = pkg?.metadata?.totalCheckpoints ?? 0;
   const qrFits = json.length > 0 && json.length <= QR_MAX_CHARS;
-  const fileName = `race-${(race.name || 'race').replace(/\s+/g, '-')}.json`;
+  const fileName = setupFileName(race.name);
 
   const download = () => {
     const url = URL.createObjectURL(new Blob([JSON.stringify(pkg, null, 2)], { type: 'application/json' }));
@@ -43,8 +45,21 @@ const ShareRaceModal = ({ isOpen, raceId, onClose, onImport }) => {
     a.click();
     URL.revokeObjectURL(url);
   };
-  const email = () => {
-    window.open(`mailto:?subject=${encodeURIComponent(`Race setup: ${race.name ?? ''}`)}&body=${encodeURIComponent(json)}`);
+  // Share the setup as a file where the device can (Web Share); otherwise
+  // download it and open a short email asking for it to be attached.
+  const email = async () => {
+    const text = JSON.stringify(pkg, null, 2);
+    const file = typeof File !== 'undefined' ? new File([text], fileName, { type: 'application/json' }) : null;
+    if (file && navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: `Race setup: ${race.name ?? ''}`, text: 'Open RaceTracker › Scan race QR code › Import and choose this file.' });
+        return;
+      } catch (e) {
+        if (e?.name === 'AbortError') return;
+      }
+    }
+    download();
+    window.open(shareEmailUrl(race.name, fileName));
   };
   const copy = async () => {
     await navigator.clipboard?.writeText(json);

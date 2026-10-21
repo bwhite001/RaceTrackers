@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import useBaseOperationsStore from '../store/baseOperationsStore';
-import { boardCheckpoints, sightingsByCheckpoint, outStatusMap, buildBoard } from '../services/receive';
-import { overdueRunners, stillOnCourse, timesMatrix, callLog } from '../services/reports';
+import { boardCheckpoints, sightingsByCheckpoint, outStatusMap, buildBoard, reportedUpTo } from '../services/receive';
+import { overdueRunners, stillOnCourse, timesMatrix, callLog, awaitingByCheckpoint, raceCounts, OVERDUE_GRACE_MINUTES } from '../services/reports';
 import { outRecords } from '../services/statusValidation';
 import { runChecks, CHECKS, PACE_LIMIT_KMH } from '../services/dataChecks';
 import TimeUtils from '../../../services/timeUtils.js';
@@ -51,7 +51,9 @@ const BaseReports = ({ initialReport = 'missing' }) => {
   const sightings = useMemo(() => sightingsByCheckpoint(runners), [runners]);
   const out = useMemo(() => outStatusMap(outList, runners), [outList, runners]);
   const outByNumber = useMemo(() => new Map(outRecords(outList).map(r => [r.number, r])), [outList]);
-  const outForMatrix = useMemo(() => new Map([...out].map(([n, s]) => [n, { status: s, checkpoint: outByNumber.get(n)?.checkpoint ?? null }])), [out, outByNumber]);
+  const outForMatrix = useMemo(() => new Map([...out].map(([n, s]) => [n, {
+    status: s, checkpoint: outByNumber.get(n)?.checkpoint ?? null, time: outByNumber.get(n)?.time ?? null,
+  }])), [out, outByNumber]);
   const raceNumbers = raceRunnerNumbers;
   const distances = useMemo(() => {
     const m = new Map(checkpoints.filter(c => c.distanceKm != null).map(c => [c.number, Number(c.distanceKm)]));
@@ -60,7 +62,13 @@ const BaseReports = ({ initialReport = 'missing' }) => {
   }, [checkpoints, currentRace?.distanceKm]);
   const resolvedKeys = useMemo(() => new Set(resolutions.map(r => r.issueKey)), [resolutions]);
 
-  const overdue = useMemo(() => overdueRunners({ sightings, order, out, now }), [sightings, order, out, now]);
+  const upTo = useMemo(() => reportedUpTo(runners), [runners]);
+  const lateRows = useMemo(() => overdueRunners({
+    sightings, order, out, now, upTo, graceMinutes: currentRace?.overdueGraceMinutes ?? OVERDUE_GRACE_MINUTES,
+  }), [sightings, order, out, now, upTo, currentRace?.overdueGraceMinutes]);
+  const overdue = lateRows.filter(r => r.status === 'overdue');
+  const awaiting = awaitingByCheckpoint(lateRows);
+  const counts = useMemo(() => raceCounts({ sightings, out, raceNumbers: raceRunnerNumbers }), [sightings, out, raceRunnerNumbers]);
   const onCourse = useMemo(() => stillOnCourse({ sightings, order, out, raceNumbers }), [sightings, order, out, raceNumbers]);
   const matrix = useMemo(() => timesMatrix({ sightings, order, out: outForMatrix, raceNumbers }), [sightings, order, outForMatrix, raceNumbers]);
   const board = useMemo(() => buildBoard({ checkpoints, records: runners, radioCalls, now, raceStart, fieldSize: raceNumbers.length, outCount: out.size }),
@@ -73,7 +81,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
   const issueTotal = Object.values(issues).reduce((n, list) => n + list.length, 0);
   const commonCounts = {
     missing: overdue.length,
-    oncourse: onCourse.reduce((n, g) => n + g.numbers.length, 0),
+    oncourse: counts.onCourse,
     results: raceNumbers.length,
     calls: calls.reduce((n, c) => n + c.calls, 0),
     exports: '',
@@ -143,10 +151,10 @@ const BaseReports = ({ initialReport = 'missing' }) => {
   const csvRows = () => {
     const cps = order.map(c => c.short);
     switch (sel) {
-      case 'missing': return [['Bib', 'Last seen', 'Last time', 'Expected at', 'Expected time', 'Overdue (min)'],
-        ...overdue.map(o => [o.number, o.lastCp.short, hhmm(o.lastTime), o.nextCp.short, hhmm(o.expectedAt), o.overdueMinutes])];
+      case 'missing': return [['Bib', 'Status', 'Last seen', 'Last time', 'Expected at', 'Expected time', 'Late (min)', 'Next CP reported up to'],
+        ...lateRows.map(o => [o.number, o.status === 'overdue' ? 'Overdue' : 'Awaiting report', o.lastCp.short, hhmm(o.lastTime), o.nextCp.short, hhmm(o.expectedAt), o.overdueMinutes, hhmm(o.upTo)])];
       case 'oncourse': return [['Group', 'Count', 'Bibs'], ...onCourse.map(g => [g.label, g.numbers.length, g.numbers.join(' ')])];
-      case 'results': return [['Bib', ...cps], ...matrix.map(r => [r.number, ...r.cells])];
+      case 'results': return [['Bib', 'Status', ...cps], ...matrix.map(r => [r.number, r.status, ...r.cells.map(c => c.text)])];
       case 'calls': return [['Checkpoint', 'Calls', 'Numbers', 'Last call', 'Up to'], ...calls.map(c => [c.short, c.calls, c.numbers, hhmm(c.lastCall), hhmm(c.upTo)])];
       default: return [];
     }
@@ -222,6 +230,17 @@ const BaseReports = ({ initialReport = 'missing' }) => {
                 {!overdue.length && <tr><td colSpan={4} className="px-3.5 py-4 text-vk-muted">No runners overdue.</td></tr>}
               </tbody>
             </table>
+            {awaiting.length > 0 && (
+              <div className="px-3.5 py-3 border-t border-vk-border dark:border-gray-700 flex flex-col gap-2" data-testid="awaiting-group">
+                <h2 className="font-display font-bold text-[15px] text-vk-navy dark:text-white">Awaiting report</h2>
+                <p className="text-[13px] text-vk-muted">Past their expected time, but the next checkpoint hasn't reported that far yet — not overdue.</p>
+                {awaiting.map(g => (
+                  <div key={g.cp.number} className="bg-vk-gold-tint border border-vk-gold rounded-btn px-3 py-2 text-sm">
+                    <strong>{g.cp.short}</strong> · {g.upTo ? `reported up to ${hhmm(g.upTo)}` : 'no calls yet'} · {g.numbers.length} expected: {g.numbers.join(', ')}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -243,12 +262,19 @@ const BaseReports = ({ initialReport = 'missing' }) => {
         {sel === 'results' && (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm min-w-[560px] tabular-nums">
-              <thead><tr className="bg-vk-band dark:bg-gray-700 text-left"><Th first>Bib</Th>{order.map(c => <Th key={c.number}>{c.short}</Th>)}</tr></thead>
+              <thead><tr className="bg-vk-band dark:bg-gray-700 text-left"><Th first>Bib</Th><Th>Status</Th>{order.map(c => <Th key={c.number}>{c.short}</Th>)}</tr></thead>
               <tbody>
                 {matrix.map(r => (
                   <tr key={r.number} className="border-b border-vk-border dark:border-gray-700">
                     <td className="pl-3.5 pr-2 py-2 font-display font-extrabold text-base">{r.number}</td>
-                    {r.cells.map((c, i) => <td key={i} className={`px-2 py-2 ${i === r.cells.length - 1 ? 'font-bold' : ''} ${c === 'DNF' ? 'text-vk-red font-bold' : c === 'DNS' ? 'text-vk-muted font-bold' : ''}`}>{c}</td>)}
+                    <td className={`px-2 py-2 font-bold ${r.status.startsWith('DNF') ? 'text-vk-red' : 'text-vk-muted'}`}>{r.status}</td>
+                    {r.cells.map((c, i) => (
+                      <td key={i} className={`px-2 py-2 ${i === r.cells.length - 1 ? 'font-bold' : ''} ${c.text === 'DNF' ? 'text-vk-red font-bold' : ''}`}>
+                        {c.flag
+                          ? <span className="border-2 border-vk-gold rounded-chip px-1" title="Recorded after DNS/DNF">{c.text}</span>
+                          : c.text}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>

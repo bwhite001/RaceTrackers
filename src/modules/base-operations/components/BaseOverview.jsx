@@ -1,8 +1,9 @@
 import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import useBaseOperationsStore from '../store/baseOperationsStore';
-import { boardCheckpoints, sightingsByCheckpoint, outStatusMap } from '../services/receive';
-import { overdueRunners, currentLeaders } from '../services/reports';
+import { boardCheckpoints, sightingsByCheckpoint, outStatusMap, reportedUpTo } from '../services/receive';
+import { overdueRunners, currentLeaders, awaitingByCheckpoint, raceCounts, OVERDUE_GRACE_MINUTES } from '../services/reports';
+import { hhmm } from '../../../services/blocks.js';
 import TimeUtils from '../../../services/timeUtils.js';
 import { BASE_STATION_CP } from '../../../types/index.js';
 import useNow from '../../../shared/hooks/useNow';
@@ -13,10 +14,11 @@ import { getRunnerTotal } from '../../../utils/raceStatistics';
 const RaceCourseMap = lazy(() => import('./RaceCourseMap'));
 const LEADERS_SHOWN = 5;
 
-const Tile = ({ label, value, className = '' }) => (
-  <div className="bg-white dark:bg-gray-800 border border-vk-border dark:border-gray-700 rounded-card px-5 py-[18px] flex flex-col gap-1">
+const Tile = ({ label, value, sub, className = '', testId }) => (
+  <div className="bg-white dark:bg-gray-800 border border-vk-border dark:border-gray-700 rounded-card px-5 py-[18px] flex flex-col gap-1" data-testid={testId}>
     <div className="text-[13px] font-semibold text-vk-muted">{label}</div>
     <div className={`font-display font-extrabold text-[34px] tabular-nums ${className}`}>{value}</div>
+    {sub && <div className="text-xs text-vk-muted">{sub}</div>}
   </div>
 );
 
@@ -38,23 +40,17 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
   const sightings = useMemo(() => sightingsByCheckpoint(runners), [runners]);
   const out = useMemo(() => outStatusMap(outList, runners), [outList, runners]);
   const meta = useMemo(() => new Map(raceRunners.map(r => [r.number, r])), [raceRunners]);
-  const overdue = useMemo(() => overdueRunners({ sightings, order, out, now }), [sightings, order, out, now]);
+  const upTo = useMemo(() => reportedUpTo(runners), [runners]);
+  const lateRows = useMemo(() => overdueRunners({
+    sightings, order, out, now, upTo, graceMinutes: currentRace?.overdueGraceMinutes ?? OVERDUE_GRACE_MINUTES,
+  }), [sightings, order, out, now, upTo, currentRace?.overdueGraceMinutes]);
+  const overdue = lateRows.filter(r => r.status === 'overdue');
+  const awaiting = awaitingByCheckpoint(lateRows);
   const leaders = useMemo(() => currentLeaders({ sightings, order, out, raceStart, meta }), [sightings, order, out, raceStart, meta]);
   const field = raceRunnerNumbers.length || getRunnerTotal(currentRace);
   const activeField = Math.max(0, field - out.size);
-  // Same sources as Reports: race-wide out list first, then sightings
-  const tiles = useMemo(() => {
-    const finishedSet = new Set([...(sightings.get(BASE_STATION_CP)?.keys() ?? [])].filter(n => !out.has(n)));
-    const seen = new Set([...sightings.values()].flatMap(m => [...m.keys()]));
-    const onCourse = [...seen].filter(n => !out.has(n) && !finishedSet.has(n)).length;
-    const outValues = [...out.values()];
-    return {
-      onCourse,
-      finished: finishedSet.size,
-      dns: outValues.filter(v => v === 'DNS').length,
-      dnf: outValues.filter(v => v === 'DNF').length,
-    };
-  }, [sightings, out]);
+  // One definition shared with Reports (D2): on course = in the race, not finished
+  const tiles = useMemo(() => raceCounts({ sightings, out, raceNumbers: raceRunnerNumbers }), [sightings, out, raceRunnerNumbers]);
   const waves = [...new Set(raceRunners.map(r => r.batchNumber).filter(Boolean))].sort((a, b) => a - b);
 
   const filtered = leaders.filter(l => filter === 'all'
@@ -75,7 +71,7 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
               {overdue.length} runner{overdue.length === 1 ? '' : 's'} overdue{overdueAt.length === 1 ? ` at ${overdueAt[0]}` : ''}
             </div>
             <div className="text-sm">
-              Later than the typical time for their leg. {overdue.slice(0, 4).map(o => o.number).join(', ')}
+              Not reported although the checkpoint has reported past their expected time. {overdue.slice(0, 4).map(o => o.number).join(', ')}
               {overdue.length > 4 ? ` +${overdue.length - 4}` : ''}
             </div>
           </div>
@@ -88,8 +84,20 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
         </section>
       )}
 
+      {awaiting.length > 0 && (
+        <section className="bg-vk-gold-tint border border-vk-gold rounded-card px-5 py-3 flex flex-col gap-1" data-testid="awaiting-report">
+          {awaiting.map(g => (
+            <div key={g.cp.number} className="text-sm">
+              <strong>{g.cp.short} {g.upTo ? `hasn't reported past ${hhmm(g.upTo)}` : "hasn't reported yet"}</strong>
+              {' · '}{g.numbers.length} expected
+            </div>
+          ))}
+        </section>
+      )}
+
       <div className="grid gap-4 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]" data-testid="stats-grid">
-        <Tile label="On course" value={tiles.onCourse} className="text-vk-blue" />
+        <Tile label="On course" value={tiles.onCourse} className="text-vk-blue" testId="tile-on-course"
+          sub={tiles.notSeen ? `${tiles.notSeen} not seen yet` : null} />
         <Tile label="Finished" value={tiles.finished} className="text-vk-navy dark:text-white" />
         <Tile label="Non-starters (DNS)" value={tiles.dns} className="text-vk-muted" />
         <Tile label="Did not finish (DNF)" value={tiles.dnf} className="text-vk-red" />

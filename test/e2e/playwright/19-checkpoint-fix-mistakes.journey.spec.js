@@ -91,7 +91,8 @@ test.describe('Checkpoint — fix mistakes', () => {
     });
 
     await step('Edit sheet — changing a called-in time warns that base already has it', async () => {
-      await sheet(page).getByLabel('1 minute earlier').click();
+      // −5 always crosses a 5-minute block (same-block edits aren't corrections — A3)
+      await sheet(page).getByLabel('5 minutes earlier').click();
       await expect(sheet(page).getByText(/base already has/i)).toBeVisible();
       await expect(sheet(page).getByText(/goes back on the callout sheet as a correction/i)).toBeVisible();
       await sheet(page).getByRole('button', { name: /^Save / }).click();

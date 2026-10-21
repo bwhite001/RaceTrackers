@@ -122,6 +122,13 @@ describe('ValidationSchemas', () => {
       expect(() => validateRunner(validRunner)).not.toThrow();
     });
 
+    it('validates a runner exactly as race setup stores it (null names, gender X)', () => {
+      expect(() => validateRunner({
+        raceId: 1, number: 100, status: 'not-started', firstName: null, lastName: null,
+        gender: 'X', batchNumber: 1, recordedTime: null, notes: null, id: 1,
+      })).not.toThrow();
+    });
+
     it('rejects runner with invalid status', () => {
       const invalidRunner = {
         raceId: 1,

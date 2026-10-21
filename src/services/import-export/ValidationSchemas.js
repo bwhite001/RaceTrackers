@@ -47,9 +47,11 @@ export const runnerSchema = z.object({
   status: z.enum(['not-started', 'passed', 'dnf', 'non-starter', 'vet-out', 'withdrawn']),
   notes: z.string().nullable().optional(),
   // Optional fields for extended runner data
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  gender: z.enum(['M', 'F', 'Other']).optional(),
+  firstName: z.string().nullable().optional(),
+  lastName: z.string().nullable().optional(),
+  // The app stores 'X' (v8 migration, race setup, CSV/XLSX import); 'Other' kept for old files
+  gender: z.enum(['M', 'F', 'X', 'Other']).optional(),
+  batchNumber: z.number().int().positive().optional(),
   wave: z.number().int().positive().optional(),
   email: z.string().email().optional(),
   phone: z.string().optional(),

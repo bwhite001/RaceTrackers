@@ -54,6 +54,24 @@ export function outStatusMap(outList = [], records = []) {
   return m;
 }
 
+/**
+ * Last block received for each checkpoint ("up to"). Exact times (manualTime)
+ * never advance it — one runner given an exact 10:53 mustn't make the board
+ * think 10:25–10:45 were received.
+ * @returns {Map<number, string>} cp → block ISO
+ */
+export function reportedUpTo(records) {
+  const out = new Map();
+  for (const r of records) {
+    const t = recordTime(r);
+    if (!t || r.manualTime === true) continue;
+    const b = toBlock(t);
+    const cur = out.get(r.checkpointNumber);
+    if (!cur || b > cur) out.set(r.checkpointNumber, b);
+  }
+  return out;
+}
+
 /** Board order: race checkpoints ascending, then Finish (base station, cp 0). */
 export function boardCheckpoints(checkpoints = []) {
   const cps = [...checkpoints]
@@ -109,6 +127,7 @@ export function checkCall(entries, ctx) {
 export function buildBoard({ checkpoints, records, radioCalls = [], now, raceStart, fieldSize, outCount = 0, dueMinutes = CALL_DUE_MINUTES }) {
   const cps = boardCheckpoints(checkpoints);
   const seen = sightingsByCheckpoint(records);
+  const upTo = reportedUpTo(records);
   const nowBlock = toBlock(now);
   const activeField = Math.max(0, (fieldSize ?? 0) - outCount);
   const raceStarted = raceStart && raceStart <= now;
@@ -117,10 +136,9 @@ export function buildBoard({ checkpoints, records, radioCalls = [], now, raceSta
     const here = seen.get(cp.number) ?? new Map();
     const prev = i > 0 ? cps[i - 1] : null;
     const prevCount = prev ? (seen.get(prev.number)?.size ?? 0) : null;
-    const times = [...here.values()];
     const calls = radioCalls.filter(c => c.checkpointNumber === cp.number && !c.undoneAt);
     const lastCallAt = calls.map(c => c.receivedAt).sort().at(-1) ?? null;
-    const lastBlock = times.length ? toBlock(times.sort().at(-1)) : null;
+    const lastBlock = upTo.get(cp.number) ?? null;
     const since = lastCallAt ? Math.max(0, TimeUtils.minutesBetween(lastCallAt, now)) : null;
     const behind = lastBlock ? Math.max(0, TimeUtils.minutesBetween(lastBlock, nowBlock)) : null;
     const closed = activeField > 0 && here.size >= activeField;
