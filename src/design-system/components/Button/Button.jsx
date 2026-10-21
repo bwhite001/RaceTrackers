@@ -18,7 +18,7 @@ const buttonVariants = {
   primary: 'bg-navy-900 hover:bg-navy-800 active:bg-navy-900 text-white shadow-md hover:shadow-lg dark:bg-navy-800 dark:hover:bg-navy-700',
   secondary: 'bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
   danger: 'bg-accent-red-600 hover:bg-accent-red-700 active:bg-accent-red-600 text-white shadow-md hover:shadow-lg',
-  success: 'bg-green-600 hover:bg-green-700 active:bg-green-600 text-white shadow-md hover:shadow-lg',
+  success: 'bg-navy-600 hover:bg-navy-700 active:bg-navy-600 text-white shadow-md hover:shadow-lg',
   warning: 'bg-gold-500 hover:bg-gold-600 active:bg-gold-500 text-white shadow-md hover:shadow-lg',
   ghost: 'bg-transparent hover:bg-gray-100 text-gray-700 dark:hover:bg-gray-800 dark:text-gray-200',
   outline: 'border border-slate-300 bg-transparent hover:bg-slate-50 active:bg-slate-100 text-slate-900 dark:border-navy-600 dark:text-navy-400 dark:hover:bg-navy-800 dark:hover:text-white',
@@ -31,7 +31,7 @@ const buttonVariants = {
   plain: 'bg-white text-vk-ink border border-vk-muted hover:bg-vk-paper dark:bg-gray-800 dark:text-gray-100',
   red: 'bg-vk-red text-white hover:bg-red-700 active:bg-vk-red',
   redOutline: 'bg-white text-vk-red border-2 border-vk-red hover:bg-vk-red-tint dark:bg-gray-800',
-  locked: 'bg-white text-vk-muted border-2 border-dashed border-vk-border cursor-not-allowed disabled:!opacity-100 dark:bg-gray-800',
+  locked: 'bg-white text-vk-muted border-2 border-dashed border-vk-border shadow-none cursor-not-allowed disabled:!opacity-100 disabled:!pointer-events-auto hover:translate-y-0 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600',
 };
 
 // Button size styles
@@ -61,7 +61,8 @@ const Button = React.forwardRef(({
   type = 'button',
   ...props
 }, ref) => {
-  const variantClasses = getVariant(buttonVariants, variant, 'primary');
+  // Any disabled button shows the locked style (spec §3.4); loading keeps its look
+  const variantClasses = getVariant(buttonVariants, disabled ? 'locked' : variant, 'primary');
   const sizeClasses = getSize(buttonSizes, size, 'md');
   const widthClass = fullWidth ? 'w-full' : '';
   

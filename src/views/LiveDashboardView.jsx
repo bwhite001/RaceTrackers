@@ -84,8 +84,8 @@ function LiveDashboardView() {
   };
 
   const STATUS_STYLES = {
-    finished:    'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
-    active:      'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+    finished:    'bg-navy-100 dark:bg-navy-900/30 text-navy-700 dark:text-navy-300',
+    active:      'bg-navy-100 dark:bg-navy-900/30 text-navy-700 dark:text-navy-300',
     dnf:         'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
     dns:         'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
     'not-started': 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400',
@@ -158,7 +158,7 @@ function LiveDashboardView() {
                 key={cp.number}
                 className={`px-4 py-2 rounded-lg text-sm font-medium border ${
                   allDone
-                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
+                    ? 'border-navy-500 bg-navy-50 dark:bg-navy-900/20 text-navy-700 dark:text-navy-300'
                     : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300'
                 }`}
               >
@@ -206,7 +206,7 @@ function LiveDashboardView() {
                   <td className="px-4 py-2 font-mono font-medium text-gray-900 dark:text-white">
                     #{runner.number}
                     {cpCount > 0 && (
-                      <span className="ml-1.5 text-xs text-green-600 dark:text-green-400">•</span>
+                      <span className="ml-1.5 text-xs text-navy-600 dark:text-navy-400">•</span>
                     )}
                   </td>
                   {showPII && (
@@ -221,7 +221,7 @@ function LiveDashboardView() {
                   )}
                   {sortedCheckpoints.map(cp => (
                     <td key={cp.number} className={`px-3 py-2 font-mono text-xs ${
-                      matrix[cp.number] ? 'text-green-700 dark:text-green-400 font-medium' : 'text-gray-300 dark:text-gray-600'
+                      matrix[cp.number] ? 'text-navy-700 dark:text-navy-400 font-medium' : 'text-gray-300 dark:text-gray-600'
                     }`}>
                       {formatTime(matrix[cp.number])}
                     </td>

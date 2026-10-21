@@ -127,6 +127,13 @@ const SECTION_MAP = {
   'withdrawal dialog uses 24-hour time and can be undone':                  'base-status',
   'reports undo stays with its list and says what it undoes':               'base-reports',
   'leaders flag open data issues':                                          'base-status',
+  // Validation fixes — Phase C (styling)
+  'locked buttons look locked':                                             'settings',
+  'dark mode passes colour contrast':                                       'settings',
+  'sunlight on the working screens':                                        'settings',
+  'race setup fits a phone':                                                'setup',
+  'footer names the club':                                                  'navigation',
+  'mt glorious template matches the brief':                                 'setup',
 };
 
 const CHAPTERS = [

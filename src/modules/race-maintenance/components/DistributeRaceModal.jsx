@@ -72,9 +72,9 @@ const DistributeRaceModal = ({ isOpen, raceId, raceName, onClose }) => {
 
         {/* Body */}
         <div className="p-5 space-y-4">
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-sm">
-            <p className="font-medium text-blue-900 dark:text-blue-100">{raceName}</p>
-            <p className="mt-1 text-blue-700 dark:text-blue-300">
+          <div className="bg-navy-50 dark:bg-navy-900/20 rounded-lg p-4 text-sm">
+            <p className="font-medium text-navy-900 dark:text-navy-100">{raceName}</p>
+            <p className="mt-1 text-navy-700 dark:text-navy-300">
               Send this file to each checkpoint operator and your base station operator.
               They import it in RaceTracker Pro to get started.
             </p>
@@ -86,7 +86,7 @@ const DistributeRaceModal = ({ isOpen, raceId, raceName, onClose }) => {
 
           {!pkg && !error && (
             <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 py-4">
-              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-navy-500 border-t-transparent rounded-full animate-spin" />
               Preparing race package…
             </div>
           )}

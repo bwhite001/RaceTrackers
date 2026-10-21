@@ -190,7 +190,7 @@ export default function QRScannerCamera({ onDecoded, onCancel }) {
         {/* Viewfinder overlay */}
         {scanning && !cameraError && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-64 h-64 border-4 border-blue-400 rounded-2xl opacity-70" />
+            <div className="w-64 h-64 border-4 border-navy-400 rounded-2xl opacity-70" />
           </div>
         )}
 
@@ -202,7 +202,7 @@ export default function QRScannerCamera({ onDecoded, onCancel }) {
             </p>
             <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-blue-500 transition-all duration-200"
+                className="h-full bg-navy-500 transition-all duration-200"
                 style={{ width: `${Math.round(progress * 100)}%` }}
               />
             </div>
@@ -215,7 +215,7 @@ export default function QRScannerCamera({ onDecoded, onCancel }) {
         {!scanning && !cameraError && (
           <button
             onClick={startCamera}
-            className="w-full max-w-xs py-3 rounded-xl bg-blue-600 hover:bg-blue-700 font-semibold transition-colors"
+            className="w-full max-w-xs py-3 rounded-xl bg-navy-600 hover:bg-navy-700 font-semibold transition-colors"
           >
             Start Scanning
           </button>
@@ -223,10 +223,10 @@ export default function QRScannerCamera({ onDecoded, onCancel }) {
 
         {cameraError === 'camera' && (
           <div className="w-full max-w-xs text-center">
-            <p className="text-sm text-amber-400 mb-3">
+            <p className="text-sm text-gold-400 mb-3">
               Camera access unavailable — use a photo or file instead.
             </p>
-            <label className="block w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-700 font-semibold text-center cursor-pointer transition-colors">
+            <label className="block w-full py-3 rounded-xl bg-gold-600 hover:bg-gold-700 font-semibold text-center cursor-pointer transition-colors">
               Take a photo of the QR code
               <input
                 type="file"

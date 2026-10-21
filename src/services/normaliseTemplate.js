@@ -8,12 +8,18 @@
 export function normaliseTemplate(raw) {
   const isRichFormat = raw.defaultRunnerRangeStart != null;
 
-  // Checkpoints — strip GPS coords and operator metadata
-  const checkpoints = (raw.checkpoints || []).map(cp => ({
-    number: cp.number,
-    name: cp.name,
-    orderSequence: cp.orderSequence ?? cp.number
-  }));
+  // Checkpoints — keep location, distance and operator callsigns ("VK4IE (John)" → "VK4IE"); strip GPS
+  const checkpoints = (raw.checkpoints || []).map(cp => {
+    const callsigns = (cp.metadata?.operators || []).map(o => String(o).split(' ')[0]).filter(Boolean);
+    return {
+      number: cp.number,
+      name: cp.name,
+      orderSequence: cp.orderSequence ?? cp.number,
+      ...(cp.locationName && { locationName: cp.locationName }),
+      ...(cp.distanceKm != null && { distanceKm: cp.distanceKm }),
+      ...(callsigns.length && { operatorCallsigns: callsigns }),
+    };
+  });
 
   // Runner ranges
   let runnerRanges, defaultRunnerRangeStart, defaultRunnerRangeEnd;
@@ -39,6 +45,7 @@ export function normaliseTemplate(raw) {
     checkpoints,
     runnerRanges,
     defaultBatches: isRichFormat ? [] : (raw.defaultBatches || []),
+    raceDefaults: raw.raceDefaults || {},
     courseGpx: raw.courseGpx || null
   };
 }

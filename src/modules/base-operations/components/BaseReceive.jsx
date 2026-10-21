@@ -8,7 +8,7 @@ import TimeUtils from '../../../services/timeUtils.js';
 import {
   toBlock, hhmm, blocksBetween, earliestTime, parseExactTime, BLOCK_MINUTES,
 } from '../../../services/blocks.js';
-import { checkClasses } from '../../../design-system/statusStyles';
+import { checkClasses, LOCKED } from '../../../design-system/statusStyles';
 import { BlockPicker, NumberPad, BibChip } from '../../../design-system/components/VK';
 import useNow from '../../../shared/hooks/useNow';
 
@@ -323,15 +323,17 @@ const BaseReceive = () => {
                 Clear {hhmm(rx.ctime)}
               </button>
               <button type="button" onClick={goNextBlock} disabled={atNow}
-                className={`${actionBtn} ${atNow ? 'bg-white text-vk-muted border border-dashed border-vk-border cursor-not-allowed dark:bg-gray-800' : 'bg-vk-blue text-white'}`}>
+                className={`${actionBtn} ${atNow ? LOCKED : 'bg-vk-blue text-white'}`}>
                 {nextLabel}
               </button>
               {/* Nothing recordable: still log the call (rejected numbers feed the
                   Unknown bibs check), but not as the gold primary */}
               <button type="button" onClick={complete} disabled={!rx.entries.length || busy}
-                className={`${actionBtn} ${rx.entries.length && !goodCount
-                  ? 'bg-white text-vk-ink border border-vk-muted dark:bg-gray-800 dark:text-gray-100'
-                  : 'bg-vk-gold text-vk-ink shadow-btn'} disabled:opacity-50 disabled:cursor-not-allowed`}>
+                className={`${actionBtn} ${!rx.entries.length || busy
+                  ? LOCKED
+                  : !goodCount
+                    ? 'bg-white text-vk-ink border border-vk-muted dark:bg-gray-800 dark:text-gray-100'
+                    : 'bg-vk-gold text-vk-ink shadow-btn'}`}>
                 {rx.entries.length && !goodCount ? 'Log call · 0' : `Complete · ${goodCount}`}
               </button>
             </div>

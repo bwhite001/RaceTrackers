@@ -195,10 +195,10 @@ const FilterButton = ({ active, onClick, count, variant = 'default', children })
       ? 'bg-navy-600 text-white' 
       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600',
     green: active
-      ? 'bg-green-600 text-white'
+      ? 'bg-navy-600 text-white'
       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600',
     blue: active
-      ? 'bg-blue-600 text-white'
+      ? 'bg-navy-600 text-white'
       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600',
     gray: active
       ? 'bg-gray-600 text-white'

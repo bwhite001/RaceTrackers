@@ -23,6 +23,9 @@ export class RaceMaintenanceRepository extends BaseRepository {
             name: checkpoint.name || `Checkpoint ${checkpoint.number}`,
             ...(checkpoint.linkedCheckpointNumber != null && { linkedCheckpointNumber: checkpoint.linkedCheckpointNumber }),
             ...(checkpoint.linkLabel != null && { linkLabel: checkpoint.linkLabel }),
+            ...(checkpoint.locationName && { locationName: checkpoint.locationName }),
+            ...(checkpoint.distanceKm != null && { distanceKm: checkpoint.distanceKm }),
+            ...(checkpoint.operatorCallsigns?.length && { operatorCallsigns: checkpoint.operatorCallsigns }),
           }));
           await db.checkpoints.bulkAdd(checkpoints);
         } else {

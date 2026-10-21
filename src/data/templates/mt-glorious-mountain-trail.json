@@ -3,7 +3,7 @@
   "name": "Mt Glorious Mountain Trail",
   "eventType": "Mountain Trail Run",
   "description": "Mountain trail race finishing at Maiala Park, Mt Glorious. Multiple distance options with challenging terrain.",
-  "defaultStartTime": "07:00:00",
+  "defaultStartTime": "06:30:00",
   "defaultRunnerRangeStart": 1,
   "defaultRunnerRangeEnd": 128,
   "checkpoints": [
@@ -13,11 +13,20 @@
       "location": "-27.321677, 152.714852",
       "orderSequence": 1,
       "metadata": {
-        "operators": ["VK4SIR (Peter)", "VK4MKD (David)", "VK4SQL (Stephen)"],
+        "operators": [
+          "VK4MUD",
+          "VK4MKD",
+          "VK4EAR"
+        ],
         "description": "First checkpoint at Northbrook Bush Camp",
         "terrain": "Bush camp area",
-        "facilities": ["Water station", "First aid"]
-      }
+        "facilities": [
+          "Water station",
+          "First aid"
+        ]
+      },
+      "distanceKm": 5,
+      "locationName": "Northbrook Bush Camp"
     },
     {
       "number": 2,
@@ -25,11 +34,19 @@
       "location": "-27.345838, 152.730526",
       "orderSequence": 2,
       "metadata": {
-        "operators": ["VK4IE (John)", "VK4AL (Alan T.)", "VK4AJJ (Andrew)"],
+        "operators": [
+          "VK4IE",
+          "VK4TBA"
+        ],
         "description": "Mid-course checkpoint at England Creek",
         "terrain": "Creek crossing area",
-        "facilities": ["Water station", "First aid"]
-      }
+        "facilities": [
+          "Water station",
+          "First aid"
+        ]
+      },
+      "distanceKm": 11,
+      "locationName": "England Creek Bush Camp"
     },
     {
       "number": 3,
@@ -37,11 +54,19 @@
       "location": "-27.366238, 152.730747",
       "orderSequence": 3,
       "metadata": {
-        "operators": ["VK4SMA (Mark)", "VK4TMK (Trish)"],
+        "operators": [
+          "VK4PMC",
+          "VK4JBX"
+        ],
         "description": "Road junction checkpoint",
         "terrain": "Road junction",
-        "facilities": ["Water station", "First aid"]
-      }
+        "facilities": [
+          "Water station",
+          "First aid"
+        ]
+      },
+      "distanceKm": 14.5,
+      "locationName": "England Creek Rd & Joyners Ridge Rd"
     },
     {
       "number": 4,
@@ -49,11 +74,19 @@
       "location": "-27.346490, 152.750306",
       "orderSequence": 4,
       "metadata": {
-        "operators": ["VK4ALG (Alan)", "VK4TBA (Ben)"],
+        "operators": [
+          "VK4AJG",
+          "VK4DTB"
+        ],
         "description": "Final checkpoint before finish",
         "terrain": "Ridge road",
-        "facilities": ["Water station", "First aid"]
-      }
+        "facilities": [
+          "Water station",
+          "First aid"
+        ]
+      },
+      "distanceKm": 17.5,
+      "locationName": "Near Apiary Site, Joyners Ridge Rd"
     }
   ],
   "metadata": {
@@ -61,13 +94,20 @@
     "callsign": "VK4WIP",
     "baseLocation": "Maiala Picnic Area, Mt Glorious Rd, Mt Glorious",
     "baseGPS": "-27.320035, 152.750278",
-    "baseOperators": ["VK4BRW (Brandon)", "VK4GJW (Greg)"],
+    "baseOperators": [
+      "VK4GJW",
+      "VK4ENE",
+      "VK4NNA"
+    ],
     "frequencies": {
-      "primary": "147.175 MHz (+offset)",
-      "fallback": "147.500 MHz"
+      "primary": "147.225 MHz (+0.6, CTCSS 91.5)",
+      "fallback": "147.500 MHz simplex"
     },
     "baseOperationalBy": "0630 hrs",
-    "historicalDates": ["2024-11-10", "2025-11-09"],
+    "historicalDates": [
+      "2024-11-10",
+      "2025-11-09"
+    ],
     "notes": [
       "Base station must be operational by 0630 hrs",
       "All operators should arrive 30 minutes before race start",
@@ -75,19 +115,28 @@
       "Mobile coverage is limited in some areas - rely on radio"
     ],
     "equipment": [
-      "VHF radios (147.175 MHz)",
+      "VHF radios (147.225 MHz)",
       "Backup radios (147.500 MHz)",
       "First aid kits at all checkpoints",
       "Runner tracking sheets",
       "Emergency contact list"
+    ],
+    "startLocation": "White Cedar Picnic Area",
+    "startOperators": [
+      "VK4BRW"
     ]
   },
   "version": "1.0.0",
   "createdAt": "2025-01-01T00:00:00.000Z",
-  "lastUpdated": "2025-01-01T00:00:00.000Z",
+  "lastUpdated": "2026-10-21T00:00:00.000Z",
   "date": null,
   "distances": [],
   "traqUrl": "https://www.traq.org.au/mount-glorious-mountain-trails/",
   "alltrailsUrl": "",
-  "lastSynced": null
+  "lastSynced": null,
+  "raceDefaults": {
+    "baseCallsign": "VK4WIP",
+    "frequency": "147.225",
+    "distanceKm": 22
+  }
 }

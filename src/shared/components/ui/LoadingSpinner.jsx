@@ -30,7 +30,7 @@ const LoadingSpinner = ({
     primary: 'text-navy-600 dark:text-navy-400',
     white: 'text-white',
     gray: 'text-gray-600 dark:text-gray-400',
-    success: 'text-green-600 dark:text-green-400',
+    success: 'text-navy-600 dark:text-navy-400',
     error: 'text-red-600 dark:text-red-400',
   };
 

@@ -58,7 +58,7 @@ export default function TransferSummaryModal({ packet, stats, onImport, onCancel
           <button
             onClick={onImport}
             disabled={importing || !stats}
-            className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-colors disabled:opacity-40"
+            className="flex-1 py-2.5 rounded-xl bg-navy-600 hover:bg-navy-700 text-white text-sm font-semibold transition-colors disabled:opacity-40"
           >
             {importing ? 'Importing…' : 'Import'}
           </button>
@@ -70,7 +70,7 @@ export default function TransferSummaryModal({ packet, stats, onImport, onCancel
 
 function Row({ label, value, positive, neutral, muted }) {
   const valueClass = positive && value > 0
-    ? 'text-green-400'
+    ? 'text-navy-400'
     : muted
     ? 'text-gray-500'
     : 'text-gray-200';

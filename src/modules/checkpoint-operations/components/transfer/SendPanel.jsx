@@ -116,14 +116,14 @@ export default function SendPanel({ raceId, checkpointNumber, onDone }) {
       )}
 
       {error && (
-        <p className="text-amber-400 text-sm text-center px-2">{error}</p>
+        <p className="text-gold-400 text-sm text-center px-2">{error}</p>
       )}
 
       <div className="mt-auto">
         <button
           onClick={handleGenerate}
           disabled={building || entryCount === 0}
-          className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 font-semibold text-white transition-colors"
+          className="w-full py-3 rounded-xl bg-navy-600 hover:bg-navy-700 disabled:opacity-40 font-semibold text-white transition-colors"
         >
           {building ? 'Building QR…' : 'Generate QR Code'}
         </button>
@@ -138,13 +138,13 @@ function ScopeOption({ id, selected, onSelect, title, description }) {
       onClick={onSelect}
       className={`text-left w-full px-4 py-3 rounded-xl border transition-colors ${
         selected
-          ? 'border-blue-500 bg-blue-900/30 text-white'
+          ? 'border-navy-500 bg-navy-900/30 text-white'
           : 'border-gray-700 bg-gray-800/40 text-gray-300 hover:border-gray-500'
       }`}
     >
       <div className="flex items-center gap-3">
         <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${
-          selected ? 'border-blue-400 bg-blue-400' : 'border-gray-500'
+          selected ? 'border-navy-400 bg-navy-400' : 'border-gray-500'
         }`} />
         <div>
           <p className="font-medium text-sm">{title}</p>

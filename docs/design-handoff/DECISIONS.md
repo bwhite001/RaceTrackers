@@ -203,3 +203,18 @@ Phase B notes:
 - **B12:** the Reports Undo reads "Undo 106: Mark checked" and is dropped when another list is opened. Journey 23 and the validation script were updated.
 - **B13:** a leader gets a gold warning icon (accessible name "Open data issue") when they have an unresolved duplicate, out-of-order time, sighting after DNF / DNS or impossible pace. These are the checks that can put a runner in the wrong place. Skipped checkpoints and unknown bibs don't move a leader, so they aren't flagged. Elapsed shows HH:MM.
 - **Validation script:** OV-06 taps the Overview stepper and expects an immediate save. It now needs a Save tap and is reworked with the pack in Phase D.
+
+Phase C notes:
+- **C1: any disabled design-system `Button` now shows the locked style** (white, dashed border, muted text, not-allowed cursor). This is done in the component, so every disabled button gets it, not just the six the brief names. The raw `<button>`s on base screens use the shared `LOCKED` classes in `statusStyles.js`.
+- **C2: off-palette colours.**
+  - In every file a screen imports, Tailwind green / emerald / teal / indigo / blue now map shade-for-shade to the `navy` scale, and yellow / amber to the `gold` scale. Both scales are re-anchored on the club colours, so navy-600 is club blue and gold-500 is club gold. This kept light/dark structure and dark-mode variants intact without restyling each screen by hand.
+  - Template tags use band and gold tint, and settings toggles use club blue on and the border colour off.
+  - `test/components/palette.test.js` fails on any of those hues in a mounted file. Its allow-list is the 27 legacy files that no screen imports: they were checked by walking imports from `src/main.jsx`, then confirmed by searching for importers.
+  - The few purple / violet / orange uses (wave badges, the live dashboard's DNF colour, the page-header badge) are outside the brief's list and were left alone.
+- **C3: dark-mode contrast.** Club muted grey (#5A6579) and club blue (#1E5CB3) are only 2.5–3:1 on the dark surfaces. In dark mode, `text-vk-muted` becomes navy-300 and `text-vk-blue` becomes navy-400, both from the club scale. This is one rule in `index.css`, and an explicit `dark:text-*` still wins. The Called-in swatch gets a light outline in dark mode. axe's colour-contrast rule passes on Settings and Mark off in Dark. `@axe-core/playwright` was added as a dev dependency.
+- **C4: Sunlight needed no code change.** The existing overrides already make the page white and borders 2 px on Mark off, Callout, Read-out and Receive. Spec 29 asserts that and captures the screens.
+- **C5:** on the runner setup step the range badges wrap inside the card. Delete is labelled "Remove range 100-159", and the buttons read "Back" and "Next: Waves" on one line.
+- **C7: Mt Glorious template.**
+  - It now follows spec §10: start 06:30, CP1–CP4 operators and distances (5 / 11 / 14.5 / 17.5 km), base VK4WIP on 147.225 (+0.6, CTCSS 91.5), race distance 22 km.
+  - The template normaliser now keeps checkpoint callsigns, location and distance (it used to strip them). Race setup copies them, and the race's base callsign / frequency / distance, into the new race.
+  - **Bib range left at 1–128 until Brandon supplies it.**

@@ -53,11 +53,27 @@ describe('normaliseTemplate', () => {
       expect(n.runnerRanges).toEqual([{ min: 1, max: 128 }]);
     });
 
-    it('strips GPS and operators from checkpoints', () => {
+    it('strips GPS but keeps operator callsigns', () => {
       const n = normaliseTemplate(richTemplate);
-      expect(n.checkpoints[0]).toEqual({ number: 1, name: 'CP1 - Northbrook', orderSequence: 1 });
+      expect(n.checkpoints[0]).toEqual({ number: 1, name: 'CP1 - Northbrook', orderSequence: 1, operatorCallsigns: ['VK4SIR'] });
+      expect(n.checkpoints[1].operatorCallsigns).toBeUndefined();
       expect(n.checkpoints[0].location).toBeUndefined();
       expect(n.checkpoints[0].metadata).toBeUndefined();
+    });
+
+    it('the shipped Mt Glorious template matches the WICEN brief (spec §10); bib range unchanged', async () => {
+      const raw = (await import('../../src/data/templates/mt-glorious-mountain-trail.json')).default;
+      const n = normaliseTemplate(raw);
+      expect(n.defaultStartTime).toBe('06:30:00');
+      expect(n.runnerRanges).toEqual([{ min: 1, max: 128 }]);
+      expect(n.checkpoints.map(c => [c.distanceKm, c.operatorCallsigns])).toEqual([
+        [5, ['VK4MUD', 'VK4MKD', 'VK4EAR']],
+        [11, ['VK4IE', 'VK4TBA']],
+        [14.5, ['VK4PMC', 'VK4JBX']],
+        [17.5, ['VK4AJG', 'VK4DTB']],
+      ]);
+      expect(n.checkpoints[2].locationName).toBe('England Creek Rd & Joyners Ridge Rd');
+      expect(n.raceDefaults).toEqual({ baseCallsign: 'VK4WIP', frequency: '147.225', distanceKm: 22 });
     });
 
     it('defaults defaultBatches to empty array', () => {

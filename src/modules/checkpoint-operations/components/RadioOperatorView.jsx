@@ -101,7 +101,7 @@ export default function RadioOperatorView({ raceId, checkpointNumber }) {
           {!scanning && (
             <button
               onClick={handleStartScan}
-              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm transition-colors shrink-0"
+              className="flex items-center gap-2 px-4 py-2.5 bg-navy-600 hover:bg-navy-700 text-white rounded-xl font-semibold text-sm transition-colors shrink-0"
             >
               <QrCodeIcon className="w-4 h-4" />
               Scan QR

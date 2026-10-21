@@ -36,7 +36,7 @@ const THEMES = [
 const STATUS_ROWS = [
   { key: 'not-started', name: 'Not yet', desc: 'White', swatch: 'border border-vk-border' },
   { key: 'passed', name: 'Passed', desc: 'Club blue' },
-  { key: 'called-in', name: 'Called in', desc: 'Navy' },
+  { key: 'called-in', name: 'Called in', desc: 'Navy', swatch: 'dark:outline dark:outline-1 dark:outline-vk-on-navy' },
   { key: 'non-starter', name: 'Non-starter', desc: 'Grey, dashed', swatch: 'border border-dashed border-vk-muted' },
   { key: 'dnf', name: 'DNF', desc: 'Red outline', swatch: 'border-2 border-vk-red' },
 ];

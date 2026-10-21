@@ -95,7 +95,7 @@ const CheckpointImportPanel = () => {
               key={cp.number}
               className={`rounded-lg border-2 p-4 flex items-center justify-between gap-3 ${
                 isImported
-                  ? 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/10'
+                  ? 'border-navy-300 dark:border-navy-700 bg-navy-50 dark:bg-navy-900/10'
                   : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
               }`}
             >
@@ -104,7 +104,7 @@ const CheckpointImportPanel = () => {
                   {cp.name || `Checkpoint ${cp.number}`}
                 </p>
                 {isImported ? (
-                  <p className="text-xs text-green-600 dark:text-green-400 mt-0.5">
+                  <p className="text-xs text-navy-600 dark:text-navy-400 mt-0.5">
                     ✓ Imported — {rec.totalRunners} runners
                     <br />
                     <span className="text-gray-400 dark:text-gray-500">
@@ -122,7 +122,7 @@ const CheckpointImportPanel = () => {
                 onClick={() => handleSelectFile(cp.number)}
                 disabled={isLoading || !currentRaceId}
                 className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded
-                           bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                           bg-navy-600 text-white hover:bg-navy-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -153,7 +153,7 @@ const CheckpointImportPanel = () => {
           aria-live="polite"
           className={`text-sm font-medium ${
             statusMsg.type === 'success'
-              ? 'text-green-600 dark:text-green-400'
+              ? 'text-navy-600 dark:text-navy-400'
               : 'text-red-600 dark:text-red-400'
           }`}
         >

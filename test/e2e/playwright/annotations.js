@@ -102,7 +102,7 @@ export const STEP_ANNOTATIONS = {
     },
     'Step 3 of 4 — Runner Setup: navigate forward then press Back': {
       action: 'click',
-      target: '"Back: Race Details" button (bottom-left)',
+      target: '"Back" button (bottom-left)',
       why: 'Simulates a race director who wants to correct a detail after moving forward.',
     },
     'Step 2 of 4 — Race Details: data preserved after Back': {

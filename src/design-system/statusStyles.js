@@ -78,6 +78,9 @@ const CHECK_CLASSES = {
   [CHECK_KIND.BAD]: 'bg-white text-vk-red border-2 border-vk-red line-through',
 };
 
+/** Locked / disabled button (spec §3.4) for raw <button>s; the design-system Button applies it itself. */
+export const LOCKED = 'bg-white text-vk-muted border-2 border-dashed border-vk-border cursor-not-allowed dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600';
+
 /** Classes for a base-station check chip (receive / bulk DNF). */
 export function checkClasses(kind) {
   return CHECK_CLASSES[kind] ?? CHECK_CLASSES[CHECK_KIND.OK];

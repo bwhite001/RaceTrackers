@@ -100,8 +100,8 @@ export default function BatchShareModal({ isOpen, raceId, checkpointNumber, onCl
       <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 p-4">
         <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-sm shadow-2xl">
           <div className="px-5 pt-5 pb-4 border-b border-gray-700 text-center">
-            <div className="w-12 h-12 rounded-full bg-green-600/20 flex items-center justify-center mx-auto mb-3">
-              <CheckIcon className="w-6 h-6 text-green-400" />
+            <div className="w-12 h-12 rounded-full bg-navy-600/20 flex items-center justify-center mx-auto mb-3">
+              <CheckIcon className="w-6 h-6 text-navy-400" />
             </div>
             <p className="text-white font-semibold text-base">Confirm batch sent?</p>
             <p className="text-gray-400 text-sm mt-1">
@@ -111,7 +111,7 @@ export default function BatchShareModal({ isOpen, raceId, checkpointNumber, onCl
           <div className="px-5 py-4 flex flex-col gap-3">
             <button
               onClick={handleConfirmSent}
-              className="w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 font-semibold text-white transition-colors"
+              className="w-full py-3 rounded-xl bg-navy-600 hover:bg-navy-700 font-semibold text-white transition-colors"
             >
               ✓ Yes, batch was received
             </button>
@@ -161,11 +161,11 @@ export default function BatchShareModal({ isOpen, raceId, checkpointNumber, onCl
         {/* Entry count / retry notice */}
         <div className="px-5 py-5">
           {isPendingRetry && (
-            <div className="mb-4 px-4 py-3 bg-amber-900/30 border border-amber-700/50 rounded-xl">
-              <p className="text-amber-300 text-sm font-medium">
+            <div className="mb-4 px-4 py-3 bg-gold-900/30 border border-gold-700/50 rounded-xl">
+              <p className="text-gold-300 text-sm font-medium">
                 Previous share may not have been received
               </p>
-              <p className="text-amber-400/70 text-xs mt-0.5">Showing the same batch again.</p>
+              <p className="text-gold-400/70 text-xs mt-0.5">Showing the same batch again.</p>
             </div>
           )}
 
@@ -175,7 +175,7 @@ export default function BatchShareModal({ isOpen, raceId, checkpointNumber, onCl
             <p className="text-gray-400 text-sm text-center">No new entries since last share.</p>
           ) : (
             <p className="text-white text-center">
-              <span className="text-3xl font-bold text-blue-400">{entryCount}</span>
+              <span className="text-3xl font-bold text-navy-400">{entryCount}</span>
               <span className="text-gray-400 text-sm ml-2">
                 {entryCount === 1 ? 'new entry' : 'new entries'}
                 {lastShareLabel ? ` since ${lastShareLabel}` : ''}
@@ -185,7 +185,7 @@ export default function BatchShareModal({ isOpen, raceId, checkpointNumber, onCl
         </div>
 
         {error && (
-          <p className="text-amber-400 text-sm text-center px-5 pb-3">{error}</p>
+          <p className="text-gold-400 text-sm text-center px-5 pb-3">{error}</p>
         )}
 
         {/* Actions */}
@@ -193,7 +193,7 @@ export default function BatchShareModal({ isOpen, raceId, checkpointNumber, onCl
           <button
             onClick={handleGenerate}
             disabled={building || entryCount === null || entryCount === 0}
-            className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 font-semibold text-white transition-colors"
+            className="w-full py-3 rounded-xl bg-navy-600 hover:bg-navy-700 disabled:opacity-40 font-semibold text-white transition-colors"
           >
             {building
               ? 'Building QR…'

@@ -289,8 +289,8 @@ export default function WebScorerImportWizard({ onClose }) {
 
               {/* Dev fixture picker */}
               {import.meta.env.DEV && (
-                <div className="flex items-center gap-2 p-2 rounded border border-dashed border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20">
-                  <span className="text-xs font-medium text-amber-700 dark:text-amber-400 whitespace-nowrap">Dev only</span>
+                <div className="flex items-center gap-2 p-2 rounded border border-dashed border-gold-300 dark:border-gold-700 bg-gold-50 dark:bg-gold-900/20">
+                  <span className="text-xs font-medium text-gold-700 dark:text-gold-400 whitespace-nowrap">Dev only</span>
                   <select
                     className="text-sm flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-2 py-1"
                     defaultValue=""
@@ -331,7 +331,7 @@ export default function WebScorerImportWizard({ onClose }) {
                             <td className="px-3 py-1.5 font-mono text-gray-800 dark:text-gray-200">
                               {col}
                               {state.autoDetected.has(col) && (
-                                <span className="ml-1 text-green-600 dark:text-green-400 text-[10px]">✓</span>
+                                <span className="ml-1 text-navy-600 dark:text-navy-400 text-[10px]">✓</span>
                               )}
                             </td>
                             <td className="px-3 py-1.5 text-gray-500 dark:text-gray-400 italic">
@@ -354,7 +354,7 @@ export default function WebScorerImportWizard({ onClose }) {
                     </table>
                   </div>
                   {!numberMapped && (
-                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                    <p className="text-xs text-gold-600 dark:text-gold-400">
                       Map at least one column to "Bib # (required)" to continue.
                     </p>
                   )}
@@ -380,17 +380,17 @@ export default function WebScorerImportWizard({ onClose }) {
             <div className="space-y-5">
               {/* Detected categories summary */}
               {batchEntries.length > 0 && (
-                <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 space-y-1">
-                  <p className="text-xs font-medium text-blue-800 dark:text-blue-300 mb-1">
+                <div className="p-3 rounded-lg bg-navy-50 dark:bg-navy-900/20 border border-navy-100 dark:border-navy-800 space-y-1">
+                  <p className="text-xs font-medium text-navy-800 dark:text-navy-300 mb-1">
                     Detected categories from file
                   </p>
                   {batchEntries.map(([num, name]) => (
-                    <div key={num} className="flex items-center justify-between text-xs text-blue-700 dark:text-blue-400">
+                    <div key={num} className="flex items-center justify-between text-xs text-navy-700 dark:text-navy-400">
                       <span>{name}</span>
                       <span className="font-mono">{batchCounts[num] ?? 0} runners</span>
                     </div>
                   ))}
-                  <div className="border-t border-blue-200 dark:border-blue-700 pt-1 mt-1 flex justify-between text-xs font-medium text-blue-800 dark:text-blue-300">
+                  <div className="border-t border-navy-200 dark:border-navy-700 pt-1 mt-1 flex justify-between text-xs font-medium text-navy-800 dark:text-navy-300">
                     <span>Total</span>
                     <span className="font-mono">{state.preview?.valid?.length ?? 0} runners</span>
                   </div>
@@ -476,7 +476,7 @@ export default function WebScorerImportWizard({ onClose }) {
 
               {/* Errors from mapping step */}
               {state.preview?.errors?.length > 0 && (
-                <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs space-y-0.5">
+                <div className="p-3 rounded-lg bg-gold-50 dark:bg-gold-900/20 text-gold-700 dark:text-gold-400 text-xs space-y-0.5">
                   <p className="font-medium">{state.preview.errors.length} row{state.preview.errors.length !== 1 ? 's' : ''} skipped:</p>
                   {state.preview.errors.slice(0, 5).map((e, i) => <p key={i}>• {e}</p>)}
                   {state.preview.errors.length > 5 && <p>…and {state.preview.errors.length - 5} more</p>}

@@ -15,11 +15,11 @@ import { MODULE_TYPES } from '../store/navigationStore';
 const MODULE_BADGE = {
   [MODULE_TYPES.CHECKPOINT]: {
     label: 'Checkpoint',
-    classes: 'bg-blue-500/20 text-blue-200 ring-1 ring-blue-400/30',
+    classes: 'bg-navy-500/20 text-navy-200 ring-1 ring-navy-400/30',
   },
   [MODULE_TYPES.BASE_STATION]: {
     label: 'Base Station',
-    classes: 'bg-blue-500/20 text-blue-200 ring-1 ring-blue-400/30',
+    classes: 'bg-navy-500/20 text-navy-200 ring-1 ring-navy-400/30',
   },
   [MODULE_TYPES.RACE_MAINTENANCE]: {
     label: 'Race Maintenance',

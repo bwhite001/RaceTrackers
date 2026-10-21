@@ -50,7 +50,7 @@ export default function TransferView() {
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
               activeTab === tab.id
-                ? 'text-blue-400 border-b-2 border-blue-400'
+                ? 'text-navy-400 border-b-2 border-navy-400'
                 : 'text-gray-400 hover:text-gray-200'
             }`}
           >

@@ -5,7 +5,7 @@ import { checkStatusNumber, outRecords, REASONS } from '../services/statusValida
 import { parseBibList } from '../../../shared/utils/parseBibs';
 import TimeUtils from '../../../services/timeUtils.js';
 import { earliestTime } from '../../../services/blocks.js';
-import { stateClasses, checkClasses, RUNNER_STATE } from '../../../design-system/statusStyles';
+import { stateClasses, checkClasses, LOCKED, RUNNER_STATE } from '../../../design-system/statusStyles';
 import { BibChip, TimeStepper } from '../../../design-system/components/VK';
 import useNow from '../../../shared/hooks/useNow';
 
@@ -175,7 +175,7 @@ const BaseStatusView = ({ onWithdrawDetails }) => {
           <button type="button" onClick={apply} disabled={!applyCount || busy}
             className={`min-h-[48px] rounded-btn font-display font-extrabold text-[13px] tracking-[0.6px] uppercase ${applyCount
               ? (mode === 'dnf' ? 'bg-vk-red text-white' : 'bg-vk-gold text-vk-ink')
-              : 'bg-vk-band text-vk-muted cursor-not-allowed'}`}>
+              : LOCKED}`}>
             {applyCount ? `Mark ${applyCount} as ${label}` : 'Add numbers to mark'}
           </button>
         </div>

@@ -45,20 +45,20 @@ const RaceStatsCard = ({
 
   // Variant-specific styling
   const variantStyles = {
-    current: 'border-l-4 border-green-500',
-    upcoming: 'border-l-4 border-blue-500',
+    current: 'border-l-4 border-navy-500',
+    upcoming: 'border-l-4 border-navy-500',
     past: 'border-l-4 border-gray-400',
     default: '',
   };
 
   const variantIcons = {
     current: (
-      <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+      <svg className="w-5 h-5 text-navy-500" fill="currentColor" viewBox="0 0 20 20">
         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
       </svg>
     ),
     upcoming: (
-      <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+      <svg className="w-5 h-5 text-navy-500" fill="currentColor" viewBox="0 0 20 20">
         <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
       </svg>
     ),
@@ -143,7 +143,7 @@ const RaceStatsCard = ({
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div
-                className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                className="bg-navy-500 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${progress.percentage}%` }}
               />
             </div>
@@ -158,9 +158,9 @@ const RaceStatsCard = ({
         {/* Statistics Grid (for past races) */}
         {variant === 'past' && progress.total > 0 && (
           <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-            <div className="bg-green-50 dark:bg-green-900/20 rounded p-2">
+            <div className="bg-navy-50 dark:bg-navy-900/20 rounded p-2">
               <div className="text-xs text-gray-600 dark:text-gray-400">Finished</div>
-              <div className="text-lg font-semibold text-green-600 dark:text-green-400">
+              <div className="text-lg font-semibold text-navy-600 dark:text-navy-400">
                 {runners.filter(r => r.status === 'finished').length}
               </div>
             </div>

@@ -333,6 +333,17 @@
 }
 
 @layer utilities {
+  /* Dark mode (G6): club muted grey and club blue are 2.5–3:1 on the dark
+     surfaces. Lighter steps of the navy scale keep 4.5:1. An explicit
+     dark:text-* on an element still wins (variants come after this layer). */
+  .dark .text-vk-muted {
+    color: #B9CBE6; /* navy-300 */
+  }
+
+  .dark .text-vk-blue {
+    color: #6F96D0; /* navy-400 */
+  }
+
   /* Text color utilities for status */
   .text-status-not-started {
     color: #5A6579;

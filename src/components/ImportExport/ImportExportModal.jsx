@@ -349,12 +349,12 @@ const ImportExportModal = ({ isOpen, onClose, initialTab = 'export', startScanne
           )}
 
           {success && (
-            <div className="mb-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+            <div className="mb-4 bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800 rounded-lg p-3">
               <div className="flex items-center">
-                <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-navy-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span className="text-sm text-green-800 dark:text-green-200">{success}</span>
+                <span className="text-sm text-navy-800 dark:text-navy-200">{success}</span>
               </div>
             </div>
           )}
@@ -517,14 +517,14 @@ const ImportExportModal = ({ isOpen, onClose, initialTab = 'export', startScanne
                         // Level L can handle ~2900 characters
                         if (dataString.length > 2500) {
                           return (
-                            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                              <svg className="w-12 h-12 text-yellow-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="p-4 bg-gold-50 dark:bg-gold-900/20 border border-gold-200 dark:border-gold-800 rounded-lg">
+                              <svg className="w-12 h-12 text-gold-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                               </svg>
-                              <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium mb-1">
+                              <p className="text-sm text-gold-800 dark:text-gold-200 font-medium mb-1">
                                 QR Code Too Large
                               </p>
-                              <p className="text-xs text-yellow-700 dark:text-yellow-300">
+                              <p className="text-xs text-gold-700 dark:text-gold-300">
                                 The race configuration is too large to encode in a QR code ({dataString.length} characters).
                                 Please use the Download or Copy options below to share this configuration.
                               </p>
@@ -693,11 +693,11 @@ const ImportExportModal = ({ isOpen, onClose, initialTab = 'export', startScanne
               </div>
 
               {/* Instructions */}
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+              <div className="bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800 rounded-lg p-4">
+                <h4 className="font-medium text-navy-900 dark:text-navy-100 mb-2">
                   Import Instructions
                 </h4>
-                <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                <ul className="text-sm text-navy-800 dark:text-navy-200 space-y-1">
                   <li>• <strong>QR Code Sharing:</strong> Scan QR codes from other devices to import complete race data</li>
                   <li>• <strong>Smart Merging:</strong> If the race already exists, data will be intelligently merged</li>
                   <li>• <strong>Checkpoint Consolidation:</strong> BaseStation can merge data from all checkpoint operators</li>

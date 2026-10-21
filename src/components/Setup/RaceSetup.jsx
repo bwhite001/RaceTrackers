@@ -61,6 +61,7 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
     if (template) {
       setFormData(prev => ({
         ...prev,
+        ...template.raceDefaults,
         name: template.name || '',
         startTime: template.defaultStartTime?.slice(0, 5) || '',
         checkpoints: template.checkpoints || [],

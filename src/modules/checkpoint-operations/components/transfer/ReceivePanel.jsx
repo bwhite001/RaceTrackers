@@ -71,8 +71,8 @@ export default function ReceivePanel({ raceId, checkpointNumber, onDone }) {
   if (successMessage) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-6 px-6 text-center">
-        <div className="w-16 h-16 rounded-full bg-green-600/20 flex items-center justify-center">
-          <svg className="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="w-16 h-16 rounded-full bg-navy-600/20 flex items-center justify-center">
+          <svg className="w-8 h-8 text-navy-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
@@ -82,7 +82,7 @@ export default function ReceivePanel({ raceId, checkpointNumber, onDone }) {
         </div>
         <button
           onClick={onDone}
-          className="w-full max-w-xs py-3 rounded-xl bg-blue-600 hover:bg-blue-700 font-semibold text-white transition-colors"
+          className="w-full max-w-xs py-3 rounded-xl bg-navy-600 hover:bg-navy-700 font-semibold text-white transition-colors"
         >
           Back to checkpoint
         </button>
@@ -122,8 +122,8 @@ export default function ReceivePanel({ raceId, checkpointNumber, onDone }) {
   // ── Initial prompt ────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col items-center justify-center h-full gap-6 px-6 text-center">
-      <div className="w-16 h-16 rounded-full bg-blue-600/20 flex items-center justify-center">
-        <svg className="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="w-16 h-16 rounded-full bg-navy-600/20 flex items-center justify-center">
+        <svg className="w-8 h-8 text-navy-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.24M16 16H9m4 4V9a1 1 0 00-1-1H9" />
         </svg>
       </div>
@@ -136,7 +136,7 @@ export default function ReceivePanel({ raceId, checkpointNumber, onDone }) {
       </div>
       <button
         onClick={() => setScanning(true)}
-        className="w-full max-w-xs py-3 rounded-xl bg-blue-600 hover:bg-blue-700 font-semibold text-white transition-colors"
+        className="w-full max-w-xs py-3 rounded-xl bg-navy-600 hover:bg-navy-700 font-semibold text-white transition-colors"
       >
         Start Scanning
       </button>

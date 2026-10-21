@@ -96,7 +96,7 @@ export const ConflictResolutionDialog = ({ conflicts, onResolve, onCancel }) => 
                     ID: <code className="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">{conflict.id}</code>
                   </p>
                 </div>
-                <span className="text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 px-2 py-1 rounded-full">
+                <span className="text-xs bg-gold-100 text-gold-800 dark:bg-gold-900 dark:text-gold-200 px-2 py-1 rounded-full">
                   Conflict
                 </span>
               </div>
@@ -107,7 +107,7 @@ export const ConflictResolutionDialog = ({ conflicts, onResolve, onCancel }) => 
                 <div
                   className={`border-2 rounded-lg p-4 cursor-pointer transition ${
                     resolutions[conflict.id] === 'existing'
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      ? 'border-navy-500 bg-navy-50 dark:bg-navy-900/20'
                       : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 bg-white dark:bg-gray-800'
                   }`}
                   onClick={() => handleResolution(conflict.id, 'existing')}
@@ -127,7 +127,7 @@ export const ConflictResolutionDialog = ({ conflicts, onResolve, onCancel }) => 
                       type="radio"
                       checked={resolutions[conflict.id] === 'existing'}
                       onChange={() => {}}
-                      className="w-4 h-4 text-blue-600"
+                      className="w-4 h-4 text-navy-600"
                       aria-label="Select existing version"
                     />
                   </div>
@@ -159,7 +159,7 @@ export const ConflictResolutionDialog = ({ conflicts, onResolve, onCancel }) => 
                 <div
                   className={`border-2 rounded-lg p-4 cursor-pointer transition ${
                     resolutions[conflict.id] === 'incoming'
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      ? 'border-navy-500 bg-navy-50 dark:bg-navy-900/20'
                       : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 bg-white dark:bg-gray-800'
                   }`}
                   onClick={() => handleResolution(conflict.id, 'incoming')}
@@ -179,7 +179,7 @@ export const ConflictResolutionDialog = ({ conflicts, onResolve, onCancel }) => 
                       type="radio"
                       checked={resolutions[conflict.id] === 'incoming'}
                       onChange={() => {}}
-                      className="w-4 h-4 text-blue-600"
+                      className="w-4 h-4 text-navy-600"
                       aria-label="Select incoming version"
                     />
                   </div>
@@ -210,7 +210,7 @@ export const ConflictResolutionDialog = ({ conflicts, onResolve, onCancel }) => 
 
               {/* Helper Text */}
               {resolutions[conflict.id] && (
-                <p className="mt-3 text-xs text-green-600 dark:text-green-400">
+                <p className="mt-3 text-xs text-navy-600 dark:text-navy-400">
                   ✓ Resolved: Will keep <strong>{resolutions[conflict.id]}</strong> version
                 </p>
               )}
@@ -238,7 +238,7 @@ export const ConflictResolutionDialog = ({ conflicts, onResolve, onCancel }) => 
               disabled={!allResolved}
               className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition ${
                 allResolved
-                  ? 'bg-blue-600 hover:bg-blue-700'
+                  ? 'bg-navy-600 hover:bg-navy-700'
                   : 'bg-gray-400 cursor-not-allowed'
               }`}
             >

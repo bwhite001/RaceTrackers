@@ -121,7 +121,7 @@ const CourseMapStep = ({ checkpoints, onComplete, onSkip, initialData = null }) 
             </div>
           </label>
           {gpxResult && (
-            <p className="text-sm text-green-700 dark:text-green-400">
+            <p className="text-sm text-navy-700 dark:text-navy-400">
               ✓ GPX loaded — {gpxResult.trackPoints.length} track points, {gpxResult.waypoints.length} waypoints
             </p>
           )}
@@ -131,7 +131,7 @@ const CourseMapStep = ({ checkpoints, onComplete, onSkip, initialData = null }) 
       {/* URL tab */}
       {activeTab === 1 && (
         <div className="space-y-3">
-          <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded p-2">
+          <p className="text-xs text-gold-700 dark:text-gold-400 bg-gold-50 dark:bg-gold-900/20 rounded p-2">
             ⚠ CORS note: Most AllTrails, Strava, and Garmin URLs block cross-origin requests.
             If this fails, download the GPX manually and use the Upload tab.
           </p>

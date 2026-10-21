@@ -65,14 +65,14 @@ const Badge = ({
       soft: 'bg-gold-50 text-gold-700 dark:bg-gold-900 dark:text-gold-300',
     },
     success: {
-      solid: 'bg-emerald-500 text-white dark:bg-emerald-600',
-      outline: 'border border-emerald-500 text-emerald-700 dark:border-emerald-600 dark:text-emerald-400',
-      soft: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
+      solid: 'bg-navy-500 text-white dark:bg-navy-600',
+      outline: 'border border-navy-500 text-navy-700 dark:border-navy-600 dark:text-navy-400',
+      soft: 'bg-navy-100 text-navy-700 dark:bg-navy-900/40 dark:text-navy-400',
     },
     warning: {
-      solid: 'bg-amber-500 text-white dark:bg-amber-600',
-      outline: 'border border-amber-500 text-amber-700 dark:border-amber-600 dark:text-amber-400',
-      soft: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
+      solid: 'bg-gold-500 text-white dark:bg-gold-600',
+      outline: 'border border-gold-500 text-gold-700 dark:border-gold-600 dark:text-gold-400',
+      soft: 'bg-gold-100 text-gold-700 dark:bg-gold-900/40 dark:text-gold-400',
     },
     danger: {
       solid: 'bg-red-600 text-white dark:bg-red-700',
@@ -80,9 +80,9 @@ const Badge = ({
       soft: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
     },
     info: {
-      solid: 'bg-blue-500 text-white dark:bg-blue-600',
-      outline: 'border border-blue-500 text-blue-700 dark:border-blue-600 dark:text-blue-400',
-      soft: 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+      solid: 'bg-navy-500 text-white dark:bg-navy-600',
+      outline: 'border border-navy-500 text-navy-700 dark:border-navy-600 dark:text-navy-400',
+      soft: 'bg-navy-50 text-navy-700 dark:bg-navy-900 dark:text-navy-300',
     },
     // Runner status variants — Fluent tinted soft-container style
     'status-not-started': {
@@ -91,9 +91,9 @@ const Badge = ({
       soft: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
     },
     'status-passed': {
-      solid: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
-      outline: 'border border-emerald-500 text-emerald-700 dark:border-emerald-600 dark:text-emerald-400',
-      soft: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
+      solid: 'bg-navy-100 text-navy-700 dark:bg-navy-900/40 dark:text-navy-400',
+      outline: 'border border-navy-500 text-navy-700 dark:border-navy-600 dark:text-navy-400',
+      soft: 'bg-navy-100 text-navy-700 dark:bg-navy-900/40 dark:text-navy-400',
     },
     'status-non-starter': {
       solid: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
@@ -101,9 +101,9 @@ const Badge = ({
       soft: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
     },
     'status-dnf': {
-      solid: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
-      outline: 'border border-amber-400 text-amber-700 dark:border-amber-600 dark:text-amber-400',
-      soft: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
+      solid: 'bg-gold-100 text-gold-700 dark:bg-gold-900/40 dark:text-gold-400',
+      outline: 'border border-gold-400 text-gold-700 dark:border-gold-600 dark:text-gold-400',
+      soft: 'bg-gold-100 text-gold-700 dark:bg-gold-900/40 dark:text-gold-400',
     },
     'status-called-in': {
       solid: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400',
@@ -138,14 +138,14 @@ const Badge = ({
     default: 'bg-gray-400 dark:bg-gray-500',
     primary: 'bg-navy-600 dark:bg-navy-500',
     secondary: 'bg-gold-500 dark:bg-gold-600',
-    success: 'bg-emerald-500 dark:bg-emerald-600',
-    warning: 'bg-amber-500 dark:bg-amber-600',
+    success: 'bg-navy-500 dark:bg-navy-600',
+    warning: 'bg-gold-500 dark:bg-gold-600',
     danger: 'bg-red-600 dark:bg-red-700',
-    info: 'bg-blue-500 dark:bg-blue-600',
+    info: 'bg-navy-500 dark:bg-navy-600',
     'status-not-started': 'bg-gray-400 dark:bg-gray-500',
-    'status-passed': 'bg-emerald-500 dark:bg-emerald-400',
+    'status-passed': 'bg-navy-500 dark:bg-navy-400',
     'status-non-starter': 'bg-red-500 dark:bg-red-400',
-    'status-dnf': 'bg-amber-500 dark:bg-amber-400',
+    'status-dnf': 'bg-gold-500 dark:bg-gold-400',
     'status-called-in': 'bg-violet-500 dark:bg-violet-400',
   };
 

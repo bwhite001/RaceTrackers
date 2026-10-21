@@ -237,7 +237,7 @@ const RaceEditView = () => {
                     ${idx === currentStep
                       ? 'bg-navy-600 text-white'
                       : idx < currentStep
-                        ? 'bg-green-600 text-white'
+                        ? 'bg-navy-600 text-white'
                         : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                     }`}
                 >
@@ -332,7 +332,7 @@ const RaceEditView = () => {
         <Card variant="elevated">
           <CardBody>
             {hasRunnerData && (
-              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-sm text-blue-800 dark:text-blue-200">
+              <div className="mb-4 p-3 bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800 rounded-lg text-sm text-navy-800 dark:text-navy-200">
                 Checkpoint data has already been recorded. Renaming checkpoints won&apos;t affect recorded times.
               </div>
             )}

@@ -14,7 +14,7 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="text-center text-sm text-gray-600 dark:text-gray-400 space-y-1">
           <p>
-            © {currentYear} VK4WIP Radio Club. All rights reserved.
+            © {currentYear} Ipswich &amp; District Radio Club · VK4WIP. All rights reserved.
           </p>
           <p className="text-xs">
             Designed for offline ultramarathon race management

@@ -90,7 +90,7 @@ const ExportCheckpointResultsModal = ({
 
           {!pkg && !error && (
             <div className="flex items-center gap-2 text-sm text-gray-500 py-4">
-              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-navy-500 border-t-transparent rounded-full animate-spin" />
               Preparing export…
             </div>
           )}
@@ -98,13 +98,13 @@ const ExportCheckpointResultsModal = ({
           {pkg && (
             <>
               <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                  <div className="text-2xl font-bold text-green-700 dark:text-green-400">{markedOff}</div>
-                  <div className="text-xs text-green-600 dark:text-green-300">marked off</div>
+                <div className="bg-navy-50 dark:bg-navy-900/20 rounded-lg p-3">
+                  <div className="text-2xl font-bold text-navy-700 dark:text-navy-400">{markedOff}</div>
+                  <div className="text-xs text-navy-600 dark:text-navy-300">marked off</div>
                 </div>
-                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
-                  <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">{calledIn}</div>
-                  <div className="text-xs text-blue-600 dark:text-blue-300">called in</div>
+                <div className="bg-navy-50 dark:bg-navy-900/20 rounded-lg p-3">
+                  <div className="text-2xl font-bold text-navy-700 dark:text-navy-400">{calledIn}</div>
+                  <div className="text-xs text-navy-600 dark:text-navy-300">called in</div>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
                   <div className="text-2xl font-bold text-gray-600 dark:text-gray-300">{notSeen}</div>

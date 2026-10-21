@@ -25,12 +25,12 @@ function TemplateSelectionStep({ onSelect, onImportFromWebScorer }) {
       {/* Import from WebScorer */}
       <button
         onClick={onImportFromWebScorer}
-        className="w-full text-left p-4 rounded-lg border-2 border-green-300 dark:border-green-700 hover:border-green-500 dark:hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors group"
+        className="w-full text-left p-4 rounded-lg border-2 border-navy-300 dark:border-navy-700 hover:border-navy-500 dark:hover:border-navy-500 hover:bg-navy-50 dark:hover:bg-navy-900/20 transition-colors group"
       >
         <div className="flex items-center gap-3">
           <ArrowDownTrayIcon className="w-7 h-7 text-vk-blue" aria-hidden="true" />
           <div>
-            <p className="font-medium text-gray-900 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-300">
+            <p className="font-medium text-gray-900 dark:text-white group-hover:text-navy-700 dark:group-hover:text-navy-300">
               Import from WebScorer
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -73,24 +73,24 @@ function TemplateSelectionStep({ onSelect, onImportFromWebScorer }) {
               {template.description}
             </p>
             <div className="mt-3 flex flex-wrap gap-2 text-xs">
-              <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+              <span className="px-2 py-0.5 rounded-full bg-vk-band text-vk-navy dark:bg-gray-700 dark:text-gray-100">
                 {template.checkpoints.length} checkpoints
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
+              <span className="px-2 py-0.5 rounded-full bg-vk-band text-vk-navy dark:bg-gray-700 dark:text-gray-100">
                 {template.runnerRanges.map(r => `${r.min}–${r.max}`).join(', ')}
               </span>
               {template.defaultBatches.length > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300">
+                <span className="px-2 py-0.5 rounded-full bg-vk-band text-vk-navy dark:bg-gray-700 dark:text-gray-100">
                   {template.defaultBatches.length} wave{template.defaultBatches.length !== 1 ? 's' : ''}
                 </span>
               )}
               {template.defaultStartTime && (
-                <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                <span className="px-2 py-0.5 rounded-full bg-vk-band text-vk-navy dark:bg-gray-700 dark:text-gray-100">
                   Start {template.defaultStartTime.slice(0, 5)}
                 </span>
               )}
               {template.baseLocation && (
-                <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300">
+                <span className="px-2 py-0.5 rounded-full bg-vk-gold-tint border border-vk-gold text-vk-ink dark:text-gray-100">
                   {template.baseLocation}
                 </span>
               )}

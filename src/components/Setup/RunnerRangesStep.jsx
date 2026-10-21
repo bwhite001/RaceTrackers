@@ -247,8 +247,8 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
             {ranges.map((range, index) => (
               <Card key={index} variant="outline">
                 <CardBody>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-2 min-w-0">
                       <Badge variant="primary" size="lg">
                         {range.min}-{range.max}
                       </Badge>
@@ -263,7 +263,8 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
                       variant="ghost"
                       onClick={() => handleRemoveRange(index)}
                       leftIcon={<TrashIcon className="w-5 h-5" />}
-                      aria-label="Remove range"
+                      aria-label={`Remove range ${range.min}-${range.max}`}
+                      className="shrink-0"
                     />
                   </div>
                 </CardBody>
@@ -293,7 +294,7 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
           <button
             type="button"
             onClick={() => setShowNameFields(!showNameFields)}
-            className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+            className="text-sm text-navy-600 hover:text-navy-800 flex items-center gap-1"
           >
             <span>{showNameFields ? '▾' : '▸'}</span>
             Add runner names &amp; gender (optional)
@@ -321,7 +322,7 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
                             name="firstName"
                             defaultValue={existing.firstName || ''}
                             placeholder="Optional"
-                            className="w-full border-0 bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 rounded px-1"
+                            className="w-full border-0 bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-navy-400 rounded px-1"
                             onBlur={(e) => {
                               if (raceId) updateRunnerPersonalData(raceId, runnerNumber, {
                                 firstName: e.target.value || null,
@@ -337,7 +338,7 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
                             name="lastName"
                             defaultValue={existing.lastName || ''}
                             placeholder="Optional"
-                            className="w-full border-0 bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 rounded px-1"
+                            className="w-full border-0 bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-navy-400 rounded px-1"
                             onBlur={(e) => {
                               if (raceId) updateRunnerPersonalData(raceId, runnerNumber, {
                                 firstName: existing.firstName || null,
@@ -377,8 +378,8 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-6 border-t border-vk-border dark:border-gray-700">
-        <Button variant="blueOutline" size="primary" onClick={onBack} className="flex-1">
-          Back: Race Details
+        <Button variant="blueOutline" size="primary" onClick={onBack} className="flex-1 whitespace-nowrap">
+          Back
         </Button>
         <Button
           variant="gold"
@@ -386,9 +387,9 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
           onClick={handleCreateRace}
           loading={isLoading}
           disabled={ranges.length === 0}
-          className="flex-[2]"
+          className="flex-[2] whitespace-nowrap"
         >
-          Next: Waves →
+          Next: Waves
         </Button>
       </div>
 

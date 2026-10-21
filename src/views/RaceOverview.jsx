@@ -144,18 +144,18 @@ const RaceOverview = () => {
 
       {/* ── 1. Success banner (post-creation only) ── */}
       {showSuccessBanner && (
-        <Card variant="elevated" className="border-l-4 border-green-500">
+        <Card variant="elevated" className="border-l-4 border-navy-500">
           <CardBody>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-start gap-3">
-                <svg className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-6 h-6 text-navy-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 <div>
-                  <h3 className="text-sm font-semibold text-green-800 dark:text-green-200">
+                  <h3 className="text-sm font-semibold text-navy-800 dark:text-navy-200">
                     Race Created Successfully!
                   </h3>
-                  <p className="text-sm text-green-700 dark:text-green-300 mt-0.5">
+                  <p className="text-sm text-navy-700 dark:text-navy-300 mt-0.5">
                     Review your race configuration and choose how to operate.
                   </p>
                 </div>
@@ -175,7 +175,7 @@ const RaceOverview = () => {
                 </Button>
                 <button
                   onClick={() => setShowSuccessBanner(false)}
-                  className="text-green-500 hover:text-green-700 dark:hover:text-green-300 ml-1"
+                  className="text-navy-500 hover:text-navy-700 dark:hover:text-navy-300 ml-1"
                   aria-label="Dismiss"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">

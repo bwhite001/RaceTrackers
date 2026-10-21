@@ -28,9 +28,9 @@ const PreviewPanel = ({
 }) => {
   const variants = {
     default: 'bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700',
-    info: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',
-    success: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
-    warning: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800',
+    info: 'bg-navy-50 dark:bg-navy-900/20 border-navy-200 dark:border-navy-800',
+    success: 'bg-navy-50 dark:bg-navy-900/20 border-navy-200 dark:border-navy-800',
+    warning: 'bg-gold-50 dark:bg-gold-900/20 border-gold-200 dark:border-gold-800',
   };
 
   const hasData = data && (Array.isArray(data) ? data.length > 0 : true);

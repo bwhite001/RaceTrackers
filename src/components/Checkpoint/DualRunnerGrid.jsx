@@ -58,10 +58,10 @@ const DualRunnerGrid = () => {
   return (
     <div className="space-y-4">
       {/* Stats bar */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+      <div className="bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800 rounded-lg p-4">
         <div className="grid grid-cols-3 gap-4 text-sm text-center">
           <div>
-            <div className="text-lg font-bold text-green-600">{passed}</div>
+            <div className="text-lg font-bold text-navy-600">{passed}</div>
             <div className="text-gray-500 dark:text-gray-400">Passed</div>
           </div>
           <div>
@@ -74,7 +74,7 @@ const DualRunnerGrid = () => {
           </div>
         </div>
         {activeTab === 'secondary' && awaitingReturn > 0 && (
-          <p className="mt-2 text-xs text-amber-700 dark:text-amber-400 text-center">
+          <p className="mt-2 text-xs text-gold-700 dark:text-gold-400 text-center">
             {awaitingReturn} runner{awaitingReturn !== 1 ? 's' : ''} still expected from outbound checkpoint
           </p>
         )}

@@ -136,7 +136,7 @@ const QRScannerModal = ({ isOpen, onScan, onClose }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <p className="text-sm text-red-600 dark:text-red-400 mb-4">{errorMsg}</p>
-              <button onClick={startCamera} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+              <button onClick={startCamera} className="px-4 py-2 bg-navy-600 text-white rounded hover:bg-navy-700 text-sm">
                 Try Again
               </button>
             </div>

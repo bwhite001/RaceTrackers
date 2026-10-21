@@ -117,12 +117,12 @@ const LinkedCheckpointOverview = () => {
     <div className="space-y-6">
       {/* Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{rows.filter(r => r.status !== 'neither').length > 0 ? rows.filter(r => r.status === 'both').length : 0}</div>
+        <div className="bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800 rounded-lg p-3 text-center">
+          <div className="text-2xl font-bold text-navy-700 dark:text-navy-300">{rows.filter(r => r.status !== 'neither').length > 0 ? rows.filter(r => r.status === 'both').length : 0}</div>
           <div className="text-xs text-gray-600 dark:text-gray-400">Both</div>
         </div>
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">{counts.primaryOnly}</div>
+        <div className="bg-gold-50 dark:bg-gold-900/20 border border-gold-200 dark:border-gold-800 rounded-lg p-3 text-center">
+          <div className="text-2xl font-bold text-gold-700 dark:text-gold-300">{counts.primaryOnly}</div>
           <div className="text-xs text-gray-600 dark:text-gray-400">CP{primaryCpNumber} Only</div>
         </div>
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-center">

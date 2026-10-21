@@ -14,15 +14,15 @@ const StatusCell = ({ status, time }) => {
     const timeLabel = time ?? null;
     return (
       <span className="inline-flex flex-col items-center leading-tight" aria-label="passed">
-        <span className="text-green-600 dark:text-green-400 font-bold text-sm">✓</span>
-        {timeLabel && <span className="text-green-700 dark:text-green-400 text-xs font-mono">{timeLabel}</span>}
+        <span className="text-navy-600 dark:text-navy-400 font-bold text-sm">✓</span>
+        {timeLabel && <span className="text-navy-700 dark:text-navy-400 text-xs font-mono">{timeLabel}</span>}
       </span>
     );
   }
   if (status === RUNNER_STATUSES.DNF || status === RUNNER_STATUSES.DNS) {
     return <span className="text-red-500 dark:text-red-400 font-bold text-sm" aria-label="dnf">✗</span>;
   }
-  return <span className="text-yellow-500 text-xs" aria-label={status}>?</span>;
+  return <span className="text-gold-500 text-xs" aria-label={status}>?</span>;
 };
 
 /**
@@ -134,7 +134,7 @@ const HeadsUpGrid = ({ runners = [], checkpoints = [], showNames = false }) => {
                 {sortedCheckpoints.map(cp => (
                   <td
                     key={cp.number}
-                    className="px-3 py-1.5 text-center border-b border-gray-100 dark:border-gray-700/50 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                    className="px-3 py-1.5 text-center border-b border-gray-100 dark:border-gray-700/50 cursor-pointer hover:bg-navy-50 dark:hover:bg-navy-900/20"
                     onClick={() => setEditTarget({ runnerNumber: runner.number, checkpointNumber: cp.number })}
                   >
                     <StatusCell status={runner.checkpointStatuses?.[cp.number]} time={runner.checkpointTimes?.[cp.number]} />
@@ -153,7 +153,7 @@ const HeadsUpGrid = ({ runners = [], checkpoints = [], showNames = false }) => {
                 </td>
                 <td className="px-3 py-2" />
                 {sortedCheckpoints.map(cp => (
-                  <td key={cp.number} className="px-3 py-2 text-center text-xs font-bold text-green-700 dark:text-green-400">
+                  <td key={cp.number} className="px-3 py-2 text-center text-xs font-bold text-navy-700 dark:text-navy-400">
                     {passCountByCheckpoint[cp.number]}
                   </td>
                 ))}
@@ -192,8 +192,8 @@ const HeadsUpGrid = ({ runners = [], checkpoints = [], showNames = false }) => {
 const OverallStatusBadge = ({ status }) => {
   const map = {
     [RUNNER_STATUSES.NOT_STARTED]: { label: 'Not Started', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' },
-    [RUNNER_STATUSES.ACTIVE]: { label: 'Active', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400' },
-    [RUNNER_STATUSES.PASSED]: { label: 'Passed', cls: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' },
+    [RUNNER_STATUSES.ACTIVE]: { label: 'Active', cls: 'bg-navy-100 text-navy-700 dark:bg-navy-900/40 dark:text-navy-400' },
+    [RUNNER_STATUSES.PASSED]: { label: 'Passed', cls: 'bg-navy-100 text-navy-700 dark:bg-navy-900/40 dark:text-navy-400' },
     [RUNNER_STATUSES.DNF]: { label: 'DNF', cls: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' },
     [RUNNER_STATUSES.DNS]: { label: 'DNS', cls: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400' },
     [RUNNER_STATUSES.NON_STARTER]: { label: 'Non-Starter', cls: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400' },

@@ -200,8 +200,8 @@ function RosterImport({ raceId, onComplete }) {
 
       {/* Dev file picker — only rendered in development builds */}
       {import.meta.env.DEV && (
-        <div className="flex items-center gap-2 p-2 rounded border border-dashed border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20">
-          <span className="text-xs font-medium text-amber-700 dark:text-amber-400 whitespace-nowrap">Dev only</span>
+        <div className="flex items-center gap-2 p-2 rounded border border-dashed border-gold-300 dark:border-gold-700 bg-gold-50 dark:bg-gold-900/20">
+          <span className="text-xs font-medium text-gold-700 dark:text-gold-400 whitespace-nowrap">Dev only</span>
           <select
             className="text-sm flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-2 py-1"
             defaultValue=""
@@ -244,7 +244,7 @@ function RosterImport({ raceId, onComplete }) {
                     <td className="px-3 py-1.5 font-mono text-gray-800 dark:text-gray-200">
                       {col}
                       {state.autoDetected.has(col) && (
-                        <span className="ml-1 text-green-600 dark:text-green-400 text-[10px]">✓</span>
+                        <span className="ml-1 text-navy-600 dark:text-navy-400 text-[10px]">✓</span>
                       )}
                     </td>
                     <td className="px-3 py-1.5 text-gray-500 dark:text-gray-400 italic">{sampleValues(col) || '—'}</td>
@@ -265,7 +265,7 @@ function RosterImport({ raceId, onComplete }) {
             </table>
           </div>
           {!numberMapped && (
-            <p className="text-xs text-amber-600 dark:text-amber-400">
+            <p className="text-xs text-gold-600 dark:text-gold-400">
               Map at least one column to "Bib # (required)" to continue.
             </p>
           )}
@@ -356,14 +356,14 @@ function RosterImport({ raceId, onComplete }) {
 
       {/* ── Importing spinner ── */}
       {state.step === 'importing' && (
-        <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-sm">
+        <div className="p-3 rounded-lg bg-navy-50 dark:bg-navy-900/20 text-navy-700 dark:text-navy-300 text-sm">
           Importing…
         </div>
       )}
 
       {/* ── Done ── */}
       {state.step === 'done' && state.result && (
-        <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 text-sm">
+        <div className="p-3 rounded-lg bg-navy-50 dark:bg-navy-900/20 text-navy-700 dark:text-navy-300 text-sm">
           ✓ Import complete — {state.result.updated} updated, {state.result.created} new
           {state.result.errors > 0 && `, ${state.result.errors} error${state.result.errors !== 1 ? 's' : ''}`}
         </div>

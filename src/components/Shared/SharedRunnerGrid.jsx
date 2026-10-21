@@ -431,11 +431,11 @@ const SharedRunnerGrid = ({
             </div>
 
             {/* Instructions */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+            <div className="bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800 rounded-lg p-4">
+                <h4 className="font-medium text-navy-900 dark:text-navy-100 mb-2">
                     Instructions
                 </h4>
-                <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                <ul className="text-sm text-navy-800 dark:text-navy-200 space-y-1">
                     <li>• Click on a runner number to mark them as passed</li>
                     <li>• Double-click on a passed runner to uncheck/revert them</li>
                     <li>• Click on a runner's time to edit it</li>

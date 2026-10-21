@@ -82,8 +82,8 @@ export const useToast = () => {
 const VARIANT_CONFIG = {
   success: {
     icon: CheckCircleIcon,
-    bar: 'bg-green-500',
-    iconColor: 'text-green-500',
+    bar: 'bg-navy-500',
+    iconColor: 'text-navy-500',
     label: 'Success',
   },
   error: {

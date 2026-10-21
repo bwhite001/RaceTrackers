@@ -115,7 +115,7 @@ export default function QRDisplayFullscreen({ packet, onDone, onCancel }) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 p-6 text-center">
         <p className="text-red-400 text-sm">{error}</p>
-        <button onClick={onCancel} className="text-blue-400 underline text-sm">Go back</button>
+        <button onClick={onCancel} className="text-navy-400 underline text-sm">Go back</button>
       </div>
     );
   }
@@ -171,7 +171,7 @@ export default function QRDisplayFullscreen({ packet, onDone, onCancel }) {
       <div className="flex flex-col items-center gap-3 w-full max-w-xs">
         <button
           onClick={onDone}
-          className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 font-semibold text-white transition-colors"
+          className="w-full py-3 rounded-xl bg-navy-600 hover:bg-navy-700 font-semibold text-white transition-colors"
         >
           Done — receiver got it
         </button>

@@ -90,7 +90,7 @@ const DualCalloutSheet = () => {
                         {segment.commonTimeLabel || '—'}
                       </h5>
                       <div className="flex items-center space-x-2 mb-3">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-navy-100 dark:bg-navy-900 text-navy-800 dark:text-navy-200">
                           {segment.runners.length} runner{segment.runners.length !== 1 ? 's' : ''}
                         </span>
                       </div>
@@ -138,12 +138,12 @@ const DualCalloutSheet = () => {
           </h4>
           <div className="space-y-2">
             {calledSegments.map((segment) => (
-              <div key={segment.commonTimeLabel} className="card p-3 border-l-4 border-l-green-500 bg-green-50 dark:bg-green-900/20">
+              <div key={segment.commonTimeLabel} className="card p-3 border-l-4 border-l-green-500 bg-navy-50 dark:bg-navy-900/20">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-4">
                       <span className="font-medium text-gray-900 dark:text-white">{segment.commonTimeLabel}</span>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-navy-100 dark:bg-navy-800 text-navy-800 dark:text-navy-200">
                         {segment.runners.length} runner{segment.runners.length !== 1 ? 's' : ''}
                       </span>
                     </div>
@@ -151,7 +151,7 @@ const DualCalloutSheet = () => {
                       {formatRunnerList(segment.runners)}
                     </div>
                   </div>
-                  <div className="flex items-center text-green-600 dark:text-green-400">
+                  <div className="flex items-center text-navy-600 dark:text-navy-400">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>

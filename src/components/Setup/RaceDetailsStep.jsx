@@ -47,10 +47,7 @@ const RaceDetailsStep = ({ data = {}, onNext, onCancel, isLoading }) => {
     const checkpoints = [];
     for (let i = 1; i <= numCheckpoints; i++) {
       const existingCheckpoint = formData.checkpoints.find(cp => cp.number === i);
-      checkpoints.push({
-        number: i,
-        name: existingCheckpoint ? existingCheckpoint.name : `Checkpoint ${i}`
-      });
+      checkpoints.push(existingCheckpoint ? { ...existingCheckpoint } : { number: i, name: `Checkpoint ${i}` });
     }
     
     const updatedData = {

@@ -63,8 +63,8 @@ const Toggle = ({
         'touch-target',
         sizeClasses.track,
         checked
-          ? 'bg-green-500 dark:bg-green-600'
-          : 'bg-gray-300 dark:bg-gray-600',
+          ? 'bg-vk-blue'
+          : 'bg-vk-border dark:bg-gray-600',
         className
       )}
       {...props}
