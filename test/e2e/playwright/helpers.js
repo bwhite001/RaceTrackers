@@ -198,7 +198,7 @@ export async function clearAppData(page) {
     sessionStorage.clear();
   });
   await page.reload();
-  await page.waitForSelector('h1:has-text("Race Tracker Pro")');
+  await page.waitForSelector('h1:has-text("RaceTracker")');
 }
 
 /**

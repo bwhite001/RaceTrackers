@@ -8,12 +8,11 @@ import {
   FormSection,
   Input,
   Button,
-  ButtonGroup,
   Card,
   CardBody,
   Badge
 } from '../../design-system/components';
-import { DocumentIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { DocumentIcon, PlusIcon, TrashIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 
 /**
  * Ensures every range object has numeric min/max, count, and individualNumbers.
@@ -35,7 +34,7 @@ function normalizeRange(r) {
   };
 }
 
-const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCreate, isLoading }) => {
+const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCreate, isLoading, onImportFile }) => {
 
   // Initialize with default range if no initial ranges provided
   const defaultRange = [];
@@ -162,11 +161,18 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-col gap-1.5">
+        <h2 className="font-display font-bold text-xl text-vk-navy dark:text-white">Which bib numbers are racing?</h2>
+        <p className="text-sm text-vk-muted dark:text-gray-400 leading-relaxed">
+          Add one or more ranges. Ranges are only used here, to create the field — every bib is handled on its own after this.
+        </p>
+      </div>
+
       {/* Add New Range */}
       <FormSection
         icon={DocumentIcon}
         title="Add Runner Range"
-        description="Define number ranges for race participants"
+        description="Start and end bib numbers, inclusive"
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormGroup>
@@ -220,7 +226,8 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
 
         <div className="mt-4">
           <Button
-            variant="secondary"
+            variant="blue"
+            size="action"
             onClick={handleAddRange}
             leftIcon={<PlusIcon className="w-5 h-5" />}
           >
@@ -266,35 +273,19 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
         </FormSection>
       )}
 
-      {/* Summary Card */}
-      <Card variant="elevated" className="bg-blue-50 dark:bg-blue-900/20">
-        <CardBody>
-          <div className="flex items-center gap-2 mb-4">
-            <DocumentIcon className="w-5 h-5 text-blue-500" />
-            <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-              Runner Configuration Summary
-            </h4>
-          </div>
-          <div className="text-sm text-blue-700 dark:text-blue-300 space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="font-medium">Total Runners:</span>
-              <Badge variant="primary">{getTotalRunners()}</Badge>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium">Number Ranges:</span>
-              <Badge variant="secondary">{ranges.length}</Badge>
-            </div>
-            {ranges.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="font-medium">Full Range:</span>
-                <Badge variant="default">
-                  {Math.min(...getRunnerNumbers())}-{Math.max(...getRunnerNumbers())}
-                </Badge>
-              </div>
-            )}
-          </div>
-        </CardBody>
-      </Card>
+      {/* Live count + first / last preview */}
+      <RunnerCountPreview numbers={getRunnerNumbers()} />
+
+      <div className="bg-vk-band dark:bg-gray-800 rounded-card px-4 py-3.5 flex gap-3 items-start">
+        <InformationCircleIcon className="w-5 h-5 text-vk-blue shrink-0 mt-0.5" aria-hidden="true" />
+        <div className="text-[13px] leading-relaxed">
+          Have a start list?{' '}
+          {onImportFile
+            ? <button type="button" onClick={onImportFile} className="text-vk-blue font-semibold underline">Import a CSV or WebScorer file</button>
+            : 'Import a CSV or WebScorer file from Race setup'}
+          {' '}to bring in names, gender and wave too.
+        </div>
+      </div>
 
       {/* Optional Runner Names & Gender */}
       {ranges.length > 0 && (
@@ -385,27 +376,49 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
       )}
 
       {/* Action Buttons */}
-      <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-        <Button
-          variant="outline"
-          onClick={onBack}
-        >
+      <div className="flex gap-3 pt-6 border-t border-vk-border dark:border-gray-700">
+        <Button variant="blueOutline" size="primary" onClick={onBack} className="flex-1">
           Back: Race Details
         </Button>
-        <ButtonGroup>
-          <Button
-            variant="primary"
-            onClick={handleCreateRace}
-            loading={isLoading}
-            disabled={ranges.length === 0}
-          >
-            Next: Waves →
-          </Button>
-        </ButtonGroup>
+        <Button
+          variant="gold"
+          size="primary"
+          onClick={handleCreateRace}
+          loading={isLoading}
+          disabled={ranges.length === 0}
+          className="flex-[2]"
+        >
+          Next: Waves →
+        </Button>
       </div>
 
       {validationErrors.general && (
         <FormErrorMessage>{validationErrors.general}</FormErrorMessage>
+      )}
+    </div>
+  );
+};
+
+/** "250 runners will be created" + first five … last five bib chips. */
+const RunnerCountPreview = ({ numbers }) => {
+  const sorted = [...numbers].sort((a, b) => a - b);
+  const head = sorted.slice(0, 5);
+  const tail = sorted.length > 10 ? sorted.slice(-5) : sorted.slice(5);
+  const chip = (n, key, muted = false) => (
+    <div key={key} className={`bg-vk-band dark:bg-gray-700 rounded-chip py-2 text-center font-bold text-[13px] tabular-nums ${muted ? 'text-vk-muted' : ''}`}>{n}</div>
+  );
+  return (
+    <div className="bg-white dark:bg-gray-800 border border-vk-border dark:border-gray-700 rounded-card p-4 flex flex-col gap-3" aria-live="polite">
+      <div className="flex items-baseline justify-between">
+        <div className="font-display font-extrabold text-[32px] text-vk-navy dark:text-white tabular-nums">{sorted.length}</div>
+        <div className="text-[13px] font-semibold text-vk-blue">runner{sorted.length === 1 ? '' : 's'} will be created</div>
+      </div>
+      {sorted.length > 0 && (
+        <div className="grid grid-cols-6 gap-1.5">
+          {head.map(n => chip(n, `h${n}`))}
+          {sorted.length > 10 && chip('…', 'gap', true)}
+          {tail.map(n => chip(n, `t${n}`))}
+        </div>
       )}
     </div>
   );

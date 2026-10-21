@@ -147,7 +147,7 @@ test.describe('Race Management Journey', () => {
   test('home page landing shows the race management module card', async ({ page, step }) => {
     await step('Home — Race Maintenance module card visible', async () => {
       await goHome(page);
-      await expect(page.getByRole('button', { name: /race maintenance/i })).toBeVisible();
+      await expect(page.getByRole('button', { name: /race setup/i })).toBeVisible();
     });
   });
 });

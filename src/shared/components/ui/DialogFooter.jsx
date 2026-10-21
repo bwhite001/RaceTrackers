@@ -96,13 +96,13 @@ const DialogFooter = ({
             onClick={primaryAction.onClick}
             disabled={primaryAction.disabled || primaryAction.loading}
             className={cn(
-              'px-4 py-2 text-sm font-medium text-white rounded-md shadow-sm',
+              'px-4 py-2 min-h-[44px] rounded-btn shadow-btn font-display font-extrabold text-[13px] uppercase tracking-[0.6px]',
               'focus:outline-none focus:ring-2 focus:ring-offset-2',
               'disabled:opacity-50 disabled:cursor-not-allowed',
               'touch-target',
               primaryAction.variant === 'danger'
-                ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
-                : 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
+                ? 'bg-vk-red text-white hover:bg-red-700 focus:ring-vk-red'
+                : 'bg-vk-gold text-vk-ink hover:bg-gold-400 focus:ring-vk-blue'
             )}
             {...primaryAction.props}
           >

@@ -134,7 +134,7 @@ test.describe('Full Confidence Check — Race Director + Volunteer + Base Statio
     await test.step('Navigate home and open Checkpoint Operations', async () => {
       await _page.goto(BASE);
       await _page.waitForSelector('h1', { timeout: 15000 });
-      await _page.getByRole('button', { name: /checkpoint operations/i }).click();
+      await _page.getByRole('button', { name: /^checkpoint\b/i }).click();
     });
 
     await test.step('Pick race in modal and wait for CP1', async () => {
@@ -478,7 +478,7 @@ test.describe('Full Confidence Check — Race Director + Volunteer + Base Statio
       } else {
         // App may redirect to home or show setup — either is acceptable
         await expect(
-          _page.getByText(/race tracker pro|no races|create|setup|import/i).first()
+          _page.getByText(/racetracker|no races|create|setup|import/i).first()
         ).toBeVisible({ timeout: 10000 });
       }
     });

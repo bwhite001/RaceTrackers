@@ -3,7 +3,7 @@
  *
  * Verifies the Settings modal and user-preference persistence:
  *   1. Open settings from the home page
- *   2. Toggle dark mode
+ *   2. Switch Theme to Dark (Light / Dark / Sunlight)
  *   3. Confirm dark class is applied to the document
  *   4. Toggle dark mode back
  *   5. Change font size
@@ -42,37 +42,36 @@ test.describe('Settings & Preferences Journey', () => {
       await expect(settingsHeading(page)).toBeVisible({ timeout: 5000 });
     });
 
-    await step('Settings modal — locate Dark Mode toggle switch', async () => {
-      // Dark mode is the first role="switch" inside the settings overlay
-      const overlay = page.locator('.fixed.inset-0');
-      const darkToggle = overlay.getByRole('switch').first();
-      await darkToggle.waitFor({ timeout: 5000 });
-    });
-
+    // Theme is a Light / Dark / Sunlight segmented control (VK4WIP redesign)
     const overlay = page.locator('.fixed.inset-0');
-    const darkToggle = overlay.getByRole('switch').first();
+    const darkButton = overlay.getByRole('button', { name: 'Dark', exact: true });
+    const lightButton = overlay.getByRole('button', { name: 'Light', exact: true });
+
+    await step('Settings modal — Theme control shows Light, Dark and Sunlight', async () => {
+      await darkButton.waitFor({ timeout: 5000 });
+      await expect(overlay.getByRole('button', { name: 'Sunlight', exact: true })).toBeVisible();
+    });
 
     const wasDark = await page.evaluate(() =>
       document.documentElement.classList.contains('dark')
     );
 
     await step('Dark mode ON — html element gains "dark" class', async () => {
-      // Toggle dark mode on
-      await darkToggle.click();
-
+      await darkButton.click();
+      await expect(darkButton).toHaveAttribute('aria-pressed', 'true');
       const isDarkNow = await page.evaluate(() =>
         document.documentElement.classList.contains('dark')
       );
-      expect(isDarkNow).toBe(!wasDark);
+      expect(isDarkNow).toBe(true);
     });
 
     await step('Dark mode OFF — "dark" class removed from html element', async () => {
-      // Toggle dark mode back
-      await darkToggle.click();
+      await lightButton.click();
       const isRestoredDark = await page.evaluate(() =>
         document.documentElement.classList.contains('dark')
       );
-      expect(isRestoredDark).toBe(wasDark);
+      expect(isRestoredDark).toBe(false);
+      expect(wasDark).toBe(false);
 
       // Discard changes (Cancel) so we don't pollute other tests
       await page.getByRole('button', { name: 'Cancel' }).click();
@@ -87,17 +86,12 @@ test.describe('Settings & Preferences Journey', () => {
     });
 
     const overlay = page.locator('.fixed.inset-0');
-    const darkToggle = overlay.getByRole('switch').first();
+    const darkButton = overlay.getByRole('button', { name: 'Dark', exact: true });
 
-    await step('Settings modal — enable dark mode and save', async () => {
-      await darkToggle.waitFor({ timeout: 5000 });
-
-      // Check current state via aria-checked attribute
-      const isCurrentlyChecked = (await darkToggle.getAttribute('aria-checked')) === 'true';
-
-      // Enable dark mode if not already on
-      if (!isCurrentlyChecked) {
-        await darkToggle.click();
+    await step('Settings modal — choose Dark theme and save', async () => {
+      await darkButton.waitFor({ timeout: 5000 });
+      if ((await darkButton.getAttribute('aria-pressed')) !== 'true') {
+        await darkButton.click();
       }
 
       // Save changes — this persists to the store and closes the modal
@@ -111,13 +105,12 @@ test.describe('Settings & Preferences Journey', () => {
       await expect(settingsHeading(page)).toBeVisible();
     });
 
-    await step('Settings modal — dark mode toggle persists as checked', async () => {
-      // Dark mode switch should still be checked
-      const persistedToggle = page.locator('.fixed.inset-0').getByRole('switch').first();
-      await expect(persistedToggle).toHaveAttribute('aria-checked', 'true');
+    await step('Settings modal — Dark theme is still selected', async () => {
+      const persisted = page.locator('.fixed.inset-0').getByRole('button', { name: 'Dark', exact: true });
+      await expect(persisted).toHaveAttribute('aria-pressed', 'true');
 
-      // Cleanup — turn dark mode back off and save
-      await persistedToggle.click();
+      // Cleanup — back to Light and save
+      await page.locator('.fixed.inset-0').getByRole('button', { name: 'Light', exact: true }).click();
       await page.getByRole('button', { name: 'Save Changes' }).click();
     });
   });

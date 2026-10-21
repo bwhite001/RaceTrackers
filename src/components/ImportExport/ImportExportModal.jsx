@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import QRCode from 'qrcode.react';
 import useRaceMaintenanceStore from '../../modules/race-maintenance/store/raceMaintenanceStore';
 import { useRaceStore } from '../../store/useRaceStore.js';
@@ -8,7 +8,7 @@ import StorageService from '../../services/storage.js';
 import ConflictResolutionDialog from './ConflictResolutionDialog.jsx';
 import QRScannerModal from '../Shared/QRScannerModal.jsx';
 
-const ImportExportModal = ({ isOpen, onClose }) => {
+const ImportExportModal = ({ isOpen, onClose, initialTab = 'export', startScanner = false }) => {
   // Use the new race maintenance store for current race data
   const { 
     currentRace: raceConfig,
@@ -26,7 +26,7 @@ const ImportExportModal = ({ isOpen, onClose }) => {
   // Get the current race ID from the race config
   const currentRaceId = raceConfig?.id;
   
-  const [activeTab, setActiveTab] = useState('export');
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [exportData, setExportData] = useState(null);
   const [importText, setImportText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -42,6 +42,13 @@ const ImportExportModal = ({ isOpen, onClose }) => {
   const [importPackage, setImportPackage] = useState(null);
   const [importPreview, setImportPreview] = useState(null);
   const [showQRScanner, setShowQRScanner] = useState(false);
+
+  // Opened from Home's "Scan race QR code": land on Import with the camera on
+  useEffect(() => {
+    if (!isOpen) return;
+    setActiveTab(initialTab);
+    if (startScanner) setShowQRScanner(true);
+  }, [isOpen, initialTab, startScanner]);
 
   const handleExport = async () => {
     setIsProcessing(true);

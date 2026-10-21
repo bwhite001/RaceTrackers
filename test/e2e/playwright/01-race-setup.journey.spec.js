@@ -24,11 +24,11 @@ test.describe('Race Director – Race Setup Journey', () => {
   test('creates a new race from scratch and verifies the overview', async ({ page, step }) => {
     await step('Home — Welcome Back screen with 3 module cards', async () => {
       await goHome(page);
-      await expect(page.getByRole('heading', { name: /race tracker pro/i })).toBeVisible();
+      await expect(page.getByRole('heading', { name: /^racetracker$/i })).toBeVisible();
     });
 
     await step('Race Maintenance → Create New Race — setup wizard opens', async () => {
-      const createRaceBtn = page.getByRole('button', { name: /create new race|race maintenance/i }).first();
+      const createRaceBtn = page.getByRole('button', { name: /create new race|race setup/i }).first();
       await createRaceBtn.click();
       if (page.url().includes('race-management')) {
         await page.getByRole('button', { name: /create new race/i }).first().click();
@@ -102,7 +102,7 @@ test.describe('Race Director – Race Setup Journey', () => {
 
     await step('Home — new race listed under module cards', async () => {
       await page.goto('/');
-      await page.waitForSelector('h1:has-text("Race Tracker Pro")', { timeout: 30000 });
+      await page.waitForSelector('h1:has-text("RaceTracker")', { timeout: 30000 });
       await expect(page.getByText(RACE_NAME)).toBeVisible();
     });
   });

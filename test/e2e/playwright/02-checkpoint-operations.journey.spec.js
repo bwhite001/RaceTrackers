@@ -33,7 +33,7 @@ test.describe('Checkpoint Volunteer – Mark-Off Journey', () => {
       await goHome(page);
 
       // Click "Checkpoint Operations" module card
-      await page.getByRole('button', { name: /checkpoint operations/i }).click();
+      await page.getByRole('button', { name: /^checkpoint\b/i }).click();
     });
 
     await step('Select Race modal — choose race from list', async () => {

@@ -1,21 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  BoltIcon, 
-  RadioIcon, 
-  Cog6ToothIcon, 
-  PlusIcon,
-  ArrowRightIcon,
+import {
+  RadioIcon,
+  Cog6ToothIcon,
+  FlagIcon,
+  AdjustmentsHorizontalIcon,
+  ChevronRightIcon,
+  QrCodeIcon,
+  QuestionMarkCircleIcon,
   ArrowTopRightOnSquareIcon,
   ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '../../design-system/components';
+import { ClubBadge, SavedIndicator } from '../../design-system/components/VK';
+import ImportExportModal from '../ImportExport/ImportExportModal';
+import TimeUtils from '../../services/timeUtils';
 import RaceStatsCard from './RaceStatsCard';
 import RaceSelectionModal from './RaceSelectionModal';
 import SettingsModal from '../Settings/SettingsModal';
-import PageHeader from '../../shared/components/PageHeader';
 import ConfirmModal from '../../shared/components/ui/ConfirmModal';
-import EmptyState from '../../shared/components/ui/EmptyState';
 import { StandardModal } from '../../shared/components/ui';
 import { categorizeRaces } from '../../utils/raceStatistics';
 import { useRaceStore } from '../../store/useRaceStore';
@@ -75,6 +78,7 @@ const LandingPage = () => {
   const [selectedModuleType, setSelectedModuleType] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: null });
   const [pendingRaceForCheckpoint, setPendingRaceForCheckpoint] = useState(null);
   const [checkpointChoices, setCheckpointChoices] = useState([]);
@@ -203,194 +207,107 @@ const LandingPage = () => {
     navigate('/race-management');
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <PageHeader variant="landing" />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-10">
-            <div className="h-8 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
-            <div className="h-4 w-72 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
-                <div className="w-12 h-12 rounded-lg bg-gray-200 dark:bg-gray-700 mb-4" />
-                <div className="h-5 w-3/4 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
-                <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded mb-1" />
-                <div className="h-4 w-2/3 bg-gray-200 dark:bg-gray-700 rounded" />
-              </div>
-            ))}
-          </div>
-        </main>
-      </div>
-    );
-  }
+  const currentRace = categorized.current[0] ?? categorized.upcoming[0] ?? categorized.recent[0] ?? null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <PageHeader
-        variant="landing"
-        onHelp={() => setShowHelp(true)}
-        onSettings={() => setShowSettings(true)}
-      />
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Welcome Back
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 max-w-2xl">
-            Select your operation mode to begin tracking. All data is stored locally on your device.
-          </p>
-        </div>
-
-        {/* Module Selection Grid */}
-        <section className="mb-12" data-screenshot-target>
-          <h3 className="section-heading">Select Operation Mode</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <ModuleCard
-              title="Checkpoint Operations"
-              description="Track runners at your assigned checkpoint"
-              icon={BoltIcon}
-              accentColor="border-l-blue-600"
-              iconBg="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-              onClick={() => handleModuleSelect(MODULE_TYPES.CHECKPOINT, '/checkpoint/1')}
-            />
-
-            <ModuleCard
-              title="Base Station Operations"
-              description="Monitor all checkpoints and manage race data"
-              icon={RadioIcon}
-              accentColor="border-l-emerald-600"
-              iconBg="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400"
-              onClick={() => handleModuleSelect(MODULE_TYPES.BASE_STATION, '/base-station/operations')}
-            />
-
-            <ModuleCard
-              title="Race Maintenance"
-              description="Configure race details and runner information"
-              icon={Cog6ToothIcon}
-              accentColor="border-l-violet-600"
-              iconBg="bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400"
-              onClick={handleGoToRaceManagement}
-            />
+    <div className="min-h-screen bg-vk-paper dark:bg-gray-900 flex flex-col">
+      <header className="bg-vk-navy text-white px-5 pt-7 pb-6">
+        <div className="max-w-3xl mx-auto flex flex-col gap-[18px]">
+          <div className="flex items-center gap-3">
+            <ClubBadge size={48} />
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <h1 className="font-display font-extrabold text-[22px] leading-tight">RaceTracker</h1>
+              <div className="text-xs text-vk-on-navy">Ipswich &amp; District Radio Club · VK4WIP</div>
+            </div>
+            <div className="ml-auto flex items-center">
+              {!currentRace && <SavedIndicator label="Offline ready" />}
+              <button type="button" aria-label="Help" onClick={() => setShowHelp(true)}
+                className="w-11 h-11 rounded-btn flex items-center justify-center hover:bg-white/10">
+                <QuestionMarkCircleIcon className="w-6 h-6" aria-hidden="true" />
+              </button>
+              <button type="button" aria-label="Settings" onClick={() => setShowSettings(true)}
+                className="w-11 h-11 rounded-btn flex items-center justify-center hover:bg-white/10">
+                <Cog6ToothIcon className="w-6 h-6" aria-hidden="true" />
+              </button>
+            </div>
           </div>
-        </section>
+          {currentRace && (
+            <CurrentRaceCard race={currentRace} />
+          )}
+        </div>
+      </header>
 
-        {/* Current Races Section */}
-        {categorized.current.length > 0 && (
-          <section className="mb-12">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="section-heading mb-0 border-0 pb-0">Current Races</h3>
-              <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm font-medium">
-                {categorized.current.length} Active
-              </span>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categorized.current.map((race) => (
-                <RaceStatsCard
-                  key={race.id}
-                  race={race}
-                  runners={runnersMap[race.id] || []}
-                  variant="current"
-                  onSelect={() => {
-                    if (settings.hapticsEnabled && 'vibrate' in navigator) {
-                      navigator.vibrate(10);
-                    }
-                    setSelectedModuleType(null);
-                    setShowRaceModal(true);
-                    setTimeout(() => handleRaceSelect(race), 100);
-                  }}
-                  onManage={() => {
-                    if (settings.hapticsEnabled && 'vibrate' in navigator) {
-                      navigator.vibrate(10);
-                    }
-                    setSelectedRaceForMode(race.id);
-                    navigate('/race-management');
-                  }}
-                />
-              ))}
-            </div>
-          </section>
-        )}
+      <main className="flex-1 px-5 py-[22px]">
+        <div className="max-w-3xl mx-auto flex flex-col gap-3.5" data-screenshot-target>
+          <h2 className="font-display font-bold text-lg text-vk-navy dark:text-white">What are you doing today?</h2>
 
-        {/* Upcoming Races Section */}
-        {categorized.upcoming.length > 0 && (
-          <section className="mb-12">
-            <h3 className="section-heading">Upcoming Races</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categorized.upcoming.map((race) => (
-                <RaceStatsCard
-                  key={race.id}
-                  race={race}
-                  runners={runnersMap[race.id] || []}
-                  variant="upcoming"
-                  showProgress={false}
-                  onSelect={() => handleRaceSelect(race)}
-                  onManage={() => {
-                    if (settings.hapticsEnabled && 'vibrate' in navigator) {
-                      navigator.vibrate(10);
-                    }
-                    setSelectedRaceForMode(race.id);
-                    navigate('/race-management');
-                  }}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Recent Races Section */}
-        {categorized.recent.length > 0 && (
-          <section className="mb-12">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="section-heading mb-0 border-0 pb-0">Recent Races</h3>
-              <Button
-                variant="text"
+          {isLoading ? (
+            [1, 2, 3].map(i => <div key={i} className="h-[76px] rounded-card bg-white border border-vk-border animate-pulse" />)
+          ) : (
+            <>
+              <RoleCard
+                title="Checkpoint"
+                description="Mark runners as they pass your station"
+                icon={FlagIcon}
+                tint="bg-vk-blue-tint text-vk-blue"
+                onClick={() => handleModuleSelect(MODULE_TYPES.CHECKPOINT, '/checkpoint/1')}
+              />
+              <RoleCard
+                title="Base station"
+                description="Log radio calls and watch the whole race"
+                icon={RadioIcon}
+                tint="bg-[rgba(11,45,83,0.1)] text-vk-navy"
+                onClick={() => handleModuleSelect(MODULE_TYPES.BASE_STATION, '/base-station/operations')}
+              />
+              <RoleCard
+                title="Race setup"
+                description="Create a race, runners and checkpoints"
+                icon={AdjustmentsHorizontalIcon}
+                tint="bg-vk-gold-tint text-vk-ink"
+                flat
                 onClick={handleGoToRaceManagement}
-                className="text-navy-600 dark:text-navy-400 touch-target inline-flex items-center"
-              >
-                View All Races
-                <ArrowRightIcon className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categorized.recent.map((race) => (
-                <RaceStatsCard
-                  key={race.id}
-                  race={race}
-                  runners={runnersMap[race.id] || []}
-                  variant="past"
-                  showProgress={false}
-                  onSelect={() => handleRaceSelect(race)}
-                  onManage={() => {
-                    if (settings.hapticsEnabled && 'vibrate' in navigator) {
-                      navigator.vibrate(10);
-                    }
-                    setSelectedRaceForMode(race.id);
-                    navigate('/race-management');
-                  }}
-                />
-              ))}
-            </div>
-          </section>
-        )}
+              />
+            </>
+          )}
 
-        {/* Empty State */}
-        {races.length === 0 && (
-          <EmptyState
-            icon={<BoltIcon className="w-full h-full" />}
-            title="No races yet"
-            description="Get started by creating your first race. You can configure checkpoints, add runners, and start tracking."
-            size="lg"
-            action={{
-              label: 'Create New Race',
-              onClick: () => navigate('/race-maintenance/setup'),
-            }}
-          />
-        )}
+          {races.length === 0 && !isLoading && (
+            <p className="text-sm text-vk-muted">
+              No races on this device yet. Choose <strong className="text-vk-ink">Race setup</strong> to create one,
+              or scan a race QR code from the race director.
+            </p>
+          )}
+
+          <div className="mt-4 flex flex-col gap-3">
+            <Button variant="gold" size="primary" fullWidth onClick={() => setShowImport(true)}
+              leftIcon={<QrCodeIcon className="w-5 h-5" aria-hidden="true" />}>
+              Scan race QR code
+            </Button>
+          </div>
+
+          {categorized.upcoming.length + categorized.recent.length + categorized.current.length > 1 && (
+            <section className="mt-6" aria-labelledby="races-hd">
+              <h2 id="races-hd" className="font-display font-bold text-xs tracking-[1.5px] uppercase text-vk-blue mb-2">Races on this device</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[...categorized.current, ...categorized.upcoming, ...categorized.recent].map(race => (
+                  <RaceStatsCard
+                    key={race.id}
+                    race={race}
+                    runners={runnersMap[race.id] || []}
+                    variant={categorized.current.includes(race) ? 'current' : categorized.upcoming.includes(race) ? 'upcoming' : 'past'}
+                    showProgress={categorized.current.includes(race)}
+                    onSelect={() => handleRaceSelect(race)}
+                    onManage={() => {
+                      setSelectedRaceForMode(race.id);
+                      navigate('/race-management');
+                    }}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          <div className="text-center text-xs text-vk-muted mt-4">Ipswich &amp; District Radio Club · VK4WIP</div>
+        </div>
       </main>
 
       {/* Race Selection Modal */}
@@ -424,7 +341,7 @@ const LandingPage = () => {
                 className="w-full text-left px-4 py-3 rounded-lg border border-navy-300 dark:border-navy-600 bg-navy-50 dark:bg-navy-900/30 hover:bg-navy-100 dark:hover:bg-navy-800/50 focus:outline-none focus:ring-2 focus:ring-navy-500 transition-colors"
               >
                 <span className="font-semibold text-gray-900 dark:text-white">
-                  🔗 CP{item.primary.number} &amp; CP{item.secondary.number}
+                  CP{item.primary.number} &amp; CP{item.secondary.number}
                 </span>
                 {(item.primary.name || item.secondary.name) && (
                   <span className="ml-2 text-gray-600 dark:text-gray-400">
@@ -527,6 +444,14 @@ const LandingPage = () => {
         </div>
       </StandardModal>
 
+      {/* Scan race QR code — existing import flow, opened on the scanner */}
+      <ImportExportModal
+        isOpen={showImport}
+        onClose={() => { setShowImport(false); loadRaces(); }}
+        initialTab="import"
+        startScanner
+      />
+
       {/* Settings Modal */}
       <SettingsModal
         isOpen={showSettings}
@@ -536,39 +461,48 @@ const LandingPage = () => {
   );
 };
 
-/**
- * ModuleCard — Touch-optimized module selection card with left accent border.
- */
-const ModuleCard = ({ title, description, icon: Icon, accentColor, iconBg, onClick }) => (
+/** Role card (≥76px): icon tile, title, one-line description, chevron. */
+const RoleCard = ({ title, description, icon: Icon, tint, onClick, flat = false }) => (
   <button
+    type="button"
     onClick={onClick}
-    className={`
-      group card-hoverable text-left w-full
-      bg-white dark:bg-gray-800
-      rounded-xl border-l-4 border border-gray-200 dark:border-gray-700
-      ${accentColor}
-      p-6 transition-all duration-200
-      active:scale-[0.97]
-      focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2
-    `}
-    style={{ minHeight: '140px' }}
+    className={`text-left w-full bg-white dark:bg-gray-800 border border-vk-border dark:border-gray-700 rounded-card p-4 flex items-center gap-3.5 min-h-[76px] ${flat ? '' : 'shadow-btn'} focus:outline-none focus-visible:ring-2 focus-visible:ring-vk-blue`}
   >
-    <div className="flex flex-col h-full">
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${iconBg}`}>
-        <Icon className="w-6 h-6" aria-hidden="true" />
-      </div>
-      <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1.5">
-        {title}
-      </h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400 flex-grow">
-        {description}
-      </p>
-      <div className="flex items-center mt-4 text-sm font-semibold text-navy-700 dark:text-navy-300">
-        <span>Get Started</span>
-        <ArrowRightIcon className="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-      </div>
-    </div>
+    <span className={`w-12 h-12 rounded-btn flex items-center justify-center shrink-0 ${tint}`}>
+      <Icon className="w-[26px] h-[26px]" aria-hidden="true" />
+    </span>
+    <span className="flex flex-col gap-[3px] flex-1">
+      <span className="font-display font-bold text-base text-vk-navy dark:text-white">{title}</span>
+      <span className="text-[13px] text-vk-muted dark:text-gray-400">{description}</span>
+    </span>
+    <ChevronRightIcon className="w-5 h-5 text-vk-muted" aria-hidden="true" />
   </button>
 );
+
+/** Current race summary in the navy header. */
+const CurrentRaceCard = ({ race }) => {
+  const [cpCount, setCpCount] = useState(null);
+  useEffect(() => {
+    let live = true;
+    StorageService.getCheckpoints(race.id).then(cps => { if (live) setCpCount(cps.length); }).catch(() => {});
+    return () => { live = false; };
+  }, [race.id]);
+  const date = race.date ? TimeUtils.formatDate(race.date, 'EEE d MMM') : '';
+  const parts = [
+    date,
+    cpCount != null && `${cpCount} checkpoint${cpCount === 1 ? '' : 's'} + finish`,
+    race.startTime && `start ${race.startTime.slice(0, 5)}`,
+  ].filter(Boolean);
+  return (
+    <div className="bg-white/[0.08] border border-white/[0.18] rounded-card px-4 py-3.5 flex flex-col gap-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[11px] font-bold tracking-[1.2px] uppercase text-vk-gold">Current race</span>
+        <SavedIndicator label="Offline ready" />
+      </div>
+      <div className="font-display font-bold text-lg">{race.name}</div>
+      <div className="text-[13px] text-vk-on-navy">{parts.join(' · ')}</div>
+    </div>
+  );
+};
 
 export default LandingPage;

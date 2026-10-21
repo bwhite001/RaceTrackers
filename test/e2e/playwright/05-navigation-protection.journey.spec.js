@@ -80,18 +80,18 @@ test.describe('Navigation Protection Journey', () => {
     await step('Navigation complete — landed on non-checkpoint route', async () => {
       // After confirming, we should be on the home page
       await page.waitForURL('/', { timeout: 5000 });
-      await expect(page.getByRole('heading', { name: /race tracker pro/i })).toBeVisible();
+      await expect(page.getByRole('heading', { name: /^racetracker$/i })).toBeVisible();
     });
   });
 
   test('home page module cards are all accessible when no operation is active', async ({ page, step }) => {
     await step('Home page — all module cards visible and enabled', async () => {
       await page.goto('/');
-      await page.waitForSelector('h1:has-text("Race Tracker Pro")');
+      await page.waitForSelector('h1:has-text("RaceTracker")');
 
-      await expect(page.getByRole('button', { name: /checkpoint operations/i })).toBeEnabled();
+      await expect(page.getByRole('button', { name: /^checkpoint\b/i })).toBeEnabled();
       await expect(page.getByRole('button', { name: /base station/i })).toBeEnabled();
-      await expect(page.getByRole('button', { name: /race maintenance/i })).toBeEnabled();
+      await expect(page.getByRole('button', { name: /race setup/i })).toBeEnabled();
     });
   });
 
@@ -99,7 +99,7 @@ test.describe('Navigation Protection Journey', () => {
     await step('Unknown route — redirects to home page', async () => {
       await page.goto('/this/route/does/not/exist');
       await page.waitForURL('/');
-      await expect(page.getByRole('heading', { name: /race tracker pro/i })).toBeVisible();
+      await expect(page.getByRole('heading', { name: /^racetracker$/i })).toBeVisible();
     });
   });
 });

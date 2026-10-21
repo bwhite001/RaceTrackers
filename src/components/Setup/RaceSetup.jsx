@@ -7,11 +7,10 @@ import {
   Container,
   Section,
   Button,
-  Badge,
   Card,
   CardBody
 } from '../../design-system/components';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 
 import TemplateSelectionStep from './TemplateSelectionStep';
 import RaceDetailsStep from './RaceDetailsStep';
@@ -20,7 +19,6 @@ import BatchConfigStep from './BatchConfigStep';
 import LinkCheckpointsStep from './LinkCheckpointsStep';
 import LoadingSpinner from '../Layout/LoadingSpinner';
 import ErrorMessage from '../Layout/ErrorMessage';
-import StepIndicator from './StepIndicator';
 import WebScorerImportWizard from '../../modules/race-maintenance/components/WebScorerImportWizard';
 
 import CourseMapStep from './CourseMapStep';
@@ -192,51 +190,46 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
     );
   }
 
-  const steps = [
-    { number: 1, label: 'Template', description: 'Choose a starting template' },
-    { number: 2, label: 'Race Details', description: 'Configure race information' },
-    { number: 3, label: 'Runner Setup', description: 'Set up runner number ranges' },
-    { number: 4, label: 'Waves', description: 'Configure starting waves' },
-    { number: 5, label: 'Course Map', description: 'Import GPX course data (optional)' },
-    { number: 6, label: 'Link Checkpoints', description: 'Optional: group checkpoints at the same location' }
-  ];
-
   const stepLabels = ['Template', 'Race Details', 'Runner Setup', 'Waves', 'Course Map', 'Link Checkpoints'];
   const totalSteps = (formData.checkpoints?.length ?? 0) >= 2 ? 6 : 5;
 
   return (
     <>
-    <Container maxWidth="xl" padding="normal">
-      <Section spacing="tight" border="bottom">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              onClick={onExitAttempt}
-              leftIcon={<ArrowLeftIcon className="w-5 h-5" />}
-            >
-              Exit Setup
-            </Button>
-            <div className="h-6 w-px bg-gray-300 dark:bg-gray-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-navy-900 dark:text-white">
-                Race Setup
-              </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {stepLabels[currentStep]}
-              </p>
+    <header className="bg-vk-navy text-white px-3 pt-4 pb-[18px]">
+      <div className="max-w-3xl mx-auto flex flex-col gap-3.5">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onExitAttempt}
+            aria-label="Exit setup"
+            className="w-11 h-11 flex items-center justify-center rounded-btn hover:bg-white/10"
+          >
+            <ChevronLeftIcon className="w-[22px] h-[22px]" aria-hidden="true" />
+          </button>
+          <div className="flex flex-col gap-0.5">
+            <h1 className="font-display font-bold text-lg">New race</h1>
+            <div className="text-xs text-vk-on-navy">
+              Step {currentStep + 1} of {totalSteps} · {stepLabels[currentStep]}
             </div>
           </div>
-          <Badge variant="primary" size="lg">
-            Step {currentStep + 1} of {totalSteps}
-          </Badge>
         </div>
-      </Section>
+        <div
+          className="grid gap-1.5 px-2"
+          style={{ gridTemplateColumns: `repeat(${totalSteps}, minmax(0, 1fr))` }}
+          role="progressbar"
+          aria-label="Setup progress"
+          aria-valuemin={1}
+          aria-valuemax={totalSteps}
+          aria-valuenow={currentStep + 1}
+        >
+          {Array.from({ length: totalSteps }, (_, i) => (
+            <div key={i} className={`h-1 rounded-full ${i <= currentStep ? 'bg-vk-gold' : 'bg-white/25'}`} />
+          ))}
+        </div>
+      </div>
+    </header>
 
-      <Section spacing="normal">
-        <StepIndicator steps={steps.slice(0, totalSteps)} currentStep={currentStep} />
-      </Section>
-
+    <Container maxWidth="xl" padding="normal">
       <Section spacing="normal">
         <Card data-screenshot-target>
           <CardBody>
@@ -262,6 +255,7 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
                 onBack={handleBack}
                 onCreate={handleRunnersNext}
                 isLoading={loading}
+                onImportFile={() => setShowWebScorerWizard(true)}
               />
             )}
             {currentStep === STEP_BATCHES && (
@@ -272,10 +266,10 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
                   raceStartTime={formData.startTime ? `${formData.date}T${formData.startTime}` : null}
                 />
                 <div className="flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <Button variant="outline" onClick={handleBack}>
+                  <Button variant="blueOutline" size="primary" onClick={handleBack} className="flex-1 mr-3">
                     Back
                   </Button>
-                  <Button variant="primary" onClick={handleBatchesNext} disabled={loading}>
+                  <Button variant="gold" size="primary" onClick={handleBatchesNext} disabled={loading} className="flex-[2]">
                     Next: Course Map
                   </Button>
                 </div>

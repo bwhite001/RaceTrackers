@@ -194,7 +194,7 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
     await test.step('Navigate to Checkpoint 1 via home modal (isolated-app flow)', async () => {
       await _page.goto(BASE);
       await _page.waitForSelector('h1', { timeout: 30000 });
-      await _page.getByRole('button', { name: /checkpoint operations/i }).click();
+      await _page.getByRole('button', { name: /^checkpoint\b/i }).click();
       await pickFirstRaceInModal(_page);
       // For multi-checkpoint races, a second modal asks which CP to operate
       await pickFirstCheckpointIfModal(_page);

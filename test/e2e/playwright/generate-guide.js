@@ -84,6 +84,10 @@ const SECTION_MAP = {
   'Share Batch button is visible in Marker mode with a QR icon':            'split-role',
   'Share Batch button is hidden in Radio Operator mode':                    'split-role',
   'Share Batch opens the batch share modal':                                'split-role',
+  // VK4WIP redesign — Phase 1
+  'home shows the three roles, the current race and Scan race QR code':     'navigation',
+  'settings switches theme to sunlight and resets status colours to club colours': 'settings',
+  'share race screen offers QR, download, email and copy':                  'settings',
 };
 
 const CHAPTERS = [
