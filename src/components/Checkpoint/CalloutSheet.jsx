@@ -130,13 +130,17 @@ const CalloutSheet = ({ onReadOut }) => {
 };
 
 /**
- * Official message / stand-down request, kept in an on-device checkpoint log
- * (WICEN: sender, recipient, message number, date/time).
+ * Official message / stand-down request, kept in an on-device checkpoint log.
+ * WICEN: an official message has sender, recipient, message number,
+ * date / time and the originator's signature.
  */
 const CheckpointLogSheet = ({ type, raceId, checkpointNumber, sender, recipient, onClose, onSaved }) => {
   const key = `checkpointLog:${raceId}:${checkpointNumber}`;
   const [log, setLog] = useState([]);
   const [to, setTo] = useState(recipient);
+  const [date, setDate] = useState(() => TimeUtils.formatTime(TimeUtils.getCurrentTimestamp(), 'dd/MM/yyyy'));
+  const [originator, setOriginator] = useState('');
+  const [signed, setSigned] = useState(false);
   const [text, setText] = useState('');
   const official = type === 'official';
 
@@ -145,14 +149,16 @@ const CheckpointLogSheet = ({ type, raceId, checkpointNumber, sender, recipient,
   }, [key]);
 
   const nextNo = log.filter(e => e.type === 'official').length + 1;
+  const ready = official ? !!text.trim() && !!originator.trim() : true;
   const save = async () => {
     const entry = {
       type, at: TimeUtils.getCurrentTimestamp(), from: sender, to, text: text.trim(),
-      ...(official && { number: nextNo }),
+      ...(official && { number: nextNo, date: date.trim(), originator: originator.trim(), signed }),
     };
     await SettingsRepository.saveSetting(key, [...log, entry]);
     onSaved(official ? `Message ${nextNo} logged at ${hhmm(entry.at)}` : `Stand-down request logged at ${hhmm(entry.at)}`);
   };
+  const field = 'min-h-[48px] rounded-btn border border-vk-border px-3 font-normal dark:bg-gray-700';
 
   return (
     <BottomSheet open onClose={onClose} labelledBy="log-hd">
@@ -164,11 +170,21 @@ const CheckpointLogSheet = ({ type, raceId, checkpointNumber, sender, recipient,
         <div><span className="text-vk-muted">Time</span> <strong>{hhmm(TimeUtils.getCurrentTimestamp())}</strong></div>
       </div>
       {official && (
-        <label className="flex flex-col gap-1 text-sm font-semibold">
-          To
-          <input value={to} onChange={e => setTo(e.target.value)}
-            className="min-h-[48px] rounded-btn border border-vk-border px-3 font-normal dark:bg-gray-700" />
-        </label>
+        <div className="grid grid-cols-2 gap-2">
+          <label className="flex flex-col gap-1 text-sm font-semibold">
+            To
+            <input value={to} onChange={e => setTo(e.target.value)} className={field} />
+          </label>
+          <label className="flex flex-col gap-1 text-sm font-semibold">
+            Date
+            <input value={date} onChange={e => setDate(e.target.value)} inputMode="numeric" className={field} />
+          </label>
+          <label className="col-span-2 flex flex-col gap-1 text-sm font-semibold">
+            Originator (name / role)
+            <input value={originator} onChange={e => setOriginator(e.target.value)} required aria-required="true"
+              placeholder="e.g. Sue Smith, CP3 marshal" className={field} />
+          </label>
+        </div>
       )}
       <label className="flex flex-col gap-1 text-sm font-semibold">
         {official ? 'Message' : 'Note'}
@@ -176,11 +192,35 @@ const CheckpointLogSheet = ({ type, raceId, checkpointNumber, sender, recipient,
           placeholder={official ? '' : 'e.g. sweep vehicle passed at 09:40'}
           className="rounded-btn border border-vk-border px-3 py-2 font-normal dark:bg-gray-700" />
       </label>
-      <Button variant="gold" size="primary" fullWidth disabled={official && !text.trim()} onClick={save}>
+      {official && (
+        <label className="flex items-center gap-2.5 min-h-[44px] text-sm font-semibold">
+          <input type="checkbox" checked={signed} onChange={e => setSigned(e.target.checked)} className="w-5 h-5" />
+          Signed by originator
+        </label>
+      )}
+      <Button variant="gold" size="primary" fullWidth disabled={!ready} onClick={save}>
         {official ? 'Log message' : 'Log request'}
       </Button>
       <Button variant="plain" size="action" fullWidth onClick={onClose}>Cancel</Button>
-      {log.length > 0 && <div className="text-xs text-vk-muted text-center">{log.length} entr{log.length === 1 ? 'y' : 'ies'} in this checkpoint's log</div>}
+      {log.length > 0 && (
+        <section aria-labelledby="cplog-hd" className="flex flex-col gap-1.5">
+          <h3 id="cplog-hd" className="text-xs font-bold text-vk-muted uppercase tracking-[0.8px]">Checkpoint log · {log.length}</h3>
+          <ul className="flex flex-col gap-1.5 max-h-[160px] overflow-y-auto" data-testid="checkpoint-log">
+            {[...log].reverse().map((e, i) => (
+              <li key={i} className="bg-vk-paper dark:bg-gray-900 rounded-btn px-3 py-2 text-[13px] leading-snug">
+                <div className="font-bold">
+                  {e.type === 'official' ? `Message ${e.number}` : 'Stand-down request'} · {hhmm(e.at)}
+                  {e.type === 'official' && ` · to ${e.to}`}
+                </div>
+                {e.type === 'official' && (
+                  <div className="text-vk-muted">{[e.date, e.originator, e.signed ? 'signed' : 'not signed'].filter(Boolean).join(' · ')}</div>
+                )}
+                {e.text && <div className="break-words">{e.text}</div>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </BottomSheet>
   );
 };

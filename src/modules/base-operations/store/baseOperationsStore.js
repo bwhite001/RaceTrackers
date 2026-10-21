@@ -417,6 +417,12 @@ const useBaseOperationsStore = create(
         await get().refreshData({ silent: true });
       },
 
+      setResolutionsAsked: async (ids, askedAt) => {
+        const repo = new BaseOperationsRepository();
+        for (const id of ids) await repo.setResolutionAsked(id, askedAt);
+        await get().refreshData({ silent: true });
+      },
+
       supersedeBaseRows: async (ids, reason) => {
         const before = await new BaseOperationsRepository().supersedeBaseRows(raceKeyOf(get().currentRaceId), ids, reason);
         await get().refreshData({ silent: true });

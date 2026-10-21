@@ -110,6 +110,26 @@ export function checkBaseNumber(num, { raceNumbers, out, earlier = [], logged, p
 export const isRecordable = (kind) => kind === CHECK.OK || kind === CHECK.INFO;
 
 /**
+ * Open "Ask CPx" reminders from Reports › Needs attention, by checkpoint:
+ * Map(cpNumber → [{ id, number }]). A resolution "ask CP2" on issue
+ * "order:106:1:2" reminds base to ask CP2 about 106 until it is marked asked.
+ */
+export function askReminders(resolutions = [], board = []) {
+  const byShort = new Map(board.map(b => [b.short, b.number]));
+  const out = new Map();
+  for (const r of resolutions) {
+    const m = /^ask (\S+)$/.exec(r.resolution ?? '');
+    if (!m || r.askedAt || !byShort.has(m[1])) continue;
+    const cp = byShort.get(m[1]);
+    const number = Number(String(r.issueKey).split(':')[1]);
+    if (!out.has(cp)) out.set(cp, []);
+    out.get(cp).push({ id: r.id, number });
+  }
+  for (const list of out.values()) list.sort((a, b) => a.number - b.number);
+  return out;
+}
+
+/**
  * Check every entry of a call in order.
  * @param {Array<{ num: number, t: string }>} entries
  * @returns {Array<{ num, t, kind, note }>}

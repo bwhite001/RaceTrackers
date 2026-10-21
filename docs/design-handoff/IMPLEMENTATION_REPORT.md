@@ -138,3 +138,55 @@ The full entries, with files, are in `DECISIONS.md`.
   - The race list on Home.
   - The setup wizard's From/To inputs.
   - Extra settings.
+
+## Validation fixes
+
+From the review of the validation pack (`VALIDATION_FIXES.md`). Judgement calls and the defaults taken are in `DECISIONS.md` › "Validation fixes". Nothing pushed.
+
+| Fix | What changed | Commit | Test |
+|---|---|---|---|
+| A1 | Overdue only once the next checkpoint has reported past expected + 10 min; otherwise "awaiting report" (gold) | f817c4b | `24-race-day-safety` › overdue waits for the checkpoint to report |
+| A2 | Exact times never advance "up to" | f817c4b | `24` › exact time does not move up-to |
+| A3 | Same-block edit of a called-in time is not a correction | f817c4b | `24` › same-block edit is not a correction |
+| A4 | One "On course" definition, "N not seen yet" | f817c4b | `24` › on course count matches report |
+| A5 | Times matrix keeps times for DNS/DNF runners; Status column | f817c4b | `24` › matrix keeps times for DNS runners |
+| A6 | Offline suite (service workers, production preview) | f817c4b | `25-offline` (`make test-offline`) |
+| A7 | Email shares a setup file + short mailto; import by content; import schema accepts app-created races | f817c4b | `26-share-race` › email share stays short, import accepts octet-stream |
+| B1 | Callsign / frequency never cut off | 791d99a | `27-checkpoint-fixes` › header shows callsign and frequency in full |
+| B2 | Share batch in the app bar with count | 791d99a | `27` › share batch lives in the app bar and covers no tiles |
+| B3 | Sticky quick entry + status line | 791d99a | `27` › status line stays in view while the grid scrolls |
+| B4 | "Keep time" back at the original minute | 791d99a | `27` › stepper back to the original time reads Keep time |
+| B5 | Overview bar DNS muted, DNF red, full aria-label | 791d99a | `27` › overview bar keeps DNS muted and labels each part |
+| B6 | Overview stepper is a draft with Save | 791d99a | `27` › overview stepper is a draft until Save |
+| B7 | Exact pinned, HH:MM, bad value rejected without selecting | 791d99a | `28-base-fixes` › exact time is pinned and a bad time keeps the block |
+| B8 | "Also in this call" counts recordable only | 791d99a | `28` › also in this call counts numbers to record |
+| B9 | "Log call · 0" plain; done card skipped count | 791d99a | `28` › a call with nothing to record is logged plainly |
+| B10 | Rejected chips shared style; two-line out list | 791d99a | `28` › rejected chips match receive and out list rows are not cut off |
+| B11 | Withdrawal dialog: sheet, 24-hour stepper, reasons mapped, exact Undo | 791d99a | `28` › withdrawal dialog uses 24-hour time and can be undone |
+| B12 | Reports Undo labelled and dropped on switch | 791d99a | `28` › reports undo stays with its list and says what it undoes |
+| B13 | Leaders flag open data issues; elapsed HH:MM | 791d99a | `28` › leaders flag open data issues |
+| C1 | Disabled buttons use the locked style | cd5fb4c | `29-visual-checks` › locked buttons look locked |
+| C2 | Off-palette colours mapped to club scales; guard test | cd5fb4c | `test/components/palette.test.js` |
+| C3 | Dark-mode contrast (axe) | cd5fb4c | `29` › dark mode passes colour contrast |
+| C4 | Sunlight on the working screens | cd5fb4c | `29` › sunlight on the working screens |
+| C5 | Race setup fits 390 px | cd5fb4c | `29` › race setup fits a phone |
+| C6 | Footer "Ipswich & District Radio Club · VK4WIP" | cd5fb4c | `29` › footer names the club |
+| C7 | Mt Glorious template per spec §10 (bibs unchanged) | cd5fb4c | `29` › mt glorious template matches the brief; `normaliseTemplate.test.js` |
+| D1 | Seed data: 108 at CP2, skip moved to 128, Merge and checkpoint-DNF cases | b437688 | validation pack ST-04, RP-10, RP-13, ST-14 |
+| D2 | "App showed" = per-event evidence; status lines separate | b437688 | validation pack (152 events, all completed) |
+| D3/D4 | Events + tests for every gap listed | b437688 | `30-coverage-gaps` (20 tests) |
+| E1 | Corrections section with WICEN placeholder | Phase E | `radio-procedure.md` (in the guide) |
+| E2 | Official message: date, originator, signed; checkpoint log list | Phase E | `27` › official message has the WICEN fields and a log |
+| E3 | "Ask CPx" reminder on Receive, "Asked" with Undo | Phase E | `28` › ask reminder; `reports.test.js` › ask reminders |
+
+**Still open (for Brandon):**
+1. D1: how base accepts a corrected time, and the WICEN wording. A proposal is in DECISIONS.md.
+2. The Mt Glorious bib range.
+3. Whether base needs separate vet-out records again (B11 note).
+
+### Test results after the validation fixes
+
+- **Unit:** 1,169 tests in 108 files, all passing (`NODE_OPTIONS=--max-old-space-size=6144 make test-run`).
+- **Playwright** (all specs, retries off): 122 passed, 16 failed, 11 skipped, against a baseline of 74 / 16 / 11. The 16 failures are the pre-existing ones from the baseline, unchanged, and nothing that passed before now fails or skips. Every new spec, 24–30, passes.
+- **Offline suite:** passes.
+

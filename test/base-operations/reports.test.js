@@ -4,7 +4,7 @@ import {
   lastSeen, legMedians, overdueRunners, stillOnCourse, timesMatrix, callLog, currentLeaders,
   awaitingByCheckpoint, raceCounts,
 } from '../../src/modules/base-operations/services/reports.js';
-import { reportedUpTo, buildBoard } from '../../src/modules/base-operations/services/receive.js';
+import { reportedUpTo, buildBoard, askReminders } from '../../src/modules/base-operations/services/receive.js';
 
 const at = (h, m) => TimeUtils.atLocalTime('2026-11-08T00:00:00.000Z', h, m);
 const order = [{ number: 1, short: 'CP1' }, { number: 2, short: 'CP2' }, { number: 0, short: 'Finish' }];
@@ -111,5 +111,25 @@ describe('base reports', () => {
     const board = buildBoard({ checkpoints: [{ number: 1 }, { number: 2 }], records, now: at(8, 0), raceStart: at(6, 30), fieldSize: 10 });
     expect(board[0].lastBlock).toBe(at(7, 20));
     expect(board[1].lastBlock).toBeNull();
+  });
+});
+
+describe('ask reminders (E3)', () => {
+  it('open "ask CPx" resolutions group by checkpoint until marked asked', () => {
+    const board = [{ number: 1, short: 'CP1' }, { number: 2, short: 'CP2' }];
+    const resolutions = [
+      { id: 1, issueKey: 'order:106:1:2', resolution: 'ask CP2' },
+      { id: 2, issueKey: 'skip:120:1', resolution: 'ask CP1' },
+      { id: 3, issueKey: 'pace:103:1:2', resolution: 'ask CP2' },
+      { id: 4, issueKey: 'pace:107:1:2', resolution: 'ask CP2', askedAt: '2026-11-08T08:00:00.000Z' },
+      { id: 5, issueKey: 'dup:105:1', resolution: 'checked' },
+      { id: 6, issueKey: 'order:150:3:4', resolution: 'ask CP9' },
+    ];
+    const asks = askReminders(resolutions, board);
+    expect([...asks]).toEqual([
+      [2, [{ id: 3, number: 103 }, { id: 1, number: 106 }]],
+      [1, [{ id: 2, number: 120 }]],
+    ]);
+    expect(askReminders([], board).size).toBe(0);
   });
 });

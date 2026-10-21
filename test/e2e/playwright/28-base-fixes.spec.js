@@ -154,6 +154,30 @@ test.describe('Base fixes', () => {
     });
   });
 
+  test('ask reminder', async ({ page, step }) => {
+    await openBase(page, { withBaseData: true });
+
+    await step('Reports › Out of order — "Ask CP2" about 106', async () => {
+      await page.getByRole('tab', { name: 'Reports' }).click();
+      await page.getByRole('button', { name: /^Out of order/ }).click();
+      await page.getByTestId('issue-row').filter({ hasText: '106' }).getByRole('button', { name: 'Ask CP2' }).click();
+    });
+
+    await step('Receive — CP2 button and board row remind base to ask about 106', async () => {
+      await page.getByRole('tab', { name: 'Receive' }).click();
+      await expect(page.getByRole('button', { name: /^CP2, \w+, ask about 106$/ })).toBeVisible();
+      await expect(page.getByTestId('ask-CP2')).toContainText('Ask about 106');
+    });
+
+    await step('Asked — the reminder clears; Undo brings it back', async () => {
+      await page.getByRole('button', { name: 'Asked CP2 about 106' }).click();
+      await expect(page.getByTestId('ask-CP2')).toHaveCount(0);
+      await expect(page.getByRole('button', { name: /^CP2, \w+$/ })).toBeVisible();
+      await page.getByTestId('board-CP2').getByRole('button', { name: 'Undo' }).click();
+      await expect(page.getByTestId('ask-CP2')).toContainText('Ask about 106');
+    });
+  });
+
   test('leaders flag open data issues', async ({ page, step }) => {
     await openBase(page, { withBaseData: true });
 

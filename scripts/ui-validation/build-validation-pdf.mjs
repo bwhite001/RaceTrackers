@@ -327,15 +327,21 @@ async function run() {
   await ev('CO-06', '§4.5 Behaviour 3 / §4.6', 'Tap "Save HH:MM", then the "Callout" tab', 'Saving sets correction = true; tile shows ✎; corrections appear in the pending list tagged "Correction".',
     async p => { await p.getByRole('button', { name: /^Save / }).click(); await cpTab(p, 'Callout').click(); },
     { show: [S('Pending block', T('pending-block'))] });
-  await ev('CO-07', '§4.6', 'Tap "Official message", type a message', 'Official message … (plain buttons; v1 can open a simple notes modal / log entry).',
-    async p => { await p.getByRole('button', { name: 'Official message' }).click(); await p.locator('[role="dialog"] textarea').fill('Request extra water at CP3'); },
-    { show: [S('Dialog', p => p.getByRole('dialog').getByRole('heading').first()), S('Message', p => p.locator('[role="dialog"] textarea'))] });
-  await ev('CO-08', '§4.6', 'Tap "Log message"', 'v1 can open a simple notes modal / log entry.',
+  await ev('CO-07', '§4.6 / Fixes E2', 'Tap "Official message"; type a message, the originator, tick "Signed by originator"', 'Official message: Date (prefilled, en-AU), Originator (name/role, required), "Signed by originator" checkbox; local log. WICEN: sender, recipient, message number, date/time, originator\'s signature.',
+    async p => {
+      await p.getByRole('button', { name: 'Official message' }).click();
+      const d = p.getByRole('dialog');
+      await d.getByLabel('Message').fill('Request extra water at CP3');
+      await d.getByLabel(/^Originator/).fill('Sue Smith, CP3 marshal');
+      await d.getByLabel('Signed by originator').check();
+    },
+    { show: [S('Heading', p => p.getByRole('dialog').getByRole('heading').first()), S('Date', p => p.getByRole('dialog').getByLabel('Date')), S('Originator', p => p.getByRole('dialog').getByLabel(/^Originator/)), V('Signed', p => p.getByRole('dialog').getByLabel('Signed by originator').isChecked()), S('Log message', p => p.getByRole('dialog').getByRole('button', { name: 'Log message' }))] });
+  await ev('CO-08', '§4.6 / Fixes E2', 'Tap "Log message"', 'Kept in a local log.',
     async p => { await p.getByRole('button', { name: 'Log message' }).click(); },
-    { show: [S('Log', p => p.getByText(/logged|in the log/i).first())] });
-  await ev('CO-09', '§4.6', 'Tap "Request stand down"', 'Request stand down (plain button; v1 notes modal / log entry). No radio phrases on screen.',
+    { show: [S('Status line', p => p.getByText(/^Message \d+ logged at/))] });
+  await ev('CO-09', '§4.6 / Fixes E2', 'Tap "Request stand down"', 'Request stand down (plain button; notes modal / log entry). Read-only "Checkpoint log" list. No radio phrases on screen.',
     async p => { await p.getByRole('button', { name: 'Request stand down' }).click(); },
-    { show: [S('Dialog', p => p.getByRole('dialog').first())] });
+    { show: [S('Heading', p => p.getByRole('dialog').getByRole('heading').first()), S('Checkpoint log', T('checkpoint-log'))] });
 
   current.section = 'Checkpoint — Read-out';
   await ev('RO-01', '§4.7 / Fixes C1', 'Cancel; send the pending correction; mark 12 runners (130–141); tap "Read out"', 'Numbers split into overs of up to 5, each bib its own row. Lead "Common time 07:45". Base copied — next locked (dashed) until every number is ticked ("Tick each number as you read · 0 of 5").',
@@ -684,6 +690,21 @@ async function run() {
   await ev('RP-12', '§4.12', 'Click "Ask CP2"', 'Resolutions persist so resolved items don\'t reappear.',
     async p => { await p.getByRole('button', { name: /^Ask CP/ }).first().click(); },
     { show: [rflash, S('Undo', btn(/^Undo /))] });
+  current.section = 'Base — Ask reminder';
+  await ev('AS-01', 'Fixes E3', 'Tap the "Receive" tab', 'An "ask" resolution shows a gold note on that checkpoint\'s row in the Receive board and on its "Who\'s calling?" button ("Ask about 106").',
+    async p => { await p.getByRole('tab', { name: 'Receive' }).click(); },
+    { show: [S('CP2 button', btn(/^CP2,/)), S('Board note', T('ask-CP2'), ['bg', 'border'])] });
+  await ev('AS-02', 'Fixes E3', 'Tap "Asked" on the note', 'Cleared by an "Asked" button on the note (Undo).',
+    async p => { await p.getByTestId('ask-CP2').getByRole('button', { name: 'Asked' }).click(); },
+    { show: [V('Board note', p => T('ask-CP2')(p).count().then(n => n ? 'shown' : 'cleared')), S('Undo line', p => p.getByTestId('board-CP2').getByRole('status'))] });
+  await ev('AS-03', 'Fixes E3', 'Tap "Undo"', 'Undo brings the reminder back.',
+    async p => { await p.getByTestId('board-CP2').getByRole('button', { name: 'Undo' }).click(); },
+    { show: [S('Board note', T('ask-CP2'))] });
+  await ev('AS-04', 'Fixes E3', 'Tap "Asked" again, then back to Reports', 'The issue stays resolved.',
+    async p => { await p.getByTestId('ask-CP2').getByRole('button', { name: 'Asked' }).click(); await p.getByRole('tab', { name: 'Reports' }).click(); },
+    { show: [S('Out of order count', T('check-count-order'))] });
+
+  current.section = 'Base — Reports & data checks';
   await ev('RP-13', '§4.12 / Fixes D1', 'Click "Skipped a checkpoint"', 'Has later CP time, missing an earlier CP (128: seen CP2, never at CP1) → Ask CPx / Mark checked.',
     async p => { await p.getByRole('button', { name: /^Skipped a checkpoint/ }).click(); },
     { show: [S('128', issueRow(128))] });

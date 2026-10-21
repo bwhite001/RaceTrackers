@@ -155,6 +155,9 @@ const SECTION_MAP = {
   'status lines are polite live regions':                                   'navigation',
   'overdue banner is an alert':                                             'base-status',
   'undo bar clears itself after about six seconds':                         'navigation',
+  // Validation fixes — Phase E
+  'ask reminder':                                                           'base-receive',
+  'official message has the WICEN fields and a log':                        'checkpoint',
 };
 
 const CHAPTERS = [

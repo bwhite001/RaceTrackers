@@ -6,7 +6,7 @@
     "action": "Open the app at /",
     "expect": "Navy header: badge, \"RaceTracker\", \"Ipswich & District Radio Club · VK4WIP\", \"Offline ready\" status. Current race card (name, date, checkpoint count, start time). Three role cards (≥76px): Checkpoint, Base station, Race setup — icon tile, title, one-line description, chevron. Primary button at bottom: Scan race QR code (existing import flow). Footer lockup: \"Ipswich & District Radio Club · VK4WIP\".",
     "observed": [
-      "Header: \"RaceTracker Ipswich & District Radio Club · VK4WIP CURRENT RACE Offline ready Mt Glorious Mountain Trails Wed 21 Oct · 3 checkpoints + finish · start 11:55\"",
+      "Header: \"RaceTracker Ipswich & District Radio Club · VK4WIP CURRENT RACE Offline ready Mt Glorious Mountain Trails Wed 21 Oct · 3 checkpoints + finish · start 12:07\"",
       "Checkpoint role card: \"Checkpoint Mark runners as they pass your station\"",
       "Role card heights: Checkpoint 94px, Base station 94px, Race setup 94px"
     ],
@@ -231,7 +231,7 @@
     "expect": "Download / Email / Copy tiles.",
     "observed": [
       "Copy tile: \"Copied\"",
-      "Clipboard starts: {\"version\":\"3.0.0\",\"exportDate\":\"2026-10-21T13:55:21.901Z\",\""
+      "Clipboard starts: {\"version\":\"3.0.0\",\"exportDate\":\"2026-10-21T14:07:23.378Z\",\""
     ],
     "status": [
       "Clear database Permanently deletes all races, runners and settings on this device. This cannot be undone. Clear database"
@@ -380,11 +380,11 @@
     "action": "Tap tile 101 (not passed)",
     "expect": "Tap a not-passed tile → mark passed at now.",
     "observed": [
-      "Tile 101: \"101 13:55\" · name \"Runner 101, 13:55\" · background rgb(30, 92, 179)",
-      "Status line: \"101 marked at 13:55\" · aria-live=polite"
+      "Tile 101: \"101 14:07\" · name \"Runner 101, 14:07\" · background rgb(30, 92, 179)",
+      "Status line: \"101 marked at 14:07\" · aria-live=polite"
     ],
     "status": [
-      "101 marked at 13:55"
+      "101 marked at 14:07"
     ],
     "error": null,
     "viewport": "390×844",
@@ -397,11 +397,11 @@
     "action": "Type \"103, 104 105\" in quick entry and press Enter",
     "expect": "Quick entry accepts multiple numbers, marks each at now, message \"3 runners marked at 07:47\".",
     "observed": [
-      "Status line: \"3 runners marked at 13:55\" · aria-live=polite",
+      "Status line: \"3 runners marked at 14:07\" · aria-live=polite",
       "Share batch: \"4\" · name \"Share batch, 4 runners\" · title=Share batch"
     ],
     "status": [
-      "3 runners marked at 13:55",
+      "3 runners marked at 14:07",
       "3 runners marked UNDO"
     ],
     "error": null,
@@ -432,11 +432,11 @@
     "action": "Type \"125\" and press Enter",
     "expect": "Jumps the grid to the group of the first number.",
     "observed": [
-      "Status line: \"125 marked at 13:55\" · aria-live=polite",
+      "Status line: \"125 marked at 14:07\" · aria-live=polite",
       "Group chip 120–139: \"120–139\" · aria-pressed=true"
     ],
     "status": [
-      "125 marked at 13:55",
+      "125 marked at 14:07",
       "125 marked UNDO"
     ],
     "error": null,
@@ -453,7 +453,7 @@
       "Group chip 100–119: \"100–119\" · aria-pressed=true · background rgb(11, 45, 83)"
     ],
     "status": [
-      "125 marked at 13:55",
+      "125 marked at 14:07",
       "125 marked UNDO"
     ],
     "error": null,
@@ -467,13 +467,13 @@
     "action": "Tap tile 101 again (passed)",
     "expect": "Edit sheet: bib, \"Passed · not called in yet\", \"Marked at HH:MM\", TimeStepper, Save HH:MM (or \"Keep time\"), Unmark runner, Cancel.",
     "observed": [
-      "Sheet: \"101 Passed · not called in yet Marked at 13:55 TIME PASSED −5 −1 13:55 +1 +5 Use − / + to correct the time KEEP TIME Cancel Unmark runner\" · role=dialog",
+      "Sheet: \"101 Passed · not called in yet Marked at 14:07 TIME PASSED −5 −1 14:07 +1 +5 Use − / + to correct the time KEEP TIME Cancel Unmark runner\" · role=dialog",
       "Primary: \"KEEP TIME\""
     ],
     "status": [
-      "125 marked at 13:55",
+      "125 marked at 14:07",
       "125 marked UNDO",
-      "13:55"
+      "14:07"
     ],
     "error": null,
     "viewport": "390×844",
@@ -486,13 +486,13 @@
     "action": "In the sheet tap \"−5\"",
     "expect": "Primary changes to \"Save HH:MM\"; \"Was HH:MM\" note.",
     "observed": [
-      "Primary: \"SAVE 13:50\"",
-      "Note: \"Was 13:55\""
+      "Primary: \"SAVE 14:02\"",
+      "Note: \"Was 14:07\""
     ],
     "status": [
-      "125 marked at 13:55",
+      "125 marked at 14:07",
       "125 marked UNDO",
-      "13:50"
+      "14:02"
     ],
     "error": null,
     "viewport": "390×844",
@@ -509,9 +509,9 @@
       "\"Was\" note: hidden"
     ],
     "status": [
-      "125 marked at 13:55",
+      "125 marked at 14:07",
       "125 marked UNDO",
-      "13:55"
+      "14:07"
     ],
     "error": null,
     "viewport": "390×844",
@@ -524,11 +524,11 @@
     "action": "Tap \"−5\" twice, then \"Save HH:MM\"",
     "expect": "Save changes the time; status line confirms.",
     "observed": [
-      "Status line: \"101 time changed to 13:45\" · aria-live=polite",
-      "Tile 101: \"101 13:45\" · name \"Runner 101, 13:45\""
+      "Status line: \"101 time changed to 13:57\" · aria-live=polite",
+      "Tile 101: \"101 13:57\" · name \"Runner 101, 13:57\""
     ],
     "status": [
-      "101 time changed to 13:45",
+      "101 time changed to 13:57",
       "101 time changed UNDO"
     ],
     "error": null,
@@ -542,7 +542,7 @@
     "action": "Tap tile 103 → \"Unmark runner\"",
     "expect": "Tile becomes \"unmarked earlier\" (dashed blue, was HH:MM); UndoBar \"103 unmarked · Undo\".",
     "observed": [
-      "Tile 103: \"103 was 13:55\" · name \"Runner 103, was 13:55\" · border 2px dashed rgb(30, 92, 179)",
+      "Tile 103: \"103 was 14:07\" · name \"Runner 103, was 14:07\" · border 2px dashed rgb(30, 92, 179)",
       "Undo bar: \"103 unmarked UNDO\" · role=status"
     ],
     "status": [
@@ -559,10 +559,10 @@
     "action": "Tap \"Undo\" on the undo bar",
     "expect": "Undo restores the original record exactly.",
     "observed": [
-      "Tile 103: \"103 13:55\" · name \"Runner 103, 13:55\""
+      "Tile 103: \"103 14:07\" · name \"Runner 103, 14:07\""
     ],
     "status": [
-      "103 restored at 13:55"
+      "103 restored at 14:07"
     ],
     "error": null,
     "viewport": "390×844",
@@ -575,7 +575,7 @@
     "action": "Tap tile 104 → \"Unmark runner\", wait 6.5 s",
     "expect": "Tile becomes \"unmarked earlier\"; Undo auto-dismisses after ~6 s.",
     "observed": [
-      "Tile 104: \"104 was 13:55\" · name \"Runner 104, was 13:55\" · border 2px dashed rgb(30, 92, 179)",
+      "Tile 104: \"104 was 14:07\" · name \"Runner 104, was 14:07\" · border 2px dashed rgb(30, 92, 179)",
       "Undo bar after 6.5 s: gone"
     ],
     "status": [],
@@ -590,10 +590,10 @@
     "action": "Tap tile 104 (unmarked earlier)",
     "expect": "Restore mode: \"Unmarked earlier · It had been marked at 07:37\", primary Mark at 07:37, secondary Use now (HH:MM).",
     "observed": [
-      "Sheet: \"104 Unmarked earlier It had been marked at 13:55 TIME PASSED −5 −1 13:55 +1 +5 Restore the original time, or adjust it MARK AT 13:55 Cancel Use now (13:55)\" · role=dialog"
+      "Sheet: \"104 Unmarked earlier It had been marked at 14:07 TIME PASSED −5 −1 14:07 +1 +5 Restore the original time, or adjust it MARK AT 14:07 Cancel Use now (14:07)\" · role=dialog"
     ],
     "status": [
-      "13:55"
+      "14:07"
     ],
     "error": null,
     "viewport": "390×844",
@@ -606,11 +606,11 @@
     "action": "Tap \"Mark at HH:MM\"",
     "expect": "Restores the original time.",
     "observed": [
-      "Status line: \"104 marked at 13:55\" · aria-live=polite",
-      "Tile 104: \"104 13:55\" · name \"Runner 104, 13:55\""
+      "Status line: \"104 marked at 14:07\" · aria-live=polite",
+      "Tile 104: \"104 14:07\" · name \"Runner 104, 14:07\""
     ],
     "status": [
-      "104 marked at 13:55",
+      "104 marked at 14:07",
       "104 marked UNDO"
     ],
     "error": null,
@@ -661,7 +661,7 @@
       "Title: \"CP3 · Callout\"",
       "Subtitle: \"VK4PMC → VK4WIP · 147.225\"",
       "Call due: \"Call due — 8 waiting, oldest 10 min\" · role=status",
-      "Pending block: \"Common time 13:45 · 1 101\""
+      "Pending block: \"Common time 13:55 · 1 101\""
     ],
     "status": [
       "Call due — 8 waiting, oldest 10 min"
@@ -678,7 +678,7 @@
     "expect": "Marks every pending runner called in; called-in blocks collapse to one compact row.",
     "observed": [
       "Callout badge: gone (nothing left to call in)",
-      "Sent row: \"Sent 13:55\""
+      "Sent row: \"Sent 14:07\""
     ],
     "status": [
       "8 marked as copied by base",
@@ -695,12 +695,12 @@
     "action": "Mark off → tap 101 (called in) → move it one minute inside its 5-minute block",
     "expect": "Same block → no correction. Sheet note \"Same common time (HH:MM) — base doesn't need a correction.\"",
     "observed": [
-      "Note: \"Same common time (13:45) — base doesn't need a correction.\"",
+      "Note: \"Same common time (13:55) — base doesn't need a correction.\"",
       "Correction warning: not shown"
     ],
     "status": [
       "Tap a number as the runner passes. Tap again to fix its time.",
-      "13:46"
+      "13:56"
     ],
     "error": null,
     "viewport": "390×844",
@@ -714,7 +714,7 @@
     "expect": "Keep calledIn, no correction, no ✎. Status line \"101 time changed — same common time, nothing to send\".",
     "observed": [
       "Status line: \"101 time changed — same common time, nothing to send\" · aria-live=polite",
-      "Tile 101: \"101 ✓ 13:46\" · name \"Runner 101, ✓ 13:46\"",
+      "Tile 101: \"101 ✓ 13:56\" · name \"Runner 101, ✓ 13:56\"",
       "Callout badge: none"
     ],
     "status": [
@@ -732,12 +732,12 @@
     "action": "Tap 101 again → \"−5\"",
     "expect": "Block changes → warning box \"Base already has 07:31. A changed time goes back on the callout sheet as a correction.\"",
     "observed": [
-      "Warning: \"Base already has 13:46. A changed time goes back on the callout sheet as a correction.\" · background rgba(212, 175, 55, 0.1) · border 1px solid rgb(212, 175, 55)"
+      "Warning: \"Base already has 13:56. A changed time goes back on the callout sheet as a correction.\" · background rgba(212, 175, 55, 0.1) · border 1px solid rgb(212, 175, 55)"
     ],
     "status": [
       "101 time changed — same common time, nothing to send",
       "101 time changed UNDO",
-      "13:41"
+      "13:51"
     ],
     "error": null,
     "viewport": "390×844",
@@ -750,10 +750,10 @@
     "action": "Tap \"Save HH:MM\", then the \"Callout\" tab",
     "expect": "Saving sets correction = true; tile shows ✎; corrections appear in the pending list tagged \"Correction\".",
     "observed": [
-      "Pending block: \"Common time 13:40 · 1 101 Correction\""
+      "Pending block: \"Common time 13:50 · 1 101 Correction\""
     ],
     "status": [
-      "Call due — 1 waiting, oldest 14 min"
+      "Call due — 1 waiting, oldest 16 min"
     ],
     "error": null,
     "viewport": "390×844",
@@ -762,15 +762,18 @@
   {
     "id": "CO-07",
     "section": "Checkpoint — Callout sheet",
-    "spec": "§4.6",
-    "action": "Tap \"Official message\", type a message",
-    "expect": "Official message … (plain buttons; v1 can open a simple notes modal / log entry).",
+    "spec": "§4.6 / Fixes E2",
+    "action": "Tap \"Official message\"; type a message, the originator, tick \"Signed by originator\"",
+    "expect": "Official message: Date (prefilled, en-AU), Originator (name/role, required), \"Signed by originator\" checkbox; local log. WICEN: sender, recipient, message number, date/time, originator's signature.",
     "observed": [
-      "Dialog: \"Official message 1\"",
-      "Message: \"Request extra water at CP3\""
+      "Heading: \"Official message 1\"",
+      "Date: \"21/10/2026\"",
+      "Originator: \"Sue Smith, CP3 marshal\"",
+      "Signed: true",
+      "Log message: \"LOG MESSAGE\""
     ],
     "status": [
-      "Call due — 1 waiting, oldest 14 min"
+      "Call due — 1 waiting, oldest 16 min"
     ],
     "error": null,
     "viewport": "390×844",
@@ -779,15 +782,15 @@
   {
     "id": "CO-08",
     "section": "Checkpoint — Callout sheet",
-    "spec": "§4.6",
+    "spec": "§4.6 / Fixes E2",
     "action": "Tap \"Log message\"",
-    "expect": "v1 can open a simple notes modal / log entry.",
+    "expect": "Kept in a local log.",
     "observed": [
-      "Log: \"Message 1 logged at 13:55\" · aria-live=polite"
+      "Status line: \"Message 1 logged at 14:07\" · aria-live=polite"
     ],
     "status": [
-      "Call due — 1 waiting, oldest 14 min",
-      "Message 1 logged at 13:55"
+      "Call due — 1 waiting, oldest 16 min",
+      "Message 1 logged at 14:07"
     ],
     "error": null,
     "viewport": "390×844",
@@ -796,15 +799,16 @@
   {
     "id": "CO-09",
     "section": "Checkpoint — Callout sheet",
-    "spec": "§4.6",
+    "spec": "§4.6 / Fixes E2",
     "action": "Tap \"Request stand down\"",
-    "expect": "Request stand down (plain button; v1 notes modal / log entry). No radio phrases on screen.",
+    "expect": "Request stand down (plain button; notes modal / log entry). Read-only \"Checkpoint log\" list. No radio phrases on screen.",
     "observed": [
-      "Dialog: \"Request stand down From VK4PMC Time 13:55 Note LOG REQUEST CANCEL 1 entry in this checkpoint's log\" · role=dialog"
+      "Heading: \"Request stand down\"",
+      "Checkpoint log: \"Message 1 · 14:07 · to VK4WIP 21/10/2026 · Sue Smith, CP3 marshal · signed Request extra water at CP3\""
     ],
     "status": [
-      "Call due — 1 waiting, oldest 14 min",
-      "Message 1 logged at 13:55"
+      "Call due — 1 waiting, oldest 16 min",
+      "Message 1 logged at 14:07"
     ],
     "error": null,
     "viewport": "390×844",
@@ -817,12 +821,12 @@
     "action": "Cancel; send the pending correction; mark 12 runners (130–141); tap \"Read out\"",
     "expect": "Numbers split into overs of up to 5, each bib its own row. Lead \"Common time 07:45\". Base copied — next locked (dashed) until every number is ticked (\"Tick each number as you read · 0 of 5\").",
     "observed": [
-      "Lead: \"Common time 13:55\"",
+      "Lead: \"Common time 14:05\"",
       "Rows: 5",
       "Next: \"TICK EACH NUMBER AS YOU READ · 0 OF 5\" · disabled · border 2px dashed rgb(224, 230, 240) · colour rgb(90, 101, 121)"
     ],
     "status": [
-      "Common time 13:55 130 Read next 131 132 133 134"
+      "Common time 14:05 130 Read next 131 132 133 134"
     ],
     "error": null,
     "viewport": "390×844",
@@ -838,7 +842,7 @@
       "Next: \"TICK EACH NUMBER AS YOU READ · 2 OF 5\" · disabled"
     ],
     "status": [
-      "Common time 13:55 130 131 132 Read next 133 134"
+      "Common time 14:05 130 131 132 Read next 133 134"
     ],
     "error": null,
     "viewport": "390×844",
@@ -854,7 +858,7 @@
       "Ticked: 0"
     ],
     "status": [
-      "Common time 13:55 130 Read next 131 132 133 134",
+      "Common time 14:05 130 Read next 131 132 133 134",
       "Ticks cleared for this over"
     ],
     "error": null,
@@ -871,7 +875,7 @@
       "Next: \"BASE COPIED — NEXT\" · background rgb(212, 175, 55)"
     ],
     "status": [
-      "Common time 13:55 130 131 132 133 134"
+      "Common time 14:05 130 131 132 133 134"
     ],
     "error": null,
     "viewport": "390×844",
@@ -884,11 +888,11 @@
     "action": "Tap \"Base copied — next\"",
     "expect": "Next over: lead \"Continuing 07:45\"; progress advances.",
     "observed": [
-      "Lead: \"Continuing 13:55\"",
+      "Lead: \"Continuing 14:05\"",
       "Progress: \"5 of 12 copied by base\""
     ],
     "status": [
-      "Continuing 13:55 135 Read next 136 137 138 139"
+      "Continuing 14:05 135 Read next 136 137 138 139"
     ],
     "error": null,
     "viewport": "390×844",
@@ -901,11 +905,11 @@
     "action": "Tick one number, tap back, then tap \"Read out\" again",
     "expect": "Read-out progress persists.",
     "observed": [
-      "Lead: \"Continuing 13:55\"",
+      "Lead: \"Continuing 14:05\"",
       "Ticked: 1"
     ],
     "status": [
-      "Continuing 13:55 135 136 Read next 137 138 139",
+      "Continuing 14:05 135 136 Read next 137 138 139",
       "Resumed at over 2"
     ],
     "error": null,
@@ -919,10 +923,10 @@
     "action": "Tap \"Previous over\"",
     "expect": "Previous over steps back.",
     "observed": [
-      "Lead: \"Common time 13:55\""
+      "Lead: \"Common time 14:05\""
     ],
     "status": [
-      "Common time 13:55 130 131 132 133 134"
+      "Common time 14:05 130 131 132 133 134"
     ],
     "error": null,
     "viewport": "390×844",
@@ -980,11 +984,11 @@
     "action": "Tap row 107 (called in)",
     "expect": "Called in: TimeStepper, Undo call-in, Reset — not passed, Mark DNF (+ note \"Base already has HH:MM. Changing the time sends a correction.\")",
     "observed": [
-      "Row 107: \"107 Called in 13:55\" · aria-expanded=true",
+      "Row 107: \"107 Called in 14:07\" · aria-expanded=true",
       "Actions: −5 · −1 · +1 · +5 · Undo call-in · Reset — not passed · Mark DNF"
     ],
     "status": [
-      "13:55"
+      "14:07"
     ],
     "error": null,
     "viewport": "390×844",
@@ -1001,7 +1005,7 @@
       "Callout badge: \"1\" · name \"1 to call in\""
     ],
     "status": [
-      "13:55",
+      "14:07",
       "107 back on callout sheet UNDO"
     ],
     "error": null,
@@ -1015,10 +1019,10 @@
     "action": "Row 107 now Passed: tap \"Mark called in\"",
     "expect": "Passed: TimeStepper, Mark called in, Reset — not passed, Mark DNF.",
     "observed": [
-      "Row 107: \"107 Called in 13:55\" · aria-expanded=true"
+      "Row 107: \"107 Called in 14:07\" · aria-expanded=true"
     ],
     "status": [
-      "13:55",
+      "14:07",
       "107 marked called in UNDO"
     ],
     "error": null,
@@ -1033,10 +1037,10 @@
     "expect": "The stepper changes a local value; nothing saved, no correction. A gold \"Save HH:MM\" appears only while it differs.",
     "observed": [
       "Save button: not shown",
-      "Row 107: \"107 Called in 13:55\" · aria-expanded=true"
+      "Row 107: \"107 Called in 14:07\" · aria-expanded=true"
     ],
     "status": [
-      "13:55",
+      "14:07",
       "107 marked called in UNDO"
     ],
     "error": null,
@@ -1050,12 +1054,12 @@
     "action": "Tap \"−5\", then \"Save HH:MM\"",
     "expect": "Save applies the A3 rule once (new block → correction); Undo restores exactly.",
     "observed": [
-      "Row 107: \"107 Passed Correction 13:50\" · aria-expanded=true",
-      "Undo bar: \"107 time 13:55 → 13:50 UNDO\" · role=status"
+      "Row 107: \"107 Passed Correction 14:02\" · aria-expanded=true",
+      "Undo bar: \"107 time 14:07 → 14:02 UNDO\" · role=status"
     ],
     "status": [
-      "13:50",
-      "107 time 13:55 → 13:50 UNDO"
+      "14:02",
+      "107 time 14:07 → 14:02 UNDO"
     ],
     "error": null,
     "viewport": "390×844",
@@ -1068,10 +1072,10 @@
     "action": "Tap \"Reset — not passed\", then \"Undo\"",
     "expect": "Every action shows UndoBar.",
     "observed": [
-      "Row 107: \"107 Passed Correction 13:50\" · aria-expanded=true"
+      "Row 107: \"107 Passed Correction 14:02\" · aria-expanded=true"
     ],
     "status": [
-      "13:50"
+      "14:02"
     ],
     "error": null,
     "viewport": "390×844",
@@ -1084,7 +1088,7 @@
     "action": "Filter \"To come\", tap row 102",
     "expect": "To come: Passed now (HH:MM) (gold), Mark DNS, Mark DNF.",
     "observed": [
-      "Passed now: \"Passed now (13:56)\" · background rgb(212, 175, 55)"
+      "Passed now: \"Passed now (14:08)\" · background rgb(212, 175, 55)"
     ],
     "status": [],
     "error": null,
@@ -1147,11 +1151,11 @@
     "action": "Race with overs of 3; four runners in one block and two in the next; Callout → \"Read out\"",
     "expect": "Read-out across two blocks; overSize 3.",
     "observed": [
-      "Lead: \"Common time 13:30\"",
+      "Lead: \"Common time 13:45\"",
       "Numbers in this over: 3"
     ],
     "status": [
-      "Common time 13:30 140 Read next 141 142"
+      "Common time 13:45 140 Read next 141 142"
     ],
     "error": null,
     "viewport": "390×844",
@@ -1164,11 +1168,11 @@
     "action": "Tick all, \"Base copied — next\"",
     "expect": "The rest of the first block continues (\"Continuing\").",
     "observed": [
-      "Lead: \"Continuing 13:30\"",
+      "Lead: \"Continuing 13:45\"",
       "Numbers in this over: 1"
     ],
     "status": [
-      "Continuing 13:30 143 Read next"
+      "Continuing 13:45 143 Read next"
     ],
     "error": null,
     "viewport": "390×844",
@@ -1181,11 +1185,11 @@
     "action": "Tick all, \"Base copied — next\"",
     "expect": "The second block starts \"Common time\".",
     "observed": [
-      "Lead: \"Common time 13:45\"",
+      "Lead: \"Common time 14:00\"",
       "Numbers in this over: 2"
     ],
     "status": [
-      "Common time 13:45 150 Read next 151"
+      "Common time 14:00 150 Read next 151"
     ],
     "error": null,
     "viewport": "390×844",
@@ -1203,7 +1207,7 @@
       "Tile 110: \"110\" · name \"Runner 110, to come\" · border 2px solid rgb(90, 101, 121)"
     ],
     "status": [
-      "3 runners marked at 13:56",
+      "3 runners marked at 14:08",
       "3 runners marked UNDO"
     ],
     "error": null,
@@ -1236,7 +1240,7 @@
       "Main background: rgba(0, 0, 0, 0)"
     ],
     "status": [
-      "Common time 13:55 100 Read next 101 102"
+      "Common time 14:05 100 Read next 101 102"
     ],
     "error": null,
     "viewport": "390×844",
@@ -1251,7 +1255,7 @@
     "observed": [
       "Body background: rgb(255, 255, 255)",
       "Main background: rgba(0, 0, 0, 0)",
-      "Block button: \"12:55\" · aria-pressed=false · border 2px solid rgb(90, 101, 121)"
+      "Block button: \"13:05\" · aria-pressed=false · border 2px solid rgb(90, 101, 121)"
     ],
     "status": [],
     "error": null,
@@ -1265,8 +1269,8 @@
     "action": "Open /base-station/operations (tablet 1112×834)",
     "expect": "Idle \"Who's calling?\": grid of compact buttons (≥64px) for CP1–CP3, Finish: short name, status pill, \"VK4PMC · up to 07:15\". Checkpoint board rows: \"Up to 07:15 · 30 min behind · call 11m ago\", count, pill.",
     "observed": [
-      "CP1 button: \"CP1 Due VK4MUD · up to 13:05\" · name \"CP1, Due\"",
-      "Board CP1: \"CP1 Up to 13:05 · 50 min behind · call 57m ago 20 Due\"",
+      "CP1 button: \"CP1 Due VK4MUD · up to 13:15\" · name \"CP1, Due\"",
+      "Board CP1: \"CP1 Up to 13:15 · 50 min behind · call 57m ago 20 Due\"",
       "Page scroll: 0px"
     ],
     "status": [],
@@ -1281,7 +1285,7 @@
     "action": "Tap \"CP1\"",
     "expect": "Default selection = next unreceived block. \"Exact\" pinned outside the scrolling block row. Complete locked (dashed) with nothing taken.",
     "observed": [
-      "Selected block: \"13:10 next\" · aria-pressed=true",
+      "Selected block: \"13:20 next\" · aria-pressed=true",
       "Exact: data-active=false · border 1px dashed rgb(90, 101, 121)",
       "Exact in view with the row scrolled to the start: yes",
       "Complete: \"COMPLETE · 0\" · disabled · border 2px dashed rgb(224, 230, 240) · colour rgb(90, 101, 121)"
@@ -1300,10 +1304,10 @@
     "observed": [
       "Chip 120: \"120\" · name \"Remove 120\" · background rgb(30, 92, 179)",
       "Chip 121: \"121\" · name \"Remove 121\"",
-      "Status line: \"121 added at 13:10\" · aria-live=polite"
+      "Status line: \"121 added at 13:20\" · aria-live=polite"
     ],
     "status": [
-      "121 added at 13:10"
+      "121 added at 13:20"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1317,11 +1321,11 @@
     "expect": "Not in race → rejected (red) \"Not in race\"; same bib earlier in this call → \"Said twice\"; already logged → \"Had 07:40\"; otherwise ok (blue).",
     "observed": [
       "Chip 999: \"999 Not in race\" · name \"Remove 999, Not in race\" · border 2px solid rgb(204, 0, 0) · text-decoration line-through",
-      "Chips: Remove 120 | Remove 121 | Remove 999, Not in race | Remove 121, Said twice | Remove 100, Had 12:55 | Remove 150",
+      "Chips: Remove 120 | Remove 121 | Remove 999, Not in race | Remove 121, Said twice | Remove 100, Had 13:05 | Remove 150",
       "Complete: \"COMPLETE · 3\""
     ],
     "status": [
-      "150 added at 13:10"
+      "150 added at 13:20"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1351,11 +1355,11 @@
     "action": "Tap \"Next HH:MM →\"",
     "expect": "Next → move to the next 5-minute block, clear the box.",
     "observed": [
-      "Selected block: \"13:15\" · aria-pressed=true",
-      "Status line: \"Now taking 13:15\" · aria-live=polite"
+      "Selected block: \"13:25\" · aria-pressed=true",
+      "Status line: \"Now taking 13:25\" · aria-live=polite"
     ],
     "status": [
-      "Now taking 13:15"
+      "Now taking 13:25"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1368,10 +1372,10 @@
     "action": "Add 122, 123",
     "expect": "Other blocks in the call show as pills; the count is only the numbers that will be recorded (ok + info).",
     "observed": [
-      "Also in this call: \"13:10 · 3\" · name \"Show the numbers at 13:10, 3 to record\""
+      "Also in this call: \"13:20 · 3\" · name \"Show the numbers at 13:20, 3 to record\""
     ],
     "status": [
-      "123 added at 13:15"
+      "123 added at 13:25"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1384,10 +1388,10 @@
     "action": "Tap the \"Also in this call\" pill",
     "expect": "Tap to switch back.",
     "observed": [
-      "Selected block: \"13:10 this call\" · aria-pressed=true"
+      "Selected block: \"13:20 this call\" · aria-pressed=true"
     ],
     "status": [
-      "Now taking 13:10"
+      "Now taking 13:20"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1397,14 +1401,14 @@
     "id": "RX-09",
     "section": "Base — Receive",
     "spec": "§4.9 / Fixes B7",
-    "action": "Type an exact time as HHMM (1334) and add 124",
+    "action": "Type an exact time as HHMM (1346) and add 124",
     "expect": "\"Exact\" accepts HH:MM or HHMM between race start and now; shown as HH:MM and selected.",
     "observed": [
-      "Exact: \"13:34\" · data-active=true · background rgb(11, 45, 83)",
-      "Status line: \"124 added at 13:34\" · aria-live=polite"
+      "Exact: \"13:46\" · data-active=true · background rgb(11, 45, 83)",
+      "Status line: \"124 added at 13:46\" · aria-live=polite"
     ],
     "status": [
-      "124 added at 13:34"
+      "124 added at 13:46"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1418,11 +1422,11 @@
     "expect": "Invalid value → red border, error in the status line, field cleared, previous block stays selected; Exact not selected.",
     "observed": [
       "Exact: aria-invalid=true · data-active=false · border 2px solid rgb(204, 0, 0)",
-      "Selected block: \"13:10 this call\" · aria-pressed=true",
-      "Status line: \"Time must be between 11:56 and now\" · aria-live=polite"
+      "Selected block: \"13:20 this call\" · aria-pressed=true",
+      "Status line: \"Time must be between 12:08 and now\" · aria-live=polite"
     ],
     "status": [
-      "Time must be between 11:56 and now"
+      "Time must be between 12:08 and now"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1432,13 +1436,13 @@
     "id": "RX-11",
     "section": "Base — Receive",
     "spec": "Fixes D3",
-    "action": "Type an exact time with a colon (13:38)",
+    "action": "Type an exact time with a colon (13:50)",
     "expect": "Exact time typed as HH:MM.",
     "observed": [
-      "Exact: \"13:38\" · data-active=true"
+      "Exact: \"13:50\" · data-active=true"
     ],
     "status": [
-      "Now taking 13:38"
+      "Now taking 13:50"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1451,11 +1455,11 @@
     "action": "Pick the \"next\" block again, tap \"Clear HH:MM\"",
     "expect": "Clears all numbers in the current block (Undo).",
     "observed": [
-      "Status line: \"Cleared 6 from 13:10\" · aria-live=polite",
+      "Status line: \"Cleared 6 from 13:20\" · aria-live=polite",
       "Chips in block: 0"
     ],
     "status": [
-      "Cleared 6 from 13:10"
+      "Cleared 6 from 13:20"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1484,7 +1488,7 @@
     "action": "Switch to the Overview tab and back to Receive",
     "expect": "The draft survives a tab switch.",
     "observed": [
-      "Selected block: \"13:10 this call\" · aria-pressed=true",
+      "Selected block: \"13:20 this call\" · aria-pressed=true",
       "Chips in block: 6"
     ],
     "status": [],
@@ -1499,11 +1503,11 @@
     "action": "Tap \"Complete · N\"",
     "expect": "Done card \"N recorded at CP1 · M skipped (flagged)\". The board's \"up to\" is the latest block received; an exact time never moves it.",
     "observed": [
-      "Done card: \"6 recorded at CP1 · 3 skipped (flagged) Blocks 13:10, 13:15, 13:34 UNDO NEXT CALL\" · role=status",
-      "Board CP1: \"CP1 Up to 13:15 · 40 min behind · call 0m ago 26 OK\""
+      "Done card: \"6 recorded at CP1 · 3 skipped (flagged) Blocks 13:20, 13:25, 13:46 UNDO NEXT CALL\" · role=status",
+      "Board CP1: \"CP1 Up to 13:25 · 40 min behind · call 0m ago 26 OK\""
     ],
     "status": [
-      "6 recorded at CP1 · 3 skipped (flagged) Blocks 13:10, 13:15, 13:34 UNDO NEXT CALL"
+      "6 recorded at CP1 · 3 skipped (flagged) Blocks 13:20, 13:25, 13:46 UNDO NEXT CALL"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1517,7 +1521,7 @@
     "expect": "Undo reopens the call, reverts writes.",
     "observed": [
       "Status line: \"Call reopened\" · aria-live=polite",
-      "Board CP1: \"CP1 Up to 13:05 · 50 min behind · call 57m ago 20 Due\""
+      "Board CP1: \"CP1 Up to 13:15 · 50 min behind · call 57m ago 20 Due\""
     ],
     "status": [
       "Call reopened"
@@ -1533,8 +1537,8 @@
     "action": "Tap \"Complete\", then \"Next call\"",
     "expect": "Next call returns to \"Who's calling?\"; board updated.",
     "observed": [
-      "CP1 button: \"CP1 OK VK4MUD · up to 13:15\" · name \"CP1, OK\"",
-      "Board CP1: \"CP1 Up to 13:15 · 40 min behind · call 0m ago 26 OK\""
+      "CP1 button: \"CP1 OK VK4MUD · up to 13:25\" · name \"CP1, OK\"",
+      "Board CP1: \"CP1 Up to 13:25 · 40 min behind · call 0m ago 26 OK\""
     ],
     "status": [],
     "error": null,
@@ -1552,7 +1556,7 @@
       "Complete: \"COMPLETE · 1\""
     ],
     "status": [
-      "115 added at 13:55"
+      "115 added at 14:05"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1599,7 +1603,7 @@
       "Button: \"LOG CALL · 0\" · background rgb(255, 255, 255) · border 1px solid rgb(90, 101, 121)"
     ],
     "status": [
-      "997 added at 13:30"
+      "997 added at 13:40"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1612,10 +1616,10 @@
     "action": "Tap \"Log call · 0\"",
     "expect": "Done card \"0 recorded · 2 skipped (flagged)\".",
     "observed": [
-      "Done card: \"0 recorded at CP2 · 2 skipped (flagged) Common time 13:30 UNDO NEXT CALL\" · role=status"
+      "Done card: \"0 recorded at CP2 · 2 skipped (flagged) Common time 13:40 UNDO NEXT CALL\" · role=status"
     ],
     "status": [
-      "0 recorded at CP2 · 2 skipped (flagged) Common time 13:30 UNDO NEXT CALL"
+      "0 recorded at CP2 · 2 skipped (flagged) Common time 13:40 UNDO NEXT CALL"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1628,7 +1632,7 @@
     "action": "\"Next call\"; \"Finish\"; add every bib 100–159; Complete; Next call",
     "expect": "Board pill Closed when every runner still in the race has been reported there.",
     "observed": [
-      "Finish button: \"Finish Closed up to 13:55\" · name \"Finish, Closed\"",
+      "Finish button: \"Finish Closed up to 14:05\" · name \"Finish, Closed\"",
       "Board Finish: \"Finish Closed 59 Closed\""
     ],
     "status": [],
@@ -1646,7 +1650,7 @@
       "Page width: 390px (viewport 390px)"
     ],
     "status": [
-      "111 added at 13:30"
+      "111 added at 13:40"
     ],
     "error": null,
     "viewport": "390×844",
@@ -1678,7 +1682,7 @@
       "Totals: \"0 DNS · 1 DNF\""
     ],
     "status": [
-      "13:56"
+      "14:08"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1695,7 +1699,7 @@
       "Medical: \"Medical\" · aria-pressed=true"
     ],
     "status": [
-      "13:56"
+      "14:08"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1708,10 +1712,10 @@
     "action": "Tap Time \"−5\" nine times (45 minutes back)",
     "expect": "Time (−5/+5, clamped).",
     "observed": [
-      "Time: \"13:11\" · aria-live=polite"
+      "Time: \"13:23\" · aria-live=polite"
     ],
     "status": [
-      "13:11"
+      "13:23"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1729,7 +1733,7 @@
       "Second 130: \"130 Listed twice\" · name \"Remove 130, Listed twice\""
     ],
     "status": [
-      "13:11",
+      "13:23",
       "5 numbers added"
     ],
     "error": null,
@@ -1744,10 +1748,10 @@
     "expect": "Primary Mark N as DNF (red). Undo. DNF writes withdrawal_records + runner status.",
     "observed": [
       "Status line: \"3 marked DNF\" · aria-live=polite",
-      "Row 108: \"108 DNF CP1 · Medical · 13:11 Clear\""
+      "Row 108: \"108 DNF CP1 · Medical · 13:23 Clear\""
     ],
     "status": [
-      "13:11",
+      "13:23",
       "3 marked DNF"
     ],
     "error": null,
@@ -1765,7 +1769,7 @@
       "Row 108: gone"
     ],
     "status": [
-      "13:11",
+      "13:23",
       "Undone"
     ],
     "error": null,
@@ -1818,7 +1822,7 @@
       "Mark button: \"ADD NUMBERS TO MARK\" · disabled"
     ],
     "status": [
-      "13:11",
+      "13:23",
       "131 added"
     ],
     "error": null,
@@ -1832,11 +1836,11 @@
     "action": "Clear list; out list filter \"DNF\"",
     "expect": "Rows (bib, status chip, \"CP1 · Medical · 07:12\") — two lines on narrow panels so the detail is never cut off.",
     "observed": [
-      "Row 131 detail: \"CP1 · Medical · 13:11\"",
+      "Row 131 detail: \"CP1 · Medical · 13:23\"",
       "Detail cut off?: no"
     ],
     "status": [
-      "13:11",
+      "13:23",
       "List cleared"
     ],
     "error": null,
@@ -1854,7 +1858,7 @@
       "Row 131: gone"
     ],
     "status": [
-      "13:11",
+      "13:23",
       "131 back in the race"
     ],
     "error": null,
@@ -1868,10 +1872,10 @@
     "action": "Tap \"Undo\", then filter \"All\"",
     "expect": "Undo.",
     "observed": [
-      "Row 131: \"131 DNF CP1 · Medical · 13:11 Clear\""
+      "Row 131: \"131 DNF CP1 · Medical · 13:23 Clear\""
     ],
     "status": [
-      "13:11",
+      "13:23",
       "Undone"
     ],
     "error": null,
@@ -1889,7 +1893,7 @@
       "Row 130 after Undo: \"130 DNS Did not start Clear\""
     ],
     "status": [
-      "13:11",
+      "13:23",
       "Undone"
     ],
     "error": null,
@@ -1906,7 +1910,7 @@
       "Clear for 145: \"Clear\" · name \"Clear DNF for 145\" · title=Recorded at a checkpoint — clear it there · disabled"
     ],
     "status": [
-      "13:11",
+      "13:23",
       "Undone"
     ],
     "error": null,
@@ -1923,7 +1927,7 @@
       "Chips: Remove 131, DNF | Remove 101, DNS"
     ],
     "status": [
-      "101 added at 13:30"
+      "101 added at 13:40"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1936,14 +1940,14 @@
     "action": "Cancel call; DNF / DNS → \"Withdraw runner with comments or vet-out details…\"",
     "expect": "Bottom sheet with design-system components, 24-hour date/time (TimeStepper + date text, no browser datetime-local), reasons Injury, Self-withdrew, Cut-off, Medical, Other; comments; red primary \"Withdraw runner\", plain Cancel. No \"*\" reverse syntax advertised.",
     "observed": [
-      "Time: \"13:56\" · aria-live=polite",
+      "Time: \"14:08\" · aria-live=polite",
       "Date: \"Wed 21 Oct 2026\"",
       "Reasons: Injury, Self-withdrew, Cut-off, Medical, Other",
       "Primary: \"WITHDRAW RUNNER\" · background rgb(204, 0, 0)",
       "Mentions \"*\": no"
     ],
     "status": [
-      "13:56"
+      "14:08"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1956,11 +1960,11 @@
     "action": "Withdraw 133 at CP2, Injury, comment \"Rolled ankle\"",
     "expect": "Submits; appears in the out list; Undo offered.",
     "observed": [
-      "Row 133: \"133 DNF CP2 · Injury · 13:56 Clear\"",
+      "Row 133: \"133 DNF CP2 · Injury · 14:08 Clear\"",
       "Undo bar: \"133 withdrawn UNDO\" · role=status"
     ],
     "status": [
-      "13:56",
+      "14:08",
       "133 withdrawn UNDO"
     ],
     "error": null,
@@ -1977,7 +1981,7 @@
       "Row 133: gone"
     ],
     "status": [
-      "13:56"
+      "14:08"
     ],
     "error": null,
     "viewport": "1112×834",
@@ -1990,7 +1994,7 @@
     "action": "Tap the \"Overview\" tab (desktop 1280)",
     "expect": "Red role=\"alert\" only for overdue runners; if a checkpoint is only behind on calls, a gold note \"CP2 hasn't reported past 10:40 · 14 expected\". On course = in the race, not finished, with \"N not seen yet\".",
     "observed": [
-      "Awaiting note: \"CP2 hasn't reported past 13:25 · 10 expected\" · background rgba(212, 175, 55, 0.1)",
+      "Awaiting note: \"CP2 hasn't reported past 13:35 · 10 expected\" · background rgba(212, 175, 55, 0.1)",
       "Red alerts: 0",
       "On course tile: \"On course 55 36 not seen yet\""
     ],
@@ -2006,7 +2010,7 @@
     "action": "Look at Current leaders",
     "expect": "Gold warning icon after the bib (aria-label \"Open data issue\") for duplicates, out-of-order times, sightings after DNF/DNS and impossible pace. Elapsed HH:MM.",
     "observed": [
-      "Leaders: 106 ⚠ 00:44 | 107 ⚠ 01:04 | 100 01:29 | 102 01:29 | 103 01:29"
+      "Leaders: 106 ⚠ 00:42 | 107 ⚠ 01:02 | 100 01:27 | 102 01:27 | 103 01:27"
     ],
     "status": [],
     "error": null,
@@ -2065,7 +2069,7 @@
     "expect": "Bib, last seen, expected at, overdue minutes. An \"Awaiting report\" group underneath, by checkpoint, with \"reported up to HH:MM\".",
     "observed": [
       "Overdue rows: 10",
-      "First row: 110 CP1 12:55 CP2 · 13:25 31 min",
+      "First row: 110 CP1 13:05 CP2 · 13:35 33 min",
       "Awaiting report group: none — CP2 has now reported past everyone"
     ],
     "status": [],
@@ -2081,7 +2085,7 @@
     "expect": "CSV gets a Status column.",
     "observed": [
       "Downloaded: Mt-Glorious-Mountain-Trails-overdue-runners.csv",
-      "First lines: Bib,Status,Last seen,Last time,Expected at,Expected time,Late (min),Next CP reported up to | 110,Overdue,CP1,12:55,CP2,13:25,31,13:55 | 111,Overdue,CP1,12:55,CP2,13:25,31,13:55"
+      "First lines: Bib,Status,Last seen,Last time,Expected at,Expected time,Late (min),Next CP reported up to | 110,Overdue,CP1,13:05,CP2,13:35,33,14:05 | 111,Overdue,CP1,13:05,CP2,13:35,33,14:05"
     ],
     "status": [],
     "error": null,
@@ -2124,8 +2128,8 @@
     "action": "Click \"Times by checkpoint\"",
     "expect": "Never replace a recorded time. Status column (DNS, DNF @CPx); DNF only in an empty cell at the withdrawal checkpoint; a time recorded while DNS / after DNF has a gold outline.",
     "observed": [
-      "Row 101: \"101 DNS 12:55 13:25 — —\"",
-      "Flagged cell: \"12:55\" · title=Recorded after DNS/DNF · border 2px solid rgb(212, 175, 55)"
+      "Row 101: \"101 DNS 13:05 13:35 — —\"",
+      "Flagged cell: \"13:05\" · title=Recorded after DNS/DNF · border 2px solid rgb(212, 175, 55)"
     ],
     "status": [],
     "error": null,
@@ -2139,7 +2143,7 @@
     "action": "Click \"Call log\"",
     "expect": "Per checkpoint: calls received, numbers, last call time, up to.",
     "observed": [
-      "CP1 row: \"CP1 1 0 12:59 13:05\""
+      "CP1 row: \"CP1 1 0 13:11 13:15\""
     ],
     "status": [],
     "error": null,
@@ -2153,8 +2157,8 @@
     "action": "Click \"Duplicates\"",
     "expect": "Keep A / Keep B (or Merge if identical).",
     "observed": [
-      "105: \"105 CP1 — 2 times 12:55 (call 12:59) and 13:05 (call 13:09) Keep 12:55 Keep 13:05\"",
-      "115: \"115 CP1 — same time twice 12:55 in 2 calls Merge\""
+      "105: \"105 CP1 — 2 times 13:05 (call 13:11) and 13:15 (call 13:21) Keep 13:05 Keep 13:15\"",
+      "115: \"115 CP1 — same time twice 13:05 in 2 calls Merge\""
     ],
     "status": [],
     "error": null,
@@ -2168,11 +2172,11 @@
     "action": "Click the first \"Keep HH:MM\" on 105",
     "expect": "Resolving removes it; Undo labelled with what it undoes.",
     "observed": [
-      "Status line: \"105: Keep 12:55\" · aria-live=polite",
-      "Undo: \"Undo 105: Keep 12:55\""
+      "Status line: \"105: Keep 13:05\" · aria-live=polite",
+      "Undo: \"Undo 105: Keep 13:05\""
     ],
     "status": [
-      "105: Keep 12:55"
+      "105: Keep 13:05"
     ],
     "error": null,
     "viewport": "1280×800",
@@ -2185,7 +2189,7 @@
     "action": "Click the Undo",
     "expect": "Undo brings it back.",
     "observed": [
-      "105: \"105 CP1 — 2 times 12:55 (call 12:59) and 13:05 (call 13:09) Keep 12:55 Keep 13:05\""
+      "105: \"105 CP1 — 2 times 13:05 (call 13:11) and 13:15 (call 13:21) Keep 13:05 Keep 13:15\""
     ],
     "status": [
       "Undone"
@@ -2218,7 +2222,7 @@
     "action": "Click \"Out of order\"",
     "expect": "Ask CPx / Mark checked. The Undo from the last list is gone.",
     "observed": [
-      "106: \"106 CP2 before CP1 CP1 12:55 → CP2 12:40 Ask CP2 Mark checked\"",
+      "106: \"106 CP2 before CP1 CP1 13:05 → CP2 12:50 Ask CP2 Mark checked\"",
       "Undo button: none"
     ],
     "status": [],
@@ -2244,13 +2248,73 @@
     "phone": false
   },
   {
+    "id": "AS-01",
+    "section": "Base — Ask reminder",
+    "spec": "Fixes E3",
+    "action": "Tap the \"Receive\" tab",
+    "expect": "An \"ask\" resolution shows a gold note on that checkpoint's row in the Receive board and on its \"Who's calling?\" button (\"Ask about 106\").",
+    "observed": [
+      "CP2 button: \"CP2 OK VK4IE · up to 14:05 Ask about 106\" · name \"CP2, OK, ask about 106\"",
+      "Board note: \"Ask about 106 Asked\" · background rgba(212, 175, 55, 0.1) · border 1px solid rgb(212, 175, 55)"
+    ],
+    "status": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "AS-02",
+    "section": "Base — Ask reminder",
+    "spec": "Fixes E3",
+    "action": "Tap \"Asked\" on the note",
+    "expect": "Cleared by an \"Asked\" button on the note (Undo).",
+    "observed": [
+      "Board note: cleared",
+      "Undo line: \"Asked CP2 about 106 Undo\" · role=status"
+    ],
+    "status": [
+      "Asked CP2 about 106 Undo"
+    ],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "AS-03",
+    "section": "Base — Ask reminder",
+    "spec": "Fixes E3",
+    "action": "Tap \"Undo\"",
+    "expect": "Undo brings the reminder back.",
+    "observed": [
+      "Board note: \"Ask about 106 Asked\""
+    ],
+    "status": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "AS-04",
+    "section": "Base — Ask reminder",
+    "spec": "Fixes E3",
+    "action": "Tap \"Asked\" again, then back to Reports",
+    "expect": "The issue stays resolved.",
+    "observed": [
+      "Out of order count: \"✓\""
+    ],
+    "status": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
     "id": "RP-13",
     "section": "Base — Reports & data checks",
     "spec": "§4.12 / Fixes D1",
     "action": "Click \"Skipped a checkpoint\"",
     "expect": "Has later CP time, missing an earlier CP (128: seen CP2, never at CP1) → Ask CPx / Mark checked.",
     "observed": [
-      "128: \"128 Not reported at CP1 CP2 13:25 Ask CP1 Mark checked\""
+      "128: \"128 Not reported at CP1 CP2 13:35 Ask CP1 Mark checked\""
     ],
     "status": [],
     "error": null,
@@ -2264,8 +2328,8 @@
     "action": "Click \"Seen after DNF / DNS\"",
     "expect": "Checkpoint time after DNF time, or any time while DNS → Clear DNF/DNS / Remove that time.",
     "observed": [
-      "101: \"101 DNS, but seen at CP1 Marked DNS → CP1 12:55 Clear DNS Remove CP1 time\"",
-      "108: \"108 DNF, then seen at CP2 DNF CP1 · Medical · 13:11 → CP2 13:25 Clear DNF Remove CP2 time\""
+      "101: \"101 DNS, but seen at CP1 Marked DNS → CP1 13:05 Clear DNS Remove CP1 time\"",
+      "108: \"108 DNF, then seen at CP2 DNF CP1 · Medical · 13:23 → CP2 13:35 Clear DNF Remove CP2 time\""
     ],
     "status": [],
     "error": null,
@@ -2313,7 +2377,7 @@
     "action": "Click \"Unknown bibs\"",
     "expect": "Numbers outside the race reported in calls → Remove / Keep for review.",
     "observed": [
-      "Rows: 777 Not in race CP2 call at 13:56, block 13:55 Remove Keep for review"
+      "Rows: 777 Not in race CP2 call at 14:08, block 14:05 Remove Keep for review"
     ],
     "status": [],
     "error": null,
@@ -2343,7 +2407,7 @@
     "action": "Click \"Impossible pace\"",
     "expect": "Split speed above 20 km/h → Ask CPx / Mark checked.",
     "observed": [
-      "107: \"107 CP1 → CP2 in 5 min 6 km · CP1 12:55 → CP2 13:00 · 72 km/h Ask CP2 Mark checked\""
+      "107: \"107 CP1 → CP2 in 5 min 6 km · CP1 13:05 → CP2 13:10 · 72 km/h Ask CP2 Mark checked\""
     ],
     "status": [],
     "error": null,
@@ -2406,7 +2470,7 @@
       "Out list below bulk add: yes"
     ],
     "status": [
-      "13:56"
+      "14:09"
     ],
     "error": null,
     "viewport": "390×844",

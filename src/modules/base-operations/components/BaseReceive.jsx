@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import {
-  buildBoard, checkCall, isRecordable, outStatusMap, sightingsByCheckpoint, CALL_DUE_MINUTES,
+  buildBoard, checkCall, isRecordable, outStatusMap, sightingsByCheckpoint, askReminders, CALL_DUE_MINUTES,
 } from '../services/receive';
 import TimeUtils from '../../../services/timeUtils.js';
 import {
@@ -35,8 +35,8 @@ const actionBtn = 'min-h-[48px] rounded-btn font-display font-extrabold text-xs 
 const BaseReceive = () => {
   const store = useBaseOperationsStore();
   const {
-    currentRace, checkpoints = [], runners = [], radioCalls = [], outList = [], raceRunnerNumbers = [],
-    receive, setReceive, resetReceive, recordCall, undoCall,
+    currentRace, checkpoints = [], runners = [], radioCalls = [], outList = [], raceRunnerNumbers = [], resolutions = [],
+    receive, setReceive, resetReceive, recordCall, undoCall, setResolutionsAsked,
   } = store;
   const now = useNow(10000);
   const inputRef = useRef(null);
@@ -46,6 +46,7 @@ const BaseReceive = () => {
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [busy, setBusy] = useState(false);
   const [exactInvalid, setExactInvalid] = useState(false);
+  const [askUndo, setAskUndo] = useState(null); // { cp, ids, text } after "Asked"
 
   const raceStart = currentRace?.date && currentRace?.startTime
     ? TimeUtils.createRaceTimestamp(currentRace.date, currentRace.startTime.slice(0, 5))
@@ -60,6 +61,20 @@ const BaseReceive = () => {
     fieldSize: raceRunnerNumbers.length, outCount: out.size,
     dueMinutes: currentRace?.baseCallDueMinutes ?? CALL_DUE_MINUTES,
   }), [checkpoints, runners, radioCalls, now, raceStart, raceRunnerNumbers.length, out.size, currentRace?.baseCallDueMinutes]);
+
+  // "Ask CPx" reminders set in Reports › Needs attention, until marked asked
+  const asks = useMemo(() => askReminders(resolutions, board), [resolutions, board]);
+  const askText = (cp) => (asks.get(cp) ?? []).map(a => a.number).join(', ');
+  const markAsked = async (row) => {
+    const ids = asks.get(row.number).map(a => a.id);
+    await setResolutionsAsked(ids, TimeUtils.getCurrentTimestamp());
+    setAskUndo({ cp: row.number, ids, text: `Asked ${row.short} about ${askText(row.number)}` });
+  };
+  const undoAsked = async () => {
+    const u = askUndo;
+    setAskUndo(null);
+    await setResolutionsAsked(u.ids, null);
+  };
 
   // A draft saved for another race (persisted across reloads) is ignored
   const rx = receive && (!receive.raceId || receive.raceId === store.currentRaceId) ? receive : { step: 'idle', entries: [] };
@@ -215,7 +230,7 @@ const BaseReceive = () => {
                   key={row.number}
                   type="button"
                   onClick={() => pickCheckpoint(row)}
-                  aria-label={`${row.short}, ${pillText[row.status]}`}
+                  aria-label={`${row.short}, ${pillText[row.status]}${asks.has(row.number) ? `, ask about ${askText(row.number)}` : ''}`}
                   className={`min-h-[64px] px-2.5 py-2 rounded-btn flex flex-col items-start justify-center gap-0.5 text-left ${row.status === 'due'
                     ? 'bg-vk-gold-tint border-2 border-vk-gold'
                     : 'bg-white border border-vk-border dark:bg-gray-800 dark:border-gray-600'} ${row.status === 'closed' ? 'opacity-75' : ''}`}
@@ -227,6 +242,9 @@ const BaseReceive = () => {
                   <span className="text-xs font-semibold text-vk-muted">
                     {[row.ops[0], row.lastBlock ? `up to ${hhmm(row.lastBlock)}` : 'no calls yet'].filter(Boolean).join(' · ')}
                   </span>
+                  {asks.has(row.number) && (
+                    <span className="text-xs font-bold text-vk-ink bg-vk-gold-tint border border-vk-gold rounded-chip px-1.5">Ask about {askText(row.number)}</span>
+                  )}
                 </button>
               ))}
             </div>
@@ -371,7 +389,22 @@ const BaseReceive = () => {
           <div key={row.number} data-testid={`board-${row.short}`}
             className={`flex items-center gap-2 px-3 py-[7px] border-b border-vk-border dark:border-gray-700 last:border-b-0 ${row.number === rx.cp && rx.step !== 'idle' ? 'bg-vk-gold-tint' : ''}`}>
             <div className="w-[46px] font-display font-extrabold text-[15px] text-vk-navy dark:text-white">{row.short}</div>
-            <div className="flex-1 min-w-0 text-xs text-vk-muted leading-snug">{row.text}</div>
+            <div className="flex-1 min-w-0 flex flex-col gap-1">
+              <div className="text-xs text-vk-muted leading-snug">{row.text}</div>
+              {asks.has(row.number) && (
+                <div className="flex items-center gap-1.5 bg-vk-gold-tint border border-vk-gold rounded-btn px-2 py-1" data-testid={`ask-${row.short}`}>
+                  <span className="flex-1 text-xs font-bold text-vk-ink">Ask about {askText(row.number)}</span>
+                  <button type="button" onClick={() => markAsked(row)} aria-label={`Asked ${row.short} about ${askText(row.number)}`}
+                    className="min-h-[32px] px-2.5 rounded-lg bg-white border border-vk-muted text-vk-ink font-bold text-xs dark:bg-gray-800 dark:text-gray-100">Asked</button>
+                </div>
+              )}
+              {askUndo?.cp === row.number && !asks.has(row.number) && (
+                <div className="flex items-center gap-1.5 text-xs text-vk-muted" role="status">
+                  <span className="flex-1">{askUndo.text}</span>
+                  <button type="button" onClick={undoAsked} className="min-h-[32px] px-3 rounded-lg bg-vk-ink text-white font-bold text-xs">Undo</button>
+                </div>
+              )}
+            </div>
             <div className="flex flex-col items-end gap-0.5">
               <div className="font-display font-extrabold text-base tabular-nums" data-testid={`board-count-${row.short}`}>{row.count}</div>
               <StatusPill status={row.status} />

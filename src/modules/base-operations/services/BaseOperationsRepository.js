@@ -208,6 +208,14 @@ export class BaseOperationsRepository extends BaseRepository {
     return id;
   }
 
+  /** "Ask CPx" done (or undone): askedAt is a data column, no index. */
+  async setResolutionAsked(id, askedAt) {
+    const row = await db.data_issue_resolutions.get(id);
+    if (!row) return;
+    await db.data_issue_resolutions.update(id, { askedAt });
+    await this.logAudit(row.raceId, askedAt ? 'issue-asked' : 'issue-ask-reopened', 'data_issue', row.issueKey, { resolution: row.resolution });
+  }
+
   async removeResolution(id) {
     const row = await db.data_issue_resolutions.get(id);
     if (!row) return;

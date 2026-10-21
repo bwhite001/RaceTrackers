@@ -228,3 +228,16 @@ Phase D notes:
 - **D2: "App showed" is evidence, not page chrome.** Each event reads the element it is about: text, accessible name, pressed / disabled / invalid state, and the computed colour or border where the plan names one. Measured values (page width, axe result, CSV first lines, mailto length) are labelled. A separate "Status line" row keeps live status and alert text, capped at 160 characters, so the generic modal text has gone. The pack now has 148 events (was 109), every one completed, and none has an empty or missing piece of evidence.
 - **D3/D4:** every gap the brief lists is a pack event and a test in `30-coverage-gaps.spec.js`. There are 20 tests: Receive, DNF / DNS, data checks, the two-block read-out, Settings Cancel and persistence, phone layouts and accessibility. Phase A–C fixes have their own events, marked "Fixes A1 …" in the Plan column.
 - **The overdue alert in the pack:** the seeded calls leave CP2 only behind on calls. So BO-01 now shows the gold "hasn't reported past" note (A1), and BO-04 has CP2 report up to now before the red alert appears.
+
+Phase E notes:
+- **E1:** the radio procedure has a "Corrections" section with the placeholder "**Brandon to supply WICEN wording** …". It describes app behaviour only: same-block edits aren't corrections, and base skips "Had HH:MM" until D1 is decided. The "Fixing mistakes" line now says a correction means a different 5-minute block.
+- **E2: official message.**
+  - The sheet adds Date (prefilled dd/mm/yyyy, editable), Originator (name / role, required: Log message stays locked without it) and a "Signed by originator" checkbox.
+  - Signing isn't required, because the paper copy may be signed after the call. The log records whether it was.
+  - The checkpoint log is now a read-only list (newest first) of every message and stand-down request on that device, replacing the bare count.
+  - **The base-side log pad is out of scope.** Base still writes official messages on paper.
+- **E3: "Ask CPx" reminder.**
+  - An "Ask CPx" resolution in Reports › Needs attention puts a gold "Ask about 106" on that checkpoint's Who's calling button and board row.
+  - "Asked" sets `askedAt` on the resolution, an additive data column with no index or schema change, and is audit-logged. Undo clears it.
+  - The issue stays resolved in Reports either way; the reminder is only about the radio call.
+  - The user guide has a line under "Base: receiving a call".

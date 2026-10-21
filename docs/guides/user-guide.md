@@ -128,6 +128,22 @@ A race director can give each wave a custom name (e.g. "Wave B") and a specific 
 
 ![Verify "Wave B" appears in the wave name input](assets/wave-name-and-time-fields-are-editable-and-save-step-05.jpg)
 
+### Race setup fits a phone
+
+
+
+**Runner setup at 390 px — the range row fits; Back and Next on one line**
+
+![Runner setup at 390 px — the range row fits; Back and Next on one line](assets/race-setup-fits-a-phone-step-01.jpg)
+
+### Mt glorious template matches the brief
+
+
+
+**Template — Mt Glorious starts at 06:30 with four checkpoints; bibs 1–128 as before**
+
+![Template — Mt Glorious starts at 06:30 with four checkpoints; bibs 1–128 as before](assets/mt-glorious-template-matches-the-brief-step-01.jpg)
+
 ## Running a Checkpoint
 
 Steps for checkpoint volunteers. Covers opening a checkpoint, marking off runners individually and in bulk, reviewing counts, exporting data, and transferring data to another device via QR code.
@@ -300,6 +316,54 @@ When a checkpoint volunteer marks a runner as called in, the pending count badge
 
 ![Tap back button — returns to /checkpoint/1](assets/back-button-returns-to-the-checkpoint-view-step-02.jpg)
 
+### Header shows callsign and frequency in full
+
+
+
+**Mark off — location and callsign wrap to two lines rather than cut off**
+
+![Mark off — location and callsign wrap to two lines rather than cut off](assets/header-shows-callsign-and-frequency-in-full-step-01.jpg)
+
+**Callout — "CP3 · Callout", VK4PMC → VK4WIP · 147.225**
+
+![Callout — "CP3 · Callout", VK4PMC → VK4WIP · 147.225](assets/header-shows-callsign-and-frequency-in-full-step-02.jpg)
+
+**Overview — "CP3 · Overview"; the tap hint heads the list**
+
+![Overview — "CP3 · Overview"; the tap hint heads the list](assets/header-shows-callsign-and-frequency-in-full-step-03.jpg)
+
+### Share batch lives in the app bar and covers no tiles
+
+
+
+**Five runners passed — Share batch shows the count in the app bar**
+
+![Five runners passed — Share batch shows the count in the app bar](assets/share-batch-lives-in-the-app-bar-and-covers-no-tiles-step-01.jpg)
+
+**Bottom-right tile 119 is clickable at 390 × 844**
+
+![Bottom-right tile 119 is clickable at 390 × 844](assets/share-batch-lives-in-the-app-bar-and-covers-no-tiles-step-02.jpg)
+
+### Status line stays in view while the grid scrolls
+
+
+
+**Scroll the grid to the bottom and tap a DNS runner — the message is on screen**
+
+![Scroll the grid to the bottom and tap a DNS runner — the message is on screen](assets/status-line-stays-in-view-while-the-grid-scrolls-step-01.jpg)
+
+### Official message has the WICEN fields and a log
+
+
+
+**Official message — date prefilled (en-AU); Log is locked until originator and message are in**
+
+![Official message — date prefilled (en-AU); Log is locked until originator and message are in](assets/official-message-has-the-wicen-fields-and-a-log-step-01.jpg)
+
+**Open it again — the checkpoint log lists the message with its fields**
+
+![Open it again — the checkpoint log lists the message with its fields](assets/official-message-has-the-wicen-fields-and-a-log-step-02.jpg)
+
 ## Operating the Base Station
 
 Steps for the base station operator. Record finish times, mark DNF/DNS runners, and review race-wide status from the Overview and Reports tabs.
@@ -408,6 +472,106 @@ Take a Scores Checkpoint call one checkpoint at a time: pick who is calling, tak
 
 ![Second tap — the call is dropped, nothing recorded](assets/base-clears-a-block-with-undo-and-cancels-a-call-with-two-taps-step-04.jpg)
 
+### Exact time does not move up-to
+
+
+
+**CP1 call — two numbers at an earlier block and one at an exact recent time**
+
+![CP1 call — two numbers at an earlier block and one at an exact recent time](assets/exact-time-does-not-move-up-to-step-01.jpg)
+
+**Board says up to the earlier block; the next call opens on the block after it**
+
+![Board says up to the earlier block; the next call opens on the block after it](assets/exact-time-does-not-move-up-to-step-02.jpg)
+
+### Exact time is pinned and a bad time keeps the block
+
+
+
+**Scroll the block row to the start — Exact stays in view**
+
+![Scroll the block row to the start — Exact stays in view](assets/exact-time-is-pinned-and-a-bad-time-keeps-the-block-step-01.jpg)
+
+**Type 2359 — rejected: red, cleared, the block stays selected, Exact not selected**
+
+![Type 2359 — rejected: red, cleared, the block stays selected, Exact not selected](assets/exact-time-is-pinned-and-a-bad-time-keeps-the-block-step-02.jpg)
+
+**Type a valid time as HHMM — shown as HH:MM and selected**
+
+![Type a valid time as HHMM — shown as HH:MM and selected](assets/exact-time-is-pinned-and-a-bad-time-keeps-the-block-step-03.jpg)
+
+### Also in this call counts numbers to record
+
+
+
+**Six numbers in one block, three not in the race**
+
+![Six numbers in one block, three not in the race](assets/also-in-this-call-counts-numbers-to-record-step-01.jpg)
+
+**Next block — the pill for the first block shows 3**
+
+![Next block — the pill for the first block shows 3](assets/also-in-this-call-counts-numbers-to-record-step-02.jpg)
+
+### A call with nothing to record is logged plainly
+
+
+
+**Only unknown numbers — "Log call · 0", not the gold Complete**
+
+![Only unknown numbers — "Log call · 0", not the gold Complete](assets/a-call-with-nothing-to-record-is-logged-plainly-step-01.jpg)
+
+**Log it — "0 recorded at CP2 · 2 skipped (flagged)"**
+
+![Log it — "0 recorded at CP2 · 2 skipped (flagged)"](assets/a-call-with-nothing-to-record-is-logged-plainly-step-02.jpg)
+
+### Ask reminder
+
+
+
+**Reports › Out of order — "Ask CP2" about 106**
+
+![Reports › Out of order — "Ask CP2" about 106](assets/ask-reminder-step-01.jpg)
+
+**Receive — CP2 button and board row remind base to ask about 106**
+
+![Receive — CP2 button and board row remind base to ask about 106](assets/ask-reminder-step-02.jpg)
+
+**Asked — the reminder clears; Undo brings it back**
+
+![Asked — the reminder clears; Undo brings it back](assets/ask-reminder-step-03.jpg)
+
+### Receive flags a number not seen at the previous checkpoint
+
+
+
+**CP2 call — 125 was never reported at CP1: blue info chip, still recorded**
+
+![CP2 call — 125 was never reported at CP1: blue info chip, still recorded](assets/receive-flags-a-number-not-seen-at-the-previous-checkpoint-step-01.jpg)
+
+### Receive shows Closed once everyone is through
+
+
+
+**CP1 reports all five runners — its pill reads Closed**
+
+![CP1 reports all five runners — its pill reads Closed](assets/receive-shows-closed-once-everyone-is-through-step-01.jpg)
+
+### Receive takes an exact time typed as HH:MM
+
+
+
+**Type the time with a colon — accepted and selected**
+
+![Type the time with a colon — accepted and selected](assets/receive-takes-an-exact-time-typed-as-hh-mm-step-01.jpg)
+
+### Receive draft survives a tab switch
+
+
+
+**Overview and back — the call in progress is still there**
+
+![Overview and back — the call in progress is still there](assets/receive-draft-survives-a-tab-switch-step-01.jpg)
+
 ## Base Station: DNF, DNS and Overview
 
 Base keeps the race-wide out list. Mark runners DNF or DNS in bulk by typing or pasting numbers, check the warnings, and clear anyone who is back in. The Overview shows who is on course, overdue alerts, checkpoint progress and the current leaders.
@@ -451,6 +615,118 @@ Base keeps the race-wide out list. Mark runners DNF or DNS in bulk by typing or 
 **Current leaders — furthest along first, gold badge for #1**
 
 ![Current leaders — furthest along first, gold badge for #1](assets/base-overview-shows-tiles-checkpoint-progress-and-current-leaders-step-02.jpg)
+
+### Overdue waits for the checkpoint to report
+
+
+
+**Overview — CP2 is only behind on calls: gold note, no red alert**
+
+![Overview — CP2 is only behind on calls: gold note, no red alert](assets/overdue-waits-for-the-checkpoint-to-report-step-01.jpg)
+
+**CP2 calls in up to now without those runners — now they are overdue**
+
+![CP2 calls in up to now without those runners — now they are overdue](assets/overdue-waits-for-the-checkpoint-to-report-step-02.jpg)
+
+### On course count matches report
+
+
+
+**Overview — On course tile with "not seen yet"**
+
+![Overview — On course tile with "not seen yet"](assets/on-course-count-matches-report-step-01.jpg)
+
+**Reports — Still on course shows the same numbers**
+
+![Reports — Still on course shows the same numbers](assets/on-course-count-matches-report-step-02.jpg)
+
+### Rejected chips match receive and out list rows are not cut off
+
+
+
+**Paste a list with a bib not in the race — rejected chip: white, 2px red, struck through**
+
+![Paste a list with a bib not in the race — rejected chip: white, 2px red, struck through](assets/rejected-chips-match-receive-and-out-list-rows-are-not-cut-off-step-01.jpg)
+
+**Mark 112 DNF at CP1, Medical — the out list shows the whole detail**
+
+![Mark 112 DNF at CP1, Medical — the out list shows the whole detail](assets/rejected-chips-match-receive-and-out-list-rows-are-not-cut-off-step-02.jpg)
+
+### Withdrawal dialog uses 24-hour time and can be undone
+
+
+
+**Open — where, 24-hour time with the date, five reasons, comments**
+
+![Open — where, 24-hour time with the date, five reasons, comments](assets/withdrawal-dialog-uses-24-hour-time-and-can-be-undone-step-01.jpg)
+
+**Withdraw 131 at CP2, Injury, with a comment — on the out list**
+
+![Withdraw 131 at CP2, Injury, with a comment — on the out list](assets/withdrawal-dialog-uses-24-hour-time-and-can-be-undone-step-02.jpg)
+
+**Undo — 131 is back in the race**
+
+![Undo — 131 is back in the race](assets/withdrawal-dialog-uses-24-hour-time-and-can-be-undone-step-03.jpg)
+
+### Leaders flag open data issues
+
+
+
+**Overview — 106 (out of order) and 107 (impossible pace) carry the warning; elapsed is HH:MM**
+
+![Overview — 106 (out of order) and 107 (impossible pace) carry the warning; elapsed is HH:MM](assets/leaders-flag-open-data-issues-step-01.jpg)
+
+**Mark 107 checked in Reports — its warning goes**
+
+![Mark 107 checked in Reports — its warning goes](assets/leaders-flag-open-data-issues-step-02.jpg)
+
+### A runner already DNF is rejected
+
+
+
+**Add 130 again as DNF — rejected "Already DNF", nothing to mark**
+
+![Add 130 again as DNF — rejected "Already DNF", nothing to mark](assets/a-runner-already-dnf-is-rejected-step-01.jpg)
+
+### A DNS row is cleared and undone
+
+
+
+**Clear on the DNS row — back in the race; Undo puts it back**
+
+![Clear on the DNS row — back in the race; Undo puts it back](assets/a-dns-row-is-cleared-and-undone-step-01.jpg)
+
+### A DNF recorded at a checkpoint cannot be cleared at base
+
+
+
+**145 was marked DNF at CP2 — its Clear is disabled with the reason**
+
+![145 was marked DNF at CP2 — its Clear is disabled with the reason](assets/a-dnf-recorded-at-a-checkpoint-cannot-be-cleared-at-base-step-01.jpg)
+
+### Base overview, DNF / DNS and reports fit a phone
+
+
+
+**Overview at 390 px — no sideways page scroll (the leaders table scrolls in its box)**
+
+![Overview at 390 px — no sideways page scroll (the leaders table scrolls in its box)](assets/base-overview-dnf-dns-and-reports-fit-a-phone-step-01.jpg)
+
+**DNF / DNS at 390 px — bulk add above the out list**
+
+![DNF / DNS at 390 px — bulk add above the out list](assets/base-overview-dnf-dns-and-reports-fit-a-phone-step-02.jpg)
+
+**Reports at 390 px — the list of reports stacks above the report**
+
+![Reports at 390 px — the list of reports stacks above the report](assets/base-overview-dnf-dns-and-reports-fit-a-phone-step-03.jpg)
+
+### Overdue banner is an alert
+
+
+
+**CP2 reports up to now — 110–119 are overdue: the banner has role="alert"**
+
+![CP2 reports up to now — 110–119 are overdue: the banner has role="alert"](assets/overdue-banner-is-an-alert-step-01.jpg)
 
 ## Base Station: Reports and Data Checks
 
@@ -496,6 +772,74 @@ Overdue runners, who is still on course, times by checkpoint and the call log �
 
 ![Call log — calls and numbers per checkpoint; CSV available](assets/base-reports-show-still-on-course-times-by-checkpoint-and-the-call-log-step-03.jpg)
 
+### Matrix keeps times for DNS runners
+
+
+
+**Mark 101 DNS (it was seen — flagged, applied anyway)**
+
+![Mark 101 DNS (it was seen — flagged, applied anyway)](assets/matrix-keeps-times-for-dns-runners-step-01.jpg)
+
+**Times by checkpoint — times kept, DNS in the Status column, CSV matches**
+
+![Times by checkpoint — times kept, DNS in the Status column, CSV matches](assets/matrix-keeps-times-for-dns-runners-step-02.jpg)
+
+### Reports undo stays with its list and says what it undoes
+
+
+
+**Out of order — Mark checked; Undo names the bib and action**
+
+![Out of order — Mark checked; Undo names the bib and action](assets/reports-undo-stays-with-its-list-and-says-what-it-undoes-step-01.jpg)
+
+**Switch to Skipped a checkpoint — no Undo carried over**
+
+![Switch to Skipped a checkpoint — no Undo carried over](assets/reports-undo-stays-with-its-list-and-says-what-it-undoes-step-02.jpg)
+
+### Identical duplicates merge
+
+
+
+**115 at CP1 twice with the same time — Merge**
+
+![115 at CP1 twice with the same time — Merge](assets/identical-duplicates-merge-step-01.jpg)
+
+### A time seen after DNF is removed
+
+
+
+**Mark 108 DNF at CP1, 45 minutes ago (it was reported at CP2 30 minutes ago)**
+
+![Mark 108 DNF at CP1, 45 minutes ago (it was reported at CP2 30 minutes ago)](assets/a-time-seen-after-dnf-is-removed-step-01.jpg)
+
+**Reports › Seen after DNF / DNS — Remove CP2 time**
+
+![Reports › Seen after DNF / DNS — Remove CP2 time](assets/a-time-seen-after-dnf-is-removed-step-02.jpg)
+
+### DNS is cleared from a check
+
+
+
+**Reports › Seen after DNF / DNS — 101 was seen, so Clear DNS**
+
+![Reports › Seen after DNF / DNS — 101 was seen, so Clear DNS](assets/dns-is-cleared-from-a-check-step-01.jpg)
+
+### An unknown bib is kept for review
+
+
+
+**Reports › Unknown bibs — Keep for review**
+
+![Reports › Unknown bibs — Keep for review](assets/an-unknown-bib-is-kept-for-review-step-01.jpg)
+
+### A report prints
+
+
+
+**Print — opens the browser print dialog for the report**
+
+![Print — opens the browser print dialog for the report](assets/a-report-prints-step-01.jpg)
+
 ## Importing & Exporting Data
 
 Transfer race configurations and results between devices. Export from the base station header or race management page; import to restore a race.
@@ -519,6 +863,26 @@ This test triggers the export function and confirms that a JSON file is actually
 ### Imports a race configuration and restores data
 
 After wiping all data from the app, this test uploads a previously exported race file and confirms the race is fully restored — the race name, checkpoints, and runner numbers all come back exactly as they were before the data was cleared.
+
+### Email share stays short
+
+
+
+**Email — the setup file downloads and a short email opens**
+
+![Email — the setup file downloads and a short email opens](assets/email-share-stays-short-step-01.jpg)
+
+### Import accepts octet-stream
+
+
+
+**Import — a race file sent as application/octet-stream loads**
+
+![Import — a race file sent as application/octet-stream loads](assets/import-accepts-octet-stream-step-01.jpg)
+
+**Import — a file that isn't JSON is refused with a plain message**
+
+![Import — a file that isn't JSON is refused with a plain message](assets/import-accepts-octet-stream-step-02.jpg)
 
 ## Navigating the App
 
@@ -599,6 +963,38 @@ If someone types a web address that doesn't exist in the app (perhaps a typo or 
 **Scan race QR code opens the import screen**
 
 ![Scan race QR code opens the import screen](assets/home-shows-the-three-roles-the-current-race-and-scan-race-qr-code-step-03.jpg)
+
+### Footer names the club
+
+
+
+**Footer — "Ipswich & District Radio Club · VK4WIP"**
+
+![Footer — "Ipswich & District Radio Club · VK4WIP"](assets/footer-names-the-club-step-01.jpg)
+
+### Sheets trap focus and close on Escape
+
+
+
+**Tab around the edit sheet — focus never leaves it; Escape closes it**
+
+![Tab around the edit sheet — focus never leaves it; Escape closes it](assets/sheets-trap-focus-and-close-on-escape-step-01.jpg)
+
+### Status lines are polite live regions
+
+
+
+**Mark off, Receive, DNF / DNS and Reports status lines use aria-live="polite"**
+
+![Mark off, Receive, DNF / DNS and Reports status lines use aria-live="polite"](assets/status-lines-are-polite-live-regions-step-01.jpg)
+
+### Undo bar clears itself after about six seconds
+
+
+
+**Unmark — Undo shows, then goes by itself**
+
+![Unmark — Undo shows, then goes by itself](assets/undo-bar-clears-itself-after-about-six-seconds-step-01.jpg)
 
 ## Settings
 
@@ -695,6 +1091,78 @@ Changes made in settings should be saved and remembered. If dark mode is turned 
 **Back — returns to Settings**
 
 ![Back — returns to Settings](assets/share-race-screen-offers-qr-download-email-and-copy-step-03.jpg)
+
+### Locked buttons look locked
+
+
+
+**Mark off — Mark is locked until a number is typed**
+
+![Mark off — Mark is locked until a number is typed](assets/locked-buttons-look-locked-step-01.jpg)
+
+**Read-out — Next is locked until every number is ticked**
+
+![Read-out — Next is locked until every number is ticked](assets/locked-buttons-look-locked-step-02.jpg)
+
+**Share race — Show full screen is locked when the race is too big for one QR**
+
+![Share race — Show full screen is locked when the race is too big for one QR](assets/locked-buttons-look-locked-step-03.jpg)
+
+**Base Receive — Complete and At now are locked with nothing to send**
+
+![Base Receive — Complete and At now are locked with nothing to send](assets/locked-buttons-look-locked-step-04.jpg)
+
+**DNF / DNS — "Add numbers to mark" is locked**
+
+![DNF / DNS — "Add numbers to mark" is locked](assets/locked-buttons-look-locked-step-05.jpg)
+
+### Dark mode passes colour contrast
+
+
+
+**Settings in Dark — no contrast failures (labels, links, swatches)**
+
+![Settings in Dark — no contrast failures (labels, links, swatches)](assets/dark-mode-passes-colour-contrast-step-01.jpg)
+
+**Mark off in Dark — no contrast failures**
+
+![Mark off in Dark — no contrast failures](assets/dark-mode-passes-colour-contrast-step-02.jpg)
+
+### Sunlight on the working screens
+
+
+
+**Mark off in Sunlight — white page, 2px tile borders**
+
+![Mark off in Sunlight — white page, 2px tile borders](assets/sunlight-on-the-working-screens-step-01.jpg)
+
+**Callout in Sunlight**
+
+![Callout in Sunlight](assets/sunlight-on-the-working-screens-step-02.jpg)
+
+**Read-out in Sunlight**
+
+![Read-out in Sunlight](assets/sunlight-on-the-working-screens-step-03.jpg)
+
+**Base Receive in Sunlight**
+
+![Base Receive in Sunlight](assets/sunlight-on-the-working-screens-step-04.jpg)
+
+### Settings cancel undoes the theme preview
+
+
+
+**Pick Dark — the page previews it; Cancel puts Light back**
+
+![Pick Dark — the page previews it; Cancel puts Light back](assets/settings-cancel-undoes-the-theme-preview-step-01.jpg)
+
+### Settings persist after reload
+
+
+
+**Reload — still Dark**
+
+![Reload — still Dark](assets/settings-persist-after-reload-step-01.jpg)
 
 ## Complete Race Walkthrough
 
@@ -840,6 +1308,70 @@ Change a time, unmark and restore a runner, send corrections to base, fix anythi
 
 ![Finish overs 2 and 3 — all 12 copied, call marked sent](assets/busy-block-is-read-out-in-overs-of-five-each-number-ticked-step-07.jpg)
 
+### Same-block edit is not a correction
+
+
+
+**Mark 101, set it 10 minutes back, send it to base**
+
+![Mark 101, set it 10 minutes back, send it to base](assets/same-block-edit-is-not-a-correction-step-01.jpg)
+
+**Move the time by a minute inside the same block — no correction**
+
+![Move the time by a minute inside the same block — no correction](assets/same-block-edit-is-not-a-correction-step-02.jpg)
+
+**Move it into another block — now it is a correction**
+
+![Move it into another block — now it is a correction](assets/same-block-edit-is-not-a-correction-step-03.jpg)
+
+### Stepper back to the original time reads Keep time
+
+
+
+**−5 then +5 — "Keep time", no "Was" note**
+
+![−5 then +5 — "Keep time", no "Was" note](assets/stepper-back-to-the-original-time-reads-keep-time-step-01.jpg)
+
+**+5 at now clamps to now in the same minute — still "Keep time"**
+
+![+5 at now clamps to now in the same minute — still "Keep time"](assets/stepper-back-to-the-original-time-reads-keep-time-step-02.jpg)
+
+### Overview bar keeps DNS muted and labels each part
+
+
+
+**Overview — bar aria-label lists DNS and DNF separately; DNS is not red**
+
+![Overview — bar aria-label lists DNS and DNF separately; DNS is not red](assets/overview-bar-keeps-dns-muted-and-labels-each-part-step-01.jpg)
+
+### Overview stepper is a draft until Save
+
+
+
+**−5 then +5 — nothing to save, still called in**
+
+![−5 then +5 — nothing to save, still called in](assets/overview-stepper-is-a-draft-until-save-step-01.jpg)
+
+**−5 and Save — saved once (a correction: new block); Undo restores it exactly**
+
+![−5 and Save — saved once (a correction: new block); Undo restores it exactly](assets/overview-stepper-is-a-draft-until-save-step-02.jpg)
+
+### Read-out runs across two blocks in overs of three
+
+
+
+**Over 1 — "Common time" and three numbers**
+
+![Over 1 — "Common time" and three numbers](assets/read-out-runs-across-two-blocks-in-overs-of-three-step-01.jpg)
+
+**Over 2 — "Continuing" the same block, one number**
+
+![Over 2 — "Continuing" the same block, one number](assets/read-out-runs-across-two-blocks-in-overs-of-three-step-02.jpg)
+
+**Over 3 — the second block starts with "Common time" again**
+
+![Over 3 — the second block starts with "Common time" again](assets/read-out-runs-across-two-blocks-in-overs-of-three-step-03.jpg)
+
 ## Split-Role Checkpoint Operations
 
 How two operators can share one checkpoint — a Marker records runner times and shares batches via QR code, while a Radio Operator scans the QR and calls runners in to base.
@@ -961,6 +1493,13 @@ What to say on air. The app never shows radio wording — use these notes alongs
 4. Busy block: tap **Read out**. Numbers are split into overs of up to 5. Tick each number as you read it; **Base copied — next** unlocks when all are ticked. End each over with "more to follow, over" and the last with "that completes [time], over". **Reset** clears the ticks on the current over if base needs it again.
 5. When base has copied everything, tap **Base copied — mark sent**.
 
+### Checkpoint: official message
+
+1. Callout sheet › **Official message**. The sheet numbers the message and fills in From, To (base) and today's date.
+2. Enter the originator's name / role (required), the message, and tick **Signed by originator** once they have signed the written copy.
+3. Call base: "VK4WIP this is VK4[CALLSIGN] Official Message", wait for base to ready the log pad, then read the number, date / time, originator and message.
+4. Tap **Log message**. Every message and stand-down request is listed under **Checkpoint log** on that device.
+
 ### Base: receiving a call
 
 1. Listen for "VK4WIP this is VK4…, Scores Checkpoint?" and tap that checkpoint under **Who's calling?** (gold **Due** = no call for 8+ minutes with runners expected).
@@ -971,6 +1510,7 @@ What to say on air. The app never shows radio wording — use these notes alongs
 6. Missed a number? Ask "say again after [last number]".
 7. Tap **Complete**, then confirm on air: "Copied [N] competitors. VK4WIP."
 8. **Clear [time]** wipes the current block; **Cancel call** (tap twice) drops the whole call. Both have Undo.
+9. A gold **Ask about 106** on a checkpoint's button and board row is a reminder you set in **Reports › Needs attention** ("Ask CP2"). Ask them on this call, then tap **Asked** (Undo if you tapped it by mistake).
 
 ### Number checks at base
 
@@ -979,13 +1519,22 @@ What to say on air. The app never shows radio wording — use these notes alongs
 - Gold: already logged at this checkpoint, or said twice — skipped.
 - Red, struck through: not in the race, or DNF/DNS — skipped.
 
+### Corrections
+
+**Brandon to supply WICEN wording** for sending a corrected time and for base acknowledging it.
+
+What the app does today:
+- Checkpoint: changing the time of a runner base already has only counts as a correction when it moves the runner into a **different 5-minute block** — base only ever hears the common time. A minute's change inside the same block stays called in ("Same common time — base doesn't need a correction").
+- A correction goes back on the Callout sheet tagged **Correction** and is sent with the next call.
+- Base: a number already logged at that checkpoint shows gold **Had HH:MM** and is skipped (kept on the call record). Base can't yet replace the logged time with the correction — that needs the wording above first.
+
 ### Fixing mistakes
 
 Checkpoint:
 - Tap a marked runner on **Mark off** to change its time (−5/−1/+1/+5) or unmark it. Unmarking shows Undo.
 - An unmarked runner keeps "was HH:MM"; tapping it restores the original time or uses now.
 - **Overview**: tap any runner to change time, undo call-in, reset to not passed, or mark DNS/DNF. Every change has Undo.
-- Changing a time base already has sends it back to the callout sheet as a correction.
+- Changing a time base already has into another 5-minute block sends it back to the callout sheet as a correction (see Corrections).
 
 Base:
 - **DNF / DNS** tab: bulk add by typing or pasting numbers, choose where and why, apply; Clear any entry to put a runner back in the race.
