@@ -88,6 +88,11 @@ const SECTION_MAP = {
   'home shows the three roles, the current race and Scan race QR code':     'navigation',
   'settings switches theme to sunlight and resets status colours to club colours': 'settings',
   'share race screen offers QR, download, email and copy':                  'settings',
+  // VK4WIP redesign — Phases 2 & 3 (checkpoint)
+  'mark off: change a time, unmark with undo, restore an unmarked runner':  'checkpoint-fixes',
+  'a changed time base already has goes back on the callout sheet as a correction': 'checkpoint-fixes',
+  'overview: undo call-in, reset, mark and clear DNS — each with undo':     'checkpoint-fixes',
+  'busy block is read out in overs of five, each number ticked':            'checkpoint-fixes',
 };
 
 const CHAPTERS = [
@@ -100,6 +105,7 @@ const CHAPTERS = [
   { key: 'settings',      title: 'Settings',                   intro: 'Personalise the app. Toggle dark mode and understand how preferences are saved.' },
   { key: 'simulation',    title: 'Complete Race Walkthrough',  intro: 'A full end-to-end race simulation: race director creates the race, checkpoint volunteers mark off runners, and the base station records finish times and statuses.' },
   { key: 'linked-checkpoints', title: 'Linked Checkpoints (Turnaround Point)', intro: 'How to operate two checkpoints at the same physical location — for example, an out-and-back turnaround where CP1 (outbound) and CP4 (return) are staffed by the same volunteers. Covers the checkpoint picker, dual view, tab switching, and cross-checkpoint overview.' },
+  { key: 'checkpoint-fixes', title: 'Checkpoint: Fixing Mistakes and Reading Out', intro: 'Change a time, unmark and restore a runner, send corrections to base, fix anything from Overview, and read a busy block to base one over at a time. Every change has Undo.' },
   { key: 'split-role', title: 'Split-Role Checkpoint Operations', intro: 'How two operators can share one checkpoint — a Marker records runner times and shares batches via QR code, while a Radio Operator scans the QR and calls runners in to base.' },
 ];
 
