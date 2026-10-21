@@ -93,12 +93,18 @@ const SECTION_MAP = {
   'a changed time base already has goes back on the callout sheet as a correction': 'checkpoint-fixes',
   'overview: undo call-in, reset, mark and clear DNS — each with undo':     'checkpoint-fixes',
   'busy block is read out in overs of five, each number ticked':            'checkpoint-fixes',
+  // VK4WIP redesign — Phase 4 (base receive)
+  'base receives a call in two blocks on a tablet without page scroll':     'base-receive',
+  'base receives a call in two blocks on a phone':                          'base-receive',
+  'base receive flags unknown, repeated, already-logged and unseen numbers': 'base-receive',
+  'base clears a block with undo and cancels a call with two taps':         'base-receive',
 };
 
 const CHAPTERS = [
   { key: 'setup',         title: 'Setting Up a Race',          intro: 'Use these steps to create and manage races. This section covers the full setup wizard, runner ranges, checkpoints, waves, and the race overview.' },
   { key: 'checkpoint',    title: 'Running a Checkpoint',       intro: 'Steps for checkpoint volunteers. Covers opening a checkpoint, marking off runners individually and in bulk, reviewing counts, exporting data, and transferring data to another device via QR code.' },
   { key: 'base-station',  title: 'Operating the Base Station', intro: 'Steps for the base station operator. Record finish times, mark DNF/DNS runners, and review race-wide status from the Overview and Reports tabs.' },
+  { key: 'base-receive',  title: 'Base Station: Receiving Calls', intro: 'Take a Scores Checkpoint call one checkpoint at a time: pick who is calling, take each number as it is read in its 5-minute block, check the coloured chips, and Complete. Undo, Clear and Cancel fix mistakes.' },
   { key: 'leaderboard',   title: 'Race Leaderboard',           intro: 'View live race standings grouped by gender, wave, or overall. Switch between grouping modes and track leaders as finishers are recorded.' },
   { key: 'import-export', title: 'Importing & Exporting Data', intro: 'Transfer race configurations and results between devices. Export from the base station header or race management page; import to restore a race.' },
   { key: 'navigation',    title: 'Navigating the App',         intro: 'How to move between modules, what to expect on the home screen, and how the app protects active operations from accidental navigation.' },

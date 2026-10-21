@@ -70,3 +70,29 @@ conflicted with existing behaviour, or didn't match the repo. Each entry: what, 
 - **Read-out covers every pending block in one session**, block by block. An over never mixes two common times, and the first over of each block says "Common time", later ones "Continuing". The list is frozen when read-out opens, so runners marked meanwhile don't reshuffle the overs; they appear on the callout sheet afterwards.
 - **Base copied is recorded at the end** (spec: "Finishing the last over … marks the block called in"). Leaving mid-read saves the ticks and the current over to `readout_progress`, keyed by the first block's time, and reopening resumes there. Finishing clears the saved progress.
 - **`overSize`** comes from race config (default 5), clamped to 3–10.
+
+## Phase 4 — Base Receive
+
+- **Receive writes `base_station_runners` per checkpoint**, as spec §4.9 says: `checkpointNumber` = the calling checkpoint, Finish = cp 0, with `commonTime` = the block (or exact time), `markOffEntryTime` = now, `manualTime`, and `callId`. The old Data Entry wrote base radio batches into `checkpoint_runners`, which crosses module isolation. That component is no longer mounted, but its file and unit tests are kept. Existing base readers (`loadRunners`, overview, stats, heads-up grid) already merge both tables by `checkpointNumber`, so they show received calls without changes.
+- **Base reads both tables, writes one.** "Already logged" and "Not seen at previous checkpoint" read base's own records plus any checkpoint data imported onto the device. Nothing in Receive writes `checkpoint_runners` (a unit test asserts this).
+- **Pre-existing deviation, not changed:** the DNF/DNS repository methods (`withdrawRunner`, `markAsNonStarter`) write `checkpoint_runners`, and the out list reads from there. Changing that would hide existing withdrawals from the out list and reports, so Phase 5 reuses them as they are.
+- **No duplicates of base's own making.** An empty placeholder row at the same checkpoint and bib (no time, not passed) is reused instead of adding a second row. The call stores the original row, and Undo puts it back exactly. Undo deletes the call's added rows by `callId` and sets `radio_calls.undoneAt`. The call row itself is kept for the log.
+- **Validation lives in `services/receive.js`** (`checkBaseNumber`, `checkCall`) together with the board logic (`buildBoard`), not a separate `receiveValidation.js`.
+- **Board rules.**
+  - The board lists the race's checkpoints then Finish (H4, no Start row).
+  - **Due** = runners are expected (the previous checkpoint has more sightings than this one; for the first checkpoint, the race has started) and no call for 8 or more minutes. The threshold is `CALL_DUE_MINUTES`, overridable by `race.baseCallDueMinutes`.
+  - **Closed** = every runner still in the race has been recorded there.
+  - "N min behind" shows from 15 minutes.
+- **Default block** = the checkpoint's last received block + 5, capped at now. For a checkpoint never received yet: the current block, with the picker showing the last hour (base is usually behind; the checkpoint states the time anyway). The selected chip scrolls into view.
+- **Undo inside a call** (remove a chip, Clear block) is single-level and inline, as in the design. Complete's Undo reopens the call with its numbers.
+- **The full-screen spinner only shows on first load.** Base refreshes used to swap the whole view for a spinner, which would wipe a call mid-entry. `refreshData({ silent: true })` is used after recording or undoing a call. The bib, call and out-list lookups for validation warn and fall back to empty if they fail, so the rest of the refresh still works. String race ids (some unit tests use `'r1'`) are passed to Dexie unchanged.
+- **The base header is the new `BaseAppBar`**: badge, "Base · VK4WIP", frequency and clock, inline tabs. Import/Export, Live Dashboard, Settings and Help are labelled icon buttons on the right. The fixed bottom StatusStrip was removed from the base view: it covered the Receive panel, and its totals are on the Overview tiles.
+- **Tabs.**
+  - The tabs are Receive · Overview · DNF / DNS · Reports.
+  - Reports shows the existing `ReportsPanel` until Phase 6 replaces it. This made the pre-existing failing `03 › switches to Reports tab and renders a report` pass.
+  - Hotkeys: N → Receive, R → Reports, D → DNF dialog, Shift+D → DNF / DNS.
+- **Tests updated for replaced behaviour:**
+  - `BaseStationView.test.jsx`: the "Data Entry" tab is now "Receive" (mocked as `BaseReceive`), and the race name is the tab panel's accessible name rather than header text.
+  - `00-full-confidence` Phase 4: the batch is received as a CP1 call on Receive instead of through the old common-time form.
+  - `BaseStationView.settings.test.jsx` gained a `BaseReceive` mock. No assertion changed.
+- **Not updated (failing before this work, now skipping):** `11-heads-up-grid › grid shows runner status indicators`, `15-smoke › Phase 6` and `16-base-station-data-entry` drive the removed Data Entry form. They failed on the baseline and now skip because they can't find that form. The behaviour they covered is in `21-base-receive`.

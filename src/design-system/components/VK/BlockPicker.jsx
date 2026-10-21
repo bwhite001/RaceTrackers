@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { cn } from '../../utils/classNames';
 
 /**
@@ -7,8 +7,17 @@ import { cn } from '../../utils/classNames';
  *
  * blocks: [{ key, label: '07:40', sub: 'done'|'next'|'this call'|'', selected, done, has }]
  */
-const BlockPicker = ({ blocks, onPick, exactText, onExactChange, exactActive, exactLabel = 'Exact time' }) => (
-  <div className="flex items-center gap-1.5 overflow-x-auto pb-1" role="group" aria-label="Common time block">
+const BlockPicker = ({ blocks, onPick, exactText, onExactChange, exactActive, exactLabel = 'Exact time' }) => {
+  const rowRef = useRef(null);
+  const selectedKey = blocks.find(b => b.selected)?.key;
+
+  // Keep the selected block in view — the row can be hours long when base is behind
+  useEffect(() => {
+    rowRef.current?.querySelector('[aria-pressed="true"]')?.scrollIntoView?.({ block: 'nearest', inline: 'center' });
+  }, [selectedKey]);
+
+  return (
+  <div ref={rowRef} className="flex items-center gap-1.5 overflow-x-auto pb-1" role="group" aria-label="Common time block">
     {blocks.map(b => (
       <button
         key={b.key}
@@ -44,6 +53,7 @@ const BlockPicker = ({ blocks, onPick, exactText, onExactChange, exactActive, ex
       )}
     />
   </div>
-);
+  );
+};
 
 export default BlockPicker;

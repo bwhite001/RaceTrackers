@@ -5,6 +5,22 @@ import db from '../../../shared/services/database/schema.js';
 import StorageService from '../../../services/storage.js';
 import { BaseOperationsRepository } from '../services/BaseOperationsRepository';
 import { getRunnerTotal } from '../../../utils/raceStatistics';
+import TimeUtils from '../../../services/timeUtils.js';
+
+/** Race ids are numeric in IndexedDB; tests and old state may hold strings. */
+const raceKeyOf = (id) => (Number.isFinite(Number(id)) ? Number(id) : id);
+
+/** Receive call draft — survives tab switches, cleared on Complete / Cancel (spec §6). */
+export const EMPTY_RECEIVE = {
+  step: 'idle',        // 'idle' | 'rx' | 'done'
+  cp: null,            // checkpoint number (BASE_STATION_CP = Finish)
+  entries: [],         // [{ num, t (ISO), manual }]
+  ctime: null,         // selected block / exact time (ISO)
+  manual: false,
+  manualText: '',
+  summary: null,       // { title, sub } after Complete
+  lastCallId: null,
+};
 
 /**
  * Base Operations Store
@@ -43,6 +59,9 @@ const useBaseOperationsStore = create(
       },
 
       outList: [],
+      raceRunnerNumbers: [],
+      radioCalls: [],
+      receive: EMPTY_RECEIVE,
 
       // Actions - Initialization
       initialize: async (raceId) => {
@@ -105,14 +124,28 @@ const useBaseOperationsStore = create(
         return await StorageService.getCheckpointRunners(raceId);
       },
 
-      refreshData: async () => {
+      refreshData: async ({ silent = false } = {}) => {
         const { currentRaceId } = get();
         if (!currentRaceId) return;
 
         try {
-          set({ loading: true, error: null });
-          
+          if (!silent) set({ loading: true, error: null });
+
           const runners = await get().loadRunners(currentRaceId);
+          // Receive needs the race's bibs, received calls and who is out. These
+          // are look-ups for validation — if one fails, warn and carry on empty
+          // rather than failing the whole refresh.
+          const repo = new BaseOperationsRepository();
+          const raceKey = raceKeyOf(currentRaceId);
+          const soft = (label, p) => Promise.resolve().then(() => p()).catch(err => {
+            console.warn(`Base refresh: could not load ${label}`, err);
+            return [];
+          });
+          const [raceRunnerRows, radioCalls, outList] = await Promise.all([
+            soft('race runners', () => db.runners.where('raceId').equals(raceKey).toArray()),
+            soft('radio calls', () => repo.getRadioCalls(raceKey)),
+            soft('out list', () => repo.getOutList(raceKey)),
+          ]);
           const stats = get().calculateStats(runners);
 
           // Compute per-wave breakdown if the race has multiple batches
@@ -146,6 +179,9 @@ const useBaseOperationsStore = create(
           set({
             runners,
             stats,
+            raceRunnerNumbers: raceRunnerRows.map(r => r.number),
+            radioCalls,
+            outList,
             loading: false,
             lastSync: new Date().toISOString()
           });
@@ -153,6 +189,28 @@ const useBaseOperationsStore = create(
           set({ error: error.message, loading: false });
           throw error;
         }
+      },
+
+      // Actions - Receive (radio calls)
+      setReceive: (patch) => set(state => ({
+        receive: { ...state.receive, ...(typeof patch === 'function' ? patch(state.receive) : patch) },
+      })),
+
+      resetReceive: () => set({ receive: EMPTY_RECEIVE }),
+
+      recordCall: async (checkpointNumber, checked) => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) throw new Error('No active race');
+        const repo = new BaseOperationsRepository();
+        const callId = await repo.recordCall(raceKeyOf(currentRaceId), checkpointNumber, checked, TimeUtils.getCurrentTimestamp());
+        await get().refreshData({ silent: true });
+        return callId;
+      },
+
+      undoCall: async (callId) => {
+        const repo = new BaseOperationsRepository();
+        await repo.undoCall(callId);
+        await get().refreshData({ silent: true });
       },
 
       // Actions - Runner Management

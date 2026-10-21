@@ -55,7 +55,12 @@ vi.mock('../../src/modules/base-operations/components/DataEntry', () => ({
 }));
 
 vi.mock('../../src/modules/base-operations/components/BatchEntryLayout', () => ({
-  default: () => <div data-testid="data-entry">Batch Entry</div>
+  default: () => <div data-testid="batch-entry">Batch Entry</div>
+}));
+
+// VK4WIP redesign: Receive replaces the Data Entry tab (spec §4.9)
+vi.mock('../../src/modules/base-operations/components/BaseReceive', () => ({
+  default: () => <div data-testid="data-entry">Receive</div>
 }));
 
 vi.mock('../../src/modules/base-operations/components/RaceOverview', () => ({
@@ -121,14 +126,14 @@ describe('BaseStationView', () => {
   test('renders main components', () => {
     renderWithRouter(<BaseStationView />);
 
-    // Header shows race name
-    expect(screen.getByText('Test Race')).toBeInTheDocument();
+    // Race name labels the tab panel (the base header shows "Base · VK4WIP")
+    expect(screen.getByRole('tabpanel', { name: 'Test Race' })).toBeInTheDocument();
 
     // Check initial tab content
     expect(screen.getByTestId('data-entry')).toBeInTheDocument();
 
     // Check tab navigation buttons exist (role="tab")
-    expect(screen.getByRole('tab', { name: /data entry/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /receive/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /overview/i })).toBeInTheDocument();
   });
 
@@ -140,7 +145,7 @@ describe('BaseStationView', () => {
     expect(screen.getByTestId('race-overview')).toBeInTheDocument();
 
     // Switch back to data entry
-    fireEvent.click(screen.getByRole('tab', { name: /data entry/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /receive/i }));
     expect(screen.getByTestId('data-entry')).toBeInTheDocument();
   });
 

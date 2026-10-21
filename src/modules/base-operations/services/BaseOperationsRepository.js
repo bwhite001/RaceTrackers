@@ -1,6 +1,7 @@
 import { BaseRepository } from '../../../shared/services/database/BaseRepository';
 import db from '../../../shared/services/database/schema';
 import { BASE_STATION_CP } from '../../../types/index.js';
+import TimeUtils from '../../../services/timeUtils.js';
 
 export class BaseOperationsRepository extends BaseRepository {
   constructor() {
@@ -106,6 +107,94 @@ export class BaseOperationsRepository extends BaseRepository {
       console.error('Error bulk marking base station runners:', error);
       throw new Error('Failed to bulk mark base station runners');
     }
+  }
+
+  // ============================================================================
+  // RECEIVE — radio calls (VK4WIP redesign, spec §4.9)
+  // ============================================================================
+
+  /**
+   * Record one received call. Only recordable (ok / info) entries become
+   * base_station_runners rows, each tagged with the call's id so the whole
+   * call can be undone. Skipped and rejected numbers are kept on the call.
+   *
+   * @param {number} raceId
+   * @param {number} checkpointNumber  race checkpoint, or BASE_STATION_CP for Finish
+   * @param {Array<{num, t, kind, note, manual?}>} checked  entries after checkCall()
+   * @param {string} receivedAt ISO
+   * @returns {Promise<number>} radio_calls id
+   */
+  async recordCall(raceId, checkpointNumber, checked, receivedAt) {
+    const recordable = checked.filter(e => e.kind === 'ok' || e.kind === 'info');
+    const blocks = [];
+    for (const e of checked) {
+      let b = blocks.find(x => x.time === e.t);
+      if (!b) blocks.push(b = { time: e.t, numbers: [] });
+      b.numbers.push(e.num);
+    }
+    blocks.sort((a, b) => a.time.localeCompare(b.time));
+
+    return db.transaction('rw', db.base_station_runners, db.radio_calls, db.audit_log, async () => {
+      const callId = await db.radio_calls.add({
+        raceId,
+        checkpointNumber,
+        receivedAt,
+        blocks,
+        recorded: recordable.map(e => e.num),
+        skipped: checked.filter(e => e.kind === 'warn').map(e => ({ number: e.num, reason: e.note })),
+        rejected: checked.filter(e => e.kind === 'bad').map(e => ({ number: e.num, reason: e.note, time: e.t })),
+        undoneAt: null,
+        replaced: [],
+      });
+
+      const replaced = [];
+      for (const e of recordable) {
+        const row = {
+          status: 'passed',
+          commonTime: e.t,
+          markOffEntryTime: receivedAt,
+          manualTime: !!e.manual,
+          callId,
+        };
+        // Reuse an empty placeholder row (no time yet) rather than duplicating it
+        const existing = await db.base_station_runners
+          .where(['raceId', 'checkpointNumber', 'number'])
+          .equals([raceId, checkpointNumber, e.num])
+          .first();
+        if (existing && !existing.commonTime && existing.status !== 'passed') {
+          replaced.push({ id: existing.id, before: existing });
+          await db.base_station_runners.update(existing.id, row);
+        } else {
+          await db.base_station_runners.add({ raceId, checkpointNumber, number: e.num, notes: null, ...row });
+        }
+      }
+      if (replaced.length) await db.radio_calls.update(callId, { replaced });
+
+      await this.logAudit(raceId, 'receive-call', 'radio_call', callId, {
+        checkpointNumber, recorded: recordable.length, skipped: checked.length - recordable.length,
+      });
+      return callId;
+    });
+  }
+
+  /** Undo a received call: remove its rows, restore any reused rows, mark the call undone. */
+  async undoCall(callId) {
+    await db.transaction('rw', db.base_station_runners, db.radio_calls, db.audit_log, async () => {
+      const call = await db.radio_calls.get(callId);
+      if (!call || call.undoneAt) return;
+      const replacedIds = new Set((call.replaced ?? []).map(r => r.id));
+      const rows = await db.base_station_runners.where('callId').equals(callId).toArray();
+      for (const r of rows) {
+        if (!replacedIds.has(r.id)) await db.base_station_runners.delete(r.id);
+      }
+      for (const { before } of call.replaced ?? []) await db.base_station_runners.put(before);
+      await db.radio_calls.update(callId, { undoneAt: TimeUtils.getCurrentTimestamp() });
+      await this.logAudit(call.raceId, 'undo-call', 'radio_call', callId, { checkpointNumber: call.checkpointNumber });
+    });
+  }
+
+  async getRadioCalls(raceId) {
+    return db.radio_calls.where('raceId').equals(raceId).toArray();
   }
 
   async exportBaseStationData(raceId, checkpointNumber = 1) {

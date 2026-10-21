@@ -20,7 +20,7 @@
  *
  *   Phase 4 — Base Station Entry (Base Station Coordinator)
  *     · Navigate to Base Station, pick race
- *     · Set common time 10:30, submit batch 105 106 107 108
+ *     · Receive a CP1 call with bibs 105 106 107 108
  *     · Record DNF for runner 109 via "d" hotkey
  *
  *   Phase 5 — Leaderboard (Base Station Coordinator)
@@ -62,7 +62,6 @@ const RACE = {
 const GRID_RUNNERS  = [100, 101, 102];
 const QUICK_RUNNERS = [103, 104];
 const BATCH_RUNNERS = [105, 106, 107, 108];
-const BATCH_TIME    = '10:30';
 const DNF_RUNNER    = 109;
 const WITHDRAWAL_RUNNER = 110;
 
@@ -230,34 +229,23 @@ test.describe('Full Confidence Check — Race Director + Volunteer + Base Statio
     await test.step('Pick race in modal and wait for operations page', async () => {
       await pickFirstRaceInModal(_page);
       await _page.waitForURL(/base-station\/operations/, { timeout: 20000 });
-      await _page.waitForSelector('#is-time', { timeout: 20000 });
-      await _page.waitForTimeout(500);
+      await _page.getByRole('heading', { name: /who's calling/i }).waitFor({ timeout: 20000 });
     });
 
-    await test.step(`Set common time to ${BATCH_TIME}`, async () => {
-      // Select checkpoint 1 (required for canSubmit)
-      await _page.selectOption('#is-cp-select', '1');
-      await _page.waitForTimeout(200);
-      await _page.locator('#is-time').first().fill(BATCH_TIME);
-      await _page.waitForTimeout(200);
-    });
-
-    await test.step('Fill runner input with batch bibs and click Record Batch', async () => {
-      // BibChipInput: type each bib and press Enter to add as a chip
-      const bibInput = _page.getByLabel('Bib Numbers').first();
-      await bibInput.waitFor({ state: 'visible', timeout: 10000 });
+    // VK4WIP redesign: base records radio calls on the Receive tab (spec §4.9),
+    // replacing the old Data Entry common-time + bib batch form.
+    await test.step('Receive — CP1 calls; add batch bibs one at a time', async () => {
+      await _page.getByRole('button', { name: /^CP1,/ }).click();
       for (const bib of BATCH_RUNNERS) {
-        await bibInput.fill(String(bib));
-        await bibInput.press('Enter');
-        await _page.waitForTimeout(150);
+        await _page.fill('#bib-heard', String(bib));
+        await _page.keyboard.press('Enter');
       }
-      await _page.getByRole('button', { name: /record.*runner/i }).first().click();
-      await _page.waitForTimeout(500);
+      await _page.getByRole('button', { name: `Complete · ${BATCH_RUNNERS.length}` }).click();
     });
 
-    await test.step('Verify batch recorded (no error visible, stats updated or input cleared)', async () => {
-      const errorMsg = _page.getByText(/error|failed/i).first();
-      await expect(errorMsg).not.toBeVisible({ timeout: 3000 });
+    await test.step('Verify batch recorded (call summary shows the count)', async () => {
+      await expect(_page.getByText(`${BATCH_RUNNERS.length} recorded at CP1`)).toBeVisible({ timeout: 5000 });
+      await _page.getByRole('button', { name: 'Next call' }).click();
     });
 
     await test.step(`Record DNF for runner ${DNF_RUNNER} via "d" hotkey`, async () => {
