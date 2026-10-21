@@ -67,6 +67,8 @@ export function reportedUpTo(records) {
   for (const r of records) {
     // A correction row counts with the block it replaced, so a correction
     // never moves "up to" in either direction
+    // A missed runner reported later is an old time: it says nothing about how far the checkpoint has reported
+    if (r.missedReport) continue;
     const t = r.correction ? r.upToBlock : recordTime(r);
     if (!t || (!r.correction && r.manualTime === true)) continue;
     const b = toBlock(t);
@@ -172,7 +174,9 @@ export function buildBoard({ checkpoints, records, radioCalls = [], now, raceSta
     const lastBlock = upTo.get(cp.number) ?? null;
     const since = lastCallAt ? Math.max(0, TimeUtils.minutesBetween(lastCallAt, now)) : null;
     const behind = lastBlock ? Math.max(0, TimeUtils.minutesBetween(lastBlock, nowBlock)) : null;
-    const closed = activeField > 0 && here.size >= activeField;
+    // Closed when everyone is through, or base stood the checkpoint down (Part E2)
+    const stoodDown = radioCalls.some(c => c.kind === 'stand-down' && !c.undoneAt && c.checkpointNumber === cp.number);
+    const closed = stoodDown || (activeField > 0 && here.size >= activeField);
     const expected = prev ? prevCount > here.size : !!raceStarted;
     const waitedFrom = lastCallAt ?? (raceStarted ? raceStart : null);
     const waited = waitedFrom ? TimeUtils.minutesBetween(waitedFrom, now) : 0;

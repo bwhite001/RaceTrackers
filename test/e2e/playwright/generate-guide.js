@@ -169,8 +169,13 @@ const SECTION_MAP = {
   'a race with bibs assigned on the day':                                   'setup',
   'the Mt Glorious template has no fixed bib range':                        'setup',
   // Race-day fixes — Parts C / D (housekeeping)
-  'no vet-out wording':                                                     'base-status',
+  // 'no vet-out wording' is a regression check, deliberately not a guide section
   'success and passed look different':                                      'base-status',
+  // Race-day fixes — Part E (missed runners)
+  'base reminds a checkpoint of a runner it missed':                        'base-receive',
+  'not seen there shows missed in the times table':                         'base-reports',
+  'stand-down check before a checkpoint packs down':                        'base-receive',
+  'checkpoint records a runner base says it missed':                        'checkpoint-fixes',
 };
 
 const CHAPTERS = [

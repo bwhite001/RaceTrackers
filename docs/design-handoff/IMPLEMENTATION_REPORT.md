@@ -179,14 +179,41 @@ From the review of the validation pack (`VALIDATION_FIXES.md`). Judgement calls 
 | E2 | Official message: date, originator, signed; checkpoint log list | e870f1f | `27` › official message has the WICEN fields and a log |
 | E3 | "Ask CPx" reminder on Receive, "Asked" with Undo | e870f1f | `28` › ask reminder; `reports.test.js` › ask reminders |
 
-**Still open (for Brandon):**
-1. D1: how base accepts a corrected time, and the WICEN wording. A proposal is in DECISIONS.md.
-2. The Mt Glorious bib range.
-3. Whether base needs separate vet-out records again (B11 note).
+**Open items from the validation fixes — closed by the race-day fixes:** D1 corrections built (Part A); the bib range is now dynamic, with the fixed Mt Glorious range removed (Part B); vet-out removed from the UI (Part C).
 
 ### Test results after the validation fixes
 
 - **Unit:** 1,169 tests in 108 files, all passing (`NODE_OPTIONS=--max-old-space-size=6144 make test-run`).
 - **Playwright** (all specs, retries off): 122 passed, 16 failed, 11 skipped, against a baseline of 74 / 16 / 11. The 16 failures are the pre-existing ones from the baseline, unchanged, and nothing that passed before now fails or skips. Every new spec, 24–30, passes.
 - **Offline suite:** passes.
+
+## Race-day fixes
+
+From Brandon's answers after 3.17.0 (`RACE_DAY_FIXES.md`). Judgement calls are in `DECISIONS.md` › "Race-day fixes". On `feature/vk4wip-ui`; not pushed or tagged; `package.json` is 3.18.0.
+
+| Item | What changed | Commit | Test |
+|---|---|---|---|
+| A1 | Checkpoint Corrections card ("now / was", "not passed"), own "correction sent" | b9a1e69 | `31-corrections` › checkpoint corrections card; › unmarking a called-in runner is a not-passed correction |
+| A2 | Base Correction mode: supersede + new row, exact Undo, "up to" unchanged | b9a1e69 | `31` › base applies a correction; › a normal call still skips a number base already has; `corrections.test.js` |
+| A3 | Radio procedure Corrections section; D1 replaced | b9a1e69 | guide (radio procedure) |
+| B1 | Checkpoint marks bibs not in setup (flag, own group, typo guard) | d0ab5ed | `32-dynamic-bibs` › checkpoint marks a bib not in the setup |
+| B2 | Base late entries, field = setup + late; Add to field | d0ab5ed | `32` › base records a late entry and adds an unknown bib to the field; `fieldChanges.test.js` |
+| B3 | Bibs assigned on the day; Mt Glorious range removed | d0ab5ed | `32` › a race with bibs assigned on the day; › the Mt Glorious template has no fixed bib range |
+| C | Vet-out wording removed (code kept unmounted) | 152c20d | `33-housekeeping` › no vet-out wording |
+| D | Green/blue state collisions fixed; palette guard widened; report corrected; 3.18.0 | d776d44 | `33` › success and passed look different; `palette.test.js` |
+| E1 | Missed-runner reminders on Receive; They have it / Not seen there | Part E (`feat: race-day Part E — runners a checkpoint missed`) | `34-missed-runners` › base reminds a checkpoint of a runner it missed; › not seen there shows missed in the times table |
+| E2 | Stand-down check and Stand down | Part E | `34` › stand-down check before a checkpoint packs down; `missed.test.js` |
+| E3 | Checkpoint "Missed — passed earlier" | Part E | `34` › checkpoint records a runner base says it missed |
+| E4 | Radio procedure: Missed runners | Part E | guide (radio procedure) |
+
+**Test results:**
+- **Unit:** 1,193 tests in 111 files, all passing.
+- **Playwright** (retries off): 136 passed, 16 failed, 11 skipped. The 16 failures are the same pre-existing ones as the original baseline; new specs 31–34 all pass.
+- **Offline suite:** passes 5 out of 5 straight after a fresh build.
+- **Offline flake found and fixed:** the suite used to fail intermittently after a rebuild. Its own reload raced the app's automatic reload when the service worker took control, so it now waits for the app's reload instead.
+- **Validation pack:** regenerated with 159 events, all completed, with no gaps in the evidence. The guide is regenerated too.
+
+**Still open (for Brandon):**
+1. N3: the wording for base asking a checkpoint about a missed runner (marked "to be confirmed" in the guide).
+2. The Mt Glorious bibs: set them at setup (range, CSV / WebScorer, or Bibs assigned on the day).
 

@@ -60,6 +60,15 @@ Sent as a separate call, one runner at a time, never mixed into a Scores call:
 - A runner called in by mistake who never passed: "Checkpoint [n] correction, runner [bib], not passed." The checkpoint's card shows "142 · not passed · was 11:00"; base taps **Not passed** before **Apply correction**.
 - In a normal Scores call, a number base already has shows gold **Had HH:MM** and is skipped. Without the word "correction" it's treated as a mistake, not a new time.
 
+## Missed runners
+
+A checkpoint can't know it missed someone. Base finds out when the runner is called in at a later checkpoint. Base then shows a gold note on that checkpoint, e.g. "Missed: 213 (seen CP2)".
+
+- Base: next time that checkpoint calls (or call them), ask about each number. Tap **They have it** and enter the time they give, or **Not seen there** (the times table then shows "missed" for that checkpoint). Both have Undo. If the checkpoint calls the number in normally, the note clears by itself.
+- Before a checkpoint stands down, base opens **Stand-down check** for it. It lists runners "Seen further on" (missed there) and runners "Not seen past here". Read back any "Not seen past here" numbers, and stand the checkpoint down only when they're accounted for. **Stand down** (tap twice) marks it Closed; Undo reopens it. Runners still unaccounted for stay on Overdue / Still on course.
+- Checkpoint: if base tells you a runner came through, open them in **Overview** and use **Missed — passed earlier**. Step the time back to the time base gives (or your best estimate) and save; it goes on the Corrections card as "213 · missed · now 08:35" to confirm with base.
+- **Wording to be confirmed by Brandon** for base asking a checkpoint about a missed runner.
+
 ## A number that isn't in the setup
 
 Bib ranges can change on the day, and some races only know bibs at registration. A runner whose number isn't in the setup is still recorded, never lost.

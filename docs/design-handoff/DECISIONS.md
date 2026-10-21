@@ -291,3 +291,25 @@ Part D — housekeeping:
 - **Version 3.18.0** in `package.json` and both `package-lock.json` fields; not tagged. The 3.17.0 bump had missed the lock file's second field, which still said 3.16.0.
 - **User guide:** the "A number that isn't in the setup" section is added to the radio procedure. The guide is regenerated once, with Part E, because Part E adds the Missed runners and Stand-down sections the brief also asks for.
 - `docs/racetracker-validation-fixes.md` had already been deleted (21 Oct).
+
+Part E — runners a checkpoint missed (N4: reminders raised automatically):
+- **One source for the "Missed" list:** it is the Skipped-a-checkpoint check itself (`missedReminders`), not a separate stored reminder.
+  - Recording a "Not seen CPx" number creates it with no extra tap, because the later sighting is what the check looks for.
+  - It can never list a bib twice; the issue key is per bib and checkpoint.
+  - It clears itself when the checkpoint calls the bib in, and Needs attention › Skipped counts only unresolved entries.
+  - An "Ask CPx" or "Mark checked" in Reports also takes a bib off the list, and the Ask reminder (validation E3) shows instead.
+- **They have it:** reuses the correction panel (bib fixed, block picker / Exact, gold "Record missed · HH:MM") and writes one base row on a `radio_calls` row with `kind: 'missed'`. The row carries `missedReport`, so the old time never moves the board's "up to". Undo is `undoCall`.
+- **Not seen there:** a `missed-confirmed` resolution on the skip issue. Times by checkpoint then shows "missed" (muted) in that cell instead of "—". Undo removes the resolution.
+- **Both Undos** live in the persisted Receive draft, like the other Receive Undos.
+- **Stand-down check:** a sheet listing runners in the field, not DNS / DNF, with no record at that checkpoint.
+  - Runners seen further on are already on the missed list (it is derived), so the sheet says so rather than offering an "add" tap. This is a deliberate simplification of the brief's "one tap adds them".
+  - A "bibs assigned on the day" race with no field shows "Field not known" in place of the second list.
+- **Stand down:** a `radio_calls` row with `kind: 'stand-down'`; it's a radio contact, and audit-logged. `buildBoard` shows the checkpoint Closed while it stands, and Undo reopens it. Nothing is written to the shared `checkpoints` table, so module isolation holds; this is my reading of the brief's "closedAt on base". Runners still unaccounted for stay on Overdue / Still on course.
+- **Call log** counts Scores calls only: corrections, missed-runner records and stand-downs are excluded. Corrections have their own column.
+- **Checkpoint, "Missed — passed earlier":** a plain button on a To come row in Overview. It opens a stepper starting at now. While it's open, its gold "Save missed · HH:MM" replaces "Passed now", so the row keeps one gold button. The runner is marked passed with `missedReport` and appears on the Corrections card as "150 · missed · now HH:MM". "Correction sent" clears it.
+- **N3:** the wording for base asking a checkpoint about a missed runner is still to be confirmed; the radio procedure says so.
+- **The guide is regenerated here, once,** with Parts A–E text (Corrections, A number that isn't in the setup, Missed runners), as the Part D note explains.
+- **Correction / missed-runner block picker:** an earlier time for an older runner wasn't selectable, because the picker only reached back to the checkpoint's last block. The validation pack found this. In those two modes it now offers the whole window (race start, capped at the last four hours).
+- **Offline suite flake:** after a rebuild, the first-visit step reloaded the page at the same moment as the app's own reload when the service worker took control (`main.jsx`), giving `ERR_ABORTED` or "interrupted by another navigation". The step now waits for the app's reload instead of racing it. It passes 5 out of 5 on fresh builds.
+- **Validation pack** regenerated: 159 events (corrections, late entries, missed runners and stand-down added), all completed, none with missing evidence.
+- **Guide:** the "no vet-out wording" test is a regression check, not a user task, so it isn't a guide section. Its heading would have put "vet" back into the guide.

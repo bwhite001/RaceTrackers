@@ -5,6 +5,7 @@ import { boardCheckpoints, sightingsByCheckpoint, outStatusMap, buildBoard, repo
 import { overdueRunners, stillOnCourse, timesMatrix, callLog, awaitingByCheckpoint, raceCounts, OVERDUE_GRACE_MINUTES } from '../services/reports';
 import { outRecords } from '../services/statusValidation';
 import { runChecks, checkpointDistances, CHECKS, PACE_LIMIT_KMH } from '../services/dataChecks';
+import { confirmedMissed } from '../services/missed';
 import TimeUtils from '../../../services/timeUtils.js';
 import { hhmm } from '../../../services/blocks.js';
 import useNow from '../../../shared/hooks/useNow';
@@ -67,7 +68,8 @@ const BaseReports = ({ initialReport = 'missing' }) => {
   const awaiting = awaitingByCheckpoint(lateRows);
   const counts = useMemo(() => raceCounts({ sightings, out, raceNumbers: raceRunnerNumbers }), [sightings, out, raceRunnerNumbers]);
   const onCourse = useMemo(() => stillOnCourse({ sightings, order, out, raceNumbers }), [sightings, order, out, raceNumbers]);
-  const matrix = useMemo(() => timesMatrix({ sightings, order, out: outForMatrix, raceNumbers }), [sightings, order, outForMatrix, raceNumbers]);
+  const missed = useMemo(() => confirmedMissed(resolutions), [resolutions]);
+  const matrix = useMemo(() => timesMatrix({ sightings, order, out: outForMatrix, raceNumbers, missed }), [sightings, order, outForMatrix, raceNumbers, missed]);
   const board = useMemo(() => buildBoard({ checkpoints, records: runners, radioCalls, now, raceStart, fieldSize: raceNumbers.length, outCount: out.size }),
     [checkpoints, runners, radioCalls, now, raceStart, raceNumbers.length, out.size]);
   const calls = useMemo(() => callLog({ radioCalls, board }), [radioCalls, board]);
@@ -268,7 +270,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
                     <td className="pl-3.5 pr-2 py-2 font-display font-extrabold text-base">{r.number}</td>
                     <td className={`px-2 py-2 font-bold ${r.status.startsWith('DNF') ? 'text-vk-red' : 'text-vk-muted'}`}>{r.status}</td>
                     {r.cells.map((c, i) => (
-                      <td key={i} className={`px-2 py-2 ${i === r.cells.length - 1 ? 'font-bold' : ''} ${c.text === 'DNF' ? 'text-vk-red font-bold' : ''}`}>
+                      <td key={i} className={`px-2 py-2 ${i === r.cells.length - 1 ? 'font-bold' : ''} ${c.text === 'DNF' ? 'text-vk-red font-bold' : ''} ${c.missed ? 'text-vk-muted italic' : ''}`}>
                         {c.flag
                           ? <span className="border-2 border-vk-gold rounded-chip px-1" title="Recorded after DNS/DNF">{c.text}</span>
                           : c.text}

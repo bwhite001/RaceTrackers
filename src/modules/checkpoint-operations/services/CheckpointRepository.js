@@ -299,6 +299,17 @@ export class CheckpointRepository extends BaseRepository {
   }
 
   /**
+   * Base says this runner came through but the checkpoint missed them (Part
+   * E3): passed at the time base gives, flagged missedReport so it goes on
+   * the Corrections card ("213 · missed · now 08:40") to confirm with base.
+   */
+  async markMissed(raceId, checkpointNumber, number, time) {
+    await this.markPassed(raceId, checkpointNumber, [number], time);
+    const r = await this._get(raceId, checkpointNumber, number);
+    await this.update(r.id, { missedReport: true, correction: false, calledIn: false, callInTime: null });
+  }
+
+  /**
    * Mark bibs that aren't in this checkpoint's setup (bibs change on the day).
    * Kept in checkpoint_runners with notInSetup and logged in the checkpoint's
    * own checkpoint_field_changes — never the shared runners table.

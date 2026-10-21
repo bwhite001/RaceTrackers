@@ -140,9 +140,33 @@ A race director can give each wave a custom name (e.g. "Wave B") and a specific 
 
 
 
-**Template — Mt Glorious starts at 06:30 with four checkpoints; bibs 1–128 as before**
+**Template — Mt Glorious starts at 06:30 with four checkpoints; bibs are set at setup**
 
-![Template — Mt Glorious starts at 06:30 with four checkpoints; bibs 1–128 as before](assets/mt-glorious-template-matches-the-brief-step-01.jpg)
+![Template — Mt Glorious starts at 06:30 with four checkpoints; bibs are set at setup](assets/mt-glorious-template-matches-the-brief-step-01.jpg)
+
+### A race with bibs assigned on the day
+
+
+
+**Setup — tick "Bibs assigned on the day": Next works with no runners**
+
+![Setup — tick "Bibs assigned on the day": Next works with no runners](assets/a-race-with-bibs-assigned-on-the-day-step-01.jpg)
+
+**Checkpoint — empty grid with a hint; Still to come "—"; quick entry creates tiles**
+
+![Checkpoint — empty grid with a hint; Still to come "—"; quick entry creates tiles](assets/a-race-with-bibs-assigned-on-the-day-step-02.jpg)
+
+**Base — On course and not seen yet show "—"**
+
+![Base — On course and not seen yet show "—"](assets/a-race-with-bibs-assigned-on-the-day-step-03.jpg)
+
+### The Mt Glorious template has no fixed bib range
+
+
+
+**Template card — "Bibs set at setup"; choosing it starts the runner step empty**
+
+![Template card — "Bibs set at setup"; choosing it starts the runner step empty](assets/the-mt-glorious-template-has-no-fixed-bib-range-step-01.jpg)
 
 ## Running a Checkpoint
 
@@ -232,9 +256,13 @@ At the end of a checkpoint shift, a volunteer may need to export their recorded 
 
 From the race overview, a race director can jump straight to any checkpoint's live mark-off screen. This test clicks the Checkpoint 1 link and confirms the checkpoint mark-off screen opens.
 
+**Navigate directly to checkpoint 1**
+
+![Navigate directly to checkpoint 1](assets/navigates-from-race-overview-to-a-checkpoint-step-01.jpg)
+
 **Checkpoint view — mark-off screen for CP1 open**
 
-![Checkpoint view — mark-off screen for CP1 open](assets/navigates-from-race-overview-to-a-checkpoint-step-01.jpg)
+![Checkpoint view — mark-off screen for CP1 open](assets/navigates-from-race-overview-to-a-checkpoint-step-02.jpg)
 
 ### Callout sheet tab shows runners who passed but not called in
 
@@ -363,6 +391,22 @@ When a checkpoint volunteer marks a runner as called in, the pending count badge
 **Open it again — the checkpoint log lists the message with its fields**
 
 ![Open it again — the checkpoint log lists the message with its fields](assets/official-message-has-the-wicen-fields-and-a-log-step-02.jpg)
+
+### Checkpoint marks a bib not in the setup
+
+
+
+**Quick entry 512 — marked, flagged "not in setup", in its own group**
+
+![Quick entry 512 — marked, flagged "not in setup", in its own group](assets/checkpoint-marks-a-bib-not-in-the-setup-step-01.jpg)
+
+**Callout — 512 is read like any other runner**
+
+![Callout — 512 is read like any other runner](assets/checkpoint-marks-a-bib-not-in-the-setup-step-02.jpg)
+
+**A five-digit number asks first; Undo removes 512**
+
+![A five-digit number asks first; Undo removes 512](assets/checkpoint-marks-a-bib-not-in-the-setup-step-03.jpg)
 
 ## Operating the Base Station
 
@@ -572,6 +616,74 @@ Take a Scores Checkpoint call one checkpoint at a time: pick who is calling, tak
 
 ![Overview and back — the call in progress is still there](assets/receive-draft-survives-a-tab-switch-step-01.jpg)
 
+### Base applies a correction
+
+
+
+**CP2 → Correction → 101: base had the earlier call's time**
+
+![CP2 → Correction → 101: base had the earlier call's time](assets/base-applies-a-correction-step-01.jpg)
+
+**Pick the new time and Apply — the times table shows it; "up to" unchanged**
+
+![Pick the new time and Apply — the times table shows it; "up to" unchanged](assets/base-applies-a-correction-step-02.jpg)
+
+**Undo — base has the original time again**
+
+![Undo — base has the original time again](assets/base-applies-a-correction-step-03.jpg)
+
+### A normal call still skips a number base already has
+
+
+
+**CP2 Scores call with 101 — gold "Had", skipped (no tap-to-replace)**
+
+![CP2 Scores call with 101 — gold "Had", skipped (no tap-to-replace)](assets/a-normal-call-still-skips-a-number-base-already-has-step-01.jpg)
+
+### Base records a late entry and adds an unknown bib to the field
+
+
+
+**CP1 call with 512 and 999 — gold "Not in setup — tap to record"**
+
+![CP1 call with 512 and 999 — gold "Not in setup — tap to record"](assets/base-records-a-late-entry-and-adds-an-unknown-bib-to-the-field-step-01.jpg)
+
+**Tap 512 — recorded as a late entry; 999 left skipped**
+
+![Tap 512 — recorded as a late entry; 999 left skipped](assets/base-records-a-late-entry-and-adds-an-unknown-bib-to-the-field-step-02.jpg)
+
+**Needs attention › Unknown bibs — 999 › Add to field**
+
+![Needs attention › Unknown bibs — 999 › Add to field](assets/base-records-a-late-entry-and-adds-an-unknown-bib-to-the-field-step-03.jpg)
+
+### Base reminds a checkpoint of a runner it missed
+
+
+
+**CP1 calls 100; CP2 calls 150 too — CP1 now shows "Missed: 150 (seen CP2)"**
+
+![CP1 calls 100; CP2 calls 150 too — CP1 now shows "Missed: 150 (seen CP2)"](assets/base-reminds-a-checkpoint-of-a-runner-it-missed-step-01.jpg)
+
+**Tap CP1 — "They have it", enter the time they give**
+
+![Tap CP1 — "They have it", enter the time they give](assets/base-reminds-a-checkpoint-of-a-runner-it-missed-step-02.jpg)
+
+**Undo — the reminder is back**
+
+![Undo — the reminder is back](assets/base-reminds-a-checkpoint-of-a-runner-it-missed-step-03.jpg)
+
+### Stand-down check before a checkpoint packs down
+
+
+
+**Stand-down check on CP2 — 100 seen further on (CP3), 101 not seen past CP1**
+
+![Stand-down check on CP2 — 100 seen further on (CP3), 101 not seen past CP1](assets/stand-down-check-before-a-checkpoint-packs-down-step-01.jpg)
+
+**Stand down (two taps) — CP2 is Closed; Undo reopens it**
+
+![Stand down (two taps) — CP2 is Closed; Undo reopens it](assets/stand-down-check-before-a-checkpoint-packs-down-step-02.jpg)
+
 ## Base Station: DNF, DNS and Overview
 
 Base keeps the race-wide out list. Mark runners DNF or DNS in bulk by typing or pasting numbers, check the warnings, and clear anyone who is back in. The Overview shows who is on course, overdue alerts, checkpoint progress and the current leaders.
@@ -644,13 +756,13 @@ Base keeps the race-wide out list. Mark runners DNF or DNS in bulk by typing or 
 
 
 
-**Paste a list with a bib not in the race — rejected chip: white, 2px red, struck through**
+**Paste a list with a number twice — the rejected chip: white, 2px red, struck through**
 
-![Paste a list with a bib not in the race — rejected chip: white, 2px red, struck through](assets/rejected-chips-match-receive-and-out-list-rows-are-not-cut-off-step-01.jpg)
+![Paste a list with a number twice — the rejected chip: white, 2px red, struck through](assets/rejected-chips-match-receive-and-out-list-rows-are-not-cut-off-step-01.jpg)
 
-**Mark 112 DNF at CP1, Medical — the out list shows the whole detail**
+**Mark 112 and 113 DNF at CP1, Medical — the out list shows the whole detail**
 
-![Mark 112 DNF at CP1, Medical — the out list shows the whole detail](assets/rejected-chips-match-receive-and-out-list-rows-are-not-cut-off-step-02.jpg)
+![Mark 112 and 113 DNF at CP1, Medical — the out list shows the whole detail](assets/rejected-chips-match-receive-and-out-list-rows-are-not-cut-off-step-02.jpg)
 
 ### Withdrawal dialog uses 24-hour time and can be undone
 
@@ -727,6 +839,14 @@ Base keeps the race-wide out list. Mark runners DNF or DNS in bulk by typing or 
 **CP2 reports up to now — 110–119 are overdue: the banner has role="alert"**
 
 ![CP2 reports up to now — 110–119 are overdue: the banner has role="alert"](assets/overdue-banner-is-an-alert-step-01.jpg)
+
+### Success and passed look different
+
+
+
+**Finish receives 100 — heads-up grid: Passed (solid club blue) and Active (blue tint) differ**
+
+![Finish receives 100 — heads-up grid: Passed (solid club blue) and Active (blue tint) differ](assets/success-and-passed-look-different-step-01.jpg)
 
 ## Base Station: Reports and Data Checks
 
@@ -839,6 +959,18 @@ Overdue runners, who is still on course, times by checkpoint and the call log �
 **Print — opens the browser print dialog for the report**
 
 ![Print — opens the browser print dialog for the report](assets/a-report-prints-step-01.jpg)
+
+### Not seen there shows missed in the times table
+
+
+
+**CP1 › "Not seen there" for 150 — the reminder clears**
+
+![CP1 › "Not seen there" for 150 — the reminder clears](assets/not-seen-there-shows-missed-in-the-times-table-step-01.jpg)
+
+**Reports — Times by checkpoint reads "missed" at CP1; Skipped check is clear**
+
+![Reports — Times by checkpoint reads "missed" at CP1; Skipped check is clear](assets/not-seen-there-shows-missed-in-the-times-table-step-02.jpg)
 
 ## Importing & Exporting Data
 
@@ -1248,9 +1380,9 @@ Change a time, unmark and restore a runner, send corrections to base, fix anythi
 
 ![Edit sheet — changing a called-in time warns that base already has it](assets/a-changed-time-base-already-has-goes-back-on-the-callout-sheet-as-a-correction-step-03.jpg)
 
-**Callout sheet — 104 is back in the next call, tagged Correction**
+**Callout sheet — 104 is on the Corrections card, sent as its own call**
 
-![Callout sheet — 104 is back in the next call, tagged Correction](assets/a-changed-time-base-already-has-goes-back-on-the-callout-sheet-as-a-correction-step-04.jpg)
+![Callout sheet — 104 is on the Corrections card, sent as its own call](assets/a-changed-time-base-already-has-goes-back-on-the-callout-sheet-as-a-correction-step-04.jpg)
 
 ### Overview: undo call-in, reset, mark and clear DNS — each with undo
 
@@ -1371,6 +1503,38 @@ Change a time, unmark and restore a runner, send corrections to base, fix anythi
 **Over 3 — the second block starts with "Common time" again**
 
 ![Over 3 — the second block starts with "Common time" again](assets/read-out-runs-across-two-blocks-in-overs-of-three-step-03.jpg)
+
+### Checkpoint corrections card
+
+
+
+**Move 101 into the block before — it goes on the Corrections card, not the next call**
+
+![Move 101 into the block before — it goes on the Corrections card, not the next call](assets/checkpoint-corrections-card-step-01.jpg)
+
+**Base copied — correction sent: the card empties; Undo brings it back**
+
+![Base copied — correction sent: the card empties; Undo brings it back](assets/checkpoint-corrections-card-step-02.jpg)
+
+### Unmarking a called-in runner is a not-passed correction
+
+
+
+**Unmark 101 after it was called in — "not passed · was" on the Corrections card**
+
+![Unmark 101 after it was called in — "not passed · was" on the Corrections card](assets/unmarking-a-called-in-runner-is-a-not-passed-correction-step-01.jpg)
+
+### Checkpoint records a runner base says it missed
+
+
+
+**Overview › 150 › "Missed — passed earlier", step back five minutes, save**
+
+![Overview › 150 › "Missed — passed earlier", step back five minutes, save](assets/checkpoint-records-a-runner-base-says-it-missed-step-01.jpg)
+
+**Callout — on the Corrections card as "150 · missed · now HH:MM"**
+
+![Callout — on the Corrections card as "150 · missed · now HH:MM"](assets/checkpoint-records-a-runner-base-says-it-missed-step-02.jpg)
 
 ## Split-Role Checkpoint Operations
 
@@ -1521,12 +1685,32 @@ What to say on air. The app never shows radio wording — use these notes alongs
 
 ### Corrections
 
-**Brandon to supply WICEN wording** for sending a corrected time and for base acknowledging it.
+Sent as a separate call, one runner at a time, never mixed into a Scores call:
+"Checkpoint [n] correction, runner [bib], time is now [HH:MM]." Give the new common time (5-minute block) unless an exact time was recorded.
 
-What the app does today:
-- Checkpoint: changing the time of a runner base already has only counts as a correction when it moves the runner into a **different 5-minute block** — base only ever hears the common time. A minute's change inside the same block stays called in ("Same common time — base doesn't need a correction").
-- A correction goes back on the Callout sheet tagged **Correction** and is sent with the next call.
-- Base: a number already logged at that checkpoint shows gold **Had HH:MM** and is skipped (kept on the call record). Base can't yet replace the logged time with the correction — that needs the wording above first.
+- Checkpoint: corrections appear in their own card on the Callout sheet ("101 · now 10:55 · was 11:00"). Tap **Base copied — correction sent** once base has it.
+- Base: tap the checkpoint, tap **Correction**, type the bib, check what base had, pick the new time and tap **Apply correction**. Undo is available.
+- A time edit inside the same 5-minute block is not a correction and nothing needs to be sent.
+- A runner called in by mistake who never passed: "Checkpoint [n] correction, runner [bib], not passed." The checkpoint's card shows "142 · not passed · was 11:00"; base taps **Not passed** before **Apply correction**.
+- In a normal Scores call, a number base already has shows gold **Had HH:MM** and is skipped. Without the word "correction" it's treated as a mistake, not a new time.
+
+### Missed runners
+
+A checkpoint can't know it missed someone. Base finds out when the runner is called in at a later checkpoint. Base then shows a gold note on that checkpoint, e.g. "Missed: 213 (seen CP2)".
+
+- Base: next time that checkpoint calls (or call them), ask about each number. Tap **They have it** and enter the time they give, or **Not seen there** (the times table then shows "missed" for that checkpoint). Both have Undo. If the checkpoint calls the number in normally, the note clears by itself.
+- Before a checkpoint stands down, base opens **Stand-down check** for it. It lists runners "Seen further on" (missed there) and runners "Not seen past here". Read back any "Not seen past here" numbers, and stand the checkpoint down only when they're accounted for. **Stand down** (tap twice) marks it Closed; Undo reopens it. Runners still unaccounted for stay on Overdue / Still on course.
+- Checkpoint: if base tells you a runner came through, open them in **Overview** and use **Missed — passed earlier**. Step the time back to the time base gives (or your best estimate) and save; it goes on the Corrections card as "213 · missed · now 08:35" to confirm with base.
+- **Wording to be confirmed by Brandon** for base asking a checkpoint about a missed runner.
+
+### A number that isn't in the setup
+
+Bib ranges can change on the day, and some races only know bibs at registration. A runner whose number isn't in the setup is still recorded, never lost.
+
+- Checkpoint: type the number in quick entry as usual. It's marked and its tile gets a small gold corner ("not in setup"). A number longer than any bib in the race (or over 9999) asks "Mark 51212? It isn't in the setup" first, in case it's a typo. Read it to base like any other number.
+- Base: in a call, the number shows gold **Not in setup — tap to record**. Tap it if the checkpoint confirms the number; it's recorded as a **Late entry** and joins the field. Leave it untapped to skip it; it then appears in **Reports › Needs attention › Unknown bibs**, where **Add to field** records it later.
+- DNF / DNS: a number outside the field shows **Not in setup — tap to add**.
+- Race setup: tick **Bibs assigned on the day** for a race with no bib list yet. Counts that need the field show "—" until bibs are known.
 
 ### Fixing mistakes
 
@@ -1534,7 +1718,7 @@ Checkpoint:
 - Tap a marked runner on **Mark off** to change its time (−5/−1/+1/+5) or unmark it. Unmarking shows Undo.
 - An unmarked runner keeps "was HH:MM"; tapping it restores the original time or uses now.
 - **Overview**: tap any runner to change time, undo call-in, reset to not passed, or mark DNS/DNF. Every change has Undo.
-- Changing a time base already has into another 5-minute block sends it back to the callout sheet as a correction (see Corrections).
+- Changing a time base already has into another 5-minute block puts it on the Corrections card (see Corrections).
 
 Base:
 - **DNF / DNS** tab: bulk add by typing or pasting numbers, choose where and why, apply; Clear any entry to put a runner back in the race.

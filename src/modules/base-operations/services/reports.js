@@ -131,7 +131,7 @@ export function stillOnCourse({ sightings, order, out, raceNumbers }) {
  * @param {Map<number,{status:'DNF'|'DNS', checkpoint?:number|null, time?:string|null}>} out
  * @returns {Array<{ number, status: string, cells: Array<{ text: string, flag: boolean }> }>}
  */
-export function timesMatrix({ sightings, order, out, raceNumbers }) {
+export function timesMatrix({ sightings, order, out, raceNumbers, missed = new Set() }) {
   return [...raceNumbers].sort((a, b) => a - b).map(number => {
     const o = out.get(number);
     const cells = order.map(cp => {
@@ -141,6 +141,8 @@ export function timesMatrix({ sightings, order, out, raceNumbers }) {
         return { text: hhmm(t), flag };
       }
       if (o?.status === 'DNF' && o.checkpoint != null && o.checkpoint === cp.number) return { text: 'DNF', flag: false };
+      // The checkpoint confirmed it never saw this runner (Part E1)
+      if (missed.has(`${number}:${cp.number}`)) return { text: 'missed', flag: false, missed: true };
       return { text: '—', flag: false };
     });
     const status = !o ? '' : o.status === 'DNS' ? 'DNS'
@@ -153,7 +155,7 @@ export function timesMatrix({ sightings, order, out, raceNumbers }) {
 export function callLog({ radioCalls, board }) {
   return board.map(row => {
     const all = radioCalls.filter(c => c.checkpointNumber === row.number && !c.undoneAt);
-    const calls = all.filter(c => c.kind !== 'correction');
+    const calls = all.filter(c => !c.kind); // Scores calls only (not corrections, missed runners or stand-downs)
     return {
       number: row.number,
       short: row.short,

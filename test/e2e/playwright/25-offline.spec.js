@@ -17,8 +17,12 @@ test('the app starts, marks off and keeps a base call with no signal', async ({ 
   await test.step('Online first visit — service worker takes control', async () => {
     await seedRace(page, BASE, { withBaseData: true });
     await page.goto(BASE);
+    // The app reloads itself when the worker takes control (main.jsx). That is
+    // the reload this step needs — wait for it rather than racing it with our own.
+    const appReload = page.waitForEvent('framenavigated', { timeout: 10000 }).catch(() => null);
     await page.waitForFunction(() => !!navigator.serviceWorker?.controller, null, { timeout: 30000 });
-    await page.reload();
+    if (await appReload) await page.waitForLoadState('load');
+    else await page.reload();
     await page.waitForFunction(() => !!navigator.serviceWorker?.controller);
     await expect(page.getByRole('heading', { name: 'RaceTracker' })).toBeVisible();
   });

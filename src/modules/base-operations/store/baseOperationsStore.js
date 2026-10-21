@@ -228,6 +228,18 @@ const useBaseOperationsStore = create(
         return callId;
       },
 
+      recordMissed: async (checkpointNumber, missed) => {
+        const callId = await new BaseOperationsRepository().recordMissed(raceKeyOf(get().currentRaceId), checkpointNumber, missed, TimeUtils.getCurrentTimestamp());
+        await get().refreshData({ silent: true });
+        return callId;
+      },
+
+      recordStandDown: async (checkpointNumber) => {
+        const callId = await new BaseOperationsRepository().recordStandDown(raceKeyOf(get().currentRaceId), checkpointNumber, TimeUtils.getCurrentTimestamp());
+        await get().refreshData({ silent: true });
+        return callId;
+      },
+
       undoCall: async (callId) => {
         const repo = new BaseOperationsRepository();
         await repo.undoCall(callId);

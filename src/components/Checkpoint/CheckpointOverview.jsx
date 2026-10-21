@@ -60,7 +60,8 @@ const CheckpointOverview = () => {
   const [filter, setFilter] = useState('all');
   const [open, setOpen] = useState(null);
   const [draft, setDraft] = useState(null); // stepper value for the open row; saved only on Save
-  const toggle = (number) => { setOpen(open === number ? null : number); setDraft(null); };
+  const [missedAt, setMissedAt] = useState(null); // "Missed — passed earlier" time being set (Part E3)
+  const toggle = (number) => { setOpen(open === number ? null : number); setDraft(null); setMissedAt(null); };
 
   const stats = useMemo(() => computeStats(runners), [runners]);
   const rows = useMemo(
@@ -118,7 +119,9 @@ const CheckpointOverview = () => {
             actions.push(['plain', 'Reset — not passed', `${r.number} reset — not passed`, () => store.unmarkRunner(r.number)]);
             actions.push(['red', 'Mark DNF', `${r.number} marked DNF`, () => store.setOut(r.number, 'dnf')]);
           } else if (state === RUNNER_STATE.NONE || state === RUNNER_STATE.RESTORABLE) {
-            actions.push(['gold', `Passed now (${hhmm(now)})`, `${r.number} marked at ${hhmm(now)}`, () => store.markPassed([r.number], nowIso())]);
+            // While setting a missed runner's time, its gold Save replaces Passed now (one gold per row)
+            if (!(isOpen && missedAt)) actions.push(['gold', `Passed now (${hhmm(now)})`, `${r.number} marked at ${hhmm(now)}`, () => store.markPassed([r.number], nowIso())]);
+            if (!(isOpen && missedAt)) actions.push(['plain', 'Missed — passed earlier', null, () => setMissedAt(nowIso())]);
             actions.push(['plain', 'Mark DNS', `${r.number} marked DNS`, () => store.setOut(r.number, 'non-starter')]);
             actions.push(['red', 'Mark DNF', `${r.number} marked DNF`, () => store.setOut(r.number, 'dnf')]);
           } else {
@@ -155,6 +158,24 @@ const CheckpointOverview = () => {
                       />
                     </div>
                   )}
+                  {isOpen && missedAt && (
+                    <div className="flex flex-col gap-2" data-testid="missed-editor">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-vk-muted uppercase tracking-[0.8px] w-11">Time</span>
+                        <TimeStepper size="md" className="flex-1" value={missedAt} min={ctx.earliest} max={now} onChange={setMissedAt} />
+                      </div>
+                      <div className="text-xs text-vk-muted">Step back to the time base gives, or your best estimate.</div>
+                      <button type="button"
+                        onClick={async () => {
+                          const t = clampTime(missedAt, ctx.earliest, nowIso());
+                          setMissedAt(null);
+                          await act(r.number, `${r.number} missed — passed ${hhmm(t)}`, () => store.markMissed(r.number, t));
+                        }}
+                        className={`min-h-[44px] rounded-btn px-2 text-[13px] font-bold ${actionClass.gold}`}>
+                        Save missed · {hhmm(missedAt)}
+                      </button>
+                    </div>
+                  )}
                   {pending && (
                     <button type="button"
                       onClick={async () => {
@@ -168,7 +189,7 @@ const CheckpointOverview = () => {
                   )}
                   <div className="grid grid-cols-2 gap-2">
                     {actions.map(([kind, label, text, run]) => (
-                      <button key={label} type="button" onClick={() => act(r.number, text, run)}
+                      <button key={label} type="button" onClick={() => (text ? act(r.number, text, run) : run())}
                         className={`min-h-[44px] rounded-btn px-2 text-[13px] font-bold ${actionClass[kind]}`}>
                         {label}
                       </button>

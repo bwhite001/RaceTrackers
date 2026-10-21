@@ -528,6 +528,18 @@ async function run() {
   await ev('RX-C3', 'Race-day A2', 'Tap "Undo", then "Back to call", "Cancel call"', 'Undo restores the exact previous rows.',
     async p => { await p.getByRole('button', { name: 'Undo', exact: true }).click(); await p.fill('#corr-bib', '101'); },
     { show: [S('Base had', T('corr-had')), async p => { await p.getByRole('button', { name: /^Back to call/ }).click(); await p.getByRole('button', { name: 'Cancel call' }).click(); return 'Back on Who\'s calling'; }] });
+  await ev('RX-M1', 'Race-day E1', 'Look at CP1 on "Who\'s calling?" and the board (128 was reported at CP2, never at CP1)', 'A gold note on that checkpoint\'s Who\'s calling button and board row, e.g. "Missed: 213, 218 (seen CP2)". Every bib listed individually.',
+    async () => {},
+    { show: [S('CP1 button', btn(/^CP1,/)), S('Board note', T('missed-CP1'), ['bg', 'border'])] });
+  await ev('RX-M2', 'Race-day E1', 'Tap "CP1"', 'The receive panel shows the missed list at the top with They have it / Not seen there per bib.',
+    async p => { await p.getByRole('button', { name: /^CP1,/ }).click(); },
+    { show: [S('Missed panel', T('missed-panel'))] });
+  await ev('RX-M3', 'Race-day E2', 'Tap "Stand-down check"', 'Lists every runner still in the race not recorded there: Seen further on (missed here) and Not seen past here. Stand down (two-tap) marks it Closed.',
+    async p => { await p.getByRole('button', { name: 'Stand-down check', exact: true }).click(); },
+    { show: [S('Seen further on', T('seen-further')), S('Not seen past here', T('not-seen-past'))] });
+  await ev('RX-M4', 'Race-day E2', 'Close the sheet; Cancel call', 'Back to Who\'s calling.',
+    async p => { await p.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).last().click(); await p.getByRole('button', { name: 'Cancel call' }).click(); },
+    { show: [S('Heading', p => p.getByRole('heading', { name: /who's calling/i }))] });
   await ev('RX-18', 'Fixes D3 / §4.9 validation table', 'Tap "CP3", add 115 (reported at CP1, never at CP2)', 'Not seen at the previous checkpoint → info (blue, recorded) "Not seen CP2".',
     async p => { await p.getByRole('button', { name: /^CP3,/ }).click(); await add(p, [115]); },
     { show: [S('Chip 115', chipOf(115), ['bg', 'border']), S('Complete', btn(/^Complete/))] });

@@ -97,7 +97,7 @@ export function findSkipped({ sightings, order }) {
       const after = trail.find(t => t.idx > idx);
       issues.push({
         key: `skip:${number}:${missing.number}`,
-        check: 'skip', number, askCp: missing,
+        check: 'skip', number, askCp: missing, seenAt: after?.cp ?? null,
         head: `Not reported at ${missing.short}`,
         detail: [before && `${before.cp.short} ${hhmm(before.time)}`, after && `${after.cp.short} ${hhmm(after.time)}`].filter(Boolean).join(' → '),
       });

@@ -2,14 +2,15 @@ import React, { useMemo, useRef, useState } from 'react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import {
-  buildBoard, checkCall, isRecordable, outStatusMap, sightingsByCheckpoint, askReminders, CALL_DUE_MINUTES, CHECK,
+  buildBoard, checkCall, isRecordable, outStatusMap, sightingsByCheckpoint, askReminders, boardCheckpoints, CALL_DUE_MINUTES, CHECK,
 } from '../services/receive';
+import { missedReminders, missedText, standDownLists, MISSED_CONFIRMED } from '../services/missed';
 import TimeUtils from '../../../services/timeUtils.js';
 import {
   toBlock, hhmm, blocksBetween, earliestTime, parseExactTime, BLOCK_MINUTES,
 } from '../../../services/blocks.js';
 import { checkClasses, LOCKED } from '../../../design-system/statusStyles';
-import { BlockPicker, NumberPad, BibChip } from '../../../design-system/components/VK';
+import { BlockPicker, NumberPad, BibChip, BottomSheet } from '../../../design-system/components/VK';
 import useNow from '../../../shared/hooks/useNow';
 
 const MAX_BLOCKS = 48;
@@ -37,6 +38,7 @@ const BaseReceive = () => {
   const {
     currentRace, checkpoints = [], runners = [], radioCalls = [], outList = [], raceRunnerNumbers = [], resolutions = [],
     receive, setReceive, resetReceive, recordCall, undoCall, setResolutionsAsked, recordCorrection,
+    recordMissed, recordStandDown, addResolution, removeResolution,
   } = store;
   const now = useNow(10000);
   const inputRef = useRef(null);
@@ -47,6 +49,7 @@ const BaseReceive = () => {
   const [busy, setBusy] = useState(false);
   const [exactInvalid, setExactInvalid] = useState(false);
   const [askUndo, setAskUndo] = useState(null); // { cp, ids, text } after "Asked"
+  const [standDownCp, setStandDownCp] = useState(null); // checkpoint whose Stand-down check is open
 
   const raceStart = currentRace?.date && currentRace?.startTime
     ? TimeUtils.createRaceTimestamp(currentRace.date, currentRace.startTime.slice(0, 5))
@@ -76,6 +79,11 @@ const BaseReceive = () => {
     await setResolutionsAsked(u.ids, null);
   };
 
+  // Runners a checkpoint missed (Part E1): the Skipped check, by checkpoint
+  const order = useMemo(() => boardCheckpoints(checkpoints), [checkpoints]);
+  const resolvedKeys = useMemo(() => new Set(resolutions.map(r => r.issueKey)), [resolutions]);
+  const missed = useMemo(() => missedReminders({ sightings, order, resolvedKeys }), [sightings, order, resolvedKeys]);
+
   // A draft saved for another race (persisted across reloads) is ignored
   const rx = receive && (!receive.raceId || receive.raceId === store.currentRaceId) ? receive : { step: 'idle', entries: [] };
   const cur = board.find(b => b.number === rx.cp) ?? null;
@@ -93,7 +101,7 @@ const BaseReceive = () => {
 
   const pickCheckpoint = (row) => {
     const next = row.lastBlock ? TimeUtils.addMinutes(row.lastBlock, BLOCK_MINUTES) : nowBlock;
-    setReceive({ step: 'rx', cp: row.number, entries: [], ctime: next > nowBlock ? nowBlock : next, manual: false, manualText: '', summary: null, lastCallId: null, raceId: store.currentRaceId, corr: null });
+    setReceive({ step: 'rx', cp: row.number, entries: [], ctime: next > nowBlock ? nowBlock : next, manual: false, manualText: '', summary: null, lastCallId: null, raceId: store.currentRaceId, corr: null, missedUndo: null });
     clearTransient();
     setFlash('');
     setTimeout(() => inputRef.current?.focus(), 0);
@@ -202,6 +210,13 @@ const BaseReceive = () => {
     setBusy(true);
     try {
       const { ctime, manual, notPassed } = rx.corr;
+      if (rx.corr.missed) {
+        // "They have it": the checkpoint gave a time for a runner it had missed
+        const callId = await recordMissed(cur.number, { number: corrNum, time: ctime, manual });
+        setReceive({ corr: null, missedUndo: { kind: 'call', id: callId, text: `${corrNum} recorded at ${cur.short} ${hhmm(ctime)}` } });
+        setFlash('');
+        return;
+      }
       const callId = await recordCorrection(cur.number, { number: corrNum, time: notPassed ? null : ctime, manual, notPassed });
       const text = `${corrNum} at ${cur.short}: ${corrHad ? hhmm(corrHad) : 'no time'} → ${notPassed ? 'not passed' : hhmm(ctime)}`;
       setReceive(r => ({ corr: { ...r.corr, num: '', notPassed: false, undo: { callId, text } } }));
@@ -218,6 +233,21 @@ const BaseReceive = () => {
     setCorr({ undo: null });
     await undoCall(u.callId);
     setFlash(`Correction undone — ${u.text}`);
+  };
+
+  const askedHasIt = (m) => {
+    setReceive({ corr: { num: String(m.number), ctime: nowBlock, manual: false, manualText: '', notPassed: false, missed: true } });
+    setFlash(''); setExactInvalid(false);
+  };
+  const notSeenThere = async (m) => {
+    const id = await addResolution(m.issueKey, MISSED_CONFIRMED);
+    setReceive({ missedUndo: { kind: 'resolution', id, text: `${m.number}: not seen at ${cur.short}` } });
+  };
+  const undoMissed = async () => {
+    const u = rx.missedUndo;
+    setReceive({ missedUndo: null });
+    if (u.kind === 'call') await undoCall(u.id);
+    else await removeResolution(u.id);
   };
 
   const complete = async () => {
@@ -254,7 +284,8 @@ const BaseReceive = () => {
     const start = cur.lastBlock
       ? TimeUtils.addMinutes(cur.lastBlock, -BLOCK_MINUTES)
       : TimeUtils.addMinutes(nowBlock, -60);
-    const from = start < toBlock(earliest) ? toBlock(earliest) : start;
+    // A correction or a missed runner can be any earlier time: offer the whole window
+    const from = rx.corr || start < toBlock(earliest) ? toBlock(earliest) : start;
     const used = new Set(rx.entries.map(e => e.t));
     const nextKey = cur.lastBlock ? TimeUtils.addMinutes(cur.lastBlock, BLOCK_MINUTES) : null;
     const sel = rx.corr ?? rx;
@@ -284,7 +315,7 @@ const BaseReceive = () => {
                   key={row.number}
                   type="button"
                   onClick={() => pickCheckpoint(row)}
-                  aria-label={`${row.short}, ${pillText[row.status]}${asks.has(row.number) ? `, ask about ${askText(row.number)}` : ''}`}
+                  aria-label={`${row.short}, ${pillText[row.status]}${asks.has(row.number) ? `, ask about ${askText(row.number)}` : ''}${missed.has(row.number) ? `, missed ${missed.get(row.number).map(m => m.number).join(', ')}` : ''}`}
                   className={`min-h-[64px] px-2.5 py-2 rounded-btn flex flex-col items-start justify-center gap-0.5 text-left ${row.status === 'due'
                     ? 'bg-vk-gold-tint border-2 border-vk-gold'
                     : 'bg-white border border-vk-border dark:bg-gray-800 dark:border-gray-600'} ${row.status === 'closed' ? 'opacity-75' : ''}`}
@@ -299,6 +330,9 @@ const BaseReceive = () => {
                   {asks.has(row.number) && (
                     <span className="text-xs font-bold text-vk-ink bg-vk-gold-tint border border-vk-gold rounded-chip px-1.5">Ask about {askText(row.number)}</span>
                   )}
+                  {missed.has(row.number) && (
+                    <span className="text-xs font-bold text-vk-ink bg-vk-gold-tint border border-vk-gold rounded-chip px-1.5">Missed: {missedText(missed.get(row.number))}</span>
+                  )}
                 </button>
               ))}
             </div>
@@ -308,8 +342,8 @@ const BaseReceive = () => {
         {rx.step === 'rx' && cur && rx.corr && (
           <div className="bg-white dark:bg-gray-800 border-2 border-vk-gold rounded-card p-3 flex flex-col gap-2.5" data-testid="correction-panel">
             <div className="flex items-center gap-2.5">
-              <h1 id="rxhd" className="font-display font-extrabold text-xl text-vk-navy dark:text-white">{cur.short} · Correction</h1>
-              <div className="text-[13px] text-vk-muted flex-1 min-w-0 truncate">One runner at a time</div>
+              <h1 id="rxhd" className="font-display font-extrabold text-xl text-vk-navy dark:text-white">{cur.short} · {rx.corr.missed ? 'Missed runner' : 'Correction'}</h1>
+              <div className="text-[13px] text-vk-muted flex-1 min-w-0 truncate">{rx.corr.missed ? 'Enter the time they give' : 'One runner at a time'}</div>
               <button type="button" onClick={closeCorrection}
                 className="min-h-[40px] px-3 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs dark:bg-gray-800 dark:text-gray-100">
                 Back to call{rx.entries.length ? ` · ${rx.entries.length}` : ''}
@@ -318,7 +352,7 @@ const BaseReceive = () => {
             <div className="flex flex-wrap gap-3 items-stretch">
               <div className="flex-[1_1_240px] min-w-0 flex flex-col gap-2">
                 <label htmlFor="corr-bib" className="text-xs font-bold text-vk-muted uppercase tracking-[0.8px]">Runner</label>
-                <input id="corr-bib" type="text" inputMode="numeric" autoComplete="off" value={rx.corr.num ?? ''}
+                <input id="corr-bib" type="text" inputMode="numeric" autoComplete="off" value={rx.corr.num ?? ''} readOnly={!!rx.corr.missed}
                   onChange={e => setCorrNum(e.target.value.replace(/\D/g, '').slice(0, MAX_DIGITS))}
                   placeholder="Number"
                   className="font-display font-extrabold text-[26px] text-vk-ink bg-white border-2 border-vk-blue rounded-btn px-3 py-1 min-h-[52px] dark:bg-gray-900 dark:text-white" />
@@ -329,10 +363,10 @@ const BaseReceive = () => {
                 <div className="text-xs font-bold text-vk-muted uppercase tracking-[0.8px] mt-1">New time</div>
                 <BlockPicker blocks={blocks} onPick={(t) => setCorr({ ctime: t, manual: false, manualText: '', notPassed: false })}
                   exactText={rx.corr.manualText} onExactChange={onExact} exactActive={rx.corr.manual && !rx.corr.notPassed} exactInvalid={exactInvalid} />
-                <button type="button" aria-pressed={!!rx.corr.notPassed} onClick={() => setCorr({ notPassed: !rx.corr.notPassed })}
+                {!rx.corr.missed && <button type="button" aria-pressed={!!rx.corr.notPassed} onClick={() => setCorr({ notPassed: !rx.corr.notPassed })}
                   className={`self-start min-h-[44px] px-3.5 rounded-btn font-bold text-[13px] ${rx.corr.notPassed ? 'bg-vk-navy text-white' : 'bg-white text-vk-ink border border-vk-muted dark:bg-gray-800 dark:text-gray-100'}`}>
                   Not passed
-                </button>
+                </button>}
               </div>
               <div className="flex-[0_1_220px]">
                 <NumberPad
@@ -350,7 +384,8 @@ const BaseReceive = () => {
             </div>
             <button type="button" onClick={applyCorrection} disabled={!corrNum || busy}
               className={`${actionBtn} ${!corrNum || busy ? LOCKED : 'bg-vk-gold text-vk-ink shadow-btn'}`}>
-              {rx.corr.notPassed ? 'Apply correction · not passed' : `Apply correction${corrNum ? ` · ${hhmm(rx.corr.ctime)}` : ''}`}
+              {rx.corr.missed ? `Record missed · ${hhmm(rx.corr.ctime)}`
+                : rx.corr.notPassed ? 'Apply correction · not passed' : `Apply correction${corrNum ? ` · ${hhmm(rx.corr.ctime)}` : ''}`}
             </button>
           </div>
         )}
@@ -365,7 +400,35 @@ const BaseReceive = () => {
                 className="min-h-[40px] px-3 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs dark:bg-gray-800 dark:text-gray-100">
                 Correction
               </button>
+              <button type="button" onClick={() => setStandDownCp(cur.number)}
+                className="min-h-[40px] px-3 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs dark:bg-gray-800 dark:text-gray-100">
+                Stand-down check
+              </button>
             </div>
+
+            {(missed.has(cur.number) || rx.missedUndo) && (
+              <div className="bg-vk-gold-tint border border-vk-gold rounded-btn p-2.5 flex flex-col gap-2" data-testid="missed-panel">
+                {missed.has(cur.number) && (
+                  <>
+                    <div className="text-[13px] font-bold text-vk-ink dark:text-white">Missed here — seen further on. Ask about each:</div>
+                    {missed.get(cur.number).map(m => (
+                      <div key={m.issueKey} className="flex flex-wrap items-center gap-2" data-testid="missed-row">
+                        <span className="font-display font-extrabold text-lg tabular-nums w-14">{m.number}</span>
+                        <span className="flex-1 text-xs text-vk-muted">{m.seenAt ? `seen ${m.seenAt}` : ''}</span>
+                        <button type="button" onClick={() => askedHasIt(m)} className="min-h-[40px] px-3 rounded-btn bg-vk-blue text-white font-bold text-xs">They have it</button>
+                        <button type="button" onClick={() => notSeenThere(m)} className="min-h-[40px] px-3 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs dark:bg-gray-800 dark:text-gray-100">Not seen there</button>
+                      </div>
+                    ))}
+                  </>
+                )}
+                {rx.missedUndo && (
+                  <div className="flex items-center gap-2 text-xs text-vk-ink dark:text-white" role="status">
+                    <span className="flex-1">{rx.missedUndo.text}</span>
+                    <button type="button" onClick={undoMissed} className="min-h-[32px] px-3 rounded-lg bg-vk-ink text-white font-bold text-xs">Undo</button>
+                  </div>
+                )}
+              </div>
+            )}
 
             <BlockPicker
               blocks={blocks}
@@ -509,6 +572,15 @@ const BaseReceive = () => {
                     className="min-h-[32px] px-2.5 rounded-lg bg-white border border-vk-muted text-vk-ink font-bold text-xs dark:bg-gray-800 dark:text-gray-100">Asked</button>
                 </div>
               )}
+              {missed.has(row.number) && (
+                <div className="text-xs font-bold text-vk-ink bg-vk-gold-tint border border-vk-gold rounded-btn px-2 py-1" data-testid={`missed-${row.short}`}>
+                  Missed: {missedText(missed.get(row.number))}
+                </div>
+              )}
+              <button type="button" onClick={() => setStandDownCp(row.number)} aria-label={`Stand-down check ${row.short}`}
+                className="self-start min-h-[32px] px-2 rounded-lg text-xs font-semibold text-vk-blue">
+                Stand-down check
+              </button>
               {askUndo?.cp === row.number && !asks.has(row.number) && (
                 <div className="flex items-center gap-1.5 text-xs text-vk-muted" role="status">
                   <span className="flex-1">{askUndo.text}</span>
@@ -523,7 +595,77 @@ const BaseReceive = () => {
           </div>
         ))}
       </aside>
+
+      {standDownCp != null && (() => {
+        const row = board.find(b => b.number === standDownCp);
+        const lists = standDownLists({
+          cpNumber: standDownCp, order, sightings, raceNumbers: raceRunnerNumbers, out,
+          fieldKnown: !(currentRace?.bibsOnTheDay && !raceRunnerNumbers.length),
+        });
+        return (
+          <StandDownSheet row={row} lists={lists} missedHere={missed.get(standDownCp) ?? []}
+            onStandDown={() => recordStandDown(standDownCp)} onUndo={(callId) => undoCall(callId)}
+            onClose={() => setStandDownCp(null)} />
+        );
+      })()}
     </div>
+  );
+};
+
+/**
+ * Stand-down check (Part E2): who is still unaccounted for at a checkpoint
+ * before it packs down. Stand down (two taps) marks it Closed on base only;
+ * runners still listed stay on Overdue / Still on course.
+ */
+const StandDownSheet = ({ row, lists, missedHere, onStandDown, onUndo, onClose }) => {
+  const [confirm, setConfirm] = useState(false);
+  const [done, setDone] = useState(null); // callId once stood down
+  const onMissedList = new Set(missedHere.map(m => m.number));
+  const standDown = async () => {
+    if (!confirm) { setConfirm(true); return; }
+    setDone(await onStandDown());
+    setConfirm(false);
+  };
+  const Chip = ({ children }) => <span className="inline-block bg-vk-paper dark:bg-gray-900 rounded-chip px-2 py-0.5 text-[13px] font-semibold tabular-nums">{children}</span>;
+  return (
+    <BottomSheet open onClose={onClose} labelledBy="standdown-hd">
+      <h2 id="standdown-hd" className="font-display font-extrabold text-xl text-vk-navy dark:text-white">Stand-down check · {row.short}</h2>
+      <section className="flex flex-col gap-1.5" data-testid="seen-further">
+        <h3 className="text-xs font-bold text-vk-muted uppercase tracking-[0.8px]">Seen further on — missed here · {lists.seenFurther.length}</h3>
+        <div className="flex flex-wrap gap-1.5">
+          {lists.seenFurther.map(r => <Chip key={r.number}>{r.number} · {r.at}</Chip>)}
+          {!lists.seenFurther.length && <span className="text-[13px] text-vk-muted">None</span>}
+        </div>
+        {lists.seenFurther.some(r => onMissedList.has(r.number)) && (
+          <div className="text-xs text-vk-muted">These are on {row.short}&apos;s missed list — ask about them on the call.</div>
+        )}
+      </section>
+      <section className="flex flex-col gap-1.5" data-testid="not-seen-past">
+        <h3 className="text-xs font-bold text-vk-muted uppercase tracking-[0.8px]">
+          Not seen past here — still to account for{lists.notSeenPast ? ` · ${lists.notSeenPast.length}` : ''}
+        </h3>
+        <div className="flex flex-wrap gap-1.5">
+          {lists.notSeenPast === null
+            ? <span className="text-[13px] text-vk-muted">Field not known (bibs assigned on the day)</span>
+            : lists.notSeenPast.map(r => <Chip key={r.number}>{r.number} · {r.last ? `last ${r.last}` : 'not seen'}</Chip>)}
+          {lists.notSeenPast?.length === 0 && <span className="text-[13px] text-vk-muted">None</span>}
+        </div>
+      </section>
+      {done ? (
+        <div className="flex items-center gap-2" role="status">
+          <span className="flex-1 text-sm font-semibold">{row.short} stood down</span>
+          <button type="button" onClick={async () => { await onUndo(done); setDone(null); }}
+            className="min-h-[40px] px-3 rounded-lg bg-vk-ink text-white font-bold text-xs">Undo</button>
+        </div>
+      ) : (
+        <button type="button" onClick={standDown}
+          className={`${actionBtn} ${confirm ? 'bg-vk-red text-white' : 'bg-white text-vk-red border-2 border-vk-red dark:bg-gray-800'}`}>
+          {confirm ? 'Tap again to stand down' : 'Stand down'}
+        </button>
+      )}
+      <button type="button" onClick={onClose}
+        className={`${actionBtn} bg-white text-vk-ink border border-vk-muted dark:bg-gray-800 dark:text-gray-100`}>Close</button>
+    </BottomSheet>
   );
 };
 

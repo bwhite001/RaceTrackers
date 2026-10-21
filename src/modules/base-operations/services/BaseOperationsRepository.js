@@ -222,6 +222,38 @@ export class BaseOperationsRepository extends BaseRepository {
     });
   }
 
+  /**
+   * Base asked a checkpoint about a runner it missed and they have a time:
+   * one base row on a 'missed' call (undoCall reverses it). missedReport keeps
+   * the old time from moving the board's "up to".
+   */
+  async recordMissed(raceId, checkpointNumber, { number, time, manual = false }, receivedAt) {
+    return db.transaction('rw', db.base_station_runners, db.radio_calls, db.audit_log, async () => {
+      const callId = await db.radio_calls.add({
+        raceId, checkpointNumber, receivedAt, kind: 'missed',
+        blocks: [{ time, numbers: [number] }], recorded: [number], skipped: [], rejected: [], undoneAt: null, replaced: [],
+      });
+      await db.base_station_runners.add({
+        raceId, checkpointNumber, number, status: 'passed', commonTime: time, markOffEntryTime: receivedAt,
+        callId, notes: null, missedReport: true, ...(manual && { manualTime: true }),
+      });
+      await this.logAudit(raceId, 'missed-runner', 'base_station', String(number), { checkpointNumber, time, callId });
+      return callId;
+    });
+  }
+
+  /** Stand a checkpoint down (base-side; the shared checkpoints table is not touched). undoCall reopens it. */
+  async recordStandDown(raceId, checkpointNumber, receivedAt) {
+    return db.transaction('rw', db.radio_calls, db.audit_log, async () => {
+      const callId = await db.radio_calls.add({
+        raceId, checkpointNumber, receivedAt, kind: 'stand-down',
+        blocks: [], recorded: [], skipped: [], rejected: [], undoneAt: null, replaced: [],
+      });
+      await this.logAudit(raceId, 'stand-down', 'checkpoint', String(checkpointNumber), { callId });
+      return callId;
+    });
+  }
+
   async undoCall(callId) {
     await db.transaction('rw', db.base_station_runners, db.radio_calls, db.audit_log, db.field_changes, async () => {
       const call = await db.radio_calls.get(callId);
