@@ -20,6 +20,7 @@ export const EMPTY_RECEIVE = {
   manualText: '',
   summary: null,       // { title, sub } after Complete
   lastCallId: null,
+  raceId: null,        // race the draft belongs to (persisted across reloads)
 };
 
 /**
@@ -673,9 +674,12 @@ const useBaseOperationsStore = create(
     {
       name: 'base-operations-storage',
       // Only persist UI preferences — never race data (causes stale state across sessions)
+      // UI preferences, plus the call being received: a page reload (e.g. a
+      // service-worker update mid-call) must not drop the numbers taken so far.
       partialize: (state) => ({
         sortOrder: state.sortOrder,
-        filterStatus: state.filterStatus
+        filterStatus: state.filterStatus,
+        receive: state.receive,
       })
     }
   )

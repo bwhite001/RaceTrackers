@@ -158,3 +158,9 @@ An independent code review of the branch found these. Each was checked against t
 **Raised but not changed (logged for follow-up):**
 - **Base can't accept a checkpoint's correction.** A corrected time from a checkpoint is heard at base as "Had HH:MM" and skipped (spec §4.9 says already-logged numbers are skipped). The skipped number is kept on the call (`radio_calls.skipped`), but there's no one-tap "accept correction" yet.
 - **The checkpoint Overview's "Undo call-in" button loses the correction flag.** It returns the runner to the callout sheet as a plain pending runner. The Undo bar after any Overview action is exact.
+
+## Found while building the UI validation pack
+
+- **A call being received was lost if the page reloaded.** `main.jsx` reloads the page when a new service worker takes control. That happens on the first visit and on every app update. The Receive draft lived only in memory, so an update mid-call dropped the numbers already taken. The Playwright config blocks service workers, so no test saw it. The draft is now persisted with the base store, tagged with its race, and a draft for another race is ignored. Files: `baseOperationsStore.js`, `BaseReceive.jsx`.
+- **Withdrawals and vet-outs were never audit-logged (pre-existing).** `withdrawRunner`, `reverseWithdrawal` and `vetOutRunner` wrote their audit row inside a transaction that didn't include `audit_log`. The write failed and the error was swallowed ("Error logging audit"). `audit_log` is now in those transactions, with a test.
+- **Validation pack:** `scripts/ui-validation/build-validation-pdf.mjs` (run with `npm run validation:pdf` while `dist` is served on port 4173). It drives the built app through 109 events and writes `docs/design-handoff/ui-validation/VK4WIP-UI-validation.pdf` and `events.json`.

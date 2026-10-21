@@ -466,7 +466,7 @@ export class BaseOperationsRepository extends BaseRepository {
 
   async withdrawRunner(raceId, runnerNumber, checkpoint, reason, comments, withdrawalTime = null) {
     const timestamp = withdrawalTime || new Date().toISOString();
-    await db.transaction('rw', db.withdrawal_records, db.checkpoint_runners, db.runners, async () => {
+    await db.transaction('rw', db.withdrawal_records, db.checkpoint_runners, db.runners, db.audit_log, async () => {
       await db.withdrawal_records.add({
         raceId, runnerNumber, checkpoint,
         withdrawalTime: timestamp,
@@ -515,7 +515,7 @@ export class BaseOperationsRepository extends BaseRepository {
   }
 
   async reverseWithdrawal(raceId, runnerNumber) {
-    await db.transaction('rw', db.withdrawal_records, db.checkpoint_runners, async () => {
+    await db.transaction('rw', db.withdrawal_records, db.checkpoint_runners, db.audit_log, async () => {
       const withdrawal = await db.withdrawal_records
         .where(['raceId', 'runnerNumber'])
         .equals([raceId, runnerNumber])
@@ -552,7 +552,7 @@ export class BaseOperationsRepository extends BaseRepository {
 
   async vetOutRunner(raceId, runnerNumber, checkpoint, reason, medicalNotes, vetOutTime = null) {
     const timestamp = vetOutTime || new Date().toISOString();
-    await db.transaction('rw', db.vet_out_records, db.checkpoint_runners, async () => {
+    await db.transaction('rw', db.vet_out_records, db.checkpoint_runners, db.audit_log, async () => {
       await db.vet_out_records.add({
         raceId, runnerNumber, checkpoint,
         vetOutTime: timestamp, reason, medicalNotes, vetName: null

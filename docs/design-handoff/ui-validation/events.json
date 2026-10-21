@@ -1,0 +1,1424 @@
+[
+  {
+    "id": "HOME-01",
+    "section": "Home",
+    "spec": "§4.1",
+    "action": "Open the app at /",
+    "expect": "Navy header: badge, \"RaceTracker\", \"Ipswich & District Radio Club · VK4WIP\", \"Offline ready\" status. Current race card (name, date, checkpoint count, start time). Three role cards (≥76px): Checkpoint, Base station, Race setup — icon tile, title, one-line description, chevron. Primary button at bottom: Scan race QR code (existing import flow). Footer lockup: \"Ipswich & District Radio Club · VK4WIP\".",
+    "observed": [],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "HOME-02",
+    "section": "Home",
+    "spec": "§4.1",
+    "action": "Click \"Scan race QR code\"",
+    "expect": "Opens the existing import flow (QR scanner).",
+    "observed": [
+      "Import / Export Race Configuration"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "HOME-03",
+    "section": "Home",
+    "spec": "§4.1",
+    "action": "Close the scanner, then click the \"Checkpoint\" role card",
+    "expect": "Role cards keep the existing navigation (choose race, then checkpoint). Navigation protection unchanged.",
+    "observed": [
+      "Select Race for Checkpoint Operations"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "SET-01",
+    "section": "Settings",
+    "spec": "§4.4",
+    "action": "Home → click the Settings (cog) button",
+    "expect": "Sections: Display (Theme segmented: Light / Dark / Sunlight; text-size slider), Status colours (rows with swatch, name, description; \"Reset to club colours\"), Race data (Share or import race config).",
+    "observed": [
+      "Settings",
+      "Clear database Permanently deletes all races, runners and settings on this device. This cannot be undone. Clear database"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "SET-02",
+    "section": "Settings",
+    "spec": "§4.4",
+    "action": "Click Theme → \"Sunlight\"",
+    "expect": "Sunlight = new high-contrast theme option (pure white bg, ink text, thicker borders).",
+    "observed": [
+      "html classes: touch-optimized sunlight-mode",
+      "Settings",
+      "Clear database Permanently deletes all races, runners and settings on this device. This cannot be undone. Clear database"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "SET-03",
+    "section": "Settings",
+    "spec": "§4.4 / G7",
+    "action": "Click Theme → \"Dark\"",
+    "expect": "Theme segmented: Light / Dark / Sunlight.",
+    "observed": [
+      "html classes: touch-optimized dark",
+      "Settings",
+      "Clear database Permanently deletes all races, runners and settings on this device. This cannot be undone. Clear database"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "SET-04",
+    "section": "Settings",
+    "spec": "§3.2 / §4.4",
+    "action": "Click \"Light\", then drag Text size to 130%",
+    "expect": "Keep the existing --font-scale setting; all sizes scale with it.",
+    "observed": [
+      "--font-scale = 1.3",
+      "Settings",
+      "Clear database Permanently deletes all races, runners and settings on this device. This cannot be undone. Clear database"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "SET-05",
+    "section": "Settings",
+    "spec": "§4.4 / G7",
+    "action": "Change the \"Passed\" colour to #2a9d8f with its swatch",
+    "expect": "Users may still recolour in Settings.",
+    "observed": [
+      "--color-status-passed = 42 157 143",
+      "Settings",
+      "Clear database Permanently deletes all races, runners and settings on this device. This cannot be undone. Clear database"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "SET-06",
+    "section": "Settings",
+    "spec": "§4.4",
+    "action": "Click \"Reset to club colours\"",
+    "expect": "Status colours … \"Reset to club colours\".",
+    "observed": [
+      "--color-status-passed = 30 92 179 (club blue = 30 92 179)",
+      "Settings",
+      "Clear database Permanently deletes all races, runners and settings on this device. This cannot be undone. Clear database"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "SHARE-01",
+    "section": "Share race config",
+    "spec": "§4.3",
+    "action": "Settings → Race data → \"Share or import race config\"",
+    "expect": "Existing QR export: large QR in a white card with shadow, runner/checkpoint count; Download / Email / Copy tiles; primary \"Show full screen\" (QRDisplayFullscreen). Note \"Works without internet — device to device\".",
+    "observed": [
+      "Settings",
+      "Clear database Permanently deletes all races, runners and settings on this device. This cannot be undone. Clear database",
+      "Share race",
+      "Scan to load this race"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "SHARE-02",
+    "section": "Share race config",
+    "spec": "§4.3",
+    "action": "Click the \"Copy\" tile",
+    "expect": "Download / Email / Copy tiles.",
+    "observed": [
+      "Settings",
+      "Clear database Permanently deletes all races, runners and settings on this device. This cannot be undone. Clear database",
+      "Share race",
+      "Scan to load this race"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "SHARE-03",
+    "section": "Share race config",
+    "spec": "§4.3",
+    "action": "Click back (\"Close share race\")",
+    "expect": "Returns to Settings.",
+    "observed": [
+      "Settings",
+      "Clear database Permanently deletes all races, runners and settings on this device. This cannot be undone. Clear database"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "SETUP-01",
+    "section": "Race setup",
+    "spec": "§4.2",
+    "action": "Open /race-maintenance/setup",
+    "expect": "Navy header with step \"Step 3 of 4 · Runners\" and a 4-segment gold progress bar. Restyle only; keep the wizard.",
+    "observed": [],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "SETUP-02",
+    "section": "Race setup",
+    "spec": "§4.2",
+    "action": "Click \"Start from Scratch\", enter name / date / start time, click Next",
+    "expect": "Keep the wizard (Back secondary, Next primary).",
+    "observed": [
+      "0 runners will be created"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "SETUP-03",
+    "section": "Race setup",
+    "spec": "§4.2 / G1",
+    "action": "Enter From 100, To 349 and click \"Add Range\"",
+    "expect": "Runner ranges input (ranges allowed here only), live count (\"250 runners will be created\") and first/last preview chips. Link to CSV / WebScorer import. Back (secondary) + Next (primary).",
+    "observed": [
+      "250 runners will be created 100 101 102 103 104 … 345 346 347 348 349"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "SETUP-04",
+    "section": "Race setup",
+    "spec": "§4.2",
+    "action": "Scroll to the bottom of the runners step",
+    "expect": "Link to CSV / WebScorer import. Back (secondary) + Next (primary).",
+    "observed": [
+      "250 runners will be created 100 101 102 103 104 … 345 346 347 348 349"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-01",
+    "section": "Checkpoint — Mark off",
+    "spec": "§4.5 Layout",
+    "action": "Open /checkpoint/3",
+    "expect": "AppBar (checkpoint number, location + operator callsign) with 3 StatTiles (Passed, Still to come, To call in gold) → quick-entry input + gold Mark → status line (aria-live) → group chips (20 per group) → 4-column tile grid (64px rows) → CheckpointTabBar.",
+    "observed": [
+      "Tap a number as the runner passes. Tap again to fix its time."
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-02",
+    "section": "Checkpoint — Mark off",
+    "spec": "§4.5 Behaviour 1",
+    "action": "Tap tile 101 (not passed)",
+    "expect": "Tap a not-passed tile → mark passed at now (actualTime = now, commonTime = block).",
+    "observed": [
+      "101 marked at 11:14"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-03",
+    "section": "Checkpoint — Mark off",
+    "spec": "§4.5 Behaviour 6",
+    "action": "Type \"103, 104 105\" in quick entry and press Enter",
+    "expect": "Quick entry accepts multiple numbers separated by commas/spaces (individual numbers only), marks each at now, jumps the grid to the group of the first number, message \"3 runners marked at 07:47\".",
+    "observed": [
+      "3 runners marked at 11:14",
+      "3 runners marked UNDO"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-04",
+    "section": "Checkpoint — Mark off",
+    "spec": "G1 / §4.5 Behaviour 6",
+    "action": "Type \"110-115 999 101\" and press Enter",
+    "expect": "Individual numbers only (no ranges outside Race setup). Unknown / already-marked numbers are not marked.",
+    "observed": [
+      "No new runners — 999 not at this checkpoint · 101 already marked · type each number on its own",
+      "3 runners marked UNDO"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-05",
+    "section": "Checkpoint — Mark off",
+    "spec": "§4.5 Behaviour 6",
+    "action": "Type \"125\" and press Enter",
+    "expect": "Jumps the grid to the group of the first number.",
+    "observed": [
+      "125 marked at 11:14",
+      "125 marked UNDO"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-06",
+    "section": "Checkpoint — Mark off",
+    "spec": "§4.5",
+    "action": "Tap group chip \"100–119\"",
+    "expect": "Group chips (20 per group: 100–119 …, horizontally scrolling).",
+    "observed": [
+      "125 marked at 11:14",
+      "125 marked UNDO"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-07",
+    "section": "Checkpoint — Mark off",
+    "spec": "§4.5 Behaviour 2–3",
+    "action": "Tap tile 101 again (passed)",
+    "expect": "Tap a passed or called-in tile → opens the Edit sheet (never unmarks directly). Edit sheet: bib, status line (\"Passed · not called in yet\" / \"Called in to base\"), \"Marked at HH:MM\". TimeStepper (clamped). Primary Save HH:MM (or \"Keep time\" if unchanged). Secondary Unmark runner. Cancel.",
+    "observed": [
+      "125 marked at 11:14",
+      "125 marked UNDO",
+      "101",
+      "11:14"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-08",
+    "section": "Checkpoint — Mark off",
+    "spec": "§3.5 TimeStepper",
+    "action": "In the sheet tap \"−5\"",
+    "expect": "TimeStepper: −5 / −1 / big time / +1 / +5. Clamp to [race start, now]. Primary changes to \"Save HH:MM\".",
+    "observed": [
+      "125 marked at 11:14",
+      "125 marked UNDO",
+      "101",
+      "11:09"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-09",
+    "section": "Checkpoint — Mark off",
+    "spec": "§3.5 TimeStepper",
+    "action": "Tap \"+5\" three times",
+    "expect": "Clamp to [race start, now] — the time cannot go past now.",
+    "observed": [
+      "125 marked at 11:14",
+      "125 marked UNDO",
+      "101",
+      "11:14"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-10",
+    "section": "Checkpoint — Mark off",
+    "spec": "§4.5 Behaviour 3",
+    "action": "Tap \"−5\" twice, then \"Save HH:MM\"",
+    "expect": "Save changes the time; status line confirms.",
+    "observed": [
+      "101 time changed to 11:04",
+      "101 time changed UNDO"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-11",
+    "section": "Checkpoint — Mark off",
+    "spec": "§4.5 Behaviour 4",
+    "action": "Tap tile 103 → \"Unmark runner\"",
+    "expect": "Unmark → tile becomes \"unmarked earlier\" (dashed blue, was HH:MM) and an UndoBar \"142 unmarked · Undo\" appears.",
+    "observed": [
+      "103 unmarked UNDO"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-12",
+    "section": "Checkpoint — Mark off",
+    "spec": "§4.5 Behaviour 4 / G5",
+    "action": "Tap \"Undo\" on the undo bar",
+    "expect": "Undo restores the original record exactly.",
+    "observed": [
+      "103 restored at 11:14"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-13",
+    "section": "Checkpoint — Mark off",
+    "spec": "§4.5 Behaviour 4",
+    "action": "Tap tile 104 → \"Unmark runner\", wait for the undo bar to clear",
+    "expect": "Tile becomes \"unmarked earlier\" (dashed blue, was HH:MM).",
+    "observed": [],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-14",
+    "section": "Checkpoint — Mark off",
+    "spec": "§4.5 Behaviour 5",
+    "action": "Tap tile 104 (unmarked earlier)",
+    "expect": "Sheet in restore mode: \"Unmarked earlier · It had been marked at 07:37\", TimeStepper preset to the original, primary Mark at 07:37, secondary Use now (HH:MM).",
+    "observed": [
+      "104",
+      "11:14"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-15",
+    "section": "Checkpoint — Mark off",
+    "spec": "§4.5 Behaviour 5",
+    "action": "Tap \"Mark at HH:MM\"",
+    "expect": "Restores the original time.",
+    "observed": [
+      "104 marked at 11:14",
+      "104 marked UNDO"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CP-16",
+    "section": "Checkpoint — Mark off",
+    "spec": "§4.5 Behaviour 7",
+    "action": "In Overview mark 106 DNS, back to Mark off, tap tile 106",
+    "expect": "DNS/DNF tiles are not editable here (use Overview).",
+    "observed": [
+      "106 is DNS — change it in Overview"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CO-01",
+    "section": "Checkpoint — Callout sheet",
+    "spec": "§4.6",
+    "action": "Mark 107 108 109, then tap the \"Callout\" tab",
+    "expect": "AppBar subtitle: CP3 · VK4PMC → VK4WIP · 147.225. Call-due banner (gold) when ≥ 5 runners waiting or oldest ≥ 5 min: \"Call due — 9 waiting, oldest 6 min\". Next call card (gold border): heading \"Next call · 2 blocks\", badge \"9 competitors\", one white card per pending block: \"Common time 07:40 · 5\" + numbers in Montserrat 800 22px separated by \" · \". Buttons: Read out + Base copied — mark sent. Below: Official message and Request stand down. No radio phrases on screen.",
+    "observed": [
+      "Call due — 8 waiting, oldest 10 min"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CO-02",
+    "section": "Checkpoint — Callout sheet",
+    "spec": "§4.6",
+    "action": "Tap \"Base copied — mark sent\"",
+    "expect": "Marks every runner in the pending blocks calledIn = true, callInTime = now. Called-in blocks collapse to one compact row (navy tick, 07:30 – 07:35 · 4, numbers, \"Sent 07:36\").",
+    "observed": [
+      "8 marked as copied by base",
+      "8 marked sent UNDO"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CO-03",
+    "section": "Checkpoint — Callout sheet",
+    "spec": "§4.5 Behaviour 3 / §4.6",
+    "action": "Mark off → tap 101 (called in) → \"−1\"",
+    "expect": "If the runner was called in and the time changes → warning box \"Base already has 07:31. A changed time goes back on the callout sheet as a correction.\"",
+    "observed": [
+      "Tap a number as the runner passes. Tap again to fix its time.",
+      "101",
+      "11:03"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CO-04",
+    "section": "Checkpoint — Callout sheet",
+    "spec": "§4.5 Behaviour 3",
+    "action": "Tap \"Save HH:MM\"",
+    "expect": "Saving sets status back to passed with correction = true so it reappears on the callout sheet; tile shows ✎.",
+    "observed": [
+      "101 changed to 11:03 — back on callout as a correction",
+      "101 time changed UNDO"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CO-05",
+    "section": "Checkpoint — Callout sheet",
+    "spec": "§4.6",
+    "action": "Tap the \"Callout\" tab",
+    "expect": "Corrections (runners with correction = true) appear in the pending list tagged \"Correction\".",
+    "observed": [
+      "Call due — 1 waiting, oldest 11 min"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CO-06",
+    "section": "Checkpoint — Callout sheet",
+    "spec": "§4.6",
+    "action": "Tap \"Official message\", type a message",
+    "expect": "Official message … (plain buttons; v1 can open a simple notes modal / log entry).",
+    "observed": [
+      "Call due — 1 waiting, oldest 11 min",
+      "Official message 1"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CO-07",
+    "section": "Checkpoint — Callout sheet",
+    "spec": "§4.6",
+    "action": "Tap \"Log message\"",
+    "expect": "v1 can open a simple notes modal / log entry.",
+    "observed": [
+      "Call due — 1 waiting, oldest 11 min",
+      "Message 1 logged at 11:14"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "CO-08",
+    "section": "Checkpoint — Callout sheet",
+    "spec": "§4.6",
+    "action": "Tap \"Request stand down\"",
+    "expect": "Request stand down (plain button; v1 notes modal / log entry). No radio phrases on screen.",
+    "observed": [
+      "Call due — 1 waiting, oldest 11 min",
+      "Message 1 logged at 11:14",
+      "Request stand down"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "RO-01",
+    "section": "Checkpoint — Read-out",
+    "spec": "§4.7",
+    "action": "Cancel; send the pending correction (Base copied — mark sent); mark 12 runners (130–141); tap \"Read out\"",
+    "expect": "Header: \"Read-out\", CP3 · block 07:45–07:50 · 27 competitors, progress \"X of N copied by base\", segmented bar (one segment per over). Numbers split into overs of up to 5. Each bib is its own row. Current over: lead \"Common time 07:45\"; one row per number with a checkbox; next unticked row highlighted (\"Read next\"). Primary Base copied — next locked until every number in the over is ticked (\"Tick each number as you read · 2 of 5\").",
+    "observed": [
+      "Common time 11:10 130 Read next 131 132 133 134"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "RO-02",
+    "section": "Checkpoint — Read-out",
+    "spec": "§4.7",
+    "action": "Tick the first two numbers",
+    "expect": "Ticked rows go muted with strike-through; next unticked row highlighted; \"Tick each number as you read · 2 of 5\".",
+    "observed": [
+      "Common time 11:10 130 131 132 Read next 133 134"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "RO-03",
+    "section": "Checkpoint — Read-out",
+    "spec": "§4.7",
+    "action": "Tap \"Reset\"",
+    "expect": "Reset clears ticks on the current over.",
+    "observed": [
+      "Common time 11:10 130 Read next 131 132 133 134",
+      "Ticks cleared for this over"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "RO-04",
+    "section": "Checkpoint — Read-out",
+    "spec": "§4.7",
+    "action": "Tick all numbers in the over",
+    "expect": "Primary Base copied — next unlocks when every number is ticked.",
+    "observed": [
+      "Common time 11:10 130 131 132 133 134"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "RO-05",
+    "section": "Checkpoint — Read-out",
+    "spec": "§4.7",
+    "action": "Tap \"Base copied — next\"",
+    "expect": "Next over: lead \"Continuing 07:45\"; progress advances.",
+    "observed": [
+      "Continuing 11:10 135 Read next 136 137 138 139"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "RO-06",
+    "section": "Checkpoint — Read-out",
+    "spec": "§4.7",
+    "action": "Tick one number, tap back, then tap \"Read out\" again",
+    "expect": "Persist read-out progress so an interrupted read resumes at the same over.",
+    "observed": [
+      "Continuing 11:10 135 136 Read next 137 138 139",
+      "Resumed at over 2"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "RO-07",
+    "section": "Checkpoint — Read-out",
+    "spec": "§4.7",
+    "action": "Tap \"Previous over\"",
+    "expect": "Previous over steps back.",
+    "observed": [
+      "Common time 11:10 130 131 132 133 134"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "RO-08",
+    "section": "Checkpoint — Read-out",
+    "spec": "§4.7",
+    "action": "Complete every over (tick all → next) to the end",
+    "expect": "Finishing the last over → done state \"All 27 copied\", which marks the block called in.",
+    "observed": [],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "OV-01",
+    "section": "Checkpoint — Overview",
+    "spec": "§4.8",
+    "action": "Back to callout, tap the \"Overview\" tab",
+    "expect": "Header: % through, \"142 of 250 through\", stacked bar (called in / passed not called / to come / out), role=\"img\" with aria-label. 4 StatTiles: Passed, To come, DNS, DNF. Filter pills: All · Passed · To come · DNS / DNF. Scrollable runner list; tap a row to expand (one open at a time, aria-expanded).",
+    "observed": [
+      "progress bar aria-label: 20 called in, 0 passed not called in, 39 to come, 1 withdrawn"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "OV-02",
+    "section": "Checkpoint — Overview",
+    "spec": "§4.8",
+    "action": "Tap filter \"Passed\"",
+    "expect": "Filter pills: All · Passed · To come · DNS / DNF.",
+    "observed": [],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "OV-03",
+    "section": "Checkpoint — Overview",
+    "spec": "§4.8 table (Called in)",
+    "action": "Tap row 107 (called in)",
+    "expect": "Called in: TimeStepper, Undo call-in, Reset — not passed, Mark DNF (+ note \"Base already has HH:MM. Changing the time sends a correction.\")",
+    "observed": [
+      "11:14"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "OV-04",
+    "section": "Checkpoint — Overview",
+    "spec": "§4.8",
+    "action": "Tap \"Undo call-in\"",
+    "expect": "Every action shows UndoBar; totals, bar and the Callout badge update live.",
+    "observed": [
+      "11:14",
+      "107 back on callout sheet UNDO"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "OV-05",
+    "section": "Checkpoint — Overview",
+    "spec": "§4.8 table (Passed)",
+    "action": "Row 107 now Passed: tap \"Mark called in\"",
+    "expect": "Passed: TimeStepper, Mark called in, Reset — not passed, Mark DNF.",
+    "observed": [
+      "11:14",
+      "107 marked called in UNDO"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "OV-06",
+    "section": "Checkpoint — Overview",
+    "spec": "§4.8",
+    "action": "Tap the time \"−5\" on row 107 (called in)",
+    "expect": "Changing the time of a called-in runner → status passed + correction = true.",
+    "observed": [
+      "11:09",
+      "107 time 11:14 → 11:09 UNDO"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "OV-07",
+    "section": "Checkpoint — Overview",
+    "spec": "§4.8",
+    "action": "Tap \"Reset — not passed\", then \"Undo\"",
+    "expect": "Every action shows UndoBar.",
+    "observed": [
+      "11:09"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "OV-08",
+    "section": "Checkpoint — Overview",
+    "spec": "§4.8 table (To come)",
+    "action": "Filter \"To come\", tap row 102",
+    "expect": "To come: Passed now (HH:MM) (gold), Mark DNS, Mark DNF.",
+    "observed": [],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "OV-09",
+    "section": "Checkpoint — Overview",
+    "spec": "§4.8",
+    "action": "Tap \"Mark DNF\"",
+    "expect": "DNF shown with red style (§3.3); counts update.",
+    "observed": [
+      "102 marked DNF UNDO"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "OV-10",
+    "section": "Checkpoint — Overview",
+    "spec": "§4.8 table (DNS / DNF)",
+    "action": "Filter \"DNS / DNF\", tap row 102",
+    "expect": "DNS / DNF: Clear DNS/DNF, Passed now (+ note that base is flagged).",
+    "observed": [
+      "102 marked DNF UNDO"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "OV-11",
+    "section": "Checkpoint — Overview",
+    "spec": "§4.8",
+    "action": "Tap \"Clear DNF\"",
+    "expect": "Clear DNS/DNF; UndoBar.",
+    "observed": [
+      "102 DNF cleared UNDO"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "RX-01",
+    "section": "Base — Receive",
+    "spec": "§4.9 / §3.5 BaseTabs",
+    "action": "Open /base-station/operations (tablet 1112×834)",
+    "expect": "AppBar: badge, \"Base · VK4WIP\", \"147.225 · now HH:MM\", inline tabs Receive · Overview · DNF / DNS · Reports, single row on tablet. Idle \"Who's calling?\": grid of compact buttons (≥64px) for Start, CP1–CP4, Finish: short name, status pill (Due gold / OK / Closed), \"VK4PMC · up to 07:15\". Checkpoint board: rows with short name, \"Up to 07:15 · 30 min behind · call 11m ago\", count, Due/OK/Closed pill.",
+    "observed": [
+      "page scroll: 0px"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-02",
+    "section": "Base — Receive",
+    "spec": "§4.9",
+    "action": "Tap \"CP1\"",
+    "expect": "Tap a checkpoint → straight into receiving. Header row: CP short name, operator · location, \"N to record\". BlockPicker from lastBlock − 5 to the current block. Default selection = that checkpoint's next unreceived block (lastBlock + 5, capped at now). Chips: done (≤ lastBlock, muted), next, this call, selected = navy. \"Exact\" input.",
+    "observed": [],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-03",
+    "section": "Base — Receive",
+    "spec": "§4.9 / §3.5 NumberPad",
+    "action": "Type 120 on the keyboard + Enter; then press keypad 1, 2, 1 and \"Add\"",
+    "expect": "Input + Add + NumberPad side by side. Enter adds. Each added number becomes a BibChip validated live.",
+    "observed": [
+      "121 added at 10:15"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-04",
+    "section": "Base — Receive",
+    "spec": "§4.9 validation table",
+    "action": "Add 999, 121 again, 100, 150",
+    "expect": "Not in race → rejected (red) \"Not in race\"; same bib earlier in this call → warning (gold) \"Said twice\"; already logged at this checkpoint → warning \"Had 07:40\"; otherwise ok (blue). Only ok + info are recorded.",
+    "observed": [
+      "150 added at 10:15"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-05",
+    "section": "Base — Receive",
+    "spec": "§4.9",
+    "action": "Tap chip 999 (remove), then \"Undo\"",
+    "expect": "Tap a chip to remove (Undo). Status line (aria-live) + inline Undo when available.",
+    "observed": [
+      "Restored"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-06",
+    "section": "Base — Receive",
+    "spec": "§4.9",
+    "action": "Tap \"Next HH:MM →\"",
+    "expect": "Next → move to the next 5-minute block, clear the box; disabled \"At now\" at the current block. Switching block clears the box and the typed number (nothing is lost).",
+    "observed": [
+      "Now taking 10:20"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-07",
+    "section": "Base — Receive",
+    "spec": "§4.9",
+    "action": "Add 122, 123",
+    "expect": "Numbers box shows only the current block's numbers. Other blocks in the call show underneath as pills: \"Also in this call: 07:40 · 5\".",
+    "observed": [
+      "123 added at 10:20"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-08",
+    "section": "Base — Receive",
+    "spec": "§4.9",
+    "action": "Tap the \"Also in this call\" pill",
+    "expect": "Tap to switch back.",
+    "observed": [
+      "Now taking 10:15"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-09",
+    "section": "Base — Receive",
+    "spec": "§4.9",
+    "action": "Type an exact time in \"Exact\" (1053)",
+    "expect": "\"Exact\" input accepts HH:MM or HHMM between race start and now; sets a non-block time and shows it selected.",
+    "observed": [
+      "124 added at 10:53"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-10",
+    "section": "Base — Receive",
+    "spec": "§4.9",
+    "action": "Type an exact time in the future (2359)",
+    "expect": "Exact time must be between race start and now.",
+    "observed": [
+      "Time must be between 09:14 and now"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-11",
+    "section": "Base — Receive",
+    "spec": "§4.9",
+    "action": "Pick the \"next\" block again, tap \"Clear HH:MM\"",
+    "expect": "Clear 07:40 — clears all numbers in the current block (Undo).",
+    "observed": [
+      "Cleared 6 from 10:15"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-12",
+    "section": "Base — Receive",
+    "spec": "§4.9 / G5",
+    "action": "Tap \"Undo\"",
+    "expect": "Undo restores the cleared numbers.",
+    "observed": [
+      "Restored"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-13",
+    "section": "Base — Receive",
+    "spec": "§4.9",
+    "action": "Tap \"Complete · N\"",
+    "expect": "Complete → writes base_station_runners, writes a radio_calls record, updates the board (count, last call = now, lastBlock = max block received). Done card: \"N recorded at CP3\", \"Blocks 07:40, 07:45 · 2 skipped (flagged)\", Undo (reopens the call, reverts writes) and Next call.",
+    "observed": [
+      "6 recorded at CP1 Blocks 10:15, 10:20, 10:53 · 3 skipped (flagged) UNDO NEXT CALL"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-14",
+    "section": "Base — Receive",
+    "spec": "§4.9",
+    "action": "Tap \"Undo\" on the done card",
+    "expect": "Undo (reopens the call, reverts writes).",
+    "observed": [
+      "Call reopened"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-15",
+    "section": "Base — Receive",
+    "spec": "§4.9",
+    "action": "Tap \"Complete\", then \"Next call\"",
+    "expect": "Next call returns to \"Who's calling?\"; board updated.",
+    "observed": [],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-16",
+    "section": "Base — Receive",
+    "spec": "§4.9 / G5",
+    "action": "Tap \"CP3\", add 101 102, tap \"Cancel call\" once",
+    "expect": "Cancel call — red outline; if numbers exist, first tap turns solid red \"Tap again to cancel\" and says how many will be dropped.",
+    "observed": [
+      "Cancel drops all 2 numbers in this call"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-17",
+    "section": "Base — Receive",
+    "spec": "§4.9",
+    "action": "Tap \"Tap again to cancel\"",
+    "expect": "Second tap drops the call.",
+    "observed": [],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "RX-18",
+    "section": "Base — Receive",
+    "spec": "§4.9 Layout",
+    "action": "Phone 390×844: tap \"CP2\", add 110 111",
+    "expect": "Phone: stacks, receive panel first. Tabs horizontally scrollable on phone.",
+    "observed": [
+      "111 added at 10:45"
+    ],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "RX-19",
+    "section": "Base — Receive",
+    "spec": "§4.9",
+    "action": "Phone: Cancel call (two taps)",
+    "expect": "Back to idle.",
+    "observed": [],
+    "error": null,
+    "viewport": "390×844",
+    "phone": true
+  },
+  {
+    "id": "ST-01",
+    "section": "Base — DNF / DNS",
+    "spec": "§4.11",
+    "action": "Tap the \"DNF / DNS\" tab",
+    "expect": "Bulk add panel: DNF/DNS segmented toggle (DNF active = red). DNF shows Where pills (CP1–CP4, On course), Reason pills (Injury, Self-withdrew, Cut-off, Medical, Other — optional, tap again to unset), Time (−5/+5, clamped). Out of the race panel: totals \"3 DNS · 3 DNF\", filter pills, rows.",
+    "observed": [
+      "11:15"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "ST-02",
+    "section": "Base — DNF / DNS",
+    "spec": "§4.11",
+    "action": "Tap Where \"CP1\", Reason \"Injury\", tap \"Injury\" again, tap \"Medical\"",
+    "expect": "Reason pills — optional, tap again to unset.",
+    "observed": [
+      "11:15"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "ST-03",
+    "section": "Base — DNF / DNS",
+    "spec": "§4.11",
+    "action": "Tap Time \"+5\"",
+    "expect": "Time (−5/+5, clamped).",
+    "observed": [
+      "11:15"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "ST-04",
+    "section": "Base — DNF / DNS",
+    "spec": "§4.11 validation table",
+    "action": "Paste \"112, 130 131; 999 130\" and press Enter (112 was seen at CP2)",
+    "expect": "Input accepts one number or a pasted list (commas, spaces, semicolons, newlines). Not in race / listed twice → rejected; DNF at CPx but seen at a later CP → warning \"Seen later at CP3\".",
+    "observed": [
+      "11:15",
+      "5 numbers added"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "ST-05",
+    "section": "Base — DNF / DNS",
+    "spec": "§4.11",
+    "action": "Tap \"Mark N as DNF\"",
+    "expect": "Clear list + primary Mark 6 as DNF (red for DNF, gold for DNS; disabled when 0). Undo. DNF writes withdrawal_records (checkpoint, withdrawalTime, reason) + runner status.",
+    "observed": [
+      "11:15",
+      "3 marked DNF"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "ST-06",
+    "section": "Base — DNF / DNS",
+    "spec": "§4.11",
+    "action": "Tap \"Undo\"",
+    "expect": "Undo.",
+    "observed": [
+      "11:15",
+      "Undone"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "ST-07",
+    "section": "Base — DNF / DNS",
+    "spec": "§4.11 validation table",
+    "action": "Paste \"130 131\" again → Mark as DNF; switch to DNS, add \"101 130\"",
+    "expect": "DNS but recorded at a checkpoint → warning \"Seen CP2 — started\"; currently the other status → warning \"Was DNS — will change\". DNS shows a one-line explainer.",
+    "observed": [
+      "2 numbers added"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "ST-08",
+    "section": "Base — DNF / DNS",
+    "spec": "§4.11",
+    "action": "Tap \"Mark 2 as DNS\"",
+    "expect": "DNS sets runner status non-starter. Audit-log every change.",
+    "observed": [
+      "2 marked DNS"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "ST-09",
+    "section": "Base — DNF / DNS",
+    "spec": "§4.11",
+    "action": "Out of the race: tap filter \"DNF\", then \"Clear\" on 131",
+    "expect": "Rows (bib, status chip, \"CP2 · Injury · 07:12\" / \"Did not start\", Clear → back in race, Undo).",
+    "observed": [
+      "131 back in the race"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "ST-10",
+    "section": "Base — DNF / DNS",
+    "spec": "§4.11",
+    "action": "Tap \"Undo\", then filter \"All\"",
+    "expect": "Undo.",
+    "observed": [
+      "Undone"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "ST-11",
+    "section": "Base — DNF / DNS",
+    "spec": "§4.9 validation table",
+    "action": "Receive → CP2 → add 131 (DNF) and 101 (DNS)",
+    "expect": "Marked DNF / DNS → rejected \"DNF\" / \"DNS\".",
+    "observed": [
+      "101 added at 10:45"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "ST-12",
+    "section": "Base — DNF / DNS",
+    "spec": "§4.11 (existing WithdrawalDialog)",
+    "action": "Cancel call; DNF / DNS → \"Withdraw runner with comments or vet-out details…\"",
+    "expect": "Evolves BulkDnsView.jsx + WithdrawalDialog.jsx.",
+    "observed": [
+      "11:15"
+    ],
+    "error": null,
+    "viewport": "1112×834",
+    "phone": false
+  },
+  {
+    "id": "BO-01",
+    "section": "Base — Overview",
+    "spec": "§4.10",
+    "action": "Close the dialog; tap the \"Overview\" tab (desktop 1280)",
+    "expect": "Red overdue alert banner (role=\"alert\", \"View runners\" → Reports › Overdue), stat tiles (On course, Finished, DNS, DNF), checkpoint progress bars (navy = closed out, blue = arriving, gold = finish), leaderboard table with filter pills (All, Female, Male, Wave 1…), gold rank badge for #1, overflow-x box on phone.",
+    "observed": [
+      "14 runners overdue at CP2 Later than the typical time for their leg. 110, 111, 112, 113 +10 VIEW RUNNERS"
+    ],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "BO-02",
+    "section": "Base — Overview",
+    "spec": "§4.10",
+    "action": "Tap leader filter \"Female\"",
+    "expect": "Leaderboard filter pills (All, Female, Male, Wave 1…).",
+    "observed": [
+      "14 runners overdue at CP2 Later than the typical time for their leg. 110, 111, 112, 113 +10 VIEW RUNNERS"
+    ],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "BO-03",
+    "section": "Base — Overview",
+    "spec": "§4.10",
+    "action": "Scroll to the top and tap \"View runners\" on the overdue alert",
+    "expect": "\"View runners\" → Reports › Overdue.",
+    "observed": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-01",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12 Reports",
+    "action": "Reports › \"Overdue runners\" (opened from the alert)",
+    "expect": "Bib, last seen (CP + time), expected at, overdue minutes (gold badge; red ≥ 60). Expected time = last seen + typical split for that leg (median of recorded splits). CSV + Print buttons. Sidebar (flex 1 1 250px) + report panel; \"Needs attention\" group with total gold badge; each item red count badge or ✓.",
+    "observed": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-02",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12 Reports",
+    "action": "Click \"CSV\"",
+    "expect": "CSV + Print buttons; reuse existing export utilities.",
+    "observed": [
+      "downloaded: Mt-Glorious-Mountain-Trails-overdue-runners.csv",
+      "first lines: Bib,Last seen,Last time,Expected at,Expected time,Overdue (min) | 110,CP1,10:10,CP2,10:40,35 | 111,CP1,10:10,CP2,10:40,35 | 112,CP1,10:10,CP2,10:40,35"
+    ],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-03",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12 Reports",
+    "action": "Click \"Still on course\"",
+    "expect": "Not finished and not out, grouped by last checkpoint passed (tiles). For sweep / stand-down.",
+    "observed": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-04",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12 Reports",
+    "action": "Click \"Times by checkpoint\"",
+    "expect": "Matrix bib × CP1…Finish (common times; DNF/DNS shown in place).",
+    "observed": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-05",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12 Reports",
+    "action": "Click \"Call log\"",
+    "expect": "Per checkpoint: calls received, numbers, last call time, up to (lastBlock). From radio_calls.",
+    "observed": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-06",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12 Needs attention",
+    "action": "Click \"Duplicates\"",
+    "expect": "Same bib, same checkpoint, >1 base record (different or same time) → Keep A / Keep B (or Merge if identical).",
+    "observed": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-07",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12",
+    "action": "Click the first \"Keep HH:MM\"",
+    "expect": "Each issue row: bib, headline, detail, 1–2 action buttons; resolving removes it (Undo).",
+    "observed": [
+      "105: Keep 10:10"
+    ],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-08",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12",
+    "action": "Click \"Undo\"",
+    "expect": "Resolving removes it (Undo).",
+    "observed": [
+      "Undone"
+    ],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-09",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12 Needs attention",
+    "action": "Click \"Out of order\"",
+    "expect": "Time at CP(n+1) < time at CP(n) → Ask CPx (flag for radio check) / Mark checked.",
+    "observed": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-10",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12",
+    "action": "Click \"Ask CP2\"",
+    "expect": "Resolutions persist in a new data_issue_resolutions table so resolved items don't reappear.",
+    "observed": [
+      "106: Ask CP2"
+    ],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-11",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12 Needs attention",
+    "action": "Click \"Skipped a checkpoint\"",
+    "expect": "Has later CP time, missing an earlier CP → Ask CPx / Mark checked.",
+    "observed": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-12",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12 Needs attention",
+    "action": "Click \"Seen after DNF / DNS\"",
+    "expect": "Checkpoint time after DNF time, or any time while DNS → Clear DNF/DNS / Remove that time.",
+    "observed": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-13",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12 Needs attention",
+    "action": "Click \"Unknown bibs\"",
+    "expect": "Numbers outside the race reported in calls (keep them in radio_calls.rejected) → Remove / Keep for review.",
+    "observed": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-14",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12 Needs attention",
+    "action": "Click \"Impossible pace\"",
+    "expect": "Split speed above a threshold (default > 20 km/h; checkpoint distances from race config) → Ask CPx / Mark checked.",
+    "observed": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-15",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12",
+    "action": "Click \"Mark checked\", then reload the page and open Reports › Impossible pace",
+    "expect": "\"Mark checked\" = acknowledged, data unchanged. Resolved items don't reappear.",
+    "observed": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  },
+  {
+    "id": "RP-16",
+    "section": "Base — Reports & data checks",
+    "spec": "§4.12",
+    "action": "Click \"Exports\"",
+    "expect": "Evolves ReportsPanel.jsx, ReportBuilder.jsx (existing exports kept).",
+    "observed": [],
+    "error": null,
+    "viewport": "1280×800",
+    "phone": false
+  }
+]

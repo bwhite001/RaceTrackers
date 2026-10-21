@@ -155,3 +155,14 @@ describe('reversing DNF / DNS restores rows it changed (review fixes)', () => {
     expect(r).toMatchObject({ status: 'dnf', notes: 'cp dnf' });
   });
 });
+
+describe('withdrawals are audit-logged', () => {
+  it('withdraw and reverse both write audit rows', async () => {
+    const repo = new BaseOperationsRepository();
+    await db.audit_log.clear();
+    await repo.withdrawRunner('r4', 11, null, 'Medical', '', '2026-11-08T07:30:00.000Z');
+    await repo.reverseWithdrawal('r4', 11);
+    const actions = (await db.audit_log.where('raceId').equals('r4').toArray()).map(a => a.action);
+    expect(actions).toEqual(['withdraw', 'reverse-withdrawal']);
+  });
+});

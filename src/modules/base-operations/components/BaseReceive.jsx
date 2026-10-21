@@ -60,7 +60,8 @@ const BaseReceive = () => {
     dueMinutes: currentRace?.baseCallDueMinutes ?? CALL_DUE_MINUTES,
   }), [checkpoints, runners, radioCalls, now, raceStart, raceRunnerNumbers.length, out.size, currentRace?.baseCallDueMinutes]);
 
-  const rx = receive ?? {};
+  // A draft saved for another race (persisted across reloads) is ignored
+  const rx = receive && (!receive.raceId || receive.raceId === store.currentRaceId) ? receive : { step: 'idle', entries: [] };
   const cur = board.find(b => b.number === rx.cp) ?? null;
   const prevCp = cur ? board[board.indexOf(cur) - 1] : null;
   const checked = useMemo(() => (cur ? checkCall(rx.entries ?? [], {
@@ -76,7 +77,7 @@ const BaseReceive = () => {
 
   const pickCheckpoint = (row) => {
     const next = row.lastBlock ? TimeUtils.addMinutes(row.lastBlock, BLOCK_MINUTES) : nowBlock;
-    setReceive({ step: 'rx', cp: row.number, entries: [], ctime: next > nowBlock ? nowBlock : next, manual: false, manualText: '', summary: null, lastCallId: null });
+    setReceive({ step: 'rx', cp: row.number, entries: [], ctime: next > nowBlock ? nowBlock : next, manual: false, manualText: '', summary: null, lastCallId: null, raceId: store.currentRaceId });
     clearTransient();
     setFlash('');
     setTimeout(() => inputRef.current?.focus(), 0);
