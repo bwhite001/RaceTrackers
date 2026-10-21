@@ -64,6 +64,11 @@ vi.mock('../../src/modules/base-operations/components/BaseReceive', () => ({
 }));
 
 vi.mock('../../src/modules/base-operations/components/RaceOverview', () => ({
+  default: () => <div data-testid="old-race-overview">Race Overview</div>
+}));
+
+// VK4WIP redesign: the Overview tab is BaseOverview (spec §4.10)
+vi.mock('../../src/modules/base-operations/components/BaseOverview', () => ({
   default: () => <div data-testid="race-overview">Race Overview</div>
 }));
 

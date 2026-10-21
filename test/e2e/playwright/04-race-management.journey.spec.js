@@ -140,7 +140,8 @@ test.describe('Race Management Journey', () => {
 
     await step('Base Station — operations screen open', async () => {
       await page.waitForURL(/base-station\/operations/, { timeout: 15000 });
-      await expect(page.getByText(/data entry/i)).toBeVisible({ timeout: 15000 });
+      // VK4WIP redesign: base opens on Receive ("Who's calling?"), not Data Entry
+      await expect(page.getByRole('heading', { name: /who's calling/i })).toBeVisible({ timeout: 15000 });
     });
   });
 

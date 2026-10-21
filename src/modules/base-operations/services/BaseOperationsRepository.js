@@ -3,6 +3,9 @@ import db from '../../../shared/services/database/schema';
 import { BASE_STATION_CP } from '../../../types/index.js';
 import TimeUtils from '../../../services/timeUtils.js';
 
+/** checkpoint_runners statuses that record a runner actually passing. */
+const SIGHTING = new Set(['passed', 'called-in', 'marked-off']);
+
 export class BaseOperationsRepository extends BaseRepository {
   constructor() {
     super('base_station_runners');
@@ -429,12 +432,19 @@ export class BaseOperationsRepository extends BaseRepository {
         reversedAt: null, reversedBy: null
       });
 
-      const existing = await db.checkpoint_runners
+      // "On course" (no checkpoint): the withdrawal record alone puts the
+      // runner on the out list.
+      const existing = checkpoint == null ? null : await db.checkpoint_runners
         .where(['raceId', 'checkpointNumber', 'number'])
         .equals([raceId, checkpoint, runnerNumber])
         .first();
 
-      if (existing) {
+      if (checkpoint == null) {
+        // nothing to mark at a checkpoint
+      } else if (existing && SIGHTING.has(existing.status)) {
+        // Never overwrite a recorded sighting (reverseWithdrawal would then
+        // delete it). The withdrawal record carries the DNF.
+      } else if (existing) {
         await db.checkpoint_runners.update(existing.id, {
           status: 'dnf',
           markOffTime: timeHHMM,
@@ -474,7 +484,7 @@ export class BaseOperationsRepository extends BaseRepository {
         reversedBy: 'system'
       });
 
-      const cpRecord = await db.checkpoint_runners
+      const cpRecord = withdrawal.checkpoint == null ? null : await db.checkpoint_runners
         .where(['raceId', 'checkpointNumber', 'number'])
         .equals([raceId, withdrawal.checkpoint, runnerNumber])
         .first();
@@ -538,7 +548,10 @@ export class BaseOperationsRepository extends BaseRepository {
           .equals([raceId, cp.number, runnerNumber])
           .first();
 
-        if (existing) {
+        if (existing && SIGHTING.has(existing.status)) {
+          // Seen at this checkpoint — keep the sighting (reverseNonStarter
+          // deletes non-starter rows, so overwriting it would lose it).
+        } else if (existing) {
           await db.checkpoint_runners.update(existing.id, {
             status: 'non-starter',
             notes: reason || null

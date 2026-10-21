@@ -335,6 +335,67 @@ const useBaseOperationsStore = create(
         await get().refreshData();
       },
 
+      // Actions - DNF / DNS bulk (spec §4.11). Each change is audit-logged by the
+      // repository; one silent refresh at the end.
+      // prev: Map(bib → out record from outRecords()) for runners already out
+      applyOutStatus: async ({ mode, numbers, where = null, reason = '', time, prev = new Map() }) => {
+        const { currentRaceId } = get();
+        if (!currentRaceId) throw new Error('No active race');
+        const raceKey = raceKeyOf(currentRaceId);
+        const repo = new BaseOperationsRepository();
+        const ops = [];
+        for (const num of numbers) {
+          const before = prev.get(num) ?? null;
+          if (mode === 'dnf') {
+            if (before?.status === 'DNS') await repo.reverseNonStarter(raceKey, num);
+            await repo.withdrawRunner(raceKey, num, where, reason || '', '', time);
+          } else {
+            if (before?.kind === 'withdrawal') await repo.reverseWithdrawal(raceKey, num);
+            await repo.markAsNonStarter(raceKey, num, '');
+          }
+          ops.push({ num, mode, before });
+        }
+        await get().refreshData({ silent: true });
+        return ops;
+      },
+
+      /** Undo applyOutStatus: reverse each change, then restore what was there. */
+      undoOutStatus: async (ops) => {
+        const { currentRaceId } = get();
+        const raceKey = raceKeyOf(currentRaceId);
+        const repo = new BaseOperationsRepository();
+        for (const { num, mode, before } of [...ops].reverse()) {
+          if (mode === 'dnf') await repo.reverseWithdrawal(raceKey, num);
+          else await repo.reverseNonStarter(raceKey, num);
+          if (before) await get()._restoreOut(repo, raceKey, before);
+        }
+        await get().refreshData({ silent: true });
+      },
+
+      /** Put a runner back in the race (Clear on the out list). */
+      clearOutStatus: async (record) => {
+        const { currentRaceId } = get();
+        const raceKey = raceKeyOf(currentRaceId);
+        const repo = new BaseOperationsRepository();
+        if (record.status === 'DNS') await repo.reverseNonStarter(raceKey, record.number);
+        else await repo.reverseWithdrawal(raceKey, record.number);
+        await get().refreshData({ silent: true });
+      },
+
+      restoreOutStatus: async (record) => {
+        const { currentRaceId } = get();
+        const raceKey = raceKeyOf(currentRaceId);
+        await get()._restoreOut(new BaseOperationsRepository(), raceKey, record);
+        await get().refreshData({ silent: true });
+      },
+
+      _restoreOut: async (repo, raceKey, record) => {
+        if (record.status === 'DNS') await repo.markAsNonStarter(raceKey, record.number, '');
+        else if (record.kind === 'withdrawal') {
+          await repo.withdrawRunner(raceKey, record.number, record.checkpoint ?? null, record.reason || '', '', record.time || undefined);
+        }
+      },
+
       // Actions - UI State
       setSelectedRunners: (numbers) => {
         set({ selectedRunners: numbers });

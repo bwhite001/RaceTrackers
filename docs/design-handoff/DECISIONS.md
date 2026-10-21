@@ -96,3 +96,26 @@ conflicted with existing behaviour, or didn't match the repo. Each entry: what, 
   - `00-full-confidence` Phase 4: the batch is received as a CP1 call on Receive instead of through the old common-time form.
   - `BaseStationView.settings.test.jsx` gained a `BaseReceive` mock. No assertion changed.
 - **Not updated (failing before this work, now skipping):** `11-heads-up-grid › grid shows runner status indicators`, `15-smoke › Phase 6` and `16-base-station-data-entry` drive the removed Data Entry form. They failed on the baseline and now skip because they can't find that form. The behaviour they covered is in `21-base-receive`.
+
+## Phase 5 — DNF / DNS bulk add, Base Overview
+
+- **Bulk DNF / DNS reuses the existing repository methods** (`withdrawRunner`, `markAsNonStarter`, `reverseWithdrawal`, `reverseNonStarter`). The out list and existing reports keep working, and every change is audit-logged by those methods. New store actions apply a whole list with one silent refresh (`applyOutStatus`) and undo it in reverse order, restoring what was there before (`undoOutStatus`). Changing DNS→DNF reverses the DNS first, and DNF→DNS reverses the withdrawal first. Files: `baseOperationsStore.js`, `services/statusValidation.js`, `components/BaseStatusView.jsx`.
+- **Bug found and fixed (data safety): DNF/DNS could destroy recorded sightings.**
+  - `markAsNonStarter` overwrote a runner's `passed` row at every checkpoint with `non-starter`, and `reverseNonStarter` then deleted those rows, so DNS + Undo erased real sightings.
+  - `withdrawRunner` likewise overwrote a `passed` row at the withdrawal checkpoint, and `reverseWithdrawal` deleted it.
+  - Both now leave sighting rows (`passed`, `called-in`, `marked-off`) alone. The withdrawal record or the other checkpoints carry the status. Tests added: "DNF / DNS never destroy recorded sightings".
+- **"On course" DNF** stores `checkpoint: null` on the withdrawal record and writes no checkpoint row. The repository now handles a null checkpoint (it used to build an invalid compound key).
+- **Clear on the out list** works for base-entered DNS and DNF (withdrawal records). DNFs that came only from a checkpoint's own data, and vet-outs, show Clear disabled with a tooltip ("Recorded at a checkpoint — clear it there"). Base has no record of its own to reverse for those.
+- **Default "Where" is "On course"** rather than a guessed checkpoint. Reason is optional and tapping it again unsets it, as in the design. Time follows the clock until −5 / +5 is used, clamped to race start and now.
+- **The detailed withdrawal dialog is kept** (comments, vet-out) behind a link, "Withdraw runner with comments or vet-out details…", on the DNF / DNS tab. The old "Bulk Mark DNS" modal and OutList are no longer mounted; their files and tests are kept.
+- **Overview** is a new `BaseOverview`:
+  - Overdue alert (red, `role="alert"`). "View runners" opens Reports › Overdue.
+  - Four stat tiles; the grid keeps `data-testid="stats-grid"` for the existing journey.
+  - Checkpoint progress bars: navy = closed out (everyone still racing has been recorded), blue = arriving, gold = finish.
+  - Current leaders table with All / Female / Male / Wave filters and a gold #1 badge. Overflow scrolls on phone.
+  - The course map, heads-up grid and checkpoint import panel stay below.
+  - The old `RaceOverview` stats block and `CourseLeadersCard` are replaced by the tiles and the leaders table; their files are kept.
+- **Overdue** (`services/reports.js`): last seen + the median split for that leg, from runners recorded at both ends of the leg. Legs nobody has completed yet are skipped rather than guessed. Elapsed in the leaders table is from race start, as the design states; per-wave start times are not applied.
+- **Tests updated for replaced behaviour:**
+  - `BaseStationView.test.jsx`: the Overview tab is mocked as `BaseOverview`.
+  - `04-race-management › navigates from race overview to base station` looked for "Data Entry" text and now checks Receive's "Who's calling?".

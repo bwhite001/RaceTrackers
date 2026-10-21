@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpTrayIcon, PresentationChartLineIcon, Cog6ToothIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 import { withOperationExit } from '../../../shared/components/ExitOperationModal';
@@ -16,19 +16,13 @@ import ImportExportModal from '../../../components/ImportExport/ImportExportModa
 // Components
 import BaseReceive from '../components/BaseReceive';
 import ReportsPanel from '../components/ReportsPanel';
-import RaceOverview from '../components/RaceOverview';
+import BaseOverview from '../components/BaseOverview';
 import WithdrawalDialog from '../components/WithdrawalDialog';
-import CheckpointImportPanel from '../components/CheckpointImportPanel';
-import BulkDnsModal from '../components/BulkDnsView';
-import OutList from '../components/OutList';
+import BaseStatusView from '../components/BaseStatusView';
 import ErrorMessage from '../../../components/Layout/ErrorMessage';
 import SettingsModal from '../../../components/Settings/SettingsModal';
 import HelpDialog from '../components/HelpDialog';
-import HeadsUpGrid from '../components/HeadsUpGrid';
-import CourseLeadersCard from '../components/CourseLeadersCard';
 import LoadingSpinner from '../../../components/Layout/LoadingSpinner';
-import { getRunnerTotal } from '../../../utils/raceStatistics';
-const RaceCourseMap = lazy(() => import('../components/RaceCourseMap'));
 
 const HeaderIcon = ({ label, Icon, onClick }) => (
   <button type="button" onClick={onClick} aria-label={label} title={label}
@@ -50,7 +44,6 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const { selectedRaceForMode, checkpoints, loadRace: loadRaceIntoStore, runners: raceRunners } = useRaceStore();
   const { darkMode } = useSettingsStore();
   const initStarted = useRef(false);
-  const [showRunnerNames, setShowRunnerNames] = useState(false);
 
   // Group flat runner records by bib number for overview components
   const groupedRunners = useMemo(() => {
@@ -86,12 +79,12 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
   // Local state
   const [activeTab, setActiveTab] = useState('receive');
+  const [reportFocus, setReportFocus] = useState(null);
   const [showWithdrawalDialog, setShowWithdrawalDialog] = useState(false);
   const [withdrawalType, setWithdrawalType] = useState('dnf');
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
-  const [showBulkDns, setShowBulkDns] = useState(false);
 
   // Initialize base station from selectedRaceForMode, or redirect if no race
   useEffect(() => {
@@ -201,54 +194,16 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             {activeTab === 'receive' && <BaseReceive />}
 
             {activeTab === 'overview' && (
-              <div className="space-y-6 max-w-[1280px] mx-auto px-3 pt-3">
-                <Suspense fallback={null}>
-                  <RaceCourseMap
-                    courseGpx={currentRace?.courseGpx ?? null}
-                    checkpoints={checkpoints ?? []}
-                    runners={runners ?? []}
-                    total={getRunnerTotal(currentRace)}
-                  />
-                </Suspense>
-                <CourseLeadersCard runners={groupedRunners} checkpoints={checkpoints ?? []} />
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setShowRunnerNames(v => !v)}
-                    className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${showRunnerNames ? 'bg-navy-600 text-white border-navy-600' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600'}`}
-                  >
-                    {showRunnerNames ? 'Hide Names' : 'Show Names'}
-                  </button>
-                </div>
-                <HeadsUpGrid runners={groupedRunners} checkpoints={checkpoints ?? []} showNames={showRunnerNames} />
-                <RaceOverview />
-                <CheckpointImportPanel />
-              </div>
+              <BaseOverview
+                raceRunners={raceRunners ?? []}
+                mapCheckpoints={checkpoints ?? []}
+                groupedRunners={groupedRunners}
+                onViewOverdue={() => { setReportFocus('overdue'); handleTabChange('reports'); }}
+              />
             )}
 
             {activeTab === 'status' && (
-              <div className="space-y-4 max-w-[1280px] mx-auto px-3 pt-3">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">DNS &amp; DNF</h2>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleWithdrawal('withdrawal')}
-                      className="px-4 py-2 text-sm font-semibold bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors"
-                    >
-                      Withdraw Runner
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowBulkDns(true)}
-                      className="px-4 py-2 text-sm font-semibold bg-amber-500 hover:bg-amber-400 text-white rounded-lg transition-colors"
-                    >
-                      Bulk Mark DNS
-                    </button>
-                  </div>
-                </div>
-                <OutList initialFilter="all" />
-              </div>
+              <BaseStatusView onWithdrawDetails={() => handleWithdrawal('withdrawal')} />
             )}
 
             {activeTab === 'reports' && (
@@ -268,11 +223,6 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
           type={withdrawalType}
         />
 
-        {/* Bulk DNS Modal */}
-        <BulkDnsModal
-          isOpen={showBulkDns}
-          onClose={() => setShowBulkDns(false)}
-        />
 
         <SettingsModal
           isOpen={showSettings}
