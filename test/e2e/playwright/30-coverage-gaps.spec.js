@@ -174,7 +174,7 @@ test.describe('Coverage gaps — data checks', () => {
     await step('Reports › Unknown bibs — Keep for review', async () => {
       await page.getByRole('tab', { name: 'Reports' }).click();
       await page.getByRole('button', { name: /^Unknown bibs/ }).click();
-      await expect(issue(page, 999)).toContainText('Not in race');
+      await expect(issue(page, 999)).toContainText('Not in setup');
       await issue(page, 999).getByRole('button', { name: 'Keep for review' }).click();
       await expect(issue(page, 999)).toHaveCount(0);
       await expect(page.getByText('All sorted')).toBeVisible();

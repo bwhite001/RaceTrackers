@@ -131,7 +131,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
       body: (
         <div className="grid grid-cols-3 gap-2">
           <StatTile variant="onNavy" value={stats.passed} label="Passed" />
-          <StatTile variant="onNavy" value={stats.toCome} label="Still to come" />
+          <StatTile variant="onNavy" value={currentRace?.bibsOnTheDay && !runners.some(r => !r.notInSetup) ? '—' : stats.toCome} label="Still to come" />
           <StatTile variant="gold" value={toCall} label="To call in" />
         </div>
       ),

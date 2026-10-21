@@ -33,6 +33,7 @@ const BaseStatusView = ({ onWithdrawDetails }) => {
   const [time, setTime] = useState(null);       // null = follow the clock
   const [typed, setTyped] = useState('');
   const [pending, setPending] = useState([]);
+  const [late, setLate] = useState(() => new Set()); // numbers outside the field, accepted by tap
   const [filter, setFilter] = useState('all');
   const [flash, setFlash] = useState('');
   const [undo, setUndo] = useState(null);
@@ -49,12 +50,12 @@ const BaseStatusView = ({ onWithdrawDetails }) => {
   const order = useMemo(() => boardCheckpoints(checkpoints), [checkpoints]);
   const raceCps = order.filter(cp => cp.short !== 'Finish');
   const ctx = useMemo(() => ({
-    mode, where, pending,
+    mode, where, pending, late,
     raceNumbers: new Set(raceRunnerNumbers),
     out: outMap,
     sightings: sightingsByCheckpoint(runners),
     order,
-  }), [mode, where, pending, raceRunnerNumbers, outMap, runners, order]);
+  }), [mode, where, pending, late, raceRunnerNumbers, outMap, runners, order]);
   const checked = pending.map((num, i) => ({ num, i, ...checkStatusNumber(num, i, ctx) }));
   const applyCount = checked.filter(c => c.kind !== 'bad').length;
   const label = mode === 'dnf' ? 'DNF' : 'DNS';
@@ -73,8 +74,10 @@ const BaseStatusView = ({ onWithdrawDetails }) => {
     setBusy(true);
     try {
       const numbers = checked.filter(c => c.kind !== 'bad').map(c => c.num);
-      const ops = await applyOutStatus({ mode, numbers, where, reason, time: dnfTime, prev: outMap });
+      const lateNumbers = numbers.filter(n => late.has(n));
+      const ops = await applyOutStatus({ mode, numbers, where, reason, time: dnfTime, prev: outMap, late: lateNumbers });
       setPending([]);
+      setLate(new Set());
       setFlash(`${numbers.length} marked ${label}`);
       setUndo({ run: () => undoOutStatus(ops) });
     } catch (err) {
@@ -148,11 +151,15 @@ const BaseStatusView = ({ onWithdrawDetails }) => {
 
         <div className="flex flex-wrap gap-1.5 min-h-[64px] max-h-[170px] overflow-y-auto content-start bg-vk-paper dark:bg-gray-900 rounded-btn p-2" data-testid="bulk-pending">
           {checked.map(c => (
-            <BibChip key={c.i} number={c.num} note={c.note}
-              className={c.kind === 'ok'
-                ? stateClasses(mode === 'dnf' ? RUNNER_STATE.DNF : RUNNER_STATE.DNS)
-                : checkClasses(c.kind)}
-              onClick={() => { setPending(p => p.filter((_, k) => k !== c.i)); setFlash(`${c.num} removed`); setUndo(null); }} />
+            c.canAdd
+              ? <BibChip key={c.i} number={c.num} note={`${c.note} — tap to add`} ariaLabel={`Add ${c.num}, not in setup`}
+                  className={checkClasses('warn')}
+                  onClick={() => { setLate(s => new Set(s).add(c.num)); setFlash(`${c.num} will be added to the field`); setUndo(null); }} />
+              : <BibChip key={c.i} number={c.num} note={c.note}
+                  className={c.kind === 'ok'
+                    ? stateClasses(mode === 'dnf' ? RUNNER_STATE.DNF : RUNNER_STATE.DNS)
+                    : checkClasses(c.kind)}
+                  onClick={() => { setPending(p => p.filter((_, k) => k !== c.i)); setFlash(`${c.num} removed`); setUndo(null); }} />
           ))}
           {!checked.length && (
             <span className="text-[13px] text-vk-muted">Add numbers one at a time or paste a list like 212, 218 224. Tap one to remove it.</span>
@@ -168,7 +175,7 @@ const BaseStatusView = ({ onWithdrawDetails }) => {
         </div>
 
         <div className="grid grid-cols-[1fr_2fr] gap-2">
-          <button type="button" onClick={() => { setPending([]); setTyped(''); setFlash('List cleared'); setUndo(null); }}
+          <button type="button" onClick={() => { setPending([]); setLate(new Set()); setTyped(''); setFlash('List cleared'); setUndo(null); }}
             className="min-h-[48px] rounded-btn border border-vk-muted bg-white text-vk-ink font-display font-extrabold text-xs tracking-[0.6px] uppercase dark:bg-gray-800 dark:text-gray-100">
             Clear list
           </button>

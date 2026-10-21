@@ -13,7 +13,8 @@ const check = (num, idx, extra) => checkStatusNumber(num, idx, { ...base, ...ext
 
 describe('checkStatusNumber (spec §4.11)', () => {
   it('rejects bibs not in the race and numbers listed twice', () => {
-    expect(check(999, 0, { mode: 'dnf', where: 2, pending: [999] })).toEqual({ kind: 'bad', note: 'Not in race' });
+    expect(check(999, 0, { mode: 'dnf', where: 2, pending: [999] })).toEqual({ kind: 'bad', note: 'Not in setup', canAdd: true });
+    expect(check(999, 0, { mode: 'dnf', where: 2, pending: [999], late: new Set([999]) })).toEqual({ kind: 'warn', note: 'Late entry' });
     expect(check(212, 1, { mode: 'dnf', where: 2, pending: [212, 212] })).toEqual({ kind: 'bad', note: 'Listed twice' });
   });
   it('rejects a runner who already has this status', () => {

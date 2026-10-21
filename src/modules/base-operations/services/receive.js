@@ -13,6 +13,8 @@ export const CALL_DUE_MINUTES = 8;   // base: no call for 8+ min with runners ex
 export const BEHIND_MINUTES = 15;    // show "N min behind" from 15 min
 
 export const CHECK = { OK: 'ok', INFO: 'info', WARN: 'warn', BAD: 'bad' };
+/** Note (and radio_calls.rejected reason) for a number outside base's field. */
+export const NOT_IN_SETUP = 'Not in setup';
 
 const PASSED = new Set(['passed', 'called-in', 'marked-off']);
 const DNF_STATUSES = new Set(['dnf', 'withdrawn', 'vet-out']);
@@ -97,10 +99,17 @@ export function boardCheckpoints(checkpoints = []) {
  * @param {number[]} ctx.earlier              numbers already heard earlier in this call
  * @param {Map<number,string>} ctx.logged     bib → time already recorded at this checkpoint
  * @param {{ short: string, seen: Map<number,string> } | null} ctx.prev  previous checkpoint
- * @returns {{ kind: 'ok'|'info'|'warn'|'bad', note: string }}
+ * @param {boolean} [late]                   base accepted this number as a late entry
+ * @returns {{ kind: 'ok'|'info'|'warn'|'bad', note: string, canAdd?: boolean }}
+ *   A number outside the field is not rejected outright (bibs change on the
+ *   day): it is skipped unless base taps it to record it as a late entry.
  */
-export function checkBaseNumber(num, { raceNumbers, out, earlier = [], logged, prev }) {
-  if (!raceNumbers.has(num)) return { kind: CHECK.BAD, note: 'Not in race' };
+export function checkBaseNumber(num, { raceNumbers, out, earlier = [], logged, prev, late = false }) {
+  if (!raceNumbers.has(num)) {
+    if (!late) return { kind: CHECK.BAD, note: NOT_IN_SETUP, canAdd: true };
+    if (earlier.includes(num)) return { kind: CHECK.WARN, note: 'Said twice' };
+    return { kind: CHECK.OK, note: 'Late entry' };
+  }
   if (out.has(num)) return { kind: CHECK.BAD, note: out.get(num) };
   if (earlier.includes(num)) return { kind: CHECK.WARN, note: 'Said twice' };
   if (logged?.has(num)) return { kind: CHECK.WARN, note: `Had ${hhmm(logged.get(num))}` };
@@ -139,7 +148,7 @@ export function askReminders(resolutions = [], board = []) {
 export function checkCall(entries, ctx) {
   return entries.map((e, i) => ({
     ...e,
-    ...checkBaseNumber(e.num, { ...ctx, earlier: entries.slice(0, i).map(x => x.num) }),
+    ...checkBaseNumber(e.num, { ...ctx, late: !!e.late, earlier: entries.slice(0, i).map(x => x.num) }),
   }));
 }
 

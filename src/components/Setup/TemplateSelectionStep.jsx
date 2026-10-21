@@ -77,7 +77,7 @@ function TemplateSelectionStep({ onSelect, onImportFromWebScorer }) {
                 {template.checkpoints.length} checkpoints
               </span>
               <span className="px-2 py-0.5 rounded-full bg-vk-band text-vk-navy dark:bg-gray-700 dark:text-gray-100">
-                {template.runnerRanges.map(r => `${r.min}–${r.max}`).join(', ')}
+                {template.runnerRanges.length ? template.runnerRanges.map(r => `${r.min}–${r.max}`).join(', ') : 'Bibs set at setup'}
               </span>
               {template.defaultBatches.length > 0 && (
                 <span className="px-2 py-0.5 rounded-full bg-vk-band text-vk-navy dark:bg-gray-700 dark:text-gray-100">

@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import {
-  buildBoard, checkCall, isRecordable, outStatusMap, sightingsByCheckpoint, askReminders, CALL_DUE_MINUTES,
+  buildBoard, checkCall, isRecordable, outStatusMap, sightingsByCheckpoint, askReminders, CALL_DUE_MINUTES, CHECK,
 } from '../services/receive';
 import TimeUtils from '../../../services/timeUtils.js';
 import {
@@ -116,6 +116,13 @@ const BaseReceive = () => {
     inputRef.current?.focus();
   };
 
+  // A number outside the field: tap to record it as a late entry (Undo)
+  const acceptLate = (i) => {
+    setUndoEntries(rx.entries);
+    setReceive({ entries: rx.entries.map((e, k) => (k === i ? { ...e, late: true } : e)) });
+    setFlash(`${rx.entries[i].num} will be recorded as a late entry`);
+  };
+
   const removeAt = (i) => {
     const e = rx.entries[i];
     setUndoEntries(rx.entries);
@@ -183,7 +190,7 @@ const BaseReceive = () => {
   const corrNum = rx.corr?.num ? Number(rx.corr.num) : null;
   const corrHad = cur && corrNum ? (sightings.get(cur.number)?.get(corrNum) ?? null) : null;
   const corrWarn = corrNum == null ? null
-    : !raceNumbers.has(corrNum) ? 'Not in race — check the number'
+    : !raceNumbers.has(corrNum) ? 'Not in setup — check the number'
       : out.has(corrNum) ? `Marked ${out.get(corrNum)} — base decides` : null;
   const setCorrNum = (num) => {
     // Pick up what base had, so the picker starts on it
@@ -377,7 +384,10 @@ const BaseReceive = () => {
                   data-testid="rx-numbers"
                 >
                   {chips.map(c => (
-                    <BibChip key={c.i} number={c.num} note={c.note} className={checkClasses(c.kind)} onClick={() => removeAt(c.i)} />
+                    c.canAdd
+                      ? <BibChip key={c.i} number={c.num} note={`${c.note} — tap to record`} ariaLabel={`Record ${c.num}, not in setup`}
+                          className={checkClasses(CHECK.WARN)} onClick={() => acceptLate(c.i)} />
+                      : <BibChip key={c.i} number={c.num} note={c.note} className={checkClasses(c.kind)} onClick={() => removeAt(c.i)} />
                   ))}
                   {chips.length === 0 && (
                     <span className="text-[13px] text-vk-muted">No numbers at {hhmm(rx.ctime)} yet. Tap a number to remove it.</span>

@@ -59,6 +59,7 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
   const field = raceRunnerNumbers.length || getRunnerTotal(currentRace);
   const activeField = Math.max(0, field - out.size);
   // One definition shared with Reports (D2): on course = in the race, not finished
+  const fieldUnknown = !!currentRace?.bibsOnTheDay && !raceRunnerNumbers.length;
   const tiles = useMemo(() => raceCounts({ sightings, out, raceNumbers: raceRunnerNumbers }), [sightings, out, raceRunnerNumbers]);
   const waves = [...new Set(raceRunners.map(r => r.batchNumber).filter(Boolean))].sort((a, b) => a - b);
 
@@ -105,8 +106,9 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
       )}
 
       <div className="grid gap-4 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]" data-testid="stats-grid">
-        <Tile label="On course" value={tiles.onCourse} className="text-vk-blue" testId="tile-on-course"
-          sub={tiles.notSeen ? `${tiles.notSeen} not seen yet` : null} />
+        {/* "Bibs assigned on the day" with no bibs yet: the field isn't known */}
+        <Tile label="On course" value={fieldUnknown ? '—' : tiles.onCourse} className="text-vk-blue" testId="tile-on-course"
+          sub={fieldUnknown ? '— not seen yet' : tiles.notSeen ? `${tiles.notSeen} not seen yet` : null} />
         <Tile label="Finished" value={tiles.finished} className="text-vk-navy dark:text-white" />
         <Tile label="Non-starters (DNS)" value={tiles.dns} className="text-vk-muted" />
         <Tile label="Did not finish (DNF)" value={tiles.dnf} className="text-vk-red" />

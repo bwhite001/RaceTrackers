@@ -46,6 +46,8 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
   const [validationErrors, setValidationErrors] = useState({});
   const [rangeInput, setRangeInput] = useState('');
   const [showNameFields, setShowNameFields] = useState(false);
+  // Bibs only known at registration: allow a race with no runners yet
+  const [onTheDay, setOnTheDay] = useState(!!raceDetails?.bibsOnTheDay);
 
   const runnerRoster = useRaceStore(s => s.runnerRoster);
   const updateRunnerPersonalData = useRaceStore(s => s.updateRunnerPersonalData);
@@ -144,11 +146,11 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
   };
 
   const handleCreateRace = () => {
-    if (ranges.length === 0) {
-      setValidationErrors({ general: 'At least one runner range is required' });
+    if (ranges.length === 0 && !onTheDay) {
+      setValidationErrors({ general: 'Add a runner range, or tick "Bibs assigned on the day"' });
       return;
     }
-    onCreate(ranges);
+    onCreate(ranges, { bibsOnTheDay: onTheDay });
   };
 
   const getTotalRunners = () => {
@@ -277,6 +279,14 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
       {/* Live count + first / last preview */}
       <RunnerCountPreview numbers={getRunnerNumbers()} />
 
+      <label className="flex items-start gap-3 min-h-[44px] bg-white dark:bg-gray-800 border border-vk-border dark:border-gray-700 rounded-card px-4 py-3 cursor-pointer">
+        <input type="checkbox" checked={onTheDay} onChange={e => setOnTheDay(e.target.checked)} className="w-5 h-5 mt-0.5" />
+        <span className="flex flex-col gap-0.5">
+          <span className="text-[15px] font-semibold">Bibs assigned on the day</span>
+          <span className="text-[13px] text-vk-muted">Create the race with no runners yet. Checkpoints and base add each number as it's heard.</span>
+        </span>
+      </label>
+
       <div className="bg-vk-band dark:bg-gray-800 rounded-card px-4 py-3.5 flex gap-3 items-start">
         <InformationCircleIcon className="w-5 h-5 text-vk-blue shrink-0 mt-0.5" aria-hidden="true" />
         <div className="text-[13px] leading-relaxed">
@@ -386,7 +396,7 @@ const RunnerRangesStep = ({ raceDetails = {}, initialRanges = [], onBack, onCrea
           size="primary"
           onClick={handleCreateRace}
           loading={isLoading}
-          disabled={ranges.length === 0}
+          disabled={ranges.length === 0 && !onTheDay}
           className="flex-[2] whitespace-nowrap"
         >
           Next: Waves

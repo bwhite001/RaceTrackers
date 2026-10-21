@@ -65,14 +65,15 @@ describe('Mark off (RunnerGrid)', () => {
     await waitFor(async () => expect((await row(140)).actualTime).toBe(original));
   });
 
-  it('quick entry marks several numbers, skips unknown and already-marked ones', async () => {
+  it('quick entry marks several numbers, skips already-marked ones, marks a bib not in setup', async () => {
     render(<RunnerGrid />);
     fireEvent.click(tile(140));
     await waitFor(() => expect(tile(140)).toHaveAccessibleName(/\d\d:\d\d$/));
     fireEvent.change(screen.getByLabelText('Bib numbers'), { target: { value: '141, 142 140 999' } });
     fireEvent.submit(screen.getByLabelText('Bib numbers').closest('form'));
-    await waitFor(() => expect(screen.getByTestId('markoff-status')).toHaveTextContent(/2 runners marked at .*999 not at this checkpoint.*140 already marked/));
+    await waitFor(() => expect(screen.getByTestId('markoff-status')).toHaveTextContent(/3 runners marked at \d\d:\d\d · 999 not in setup · 140 already marked/));
     expect((await row(141)).status).toBe('passed');
     expect((await row(142)).status).toBe('passed');
+    expect(await row(999)).toMatchObject({ status: 'passed', notInSetup: true });
   });
 });

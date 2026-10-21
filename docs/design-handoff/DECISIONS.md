@@ -259,3 +259,16 @@ Part A — corrections by radio:
   - Validation warns but allows: a number not in the field shows "Not in race — check the number" until Part B, and DNF / DNS shows the status.
 - **N1 wording:** the decisions table gives it ("Checkpoint [n] correction, runner [bib], not passed"), so the radio procedure uses it. The brief's A3 placeholder text was older.
 
+
+Part B — bibs can change on the day (N2: a safety net for both late changes and bibs only known at registration; the full Field changes broadcast isn't built):
+- **Schema v12 (additive):** `checkpoint_field_changes` is a checkpoint's own log and `field_changes` is base's additions. Races gain `bibsOnTheDay` and checkpoint rows gain `notInSetup`, both data columns.
+- **Base's field = setup runners + uncancelled late entries.** It's computed once in the store's refresh (`fieldNumbers`), so every count, check and report that reads `raceRunnerNumbers` includes late entries without per-screen changes. Undo cancels a field change (`cancelledAt`) and never deletes it. "Sharing spec §7" isn't in this repo, so the table follows the brief's field list.
+- **Receive:** a number outside the field is still stored as rejected if left untapped, now with reason "Not in setup" (older calls' "Not in race" still counts for Unknown bibs). Tapping it marks the entry `late`; it records as ok "Late entry", and `recordCall` adds the field change in the same transaction with the call's id, so undoing the call cancels it.
+- **DNF / DNS bulk add:** the same gold, tappable "Not in setup". Accepted numbers join the field before the status is applied, and the bulk Undo cancels them.
+- **Unknown bibs › Add to field:** it also records the time the bib was heard on that call (the checkpoint and block from the rejected entry). Otherwise the runner would join the field but still be missing from that checkpoint. Undo deletes only the row this action created, cancels the field change and reopens the issue. A bib that's since joined the field drops off Unknown bibs on every call that heard it.
+- **Checkpoint:** a quick-entry number outside the setup is marked at now with `notInSetup` and logged in `checkpoint_field_changes`. Undo removes both, because the snapshot treats a bib that had no row as new.
+- **Mark off groups:** groups are built from the setup's bibs only. A late bib joins the group whose range covers it, or a new group after the rest, so the setup's chips never shift. The grid jumps to the new group once it exists.
+- **Typo guard:** a number with more digits than any setup bib, or over 9999, asks "Mark 51212? It isn't in the setup" (inline confirm, Mark / Cancel). Ranges are still refused.
+- **Bibs assigned on the day:** a checkbox on the runner step allows zero runners. In such a race with no setup bibs, the checkpoint shows a hint and "Still to come —", and base shows "On course —" and "— not seen yet" until the field has bibs.
+- **Mt Glorious template:** the fixed 1–128 range is removed. The card says "Bibs set at setup", and the runner step starts empty.
+- **Validation script:** chip locators accept the new "Record …" / "Add …" names, and RX-05 now shows tap-to-record.

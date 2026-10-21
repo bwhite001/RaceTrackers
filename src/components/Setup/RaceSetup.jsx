@@ -83,8 +83,8 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
     setCurrentStep(prev => prev - 1);
   };
 
-  const handleRunnersNext = (runnerRanges) => {
-    setFormData(prev => ({ ...prev, runnerRanges }));
+  const handleRunnersNext = (runnerRanges, { bibsOnTheDay = false } = {}) => {
+    setFormData(prev => ({ ...prev, runnerRanges, bibsOnTheDay }));
     // Build initial batches for step 3 from template or default single batch
     const templateBatches = formData._templateBatches || [];
     const raceDate = formData.date || new Date().toISOString().slice(0, 10);

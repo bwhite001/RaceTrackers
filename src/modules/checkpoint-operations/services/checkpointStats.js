@@ -97,6 +97,33 @@ export function isCallDue({ waiting, oldestMinutes }, { count = CALL_DUE_WAITING
   return waiting >= count || oldestMinutes >= minutes;
 }
 
+/**
+ * Mark off groups: the setup's bibs in chunks of `size`; a bib marked that
+ * wasn't in the setup joins the group whose range covers it, or new groups
+ * after the rest (so the setup's groups never shift).
+ */
+export function fieldGroups(runners, size = 20) {
+  const groups = bibGroups(runners.filter(r => !r.notInSetup).map(r => r.number), size);
+  const extras = [];
+  for (const n of runners.filter(r => r.notInSetup).map(r => r.number).sort((a, b) => a - b)) {
+    const g = groups.find(x => n >= x.first && n <= x.last);
+    if (g) g.numbers = [...g.numbers, n].sort((a, b) => a - b);
+    else extras.push(n);
+  }
+  return [...groups, ...bibGroups(extras, size)];
+}
+
+/**
+ * A typed bib that isn't in the setup looks like a typo when it has more
+ * digits than any bib in the field (or is over 9999): ask before marking.
+ */
+export function looksLikeTypo(number, fieldNumbers) {
+  if (number > 9999) return true;
+  if (!fieldNumbers.length) return false;
+  const maxDigits = Math.max(...fieldNumbers.map(n => String(n).length));
+  return String(number).length > maxDigits;
+}
+
 /** Chunk sorted bib numbers into navigation groups of `size` (Mark off chips). */
 export function bibGroups(numbers, size = 20) {
   const sorted = [...numbers].sort((a, b) => a - b);

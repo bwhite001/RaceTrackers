@@ -61,11 +61,11 @@ describe('normaliseTemplate', () => {
       expect(n.checkpoints[0].metadata).toBeUndefined();
     });
 
-    it('the shipped Mt Glorious template matches the WICEN brief (spec §10); bib range unchanged', async () => {
+    it('the shipped Mt Glorious template matches the WICEN brief (spec §10); no fixed bib range (race-day B3)', async () => {
       const raw = (await import('../../src/data/templates/mt-glorious-mountain-trail.json')).default;
       const n = normaliseTemplate(raw);
       expect(n.defaultStartTime).toBe('06:30:00');
-      expect(n.runnerRanges).toEqual([{ min: 1, max: 128 }]);
+      expect(n.runnerRanges).toEqual([]);
       expect(n.checkpoints.map(c => [c.distanceKm, c.operatorCallsigns])).toEqual([
         [5, ['VK4MUD', 'VK4MKD', 'VK4EAR']],
         [11, ['VK4IE', 'VK4TBA']],

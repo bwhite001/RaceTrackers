@@ -73,7 +73,8 @@ const BaseReports = ({ initialReport = 'missing' }) => {
   const calls = useMemo(() => callLog({ radioCalls, board }), [radioCalls, board]);
   const issues = useMemo(() => runChecks({
     baseRows, order, sightings, outByNumber, radioCalls, distances, limitKmh: currentRace?.paceLimitKmh ?? PACE_LIMIT_KMH,
-  }, resolvedKeys), [baseRows, order, sightings, outByNumber, radioCalls, distances, currentRace?.paceLimitKmh, resolvedKeys]);
+    raceNumbers: new Set(raceNumbers),
+  }, resolvedKeys), [baseRows, order, sightings, outByNumber, radioCalls, distances, currentRace?.paceLimitKmh, resolvedKeys, raceNumbers]);
 
   const issueTotal = Object.values(issues).reduce((n, list) => n + list.length, 0);
   const commonCounts = {
@@ -119,7 +120,8 @@ const BaseReports = ({ initialReport = 'missing' }) => {
       }
       case 'unknown':
         return [
-          { label: 'Remove', primary: true, run: ack(issue, 'removed') },
+          { label: 'Add to field', primary: true, run: () => store.addToField({ number: issue.number, checkpointNumber: issue.checkpointNumber, time: issue.time, issueKey: issue.key }) },
+          { label: 'Remove', run: ack(issue, 'removed') },
           { label: 'Keep for review', run: ack(issue, 'kept') },
         ];
       default:

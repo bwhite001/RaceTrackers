@@ -88,19 +88,19 @@ test.describe('Base fixes', () => {
     await openBase(page, { viewport: { width: 1112, height: 834 } });
     await page.getByRole('tab', { name: 'DNF / DNS' }).click();
 
-    await step('Paste a list with a bib not in the race — rejected chip: white, 2px red, struck through', async () => {
-      await page.fill('#bulk-bibs', '112, 999');
+    await step('Paste a list with a number twice — the rejected chip: white, 2px red, struck through', async () => {
+      await page.fill('#bulk-bibs', '112, 113, 113');
       await page.keyboard.press('Enter');
-      const bad = page.getByTestId('bulk-pending').getByRole('button', { name: /^Remove 999/ });
+      const bad = page.getByTestId('bulk-pending').getByRole('button', { name: 'Remove 113, Listed twice' });
       await expect(bad).toHaveCSS('border-top-width', '2px');
       await expect(bad).toHaveCSS('background-color', 'rgb(255, 255, 255)');
       await expect(bad).toHaveCSS('text-decoration-line', 'line-through');
     });
 
-    await step('Mark 112 DNF at CP1, Medical — the out list shows the whole detail', async () => {
+    await step('Mark 112 and 113 DNF at CP1, Medical — the out list shows the whole detail', async () => {
       await page.getByRole('group', { name: 'Where' }).getByRole('button', { name: 'CP1' }).click();
       await page.getByRole('group', { name: 'Reason' }).getByRole('button', { name: 'Medical' }).click();
-      await page.getByRole('button', { name: 'Mark 1 as DNF' }).click();
+      await page.getByRole('button', { name: 'Mark 2 as DNF' }).click();
       const detail = page.getByTestId('out-detail').first();
       await expect(detail).toHaveText(/^CP1 · Medical · \d\d:\d\d$/);
       expect(await detail.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);

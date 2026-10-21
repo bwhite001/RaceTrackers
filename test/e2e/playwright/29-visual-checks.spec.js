@@ -168,12 +168,12 @@ test.describe('Visual checks', () => {
   });
 
   test('mt glorious template matches the brief', async ({ page, step }) => {
-    await step('Template — Mt Glorious starts at 06:30 with four checkpoints; bibs 1–128 as before', async () => {
+    await step('Template — Mt Glorious starts at 06:30 with four checkpoints; bibs are set at setup', async () => {
       await page.goto(`${BASE}/race-maintenance/setup`);
       const card = page.getByRole('button', { name: /Mt Glorious Mountain Trail/ });
       await expect(card).toContainText('Start 06:30');
       await expect(card).toContainText('4 checkpoints');
-      await expect(card).toContainText('1–128');
+      await expect(card).toContainText('Bibs set at setup');
       await card.click();
       await expect(page.locator('#startTime')).toHaveValue('06:30');
     });

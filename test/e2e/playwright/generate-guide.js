@@ -163,6 +163,11 @@ const SECTION_MAP = {
   'unmarking a called-in runner is a not-passed correction':                'checkpoint-fixes',
   'base applies a correction':                                              'base-receive',
   'a normal call still skips a number base already has':                    'base-receive',
+  // Race-day fixes — Part B (dynamic bibs)
+  'checkpoint marks a bib not in the setup':                                'checkpoint',
+  'base records a late entry and adds an unknown bib to the field':         'base-receive',
+  'a race with bibs assigned on the day':                                   'setup',
+  'the Mt Glorious template has no fixed bib range':                        'setup',
 };
 
 const CHAPTERS = [

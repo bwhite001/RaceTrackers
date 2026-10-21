@@ -137,7 +137,7 @@ export class BaseOperationsRepository extends BaseRepository {
     }
     blocks.sort((a, b) => a.time.localeCompare(b.time));
 
-    return db.transaction('rw', db.base_station_runners, db.radio_calls, db.audit_log, async () => {
+    return db.transaction('rw', db.base_station_runners, db.radio_calls, db.audit_log, db.field_changes, async () => {
       const callId = await db.radio_calls.add({
         raceId,
         checkpointNumber,
@@ -172,6 +172,9 @@ export class BaseOperationsRepository extends BaseRepository {
         }
       }
       if (replaced.length) await db.radio_calls.update(callId, { replaced });
+      // Late entries base accepted on this call join the field (Undo cancels them)
+      const late = [...new Set(recordable.filter(e => e.late).map(e => e.num))];
+      if (late.length) await this.addFieldChanges(raceId, late, 'receive', { callId });
 
       await this.logAudit(raceId, 'receive-call', 'radio_call', callId, {
         checkpointNumber, recorded: recordable.length, skipped: checked.length - recordable.length,
@@ -220,7 +223,7 @@ export class BaseOperationsRepository extends BaseRepository {
   }
 
   async undoCall(callId) {
-    await db.transaction('rw', db.base_station_runners, db.radio_calls, db.audit_log, async () => {
+    await db.transaction('rw', db.base_station_runners, db.radio_calls, db.audit_log, db.field_changes, async () => {
       const call = await db.radio_calls.get(callId);
       if (!call || call.undoneAt) return;
       const replacedIds = new Set((call.replaced ?? []).map(r => r.id));
@@ -229,6 +232,8 @@ export class BaseOperationsRepository extends BaseRepository {
         if (!replacedIds.has(r.id)) await db.base_station_runners.delete(r.id);
       }
       for (const { before } of call.replaced ?? []) await db.base_station_runners.put(before);
+      const changes = await db.field_changes.where('callId').equals(callId).toArray();
+      await this.cancelFieldChanges(call.raceId, changes.map(c => c.id));
       await db.radio_calls.update(callId, { undoneAt: TimeUtils.getCurrentTimestamp() });
       await this.logAudit(call.raceId, 'undo-call', 'radio_call', callId, { checkpointNumber: call.checkpointNumber });
     });
@@ -284,6 +289,57 @@ export class BaseOperationsRepository extends BaseRepository {
       for (const r of rows) await db.base_station_runners.put(r);
       await this.logAudit(raceId, 'restore', 'base_station', rows.map(r => r.id).join(','), {});
     });
+  }
+
+  // ── Field changes (race-day Part B): bibs not in the setup ──────────────
+
+  async getFieldChanges(raceId) {
+    return db.field_changes.where('raceId').equals(raceId).toArray();
+  }
+
+  /** Add late entries to base's field. @returns {Promise<number[]>} ids */
+  async addFieldChanges(raceId, numbers, source, extra = {}) {
+    const createdAt = TimeUtils.getCurrentTimestamp();
+    const ids = [];
+    for (const number of numbers) {
+      ids.push(await db.field_changes.add({ raceId, number, kind: 'late', source, createdAt, cancelledAt: null, callId: null, ...extra }));
+      await this.logAudit(raceId, 'add-to-field', 'field_change', String(number), { source });
+    }
+    return ids;
+  }
+
+  /**
+   * Reports › Unknown bibs › Add to field: the bib joins the field and the
+   * time it was heard on that call is recorded. @returns what undoAddToField needs.
+   */
+  async addToField(raceId, { number, checkpointNumber, time, issueKey }) {
+    return db.transaction('rw', db.field_changes, db.base_station_runners, db.data_issue_resolutions, db.audit_log, async () => {
+      const [fieldChangeId] = await this.addFieldChanges(raceId, [number], 'reports');
+      const rowId = time && checkpointNumber != null
+        ? await db.base_station_runners.add({ raceId, checkpointNumber, number, status: 'passed', commonTime: time, markOffEntryTime: TimeUtils.getCurrentTimestamp(), notes: null, lateAdd: fieldChangeId })
+        : null;
+      const resolutionId = await this.addResolution(raceId, issueKey, 'added to field');
+      return { fieldChangeId, rowId, resolutionId };
+    });
+  }
+
+  async undoAddToField(raceId, { fieldChangeId, rowId, resolutionId }) {
+    await db.transaction('rw', db.field_changes, db.base_station_runners, db.data_issue_resolutions, db.audit_log, async () => {
+      if (rowId) await db.base_station_runners.delete(rowId); // the row this action created
+      await this.cancelFieldChanges(raceId, [fieldChangeId]);
+      await this.removeResolution(resolutionId);
+    });
+  }
+
+  /** Undo of an addition: cancelled, never deleted. */
+  async cancelFieldChanges(raceId, ids) {
+    const cancelledAt = TimeUtils.getCurrentTimestamp();
+    for (const id of ids) {
+      const row = await db.field_changes.get(id);
+      if (!row || row.cancelledAt) continue;
+      await db.field_changes.update(id, { cancelledAt });
+      await this.logAudit(raceId, 'remove-from-field', 'field_change', String(row.number), { source: row.source });
+    }
   }
 
   async getRadioCalls(raceId) {

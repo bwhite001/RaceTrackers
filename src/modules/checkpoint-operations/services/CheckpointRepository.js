@@ -181,15 +181,19 @@ export class CheckpointRepository extends BaseRepository {
     })));
   }
 
-  /** Put records back exactly as snapshotted; delete rows that didn't exist. */
+  /**
+   * Put records back exactly as snapshotted; delete rows that didn't exist
+   * (and the field-change log of a bib that wasn't in the setup).
+   */
   async restoreSnapshot(raceId, checkpointNumber, snap) {
-    await db.transaction('rw', this.table, async () => {
+    await db.transaction('rw', this.table, db.checkpoint_field_changes, async () => {
       for (const { number, record } of snap) {
         if (record) {
           await this.table.put(record);
         } else {
           const added = await this._get(raceId, checkpointNumber, number);
           if (added) await this.table.delete(added.id);
+          await db.checkpoint_field_changes.where(['raceId', 'checkpointNumber', 'number']).equals([raceId, checkpointNumber, number]).delete();
         }
       }
     });
@@ -290,6 +294,26 @@ export class CheckpointRepository extends BaseRepository {
         await this.update(r.id, calledIn
           ? { calledIn: true, callInTime, correction: false, calledInBlock: r.commonTime ?? null, missedReport: false }
           : { calledIn: false, callInTime: null, calledInBlock: null });
+      }
+    });
+  }
+
+  /**
+   * Mark bibs that aren't in this checkpoint's setup (bibs change on the day).
+   * Kept in checkpoint_runners with notInSetup and logged in the checkpoint's
+   * own checkpoint_field_changes — never the shared runners table.
+   */
+  async markNotInSetup(raceId, checkpointNumber, numbers, time) {
+    const { commonTime, commonTimeLabel } = TimeUtils.getCommonTimeLabel(time);
+    const loggedAt = TimeUtils.getCurrentTimestamp();
+    await db.transaction('rw', this.table, db.checkpoint_field_changes, async () => {
+      for (const number of numbers) {
+        if (await this._get(raceId, checkpointNumber, number)) continue;
+        await this.table.add({
+          raceId, checkpointNumber, number, status: 'passed', actualTime: time, commonTime, commonTimeLabel,
+          markOffTime: time, originalTime: time, calledIn: false, callInTime: null, correction: false, notes: null, notInSetup: true,
+        });
+        await db.checkpoint_field_changes.add({ raceId, checkpointNumber, number, kind: 'late', source: 'checkpoint', loggedAt });
       }
     });
   }

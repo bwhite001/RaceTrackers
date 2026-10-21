@@ -99,6 +99,19 @@ class RaceTrackerDB extends Dexie {
     //  races / checkpoints / withdrawal_records gain nullable data columns only
     //    (baseCallsign, frequency, callDueMinutes, overSize; operatorCallsigns, distanceKm,
     //    locationName; reason) — no index needed.
+    // Version 12 (race-day fixes Part B): bibs can change on the day.
+    //  checkpoint_field_changes: a checkpoint's own log of bibs it marked that
+    //    weren't in its setup {kind: 'late', source: 'checkpoint', loggedAt}
+    //    (checkpoints never write the shared runners table)
+    //  field_changes: base's additions to the field {kind: 'late', source, createdAt,
+    //    cancelledAt, callId} — base's field = setup runners + uncancelled late entries
+    //  races gain data column bibsOnTheDay; checkpoint_runners gain notInSetup — no index.
+    this.version(12)
+        .stores({
+            checkpoint_field_changes: "++id, [raceId+checkpointNumber+number], raceId, checkpointNumber, number",
+            field_changes: "++id, [raceId+number], raceId, number, callId"
+        });
+
     this.version(11)
         .stores({
             checkpoint_runners: "++id, [raceId+checkpointNumber+number], raceId, checkpointNumber, number, actualTime, commonTime, calledIn, markOffTime, callInTime, status, notes, correction",

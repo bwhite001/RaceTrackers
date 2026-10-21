@@ -467,7 +467,7 @@ async function run() {
   current.section = 'Base — Receive';
   const flash = S('Status line', T('rx-flash'));
   const selected = S('Selected block', p => p.getByRole('group', { name: 'Common time block' }).locator('[aria-pressed="true"]'));
-  const chipOf = (n) => (p) => p.getByTestId('rx-numbers').getByRole('button', { name: new RegExp(`^Remove ${n}\\b`) });
+  const chipOf = (n) => (p) => p.getByTestId('rx-numbers').getByRole('button', { name: new RegExp(`^(Remove|Record) ${n}\\b`) });
   await ev('RX-01', '§4.9 / §3.5 BaseTabs', 'Open /base-station/operations (tablet 1112×834)', 'Idle "Who\'s calling?": grid of compact buttons (≥64px) for CP1–CP3, Finish: short name, status pill, "VK4PMC · up to 07:15". Checkpoint board rows: "Up to 07:15 · 30 min behind · call 11m ago", count, pill.',
     async p => { await p.goto(`${BASE}/base-station/operations`); await p.getByRole('heading', { name: /who's calling/i }).waitFor(); },
     { show: [S('CP1 button', btn(/^CP1,/)), S('Board CP1', T('board-CP1')), V('Page scroll', p => p.evaluate(() => `${document.scrollingElement.scrollHeight - innerHeight}px`))] });
@@ -480,7 +480,7 @@ async function run() {
   await ev('RX-04', '§4.9 validation table', 'Add 999, 121 again, 100, 150', 'Not in race → rejected (red) "Not in race"; same bib earlier in this call → "Said twice"; already logged → "Had 07:40"; otherwise ok (blue).',
     async p => { await add(p, [999, 121, 100, 150]); },
     { show: [S('Chip 999', chipOf(999), ['border', 'strike']), V('Chips', p => p.getByTestId('rx-numbers').getByRole('button').evaluateAll(els => els.map(e => e.getAttribute('aria-label')).join(' | '))), S('Complete', btn(/^Complete/))] });
-  await ev('RX-05', '§4.9', 'Tap chip 999 (remove), then "Undo"', 'Tap a chip to remove (Undo).',
+  await ev('RX-05', '§4.9 / Race-day B2', 'Tap chip 999 (not in setup), then "Undo"', 'A number outside the field is a gold warning chip "Not in setup — tap to record"; tapping records it as a late entry (Undo).',
     async p => { await chipOf(999)(p).click(); await p.waitForTimeout(200); await p.getByRole('button', { name: 'Undo' }).click(); },
     { show: [flash, S('Chip 999', chipOf(999))] });
   await ev('RX-06', '§4.9', 'Tap "Next HH:MM →"', 'Next → move to the next 5-minute block, clear the box.',
@@ -565,7 +565,7 @@ async function run() {
   page = await newPage(browser, TABLET, { withBaseData: true });
   current.section = 'Base — DNF / DNS';
   const sflash = S('Status line', T('status-flash'));
-  const pend = (n) => (p) => p.getByTestId('bulk-pending').getByRole('button', { name: new RegExp(`^Remove ${n}\\b`) });
+  const pend = (n) => (p) => p.getByTestId('bulk-pending').getByRole('button', { name: new RegExp(`^(Remove|Add) ${n}\\b`) });
   const outRow = (n) => (p) => p.getByTestId('out-row').filter({ hasText: new RegExp(`^${n}(?!\\d)`) });
   await ev('ST-01', '§4.11 / Fixes C1', 'Open base, tap the "DNF / DNS" tab', 'Bulk add: DNF/DNS toggle (DNF active = red), Where pills, Reason pills, Time (−5/+5). "Add numbers to mark" locked. Out of the race panel with totals and rows.',
     async p => { await p.goto(`${BASE}/base-station/operations`); await p.getByRole('tab', { name: 'DNF / DNS' }).click(); },

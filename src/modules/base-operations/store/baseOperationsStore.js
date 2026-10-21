@@ -6,6 +6,7 @@ import StorageService from '../../../services/storage.js';
 import { BaseOperationsRepository } from '../services/BaseOperationsRepository';
 import { getRunnerTotal } from '../../../utils/raceStatistics';
 import TimeUtils from '../../../services/timeUtils.js';
+import { fieldNumbers } from '../services/field.js';
 
 /** Race ids are numeric in IndexedDB; tests and old state may hold strings. */
 const raceKeyOf = (id) => (Number.isFinite(Number(id)) ? Number(id) : id);
@@ -61,6 +62,7 @@ const useBaseOperationsStore = create(
 
       outList: [],
       raceRunnerNumbers: [],
+      fieldChanges: [],
       radioCalls: [],
       baseRows: [],
       resolutions: [],
@@ -145,12 +147,13 @@ const useBaseOperationsStore = create(
             console.warn(`Base refresh: could not load ${label}`, err);
             return [];
           });
-          const [raceRunnerRows, radioCalls, outList, baseRows, resolutions] = await Promise.all([
+          const [raceRunnerRows, radioCalls, outList, baseRows, resolutions, fieldChanges] = await Promise.all([
             soft('race runners', () => db.runners.where('raceId').equals(raceKey).toArray()),
             soft('radio calls', () => repo.getRadioCalls(raceKey)),
             soft('out list', () => repo.getOutList(raceKey)),
             soft('base records', () => repo.getBaseStationRunners(raceKey)),
             soft('resolutions', () => repo.getResolutions(raceKey)),
+            soft('field changes', () => repo.getFieldChanges(raceKey)),
           ]);
           const stats = get().calculateStats(runners);
 
@@ -185,7 +188,9 @@ const useBaseOperationsStore = create(
           set({
             runners,
             stats,
-            raceRunnerNumbers: raceRunnerRows.map(r => r.number),
+            // Base's field = setup runners + late entries (race-day Part B)
+            raceRunnerNumbers: fieldNumbers(raceRunnerRows.map(r => r.number), fieldChanges),
+            fieldChanges,
             radioCalls,
             outList,
             baseRows,
@@ -354,12 +359,14 @@ const useBaseOperationsStore = create(
       // Actions - DNF / DNS bulk (spec §4.11). Each change is audit-logged by the
       // repository; one silent refresh at the end.
       // prev: Map(bib → out record from outRecords()) for runners already out
-      applyOutStatus: async ({ mode, numbers, where = null, reason = '', comments = '', time, prev = new Map() }) => {
+      applyOutStatus: async ({ mode, numbers, where = null, reason = '', comments = '', time, prev = new Map(), late = [] }) => {
         const { currentRaceId } = get();
         if (!currentRaceId) throw new Error('No active race');
         const raceKey = raceKeyOf(currentRaceId);
         const repo = new BaseOperationsRepository();
         const ops = [];
+        // Late entries join the field first; Undo cancels them
+        if (late.length) ops.push({ fieldChangeIds: await repo.addFieldChanges(raceKey, late, 'status') });
         for (const num of numbers) {
           const before = prev.get(num) ?? null;
           if (mode === 'dnf') {
@@ -380,7 +387,8 @@ const useBaseOperationsStore = create(
         const { currentRaceId } = get();
         const raceKey = raceKeyOf(currentRaceId);
         const repo = new BaseOperationsRepository();
-        for (const { num, mode, before } of [...ops].reverse()) {
+        for (const { num, mode, before, fieldChangeIds } of [...ops].reverse()) {
+          if (fieldChangeIds) { await repo.cancelFieldChanges(raceKey, fieldChangeIds); continue; }
           if (mode === 'dnf') await repo.reverseWithdrawal(raceKey, num);
           else await repo.reverseNonStarter(raceKey, num);
           if (before) await get()._restoreOut(repo, raceKey, before);
@@ -423,6 +431,14 @@ const useBaseOperationsStore = create(
       removeResolution: async (id) => {
         await new BaseOperationsRepository().removeResolution(id);
         await get().refreshData({ silent: true });
+      },
+
+      addToField: async (args) => {
+        const repo = new BaseOperationsRepository();
+        const raceKey = raceKeyOf(get().currentRaceId);
+        const done = await repo.addToField(raceKey, args);
+        await get().refreshData({ silent: true });
+        return async () => { await repo.undoAddToField(raceKey, done); await get().refreshData({ silent: true }); };
       },
 
       setResolutionsAsked: async (ids, askedAt) => {

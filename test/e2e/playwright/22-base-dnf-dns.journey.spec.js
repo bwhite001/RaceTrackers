@@ -46,7 +46,7 @@ test.describe('Base — DNF / DNS and overview', () => {
       await page.fill('#bulk-bibs', '110, 112 113; 999 112');
       await page.keyboard.press('Enter');
       await expect(pending(page, 110)).toHaveAccessibleName('Remove 110, Seen later at CP2');
-      await expect(pending(page, 999)).toHaveAccessibleName('Remove 999, Not in race');
+      await expect(page.getByTestId('bulk-pending').getByRole('button', { name: 'Add 999, not in setup' })).toBeVisible();
       await expect(pending(page, 112).nth(1)).toHaveAccessibleName('Remove 112, Listed twice');
       await expect(page.getByRole('button', { name: 'Mark 3 as DNF' })).toBeEnabled();
     });

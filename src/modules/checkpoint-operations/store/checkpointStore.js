@@ -209,6 +209,7 @@ const useCheckpointStore = create((set, get) => ({
   editTime: (number, time) => get()._run((raceId, cp) => CheckpointRepository.editTime(raceId, cp, number, time)),
   unmarkRunner: (number) => get()._run((raceId, cp) => CheckpointRepository.unmark(raceId, cp, number)),
   setCalledIn: (numbers, calledIn = true) => get()._run((raceId, cp) => CheckpointRepository.setCalledIn(raceId, cp, numbers, calledIn)),
+  markNotInSetup: (numbers, time) => get()._run((raceId, cp) => CheckpointRepository.markNotInSetup(raceId, cp, numbers, time)),
   sendCorrections: (numbers) => get()._run((raceId, cp) => CheckpointRepository.sendCorrections(raceId, cp, numbers)),
   setOut: (number, status) => get()._run((raceId, cp) => CheckpointRepository.setOut(raceId, cp, number, status)),
   clearOut: (number) => get()._run((raceId, cp) => CheckpointRepository.clearOut(raceId, cp, number)),

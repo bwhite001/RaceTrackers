@@ -34,12 +34,12 @@ describe('Dexie v11 migration (additive)', () => {
     }
     await upgraded.open();
 
-    expect(upgraded.verno).toBe(11);
+    expect(upgraded.verno).toBe(12);
     expect(await upgraded.checkpoint_runners.count()).toBe(1);
     expect((await upgraded.checkpoint_runners.toArray())[0]).toMatchObject({ number: 101, calledIn: true, status: 'passed' });
     expect(await upgraded.base_station_runners.count()).toBe(1);
     expect((await upgraded.withdrawal_records.toArray())[0].reason).toBe('Injury');
-    expect(upgraded.tables.map(t => t.name)).toEqual(expect.arrayContaining(['radio_calls', 'data_issue_resolutions', 'readout_progress']));
+    expect(upgraded.tables.map(t => t.name)).toEqual(expect.arrayContaining(['radio_calls', 'data_issue_resolutions', 'readout_progress', 'checkpoint_field_changes', 'field_changes']));
 
     // New indexes are queryable
     await upgraded.base_station_runners.add({ raceId, checkpointNumber: 2, number: 103, callId: 7 });

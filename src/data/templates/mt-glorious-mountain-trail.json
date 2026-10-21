@@ -4,8 +4,6 @@
   "eventType": "Mountain Trail Run",
   "description": "Mountain trail race finishing at Maiala Park, Mt Glorious. Multiple distance options with challenging terrain.",
   "defaultStartTime": "06:30:00",
-  "defaultRunnerRangeStart": 1,
-  "defaultRunnerRangeEnd": 128,
   "checkpoints": [
     {
       "number": 1,

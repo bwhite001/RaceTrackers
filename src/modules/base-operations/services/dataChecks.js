@@ -133,16 +133,17 @@ export function findSeenAfterOut({ sightings, order, outByNumber, baseRows }) {
 }
 
 /** Numbers outside the race heard on calls (kept in radio_calls.rejected). */
-export function findUnknownBibs({ radioCalls, order }) {
+export function findUnknownBibs({ radioCalls, order, raceNumbers = null }) {
   const issues = [];
   for (const call of radioCalls) {
     if (call.undoneAt) continue;
     for (const r of call.rejected ?? []) {
-      if (r.reason !== 'Not in race') continue;
+      if (raceNumbers?.has(r.number)) continue; // added to the field since
+      if (r.reason !== 'Not in race' && r.reason !== 'Not in setup') continue; // older calls said "Not in race"
       issues.push({
         key: `unknown:${call.id}:${r.number}:${r.time ?? ''}`,
-        check: 'unknown', number: r.number,
-        head: 'Not in race',
+        check: 'unknown', number: r.number, checkpointNumber: call.checkpointNumber, time: r.time ?? null,
+        head: 'Not in setup',
         detail: `${shortOf(order, call.checkpointNumber)} call at ${hhmm(call.receivedAt)}${r.time ? `, block ${hhmm(r.time)}` : ''}`,
       });
     }

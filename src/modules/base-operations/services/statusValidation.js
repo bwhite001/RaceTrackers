@@ -58,10 +58,14 @@ export function outRecords(outList = []) {
  * @param {Map<number,{status:'DNF'|'DNS'}>} ctx.out
  * @param {Map<number, Map<number,string>>} ctx.sightings  cp → bib → time
  * @param {Array<{number:number, short:string}>} ctx.order  checkpoints in course order
+ * @param {Set<number>} [ctx.late]     numbers outside the field base accepted (tap) as late entries
  */
-export function checkStatusNumber(num, idx, { mode, where, raceNumbers, pending, out, sightings, order }) {
-  if (!raceNumbers.has(num)) return { kind: 'bad', note: 'Not in race' };
+export function checkStatusNumber(num, idx, { mode, where, raceNumbers, pending, out, sightings, order, late = new Set() }) {
   if (pending.slice(0, idx).includes(num)) return { kind: 'bad', note: 'Listed twice' };
+  // Bibs change on the day: outside the field is a warning base can accept
+  if (!raceNumbers.has(num)) {
+    return late.has(num) ? { kind: 'warn', note: 'Late entry' } : { kind: 'bad', note: 'Not in setup', canAdd: true };
+  }
   const target = mode === 'dnf' ? 'DNF' : 'DNS';
   const cur = out.get(num);
   if (cur?.status === target) return { kind: 'bad', note: `Already ${target}` };

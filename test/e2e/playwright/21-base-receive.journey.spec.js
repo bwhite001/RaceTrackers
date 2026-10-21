@@ -131,7 +131,7 @@ test.describe('Base — receive checks and actions', () => {
     await step('CP2 call — each number is checked as it is added', async () => {
       await page.getByRole('button', { name: /^CP2,/ }).click();
       await add(page, [100, 999, 100, 120]);
-      await expect(chip(page, 999)).toHaveAccessibleName('Remove 999, Not in race');
+      await expect(page.getByTestId('rx-numbers').getByRole('button', { name: 'Record 999, not in setup' })).toBeVisible();
       await expect(chip(page, 100).nth(1)).toHaveAccessibleName('Remove 100, Said twice');
       await expect(chip(page, 120)).toHaveAccessibleName('Remove 120, Not seen CP1');
       await expect(chip(page, 100).first()).toHaveAccessibleName('Remove 100');

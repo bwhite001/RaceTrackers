@@ -15,8 +15,10 @@ const ctx = {
 };
 
 describe('checkBaseNumber (spec §4.9)', () => {
-  it('rejects bibs not in the race', () => {
-    expect(checkBaseNumber(999, ctx)).toEqual({ kind: CHECK.BAD, note: 'Not in race' });
+  it('a bib outside the field is skipped unless base records it as a late entry (race-day B2)', () => {
+    expect(checkBaseNumber(999, ctx)).toEqual({ kind: CHECK.BAD, note: 'Not in setup', canAdd: true });
+    expect(checkBaseNumber(999, { ...ctx, late: true })).toEqual({ kind: CHECK.OK, note: 'Late entry' });
+    expect(checkBaseNumber(999, { ...ctx, late: true, earlier: [999] })).toEqual({ kind: CHECK.WARN, note: 'Said twice' });
   });
   it('rejects DNF / DNS runners', () => {
     expect(checkBaseNumber(150, ctx)).toEqual({ kind: CHECK.BAD, note: 'DNF' });
