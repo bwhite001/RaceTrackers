@@ -21,11 +21,9 @@ const useCheckpointStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       
-      // Initialize checkpoint runners if not already initialized
-      const existingRunners = await CheckpointRepository.getCheckpointRunners(raceId, checkpointNumber);
-      if (existingRunners.length === 0) {
-        await CheckpointRepository.initializeCheckpoint(raceId, checkpointNumber);
-      }
+      // Seed any bibs that have no row yet (idempotent — safe when some rows
+      // already exist, e.g. a DNS that base recorded on this device)
+      await CheckpointRepository.initializeCheckpoint(raceId, checkpointNumber);
 
       const runners = await CheckpointRepository.getCheckpointRunners(raceId, checkpointNumber);
       

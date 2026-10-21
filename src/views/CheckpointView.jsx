@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowDownTrayIcon, ArrowsRightLeftIcon, QrCodeIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { withOperationExit } from '../shared/components/ExitOperationModal';
 import useNavigationStore, { MODULE_TYPES } from '../shared/store/navigationStore';
-import useCheckpointStore, { checkpointStore } from '../modules/checkpoint-operations/store/checkpointStore';
+import useCheckpointStore from '../modules/checkpoint-operations/store/checkpointStore';
 import useSettingsStore from '../shared/store/settingsStore';
 import useRaceMaintenanceStore, { raceMaintenanceStore } from '../modules/race-maintenance/store/raceMaintenanceStore';
 import { useRaceStore } from '../store/useRaceStore.js';
@@ -54,7 +54,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
   const { startOperation } = useNavigationStore();
   const { currentRace, loadCurrentRace, checkpoints = [] } = useRaceMaintenanceStore();
-  const { runners = [], loading, error, initializeCheckpoint, loadCheckpointData } = useCheckpointStore();
+  const { runners = [], loading, error, initializeCheckpoint } = useCheckpointStore();
   const { loadRace: loadRaceIntoLegacyStore, loadCheckpointRunners } = useRaceStore();
   const { updateSetting } = useSettingsStore();
 
@@ -72,11 +72,8 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         const freshRace = raceMaintenanceStore.getState().currentRace;
         if (freshRace) {
           startOperation(MODULE_TYPES.CHECKPOINT);
-          await loadCheckpointData(freshRace.id, cpNumber);
-          const { runners: existingRunners } = checkpointStore.getState();
-          if (!existingRunners || existingRunners.length === 0) {
-            await initializeCheckpoint(freshRace.id, cpNumber);
-          }
+          // Seeds any missing bibs (idempotent) and loads the checkpoint
+          await initializeCheckpoint(freshRace.id, cpNumber);
           // Legacy store is still used by the radio operator and transfer views
           await loadRaceIntoLegacyStore?.(freshRace.id);
           await loadCheckpointRunners?.(cpNumber);
@@ -92,7 +89,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
       }
     };
     initializeOperation();
-  }, [checkpointId, currentRace, loadCurrentRace, initializeCheckpoint, loadCheckpointData, startOperation, updateSetting, navigate, loadRaceIntoLegacyStore, loadCheckpointRunners, cpNumber]);
+  }, [checkpointId, currentRace, loadCurrentRace, initializeCheckpoint, startOperation, updateSetting, navigate, loadRaceIntoLegacyStore, loadCheckpointRunners, cpNumber]);
 
   // Every mark is saved immediately — nothing is ever "unsaved"
   useEffect(() => {

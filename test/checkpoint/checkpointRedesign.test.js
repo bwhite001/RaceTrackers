@@ -113,3 +113,15 @@ describe('checkpoint seeding is idempotent', () => {
     expect(await db.checkpoint_runners.count()).toBe(2); // nothing deleted
   });
 });
+
+describe('clearing DNS / DNF keeps a pass time (review fix)', () => {
+  it('a passed runner marked DNF then cleared is passed again with the same time', async () => {
+    await db.checkpoint_runners.clear();
+    await db.checkpoint_runners.add({ raceId: RACE, checkpointNumber: CP, number: 150, status: 'not-started', calledIn: false });
+    await CheckpointRepository.markPassed(RACE, CP, [150], at(10, 5));
+    await CheckpointRepository.setCalledIn(RACE, CP, [150], true);
+    await CheckpointRepository.setOut(RACE, CP, 150, 'dnf');
+    await CheckpointRepository.clearOut(RACE, CP, 150);
+    expect(await get(150)).toMatchObject({ status: 'passed', actualTime: at(10, 5), calledIn: false });
+  });
+});

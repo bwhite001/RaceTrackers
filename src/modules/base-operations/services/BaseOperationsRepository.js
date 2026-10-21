@@ -466,8 +466,6 @@ export class BaseOperationsRepository extends BaseRepository {
 
   async withdrawRunner(raceId, runnerNumber, checkpoint, reason, comments, withdrawalTime = null) {
     const timestamp = withdrawalTime || new Date().toISOString();
-    const timeHHMM = timestamp.slice(11, 16);
-
     await db.transaction('rw', db.withdrawal_records, db.checkpoint_runners, db.runners, async () => {
       await db.withdrawal_records.add({
         raceId, runnerNumber, checkpoint,
@@ -489,11 +487,14 @@ export class BaseOperationsRepository extends BaseRepository {
         // Never overwrite a recorded sighting (reverseWithdrawal would then
         // delete it). The withdrawal record carries the DNF.
       } else if (existing) {
+        // Remember what the row was (e.g. a not-started placeholder) so
+        // reverseWithdrawal can put it back instead of deleting it.
         await db.checkpoint_runners.update(existing.id, {
           status: 'dnf',
-          markOffTime: timeHHMM,
-          callInTime: timeHHMM,
-          notes: `DNF: ${reason}. ${comments || ''}`
+          markOffTime: timestamp,
+          callInTime: timestamp,
+          notes: `DNF: ${reason}. ${comments || ''}`,
+          dnfPrev: existing.dnfPrev ?? { status: existing.status, markOffTime: existing.markOffTime ?? null, callInTime: existing.callInTime ?? null, notes: existing.notes ?? null },
         });
       } else {
         await db.checkpoint_runners.add({
@@ -501,8 +502,8 @@ export class BaseOperationsRepository extends BaseRepository {
           checkpointNumber: checkpoint,
           number: runnerNumber,
           status: 'dnf',
-          markOffTime: timeHHMM,
-          callInTime: timeHHMM,
+          markOffTime: timestamp,
+          callInTime: timestamp,
           notes: `DNF: ${reason}. ${comments || ''}`
         });
       }
@@ -534,7 +535,13 @@ export class BaseOperationsRepository extends BaseRepository {
         .first();
 
       if (cpRecord && cpRecord.status === 'dnf') {
-        await db.checkpoint_runners.delete(cpRecord.id);
+        if (cpRecord.dnfPrev) {
+          // It was an existing row (e.g. a placeholder) — restore it
+          const { dnfPrev, ...rest } = cpRecord;
+          await db.checkpoint_runners.put({ ...rest, ...dnfPrev });
+        } else {
+          await db.checkpoint_runners.delete(cpRecord.id);
+        }
       }
 
       await this.logAudit(raceId, 'reverse-withdrawal', 'runner', runnerNumber, {
@@ -545,8 +552,6 @@ export class BaseOperationsRepository extends BaseRepository {
 
   async vetOutRunner(raceId, runnerNumber, checkpoint, reason, medicalNotes, vetOutTime = null) {
     const timestamp = vetOutTime || new Date().toISOString();
-    const timeHHMM = timestamp.slice(11, 16);
-
     await db.transaction('rw', db.vet_out_records, db.checkpoint_runners, async () => {
       await db.vet_out_records.add({
         raceId, runnerNumber, checkpoint,
@@ -561,16 +566,16 @@ export class BaseOperationsRepository extends BaseRepository {
       if (existing) {
         await db.checkpoint_runners.update(existing.id, {
           status: 'dnf',
-          markOffTime: timeHHMM,
-          callInTime: timeHHMM,
+          markOffTime: timestamp,
+          callInTime: timestamp,
           notes: `Vet Out: ${reason}. ${medicalNotes || ''}`
         });
       } else {
         await db.checkpoint_runners.add({
           raceId, checkpointNumber: checkpoint, number: runnerNumber,
           status: 'dnf',
-          markOffTime: timeHHMM,
-          callInTime: timeHHMM,
+          markOffTime: timestamp,
+          callInTime: timestamp,
           notes: `Vet Out: ${reason}. ${medicalNotes || ''}`
         });
       }
@@ -592,13 +597,15 @@ export class BaseOperationsRepository extends BaseRepository {
           .equals([raceId, cp.number, runnerNumber])
           .first();
 
-        if (existing && SIGHTING.has(existing.status)) {
-          // Seen at this checkpoint — keep the sighting (reverseNonStarter
-          // deletes non-starter rows, so overwriting it would lose it).
+        if (existing && (SIGHTING.has(existing.status) || existing.status === 'dnf')) {
+          // Seen at this checkpoint, or a checkpoint's own DNF — keep it.
         } else if (existing) {
+          // Remember the row's previous state so reverseNonStarter restores
+          // it (e.g. a not-started placeholder) instead of deleting it.
           await db.checkpoint_runners.update(existing.id, {
             status: 'non-starter',
-            notes: reason || null
+            notes: reason || null,
+            dnsPrev: existing.dnsPrev ?? { status: existing.status, notes: existing.notes ?? null },
           });
         } else {
           await db.checkpoint_runners.add({
@@ -625,7 +632,12 @@ export class BaseOperationsRepository extends BaseRepository {
         .toArray();
 
       for (const r of records) {
-        await db.checkpoint_runners.delete(r.id);
+        if (r.dnsPrev) {
+          const { dnsPrev, ...rest } = r;
+          await db.checkpoint_runners.put({ ...rest, ...dnsPrev });
+        } else {
+          await db.checkpoint_runners.delete(r.id);
+        }
       }
 
       await this.logAudit(raceId, 'reverse-dns', 'runner', runnerNumber, {});

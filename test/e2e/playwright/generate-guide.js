@@ -123,6 +123,45 @@ const CHAPTERS = [
   { key: 'split-role', title: 'Split-Role Checkpoint Operations', intro: 'How two operators can share one checkpoint — a Marker records runner times and shares batches via QR code, while a Radio Operator scans the QR and calls runners in to base.' },
 ];
 
+// Radio wording is deliberately kept out of the app screens (VK4WIP redesign);
+// it lives here, appended to the guide from the design handoff notes.
+const RADIO_PROCEDURE = path.join(ROOT, 'docs', 'design-handoff', 'docs', 'radio-procedure.md');
+const RADIO_CHAPTER = {
+  key: 'radio-procedure',
+  title: 'Radio Procedure (WICEN)',
+  intro: 'What to say on air. The app never shows radio wording — use these notes alongside the Callout sheet, Read-out and base Receive screens.',
+};
+
+/** Sections from "## …" onward of radio-procedure.md (drops its own title and preamble). */
+function radioProcedureMarkdown() {
+  if (!fs.existsSync(RADIO_PROCEDURE)) return '';
+  const md = fs.readFileSync(RADIO_PROCEDURE, 'utf8');
+  const i = md.indexOf('\n## ');
+  return i >= 0 ? md.slice(i + 1).trim() : '';
+}
+
+/** Minimal markdown → HTML for the radio notes: ## headings, lists, paragraphs, **bold**. */
+function radioProcedureHtml(md) {
+  const inline = (t) => escapeHtml(t).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  const out = [];
+  let list = null;
+  const close = () => { if (list) { out.push(`</${list}>`); list = null; } };
+  for (const line of md.split('\n')) {
+    const h = line.match(/^##\s+(.*)/);
+    const ul = line.match(/^-\s+(.*)/);
+    const ol = line.match(/^\d+\.\s+(.*)/);
+    if (h) { close(); out.push(`<h3>${inline(h[1])}</h3>`); }
+    else if (ul || ol) {
+      const tag = ul ? 'ul' : 'ol';
+      if (list !== tag) { close(); out.push(`<${tag}>`); list = tag; }
+      out.push(`<li>${inline((ul || ol)[1])}</li>`);
+    } else if (line.trim()) { close(); out.push(`<p>${inline(line)}</p>`); }
+    else close();
+  }
+  close();
+  return out.join('\n');
+}
+
 function slugify(str) {
   return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
@@ -246,6 +285,11 @@ function main() {
     }
   }
 
+  const radioMd = radioProcedureMarkdown();
+  if (radioMd) {
+    mdLines.push(`## ${RADIO_CHAPTER.title}`, '', RADIO_CHAPTER.intro, '', radioMd.replace(/^## /gm, '### '), '');
+  }
+
   fs.writeFileSync(path.join(OUT_DIR, 'user-guide.md'), mdLines.join('\n'), 'utf8');
   console.log('Written: docs/guides/user-guide.md');
 
@@ -268,8 +312,11 @@ function main() {
     chapterBlocks.push(block);
   }
 
-  const tocLinks = CHAPTERS
-    .filter(ch => chapters[ch.key].length)
+  if (radioMd) {
+    chapterBlocks.push(`<div id="${RADIO_CHAPTER.key}">\n<h2>${RADIO_CHAPTER.title}</h2>\n<p class="chapter-intro">${RADIO_CHAPTER.intro}</p>\n<section class="task radio">\n${radioProcedureHtml(radioMd)}\n</section>\n</div>`);
+  }
+
+  const tocLinks = [...CHAPTERS.filter(ch => chapters[ch.key].length), ...(radioMd ? [RADIO_CHAPTER] : [])]
     .map(ch => `  <a href="#${ch.key}">${ch.title}</a>`)
     .join('\n');
 
@@ -302,6 +349,7 @@ function main() {
   .step { display: flex; flex-direction: column; gap: 8px; }
   .step-instruction { font-weight: 600; font-size: .95rem; color: #1e293b; margin: 0; }
   .step img { max-width: 100%; width: 640px; border-radius: 8px; border: 1px solid #e2e8f0; display: block; }
+  .radio h3 { margin: 16px 0 6px; } .radio ul, .radio ol { margin: 0 0 8px 20px; font-size: .9rem; } .radio p { font-size: .9rem; margin-bottom: 8px; }
   .page-footer { text-align: center; padding: 24px; font-size: .75rem; color: #94a3b8; border-top: 1px solid #e2e8f0; margin-top: 40px; }
   @media (max-width: 640px) { .step img { width: 100%; } main { padding: 16px; } }
 </style>

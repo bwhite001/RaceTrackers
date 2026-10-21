@@ -399,7 +399,7 @@ const useBaseOperationsStore = create(
       _restoreOut: async (repo, raceKey, record) => {
         if (record.status === 'DNS') await repo.markAsNonStarter(raceKey, record.number, '');
         else if (record.kind === 'withdrawal') {
-          await repo.withdrawRunner(raceKey, record.number, record.checkpoint ?? null, record.reason || '', '', record.time || undefined);
+          await repo.withdrawRunner(raceKey, record.number, record.checkpoint ?? null, record.reason || '', record.comments || '', record.time || undefined);
         }
       },
 

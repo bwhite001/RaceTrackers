@@ -280,13 +280,19 @@ export class CheckpointRepository extends BaseRepository {
     });
   }
 
-  /** Clear DNS / DNF — back to not passed. */
+  /**
+   * Clear DNS / DNF. A runner who had passed goes back to passed with their
+   * time (needs calling in again); otherwise back to not passed.
+   */
   async clearOut(raceId, checkpointNumber, number) {
     const r = await this._get(raceId, checkpointNumber, number);
     if (!r) return;
+    if (r.actualTime) {
+      await this.update(r.id, { status: 'passed', calledIn: false, correction: false });
+      return;
+    }
     await this.update(r.id, {
       status: 'not-started',
-      actualTime: null,
       commonTime: null,
       commonTimeLabel: null,
       markOffTime: null,

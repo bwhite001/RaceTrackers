@@ -116,3 +116,42 @@ describe('DNF / DNS never destroy recorded sightings', () => {
     expect((await repo.getOutList('r2')).find(r => r.number === 8)).toBeUndefined();
   });
 });
+
+describe('reversing DNF / DNS restores rows it changed (review fixes)', () => {
+  let repo;
+  beforeEach(async () => {
+    repo = new BaseOperationsRepository();
+    await db.checkpoint_runners.clear();
+    await db.checkpoints.clear();
+    await db.withdrawal_records.clear();
+    await db.checkpoints.bulkAdd([{ raceId: 'r3', number: 1, name: 'CP1' }]);
+    await db.checkpoint_runners.add({ raceId: 'r3', checkpointNumber: 1, number: 9, status: 'not-started', notes: null });
+  });
+  const row = () => db.checkpoint_runners.where(['raceId', 'checkpointNumber', 'number']).equals(['r3', 1, 9]).first();
+
+  it('DNS on a placeholder then undo puts the placeholder back (not deleted)', async () => {
+    await repo.markAsNonStarter('r3', 9, '');
+    expect((await row()).status).toBe('non-starter');
+    await repo.reverseNonStarter('r3', 9);
+    const r = await row();
+    expect(r).toMatchObject({ status: 'not-started' });
+    expect(r.dnsPrev).toBeUndefined();
+  });
+
+  it('DNF on a placeholder then undo puts the placeholder back, with ISO times while out', async () => {
+    await repo.withdrawRunner('r3', 9, 1, 'Injury', 'twisted ankle', '2026-11-08T07:30:00.000Z');
+    expect(await row()).toMatchObject({ status: 'dnf', markOffTime: '2026-11-08T07:30:00.000Z' });
+    await repo.reverseWithdrawal('r3', 9);
+    const r = await row();
+    expect(r).toMatchObject({ status: 'not-started', markOffTime: null });
+    expect(r.dnfPrev).toBeUndefined();
+  });
+
+  it('DNS never overwrites a checkpoint DNF row', async () => {
+    await db.checkpoint_runners.add({ raceId: 'r3', checkpointNumber: 1, number: 10, status: 'dnf', notes: 'cp dnf' });
+    await repo.markAsNonStarter('r3', 10, '');
+    await repo.reverseNonStarter('r3', 10);
+    const r = await db.checkpoint_runners.where(['raceId', 'checkpointNumber', 'number']).equals(['r3', 1, 10]).first();
+    expect(r).toMatchObject({ status: 'dnf', notes: 'cp dnf' });
+  });
+});

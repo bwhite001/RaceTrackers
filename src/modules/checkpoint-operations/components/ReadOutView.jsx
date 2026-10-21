@@ -85,9 +85,15 @@ const ReadOutView = ({ onClose }) => {
       return;
     }
     finishing.current = true;
-    await setCalledIn(allNumbers, true);
-    await CheckpointRepository.clearReadout(currentRaceId, checkpointNumber, sessionKey).catch(() => {});
-    setDone(true);
+    try {
+      await setCalledIn(allNumbers, true);
+      await CheckpointRepository.clearReadout(currentRaceId, checkpointNumber, sessionKey).catch(() => {});
+      setDone(true);
+    } catch (err) {
+      setFlash(`Could not mark the call sent: ${err.message}. Try again.`);
+    } finally {
+      finishing.current = false;
+    }
   };
 
   const reset = () => {

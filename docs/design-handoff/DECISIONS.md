@@ -140,3 +140,21 @@ conflicted with existing behaviour, or didn't match the repo. Each entry: what, 
 - **Overdue → "View runners"** on the Overview opens Reports with Overdue runners selected.
 - **Bug fix: `08-complete-race-simulation` couldn't load** (`pickFirstCheckpointIfModal` was missing from `helpers.js`; H6). The helper was added (it picks the first checkpoint when the picker dialog appears). The spec was updated for the new UI: tiles pinned by aria-label, the base batch received as a Finish call, the DNF count read from the DNF / DNS tab, and the overview checked via the leaders table and progress bars instead of the removed StatusStrip. All 10 phases pass.
 - **New journey:** `23-base-reports-checks` (spec journey 9, plus the four reports).
+
+## Post-implementation review fixes
+
+An independent code review of the branch found these. Each was checked against the code before fixing, and each has a regression test.
+
+1. **Overview tiles disagreed with the out list.** After Phase 5 stopped overwriting sightings, the tiles (from `calculateStats`) counted a DNF runner seen at a checkpoint as "On course". The tiles are now computed in `BaseOverview` from the same race-wide out list and sightings that Reports use. `calculateStats` is unchanged for its other callers.
+2. **Reversing DNS / DNF deleted rows it hadn't created.**
+   - `markAsNonStarter` and `withdrawRunner` now record a converted row's previous state (`dnsPrev` / `dnfPrev`). `reverseNonStarter` and `reverseWithdrawal` restore that row (e.g. a not-started placeholder) instead of deleting it; only rows they added are deleted.
+   - DNS no longer overwrites a checkpoint's own DNF row. Bulk DNS now refuses DNF runners that base can't change ("DNF at checkpoint", i.e. checkpoint DNFs and vet-outs).
+   - The checkpoint seeder used to run only when the checkpoint had zero rows, so one DNS row recorded by base on the same device stopped the whole field from being seeded. `checkpointStore.initializeCheckpoint` now always calls the idempotent seeder.
+3. **Clearing a checkpoint DNF / DNS lost the pass time.** `clearOut` now returns a runner who had a time to passed with that time (to be called in again), and only resets to not passed when there was no time.
+4. **`withdrawRunner` / `vetOutRunner` wrote UTC "HH:mm" strings** into `markOffTime` / `callInTime` (pre-existing). The officials report then showed "Invalid Date", and the hour was UTC, not local. They now store the full ISO timestamp, like every other time.
+5. **Clear → Undo on the out list dropped withdrawal comments.** Comments are now carried through and restored.
+6. **Read-out could lock after a failed save.** If marking the call sent throws, the read-out now shows an error and can be retried.
+
+**Raised but not changed (logged for follow-up):**
+- **Base can't accept a checkpoint's correction.** A corrected time from a checkpoint is heard at base as "Had HH:MM" and skipped (spec §4.9 says already-logged numbers are skipped). The skipped number is kept on the call (`radio_calls.skipped`), but there's no one-tap "accept correction" yet.
+- **The checkpoint Overview's "Undo call-in" button loses the correction flag.** It returns the runner to the callout sheet as a plain pending runner. The Undo bar after any Overview action is exact.

@@ -48,3 +48,13 @@ describe('outRecords', () => {
     expect(rows.find(r => r.number === 233).detail).toBe('Did not start');
   });
 });
+
+describe('checkStatusNumber — non-base DNF (review fix)', () => {
+  it('refuses to change a checkpoint DNF or vet-out to DNS', () => {
+    const r = checkStatusNumber(150, 0, {
+      ...base, mode: 'dns', where: null, pending: [150],
+      out: new Map([[150, { status: 'DNF', clearable: false }]]),
+    });
+    expect(r).toEqual({ kind: 'bad', note: 'DNF at checkpoint' });
+  });
+});

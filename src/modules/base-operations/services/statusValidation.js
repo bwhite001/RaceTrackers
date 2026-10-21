@@ -28,6 +28,7 @@ export function outRecords(outList = []) {
       kind: w ? 'withdrawal' : v ? 'vet-out' : 'checkpoint-dnf',
       detail: parts.join(' · ') || 'Did not finish',
       checkpoint, reason, time,
+      comments: w?.comments ?? '',
       clearable: !!w,
     };
   }).sort((a, b) => a.number - b.number);
@@ -52,6 +53,8 @@ export function checkStatusNumber(num, idx, { mode, where, raceNumbers, pending,
   const target = mode === 'dnf' ? 'DNF' : 'DNS';
   const cur = out.get(num);
   if (cur?.status === target) return { kind: 'bad', note: `Already ${target}` };
+  // A checkpoint's own DNF or a vet-out isn't base's record to change
+  if (cur && cur.clearable === false) return { kind: 'bad', note: `${cur.status} at checkpoint` };
   if (cur) return { kind: 'warn', note: `Was ${cur.status} — will change` };
 
   const seenAt = order.filter(cp => sightings.get(cp.number)?.has(num));

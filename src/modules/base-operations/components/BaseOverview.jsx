@@ -25,7 +25,7 @@ const Tile = ({ label, value, className = '' }) => (
  * progress, current leaders; then the course map, heads-up grid and imports.
  */
 const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = [], onViewOverdue }) => {
-  const { currentRace, checkpoints = [], runners = [], outList = [], stats = {}, raceRunnerNumbers = [] } = useBaseOperationsStore();
+  const { currentRace, checkpoints = [], runners = [], outList = [], raceRunnerNumbers = [] } = useBaseOperationsStore();
   const now = useNow(30000);
   const [filter, setFilter] = useState('all');
   const [showAll, setShowAll] = useState(false);
@@ -42,6 +42,19 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
   const leaders = useMemo(() => currentLeaders({ sightings, order, out, raceStart, meta }), [sightings, order, out, raceStart, meta]);
   const field = raceRunnerNumbers.length || getRunnerTotal(currentRace);
   const activeField = Math.max(0, field - out.size);
+  // Same sources as Reports: race-wide out list first, then sightings
+  const tiles = useMemo(() => {
+    const finishedSet = new Set([...(sightings.get(BASE_STATION_CP)?.keys() ?? [])].filter(n => !out.has(n)));
+    const seen = new Set([...sightings.values()].flatMap(m => [...m.keys()]));
+    const onCourse = [...seen].filter(n => !out.has(n) && !finishedSet.has(n)).length;
+    const outValues = [...out.values()];
+    return {
+      onCourse,
+      finished: finishedSet.size,
+      dns: outValues.filter(v => v === 'DNS').length,
+      dnf: outValues.filter(v => v === 'DNF').length,
+    };
+  }, [sightings, out]);
   const waves = [...new Set(raceRunners.map(r => r.batchNumber).filter(Boolean))].sort((a, b) => a - b);
 
   const filtered = leaders.filter(l => filter === 'all'
@@ -76,10 +89,10 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
       )}
 
       <div className="grid gap-4 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]" data-testid="stats-grid">
-        <Tile label="On course" value={stats.active ?? 0} className="text-vk-blue" />
-        <Tile label="Finished" value={stats.finished ?? 0} className="text-vk-navy dark:text-white" />
-        <Tile label="Non-starters (DNS)" value={stats.dns ?? 0} className="text-vk-muted" />
-        <Tile label="Did not finish (DNF)" value={stats.dnf ?? 0} className="text-vk-red" />
+        <Tile label="On course" value={tiles.onCourse} className="text-vk-blue" />
+        <Tile label="Finished" value={tiles.finished} className="text-vk-navy dark:text-white" />
+        <Tile label="Non-starters (DNS)" value={tiles.dns} className="text-vk-muted" />
+        <Tile label="Did not finish (DNF)" value={tiles.dnf} className="text-vk-red" />
       </div>
 
       <div className="flex flex-wrap gap-6 items-start">
