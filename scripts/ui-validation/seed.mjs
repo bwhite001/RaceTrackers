@@ -1,8 +1,12 @@
-/** Seed a demo race (and optionally earlier base calls with deliberate data problems). */
-export async function seedRace(page, BASE, { withBaseData = false } = {}) {
+/**
+ * Seed a demo race (and optionally earlier base calls with deliberate data problems).
+ * cpPasses: [{ cp, number, minutesAgo }] — runners already passed (not called in) at a checkpoint.
+ * overSize: numbers per read-out over (race setting; default 5).
+ */
+export async function seedRace(page, BASE, { withBaseData = false, cpPasses = [], overSize } = {}) {
   await page.goto(BASE);
   await page.waitForTimeout(800);
-  const raceId = await page.evaluate(async ({ withBaseData }) => {
+  const raceId = await page.evaluate(async ({ withBaseData, cpPasses, overSize }) => {
     const db = await new Promise((res, rej) => { const r = indexedDB.open('RaceTrackerDB'); r.onsuccess = e => res(e.target.result); r.onerror = rej; });
     const add = (store, val) => new Promise((res, rej) => { const tx = db.transaction(store, 'readwrite'); const q = tx.objectStore(store).add(val); q.onsuccess = e => res(e.target.result); q.onerror = () => rej(q.error); });
     const now = Date.now();
@@ -14,6 +18,7 @@ export async function seedRace(page, BASE, { withBaseData = false } = {}) {
     const raceId = await add('races', {
       name: 'Mt Glorious Mountain Trails', date, startTime: hm, minRunner: 100, maxRunner: 159,
       createdAt: new Date().toISOString(), baseCallsign: 'VK4WIP', frequency: '147.225', distanceKm: 22,
+      ...(overSize && { overSize }),
     });
     await add('race_batches', { raceId, batchNumber: 1, batchName: 'All Runners', startTime: `${date}T${hm}:00` });
     const names = [['Sarah', 'Johnson', 'F'], ['Mike', 'Chen', 'M'], ['Emma', 'Williams', 'F'], ['Carlos', 'Ruiz', 'M']];
@@ -38,14 +43,20 @@ export async function seedRace(page, BASE, { withBaseData = false } = {}) {
       await row(1, 105, 50, 47);   // duplicate: second CP1 record for 105
       await row(2, 106, 75);       // out of order: CP2 earlier than CP1
       await row(2, 107, 55);       // impossible pace: 6 km CP1→CP2 in ~5 min
-      await row(2, 120, 30);       // skipped: seen CP2, never at CP1
+      await row(2, 128, 30);       // skipped: seen CP2, never at CP1 (no Receive event uses 128)
+      await row(1, 115, 60);       // identical duplicate: 115 twice at CP1, same block → Merge
+      // A DNF recorded at a checkpoint (not by base): base can't clear it
+      await add('checkpoint_runners', { raceId, checkpointNumber: 2, number: 145, status: 'dnf', notes: null });
       await add('radio_calls', { raceId, checkpointNumber: 1, receivedAt: iso(57), blocks: [{ time: blk(60), numbers: [] }], recorded: [], skipped: [], rejected: [], undoneAt: null, replaced: [] });
       await add('radio_calls', { raceId, checkpointNumber: 2, receivedAt: iso(27), blocks: [{ time: blk(30), numbers: [] }], recorded: [], skipped: [], rejected: [], undoneAt: null, replaced: [] });
+    }
+    for (const { cp, number, minutesAgo } of cpPasses) {
+      await add('checkpoint_runners', { raceId, checkpointNumber: cp, number, status: 'passed', actualTime: iso(minutesAgo), commonTime: blk(minutesAgo), calledIn: false, notes: null });
     }
     const tx = db.transaction('settings', 'readwrite');
     tx.objectStore('settings').put({ key: 'currentRaceId', value: raceId });
     return raceId;
-  }, { withBaseData });
+  }, { withBaseData, cpPasses, overSize });
   await page.evaluate((rid) => {
     const s = JSON.parse(localStorage.getItem('race-tracker-storage') || '{"state":{}}');
     s.state = { ...s.state, selectedRaceForMode: rid, currentRaceId: rid };

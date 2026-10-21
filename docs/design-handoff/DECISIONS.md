@@ -218,3 +218,13 @@ Phase C notes:
   - It now follows spec §10: start 06:30, CP1–CP4 operators and distances (5 / 11 / 14.5 / 17.5 km), base VK4WIP on 147.225 (+0.6, CTCSS 91.5), race distance 22 km.
   - The template normaliser now keeps checkpoint callsigns, location and distance (it used to strip them). Race setup copies them, and the race's base callsign / frequency / distance, into the new race.
   - **Bib range left at 1–128 until Brandon supplies it.**
+
+Phase D notes:
+- **D1: seed data.**
+  - "Seen later at CPx" is now shown with 108, which really was reported at CP2. The DNF list in the pack sets the time 45 minutes back, so the same runner also produces the "DNF, then seen at CP2" check for "Remove CP2 time".
+  - The skipped-checkpoint runner moved from 120 to 128, because RX-03 records 120 at CP1 and filled the gap.
+  - The seed also adds an identical duplicate (115, for Merge) and a DNF recorded by CP2 itself (145, for the disabled Clear).
+  - `seedRace` takes `cpPasses` and `overSize` for the two-block read-out.
+- **D2: "App showed" is evidence, not page chrome.** Each event reads the element it is about: text, accessible name, pressed / disabled / invalid state, and the computed colour or border where the plan names one. Measured values (page width, axe result, CSV first lines, mailto length) are labelled. A separate "Status line" row keeps live status and alert text, capped at 160 characters, so the generic modal text has gone. The pack now has 148 events (was 109), every one completed, and none has an empty or missing piece of evidence.
+- **D3/D4:** every gap the brief lists is a pack event and a test in `30-coverage-gaps.spec.js`. There are 20 tests: Receive, DNF / DNS, data checks, the two-block read-out, Settings Cancel and persistence, phone layouts and accessibility. Phase A–C fixes have their own events, marked "Fixes A1 …" in the Plan column.
+- **The overdue alert in the pack:** the seeded calls leave CP2 only behind on calls. So BO-01 now shows the gold "hasn't reported past" note (A1), and BO-04 has CP2 report up to now before the red alert appears.

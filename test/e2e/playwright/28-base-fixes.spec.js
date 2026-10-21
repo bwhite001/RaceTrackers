@@ -2,7 +2,7 @@
  * Base station fixes from the UI validation (Phase B — B7 to B13).
  * Uses the validation pack's Mt Glorious race (bibs 100–159). With base data:
  * CP1 100–119 an hour ago, CP2 100–109 half an hour ago, plus a duplicate
- * (105), an out-of-order time (106), an impossible pace (107) and a skip (120).
+ * (105), an out-of-order time (106), an impossible pace (107) and a skip (128).
  */
 import { test, expect } from './fixtures.js';
 import { seedRace } from '../../../scripts/ui-validation/seed.mjs';

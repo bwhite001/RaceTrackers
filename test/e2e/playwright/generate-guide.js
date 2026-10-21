@@ -134,6 +134,27 @@ const SECTION_MAP = {
   'race setup fits a phone':                                                'setup',
   'footer names the club':                                                  'navigation',
   'mt glorious template matches the brief':                                 'setup',
+  // Validation fixes — Phase D (coverage gaps)
+  'receive flags a number not seen at the previous checkpoint':             'base-receive',
+  'receive shows Closed once everyone is through':                          'base-receive',
+  'receive takes an exact time typed as HH:MM':                             'base-receive',
+  'receive draft survives a tab switch':                                    'base-receive',
+  'a runner already DNF is rejected':                                       'base-status',
+  'a DNS row is cleared and undone':                                        'base-status',
+  'a DNF recorded at a checkpoint cannot be cleared at base':               'base-status',
+  'identical duplicates merge':                                             'base-reports',
+  'a time seen after DNF is removed':                                       'base-reports',
+  'DNS is cleared from a check':                                            'base-reports',
+  'an unknown bib is kept for review':                                      'base-reports',
+  'a report prints':                                                        'base-reports',
+  'read-out runs across two blocks in overs of three':                      'checkpoint-fixes',
+  'settings cancel undoes the theme preview':                               'settings',
+  'settings persist after reload':                                          'settings',
+  'base overview, DNF / DNS and reports fit a phone':                       'base-status',
+  'sheets trap focus and close on Escape':                                  'navigation',
+  'status lines are polite live regions':                                   'navigation',
+  'overdue banner is an alert':                                             'base-status',
+  'undo bar clears itself after about six seconds':                         'navigation',
 };
 
 const CHAPTERS = [
