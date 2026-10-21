@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Base station — reports</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1E5CB3}a:hover{color:#0B2D53}
+</style>
+</helmet>
+<div style="width: 100%; box-sizing: border-box; background: #F7F8FB; font-family: Inter, system-ui, sans-serif; color: #222A35; display: flex; flex-direction: column">
+
+  <header style="background: #0B2D53; color: #FFFFFF">
+    <div style="max-width: 1280px; margin: 0 auto; padding: 0 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 0 16px; box-sizing: border-box">
+      <a href="Home.dc.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: #FFFFFF; min-height: 52px">
+        <span style="width: 32px; height: 32px; border-radius: 9999px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+          <img src="/_blob/a9aa5fc8a48778477a9ca342d9a05fac" alt="" style="width: 27px; height: 27px; object-fit: contain">
+        </span>
+        <span style="display: flex; flex-direction: column">
+          <span style="font-family: Montserrat, sans-serif; font-weight: 800; font-size: 15px; line-height: 1.2">Base · VK4WIP</span>
+          <span style="font-size: 11px; color: #E9F2FF">147.225 · now 07:47</span>
+        </span>
+      </a>
+      <nav style="display: flex; gap: 2px; align-self: stretch; overflow-x: auto" aria-label="Base station sections">
+        <a href="BaseEntry.dc.html" style="display: flex; align-items: center; padding: 0 12px; text-decoration: none; color: #E9F2FF; font-weight: 600; font-size: 14px; border-bottom: 3px solid transparent; min-height: 44px; white-space: nowrap">Receive</a>
+        <a href="BaseOverview.dc.html" style="display: flex; align-items: center; padding: 0 12px; text-decoration: none; color: #E9F2FF; font-weight: 600; font-size: 14px; border-bottom: 3px solid transparent; min-height: 44px; white-space: nowrap">Overview</a>
+        <a href="BaseStatus.dc.html" style="display: flex; align-items: center; padding: 0 12px; text-decoration: none; color: #E9F2FF; font-weight: 600; font-size: 14px; border-bottom: 3px solid transparent; min-height: 44px; white-space: nowrap">DNF / DNS</a>
+        <a href="BaseReports.dc.html" aria-current="page" style="display: flex; align-items: center; padding: 0 12px; text-decoration: none; color: #FFFFFF; font-weight: 700; font-size: 14px; border-bottom: 3px solid #D4AF37; min-height: 44px; white-space: nowrap">Reports</a>
+      </nav>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #E9F2FF"><span style="width: 8px; height: 8px; border-radius: 9999px; background: #D4AF37"></span>Saved</div>
+    </div>
+  </header>
+
+  <main style="max-width: 1280px; width: 100%; margin: 0 auto; padding: 12px; box-sizing: border-box; display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start">
+
+    <nav aria-label="Reports" style="flex: 1 1 250px; min-width: 0; background: #FFFFFF; border: 1px solid #E0E6F0; border-radius: 12px; overflow: hidden">
+      <div style="padding: 10px 12px 6px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #1E5CB3">Reports</div>
+      <sc-for list="{{common}}" as="r" hint-placeholder-count="4">
+        <button type="button" onClick="{{r.pick}}" aria-current="{{r.current}}" style="{{r.style}}">
+          <span style="flex: 1; text-align: left">{{r.label}}</span>
+          <span style="font-size: 12px; font-weight: 700; color: #5A6579">{{r.count}}</span>
+        </button>
+      </sc-for>
+      <div style="padding: 12px 12px 6px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #E0E6F0">
+        <span style="flex: 1; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #CC0000">Needs attention</span>
+        <span style="font-size: 12px; font-weight: 800; background: #D4AF37; color: #222A35; border-radius: 9999px; padding: 1px 8px">{{issueTotal}}</span>
+      </div>
+      <sc-for list="{{checks}}" as="r" hint-placeholder-count="6">
+        <button type="button" onClick="{{r.pick}}" aria-current="{{r.current}}" style="{{r.style}}">
+          <span style="flex: 1; text-align: left">{{r.label}}</span>
+          <span style="{{r.badgeStyle}}">{{r.count}}</span>
+        </button>
+      </sc-for>
+    </nav>
+
+    <section aria-labelledby="rephd" style="flex: 999 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E0E6F0; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="padding: 12px 14px; border-bottom: 1px solid #E0E6F0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px">
+        <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 2px">
+          <h1 id="rephd" style="margin: 0; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 18px; color: #0B2D53">{{cur.title}}</h1>
+          <div style="font-size: 13px; color: #5A6579">{{cur.desc}}</div>
+        </div>
+        <sc-if value="{{cur.isCommon}}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; gap: 6px">
+            <button type="button" style="min-height: 40px; padding: 0 12px; border-radius: 10px; border: 2px solid #1E5CB3; background: transparent; color: #1E5CB3; font-family: Montserrat, sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 0.6px; text-transform: uppercase">CSV</button>
+            <button type="button" style="min-height: 40px; padding: 0 12px; border-radius: 10px; border: 0; background: #1E5CB3; color: #FFFFFF; font-family: Montserrat, sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 0.6px; text-transform: uppercase">Print</button>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{show.missing}}" hint-placeholder-val="{{ false }}">
+        <div style="overflow-x: auto">
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 480px">
+            <thead><tr style="background: #EEF3FA; text-align: left">
+              <th scope="col" style="padding: 8px 14px; font-size: 11px; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px">Bib</th>
+              <th scope="col" style="padding: 8px; font-size: 11px; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px">Last seen</th>
+              <th scope="col" style="padding: 8px; font-size: 11px; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px">Expected at</th>
+              <th scope="col" style="padding: 8px 14px 8px 8px; font-size: 11px; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px; text-align: right">Overdue</th>
+            </tr></thead>
+            <tbody>
+              <sc-for list="{{missing}}" as="m" hint-placeholder-count="6">
+                <tr style="border-bottom: 1px solid #E0E6F0">
+                  <td style="padding: 10px 14px; font-family: Montserrat, sans-serif; font-weight: 800; font-size: 16px">{{m.num}}</td>
+                  <td style="padding: 10px 8px">{{m.seen}}</td>
+                  <td style="padding: 10px 8px">{{m.next}}</td>
+                  <td style="padding: 10px 14px 10px 8px; text-align: right"><span style="{{m.overStyle}}">{{m.over}}</span></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{show.oncourse}}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 14px; display: flex; flex-direction: column; gap: 12px">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px">
+            <sc-for list="{{oncourse}}" as="o" hint-placeholder-count="5">
+              <div style="background: #F7F8FB; border: 1px solid #E0E6F0; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px">
+                <span style="font-size: 12px; font-weight: 600; color: #5A6579">{{o.label}}</span>
+                <span style="font-family: Montserrat, sans-serif; font-weight: 800; font-size: 26px; color: #0B2D53">{{o.count}}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size: 13px; line-height: 1.6; color: #5A6579">Not finished and not marked DNF or DNS, grouped by the last checkpoint they passed. Use before standing a checkpoint down after the sweep has passed.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{show.results}}" hint-placeholder-val="{{ false }}">
+        <div style="overflow-x: auto">
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 560px; font-variant-numeric: tabular-nums">
+            <thead><tr style="background: #EEF3FA; text-align: left">
+              <th scope="col" style="padding: 8px 14px; font-size: 11px; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px">Bib</th>
+              <th scope="col" style="padding: 8px; font-size: 11px; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px">CP1</th>
+              <th scope="col" style="padding: 8px; font-size: 11px; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px">CP2</th>
+              <th scope="col" style="padding: 8px; font-size: 11px; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px">CP3</th>
+              <th scope="col" style="padding: 8px; font-size: 11px; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px">CP4</th>
+              <th scope="col" style="padding: 8px 14px 8px 8px; font-size: 11px; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px">Finish</th>
+            </tr></thead>
+            <tbody>
+              <sc-for list="{{results}}" as="r" hint-placeholder-count="8">
+                <tr style="border-bottom: 1px solid #E0E6F0">
+                  <td style="padding: 9px 14px; font-family: Montserrat, sans-serif; font-weight: 800; font-size: 16px">{{r.num}}</td>
+                  <td style="padding: 9px 8px">{{r.c1}}</td>
+                  <td style="padding: 9px 8px">{{r.c2}}</td>
+                  <td style="padding: 9px 8px">{{r.c3}}</td>
+                  <td style="padding: 9px 8px">{{r.c4}}</td>
+                  <td style="padding: 9px 14px 9px 8px; font-weight: 700">{{r.fin}}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{show.calls}}" hint-placeholder-val="{{ false }}">
+        <div style="overflow-x: auto">
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 520px">
+            <thead><tr style="background: #EEF3FA; text-align: left">
+              <th scope="col" style="padding: 8px 14px; font-size: 11px; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px">Checkpoint</th>
+              <th scope="col" style="padding: 8px; font-size: 11px; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px">Calls</th>
+              <th scope="col" style="padding: 8px; font-size: 11px; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px">Numbers</th>
+              <th scope="col" style="padding: 8px; font-size: 11px; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px">Last call</th>
+              <th scope="col" style="padding: 8px 14px 8px 8px; font-size: 11px; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px">Up to</th>
+            </tr></thead>
+            <tbody>
+              <sc-for list="{{calls}}" as="c" hint-placeholder-count="6">
+                <tr style="border-bottom: 1px solid #E0E6F0">
+                  <td style="padding: 10px 14px; font-weight: 700">{{c.cp}}</td>
+                  <td style="padding: 10px 8px">{{c.calls}}</td>
+                  <td style="padding: 10px 8px">{{c.nums}}</td>
+                  <td style="padding: 10px 8px">{{c.last}}</td>
+                  <td style="padding: 10px 14px 10px 8px">{{c.upto}}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{cur.isCheck}}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column">
+          <sc-for list="{{issues}}" as="i" hint-placeholder-count="3">
+            <div style="padding: 12px 14px; border-bottom: 1px solid #E0E6F0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px">
+              <span style="width: 52px; font-family: Montserrat, sans-serif; font-weight: 800; font-size: 20px; color: #0B2D53">{{i.num}}</span>
+              <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 2px">
+                <span style="font-weight: 700; font-size: 14px">{{i.head}}</span>
+                <span style="font-size: 13px; color: #5A6579">{{i.detail}}</span>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px">
+                <sc-for list="{{i.actions}}" as="a" hint-placeholder-count="2">
+                  <button type="button" onClick="{{a.run}}" style="{{a.style}}">{{a.label}}</button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{noIssues}}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 28px 14px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center">
+              <span style="width: 44px; height: 44px; border-radius: 9999px; background: #0B2D53; display: flex; align-items: center; justify-content: center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>
+              </span>
+              <span style="font-weight: 700">All sorted</span>
+              <span style="font-size: 13px; color: #5A6579">Nothing left in this check.</span>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <div style="padding: 8px 14px; display: flex; align-items: center; gap: 8px; min-height: 36px; background: #F7F8FB">
+        <span style="flex: 1; font-size: 12px; font-weight: 600; color: #1E5CB3" aria-live="polite">{{flash}}</span>
+        <sc-if value="{{canUndo}}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{undo}}" style="min-height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: #222A35; color: #FFFFFF; font-family: Inter, sans-serif; font-weight: 700; font-size: 12px">Undo</button>
+        </sc-if>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":680}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.reports = {
+      missing: { title: 'Overdue runners', desc: 'Passed a checkpoint but not reached the next one in the expected time.', type: 'common' },
+      oncourse: { title: 'Still on course', desc: 'Everyone not finished and not out — for sweep and stand-down.', type: 'common' },
+      results: { title: 'Times by checkpoint', desc: 'Every runner’s common time at each checkpoint.', type: 'common' },
+      calls: { title: 'Call log', desc: 'Scores Checkpoint calls received from each station.', type: 'common' },
+      dup: { title: 'Duplicates', desc: 'Same bib reported twice at one checkpoint with different times. Pick the one to keep.', type: 'check' },
+      order: { title: 'Out of order', desc: 'Time at a later checkpoint is earlier than at the one before.', type: 'check' },
+      skip: { title: 'Skipped a checkpoint', desc: 'Seen further on but never reported at an earlier checkpoint.', type: 'check' },
+      after: { title: 'Seen after DNF / DNS', desc: 'Reported at a checkpoint after being marked out.', type: 'check' },
+      unknown: { title: 'Unknown bibs', desc: 'Numbers reported that aren’t in this race.', type: 'check' },
+      pace: { title: 'Impossible pace', desc: 'Faster between checkpoints than anyone could run.', type: 'check' }
+    };
+    this.issueData = {
+      dup: [
+        { id: 'd1', num: 142, head: 'CP3 — two times', detail: '07:40 (call 07:46) and 07:45 (call 07:52)', a: 'Keep 07:40', b: 'Keep 07:45' },
+        { id: 'd2', num: 188, head: 'CP2 — two times', detail: '07:10 (call 07:16) and 07:30 (call 07:36)', a: 'Keep 07:10', b: 'Keep 07:30' },
+        { id: 'd3', num: 205, head: 'CP1 — same time twice', detail: '06:55 in two calls', a: 'Merge', b: null }
+      ],
+      order: [
+        { id: 'o1', num: 221, head: 'CP3 before CP2', detail: 'CP2 07:35 → CP3 07:25', a: 'Ask CP3', b: 'Mark checked' },
+        { id: 'o2', num: 167, head: 'CP4 before CP3', detail: 'CP3 07:20 → CP4 07:15', a: 'Ask CP4', b: 'Mark checked' }
+      ],
+      skip: [
+        { id: 's1', num: 186, head: 'Not reported at CP2', detail: 'CP1 06:55 → CP3 07:40', a: 'Ask CP2', b: 'Mark checked' },
+        { id: 's2', num: 203, head: 'Not reported at CP2', detail: 'CP1 06:55 → CP3 07:45', a: 'Ask CP2', b: 'Mark checked' }
+      ],
+      after: [
+        { id: 'a1', num: 150, head: 'DNF, then seen at CP3', detail: 'DNF at CP2 07:10 (Injury) → CP3 07:40', a: 'Clear DNF', b: 'Remove CP3 time' },
+        { id: 'a2', num: 233, head: 'DNS, but seen at CP1', detail: 'Marked DNS → CP1 06:55', a: 'Clear DNS', b: 'Remove CP1 time' }
+      ],
+      unknown: [
+        { id: 'u1', num: 999, head: 'Not in race', detail: 'CP3 call at 07:46, block 07:40', a: 'Remove', b: 'Keep for review' },
+        { id: 'u2', num: 41, head: 'Not in race', detail: 'CP1 call at 06:58, block 06:50', a: 'Remove', b: 'Keep for review' }
+      ],
+      pace: [
+        { id: 'p1', num: 112, head: 'CP1 → CP2 in 10 min', detail: '6 km · CP1 06:55 → CP2 07:05', a: 'Ask CP2', b: 'Mark checked' }
+      ]
+    };
+    this.state = { sel: 'dup', resolved: {}, flash: '', undoSnap: null };
+  }
+  renderVals() {
+    var self = this;
+    var st = this.state;
+    var open = function (key) { return self.issueData[key].filter(function (i) { return !st.resolved[i.id]; }); };
+    var rowStyle = function (on) {
+      return 'width: 100%; min-height: 44px; padding: 0 12px; border: 0; display: flex; align-items: center; gap: 8px; font-family: Inter, sans-serif; font-size: 14px; cursor: pointer; ' + (on ? 'background: #EEF3FA; color: #0B2D53; font-weight: 700; box-shadow: inset 3px 0 0 #D4AF37' : 'background: #FFFFFF; color: #222A35; font-weight: 600');
+    };
+    var commonCounts = { missing: 6, oncourse: 216, results: 250, calls: 38 };
+    var common = ['missing', 'oncourse', 'results', 'calls'].map(function (k) {
+      return { label: self.reports[k].title, count: commonCounts[k], current: st.sel === k ? 'page' : 'false', style: rowStyle(st.sel === k), pick: function () { self.setState({ sel: k, flash: '' }); } };
+    });
+    var total = 0;
+    var checks = ['dup', 'order', 'skip', 'after', 'unknown', 'pace'].map(function (k) {
+      var n = open(k).length;
+      total += n;
+      return {
+        label: self.reports[k].title, count: n || '✓',
+        current: st.sel === k ? 'page' : 'false',
+        style: rowStyle(st.sel === k),
+        badgeStyle: 'min-width: 22px; text-align: center; font-size: 12px; font-weight: 800; border-radius: 9999px; padding: 1px 7px; ' + (n ? 'background: rgba(204,0,0,0.1); color: #CC0000; border: 1px solid #CC0000' : 'background: #EEF3FA; color: #0B2D53'),
+        pick: function () { self.setState({ sel: k, flash: '' }); }
+      };
+    });
+    var rep = this.reports[st.sel];
+    var btn = function (primary) {
+      return 'min-height: 40px; padding: 0 12px; border-radius: 10px; font-family: Inter, sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; ' + (primary ? 'border: 0; background: #1E5CB3; color: #FFFFFF' : 'border: 1px solid #5A6579; background: #FFFFFF; color: #222A35');
+    };
+    var issues = rep.type === 'check' ? open(st.sel).map(function (i) {
+      var resolve = function (label) {
+        return function () {
+          var r = Object.assign({}, self.state.resolved); r[i.id] = true;
+          self.setState({ resolved: r, undoSnap: self.state.resolved, flash: i.num + ': ' + label });
+        };
+      };
+      var actions = [{ label: i.a, style: btn(true), run: resolve(i.a) }];
+      if (i.b) actions.push({ label: i.b, style: btn(false), run: resolve(i.b) });
+      return { num: i.num, head: i.head, detail: i.detail, actions: actions };
+    }) : [];
+
+    var overStyle = function (m) { return 'font-weight: 800; border-radius: 6px; padding: 2px 8px; ' + (m >= 60 ? 'background: #CC0000; color: #FFFFFF' : 'background: rgba(212,175,55,0.1); border: 1px solid #D4AF37; color: #222A35'); };
+    var missing = [[180, 'CP2 06:40', 'CP3', 67], [185, 'CP2 06:45', 'CP3', 62], [190, 'CP2 06:50', 'CP3', 57], [195, 'CP2 06:55', 'CP3', 52], [244, 'CP1 06:45', 'CP2', 48], [262, 'CP3 07:00', 'CP4', 41]].map(function (m) {
+      return { num: m[0], seen: m[1], next: m[2], over: m[3] + ' min', overStyle: overStyle(m[3]) };
+    });
+    var oncourse = [['Last at CP1', 43], ['Last at CP2', 59], ['Last at CP3', 74], ['Last at CP4', 40], ['Not seen since start', 0]].map(function (o) { return { label: o[0], count: o[1] }; });
+    var results = [[105, '06:50', '07:05', '07:15', '07:30', '07:45'], [112, '06:55', '07:05', '07:20', '07:35', '—'], [130, '06:55', '07:15', '07:25', '07:40', '—'], [140, '07:00', '07:15', '07:30', '—', '—'], [142, '07:00', '07:20', '07:40', '—', '—'], [150, '07:00', 'DNF', '', '', ''], [186, '06:55', '—', '07:40', '—', '—'], [233, 'DNS', '', '', '', '']].map(function (r) {
+      return { num: r[0], c1: r[1], c2: r[2], c3: r[3], c4: r[4], fin: r[5] };
+    });
+    var calls = [['Start', 2, 246, '06:40', '06:30'], ['CP1', 9, 244, '07:45', '07:35'], ['CP2', 8, 201, '07:36', '06:55'], ['CP3', 7, 142, '07:36', '07:15'], ['CP4', 6, 68, '07:43', '07:30'], ['Finish', 6, 12, '07:46', '07:40']].map(function (c) {
+      return { cp: c[0], calls: c[1], nums: c[2], last: c[3], upto: c[4] };
+    });
+
+    return {
+      common: common, checks: checks, issueTotal: total,
+      cur: { title: rep.title, desc: rep.desc, isCommon: rep.type === 'common', isCheck: rep.type === 'check' },
+      show: { missing: st.sel === 'missing', oncourse: st.sel === 'oncourse', results: st.sel === 'results', calls: st.sel === 'calls' },
+      issues: issues, noIssues: rep.type === 'check' && issues.length === 0,
+      missing: missing, oncourse: oncourse, results: results, calls: calls,
+      flash: st.flash, canUndo: !!st.undoSnap,
+      undo: function () { if (self.state.undoSnap) self.setState({ resolved: self.state.undoSnap, undoSnap: null, flash: 'Undone' }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

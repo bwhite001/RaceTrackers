@@ -28,7 +28,6 @@ const DraftView = ({
     return (
       <div className="flex flex-col h-full">
         <div className="flex-1 flex flex-col items-center justify-center text-gray-400 py-16">
-          <span className="text-5xl mb-3" role="img" aria-label="runner">🏃</span>
           <p className="font-medium">No runners yet</p>
           <p className="text-sm mt-1">Enter bib numbers above to start building your batch</p>
         </div>
@@ -49,8 +48,8 @@ const DraftView = ({
           : 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200'
       }`}>
         {isEditMode
-          ? `✏️ EDITING BATCH #${editingBatch.batchNumber}`
-          : `📝 DRAFT FOR: ${checkpointName}`
+          ? `EDITING BATCH #${editingBatch.batchNumber}`
+          : `DRAFT FOR: ${checkpointName}`
         }
         {commonTime && (
           <span className="ml-2 font-normal">⏰ {commonTime}</span>
@@ -60,21 +59,21 @@ const DraftView = ({
       {/* Unresolved calls warning */}
       {hasUnresolved && (
         <div role="alert" className="px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 text-amber-800 dark:text-amber-200 text-sm">
-          ⚠️ {unresolved.length} unresolved call{unresolved.length > 1 ? 's' : ''} — resolve or remove before submitting
+          {unresolved.length} unresolved call{unresolved.length > 1 ? 's' : ''} — resolve or remove before submitting
         </div>
       )}
 
       {/* Unknown bib error */}
       {hasUnknowns && (
         <div role="alert" className="px-4 py-2 bg-red-50 dark:bg-red-900/20 border-b border-red-200 text-red-800 dark:text-red-200 text-sm">
-          ❌ {unknowns.map(r => `Runner ${r.bib} is not a registered racer`).join(', ')}
+          {unknowns.map(r => `Runner ${r.bib} is not a registered racer`).join(', ')}
         </div>
       )}
 
       {/* Duplicate warning */}
       {hasDuplicates && (
         <div role="alert" className="px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 text-amber-800 dark:text-amber-200 text-sm">
-          ⚠️ {duplicates.map(r => `Runner ${r.bib} is already in this batch`).join(', ')}
+          {duplicates.map(r => `Runner ${r.bib} is already in this batch`).join(', ')}
         </div>
       )}
 
@@ -108,8 +107,8 @@ const DraftView = ({
                     {isUnresolved
                       ? <span className="text-amber-600 dark:text-amber-400">?</span>
                       : <>
-                          {isUnknown && <span className="mr-1">❌</span>}
-                          {!isUnknown && isDup && <span className="mr-1">⚠️</span>}
+                          {isUnknown && <span className="mr-1">✗</span>}
+                          {!isUnknown && isDup && <span className="mr-1">!</span>}
                           {r.bib}
                         </>
                     }

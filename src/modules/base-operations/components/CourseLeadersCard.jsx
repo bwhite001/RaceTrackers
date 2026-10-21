@@ -70,12 +70,9 @@ export default function CourseLeadersCard({ runners = [], checkpoints = [], topN
     'text-amber-600 dark:text-amber-500',    // 3rd
   ];
 
-  const MEDAL = ['🥇', '🥈', '🥉'];
-
   return (
     <div className="rounded-lg border-2 border-yellow-200 dark:border-yellow-700 bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 p-4">
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-xl" role="img" aria-label="Crown">👑</span>
         <h2 className="text-base font-semibold text-gray-900 dark:text-white">
           Current Leaders
         </h2>
@@ -90,7 +87,7 @@ export default function CourseLeadersCard({ runners = [], checkpoints = [], topN
           >
             {/* Position */}
             <span className={`text-lg w-6 text-center flex-shrink-0 ${POSITION_STYLES[position - 1] ?? 'text-gray-500'}`}>
-              {MEDAL[position - 1] ?? position}
+              <span className={`inline-flex w-6 h-6 rounded-full items-center justify-center text-sm font-extrabold ${position === 1 ? 'bg-vk-gold text-vk-ink' : 'bg-vk-band text-vk-ink'}`}>{position}</span>
             </span>
 
             {/* Bib */}

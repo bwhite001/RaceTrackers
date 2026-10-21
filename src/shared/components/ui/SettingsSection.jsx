@@ -11,7 +11,7 @@ import { cn } from '../../../design-system/utils/classNames';
  * @example
  * <SettingsSection
  *   title="Appearance"
- *   icon="🎨"
+ *   icon={<PaintBrushIcon className="w-5 h-5" />}
  *   description="Customize the look and feel"
  *   collapsible={true}
  * >

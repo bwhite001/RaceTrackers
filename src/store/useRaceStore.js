@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import StorageService from '../services/storage.js';
 import TimeUtils from '../services/timeUtils.js';
-import { DEFAULT_SETTINGS, APP_MODES, RUNNER_STATUSES } from '../types/index.js';
+import { DEFAULT_SETTINGS, APP_MODES, RUNNER_STATUSES, upgradeStatusColors } from '../types/index.js';
 
 export const useRaceStore = create(
     persist(
@@ -286,6 +286,7 @@ export const useRaceStore = create(
                 try {
                     const savedSettings = await StorageService.getAllSettings();
                     const settings = { ...DEFAULT_SETTINGS, ...savedSettings };
+                    settings.statusColors = upgradeStatusColors(savedSettings?.statusColors);
                     set({ settings });
                 } catch (error) {
                     console.error("Failed to load settings:", error);
@@ -824,6 +825,15 @@ export const useRaceStore = create(
         }),
         {
             name: "race-tracker-storage",
+            merge: (persisted, current) => ({
+                ...current,
+                ...persisted,
+                settings: {
+                    ...current.settings,
+                    ...persisted?.settings,
+                    statusColors: upgradeStatusColors(persisted?.settings?.statusColors),
+                },
+            }),
             partialize: (state) => ({
                 currentRaceId: state.currentRaceId,
                 selectedRaceForMode: state.selectedRaceForMode,

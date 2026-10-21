@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Base station — DNF and DNS</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1E5CB3}a:hover{color:#0B2D53}
+</style>
+</helmet>
+<div style="width: 100%; box-sizing: border-box; background: #F7F8FB; font-family: Inter, system-ui, sans-serif; color: #222A35; display: flex; flex-direction: column">
+
+  <header style="background: #0B2D53; color: #FFFFFF">
+    <div style="max-width: 1280px; margin: 0 auto; padding: 0 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 0 16px; box-sizing: border-box">
+      <a href="Home.dc.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: #FFFFFF; min-height: 52px">
+        <span style="width: 32px; height: 32px; border-radius: 9999px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+          <img src="/_blob/a9aa5fc8a48778477a9ca342d9a05fac" alt="" style="width: 27px; height: 27px; object-fit: contain">
+        </span>
+        <span style="display: flex; flex-direction: column">
+          <span style="font-family: Montserrat, sans-serif; font-weight: 800; font-size: 15px; line-height: 1.2">Base · VK4WIP</span>
+          <span style="font-size: 11px; color: #E9F2FF">147.225 · now 07:47</span>
+        </span>
+      </a>
+      <nav style="display: flex; gap: 2px; align-self: stretch; overflow-x: auto" aria-label="Base station sections">
+        <a href="BaseEntry.dc.html" style="display: flex; align-items: center; padding: 0 12px; text-decoration: none; color: #E9F2FF; font-weight: 600; font-size: 14px; border-bottom: 3px solid transparent; min-height: 44px; white-space: nowrap">Receive</a>
+        <a href="BaseOverview.dc.html" style="display: flex; align-items: center; padding: 0 12px; text-decoration: none; color: #E9F2FF; font-weight: 600; font-size: 14px; border-bottom: 3px solid transparent; min-height: 44px; white-space: nowrap">Overview</a>
+        <a href="BaseStatus.dc.html" aria-current="page" style="display: flex; align-items: center; padding: 0 12px; text-decoration: none; color: #FFFFFF; font-weight: 700; font-size: 14px; border-bottom: 3px solid #D4AF37; min-height: 44px; white-space: nowrap">DNF / DNS</a>
+        <a href="BaseReports.dc.html" style="display: flex; align-items: center; padding: 0 12px; text-decoration: none; color: #E9F2FF; font-weight: 600; font-size: 14px; border-bottom: 3px solid transparent; min-height: 44px; white-space: nowrap">Reports</a>
+      </nav>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #E9F2FF"><span style="width: 8px; height: 8px; border-radius: 9999px; background: #D4AF37"></span>Saved</div>
+    </div>
+  </header>
+
+  <main style="max-width: 1280px; width: 100%; margin: 0 auto; padding: 12px; box-sizing: border-box; display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start">
+
+    <section aria-labelledby="bulkhd" style="flex: 999 1 480px; min-width: 0; background: #FFFFFF; border: 1px solid #E0E6F0; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+        <h1 id="bulkhd" style="margin: 0; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; color: #0B2D53; flex: 1">Bulk add</h1>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: #EEF3FA; border-radius: 10px; padding: 3px; gap: 3px" role="group" aria-label="Status to apply">
+          <sc-for list="{{modes}}" as="m" hint-placeholder-count="2">
+            <button type="button" onClick="{{m.pick}}" aria-pressed="{{m.on}}" style="{{m.style}}">{{m.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <sc-if value="{{isDnf}}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap">
+            <span style="font-size: 12px; font-weight: 700; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px; width: 64px">Where</span>
+            <sc-for list="{{wheres}}" as="w" hint-placeholder-count="5">
+              <button type="button" onClick="{{w.pick}}" aria-pressed="{{w.on}}" style="{{w.style}}">{{w.label}}</button>
+            </sc-for>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap">
+            <span style="font-size: 12px; font-weight: 700; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px; width: 64px">Reason</span>
+            <sc-for list="{{reasons}}" as="r" hint-placeholder-count="5">
+              <button type="button" onClick="{{r.pick}}" aria-pressed="{{r.on}}" style="{{r.style}}">{{r.label}}</button>
+            </sc-for>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px">
+            <span style="font-size: 12px; font-weight: 700; color: #5A6579; text-transform: uppercase; letter-spacing: 0.8px; width: 64px">Time</span>
+            <button type="button" onClick="{{tm5}}" aria-label="5 minutes earlier" style="width: 44px; min-height: 40px; border-radius: 8px; border: 1px solid #E0E6F0; background: #F7F8FB; font-family: Inter, sans-serif; font-weight: 700; font-size: 13px; color: #222A35">−5</button>
+            <span style="min-width: 70px; text-align: center; font-family: Montserrat, sans-serif; font-weight: 800; font-size: 20px; color: #0B2D53">{{timeText}}</span>
+            <button type="button" onClick="{{tp5}}" aria-label="5 minutes later" style="width: 44px; min-height: 40px; border-radius: 8px; border: 1px solid #E0E6F0; background: #F7F8FB; font-family: Inter, sans-serif; font-weight: 700; font-size: 13px; color: #222A35">+5</button>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{isDns}}" hint-placeholder-val="{{ false }}">
+        <div style="font-size: 13px; color: #5A6579; background: #F7F8FB; border-radius: 10px; padding: 8px 12px">Non-starters: runners who never crossed the start. Anyone already recorded at a checkpoint is flagged.</div>
+      </sc-if>
+
+      <div style="display: flex; gap: 8px">
+        <label for="bulkin" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Bib numbers</label>
+        <input id="bulkin" type="text" inputmode="numeric" value="{{typed}}" onChange="{{onType}}" onKeyDown="{{onKey}}" placeholder="Bib numbers — type or paste a list" style="flex: 1; min-width: 0; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 20px; color: #222A35; background: #FFFFFF; border: 2px solid #1E5CB3; border-radius: 10px; padding: 4px 12px; min-height: 52px; box-sizing: border-box; outline: none">
+        <button type="button" onClick="{{add}}" style="font-family: Montserrat, sans-serif; font-weight: 800; font-size: 14px; letter-spacing: 0.6px; text-transform: uppercase; background: #1E5CB3; color: #FFFFFF; border: 0; border-radius: 10px; padding: 0 16px; min-height: 52px">Add</button>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 64px; max-height: 170px; overflow-y: auto; align-content: flex-start; background: #F7F8FB; border-radius: 10px; padding: 8px">
+        <sc-for list="{{pending}}" as="k" hint-placeholder-count="5">
+          <button type="button" onClick="{{k.remove}}" aria-label="{{k.aria}}" style="{{k.style}}">
+            <span style="font-family: Montserrat, sans-serif; font-weight: 800; font-size: 18px; line-height: 1">{{k.num}}</span>
+            <sc-if value="{{k.note}}" hint-placeholder-val="{{ false }}"><span style="font-size: 10px; font-weight: 700">{{k.note}}</span></sc-if>
+          </button>
+        </sc-for>
+        <sc-if value="{{noPending}}" hint-placeholder-val="{{ true }}">
+          <span style="font-size: 13px; color: #5A6579">Add numbers one at a time or paste a list like 212, 218 224. Tap one to remove it.</span>
+        </sc-if>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px; min-height: 28px">
+        <span style="flex: 1; font-size: 12px; font-weight: 600; color: #1E5CB3" aria-live="polite">{{flash}}</span>
+        <sc-if value="{{canUndo}}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{undo}}" style="min-height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: #222A35; color: #FFFFFF; font-family: Inter, sans-serif; font-weight: 700; font-size: 12px">Undo</button>
+        </sc-if>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 8px">
+        <button type="button" onClick="{{clearPending}}" style="min-height: 48px; border-radius: 10px; border: 1px solid #5A6579; background: #FFFFFF; font-family: Montserrat, sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 0.6px; text-transform: uppercase; color: #222A35">Clear list</button>
+        <button type="button" onClick="{{apply}}" style="{{applyStyle}}">{{applyLabel}}</button>
+      </div>
+    </section>
+
+    <aside aria-labelledby="listhd" style="flex: 1 1 300px; min-width: 0; background: #FFFFFF; border: 1px solid #E0E6F0; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="padding: 10px 12px; border-bottom: 1px solid #E0E6F0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+        <h2 id="listhd" style="margin: 0; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; color: #0B2D53; flex: 1">Out of the race</h2>
+        <span style="font-size: 12px; font-weight: 700; color: #5A6579">{{dnsCount}} DNS · {{dnfCount}} DNF</span>
+      </div>
+      <div style="padding: 8px 12px; display: flex; gap: 6px; border-bottom: 1px solid #E0E6F0">
+        <sc-for list="{{filters}}" as="f" hint-placeholder-count="3">
+          <button type="button" onClick="{{f.pick}}" aria-pressed="{{f.on}}" style="{{f.style}}">{{f.label}}</button>
+        </sc-for>
+      </div>
+      <div style="max-height: 420px; overflow-y: auto">
+        <sc-for list="{{records}}" as="r" hint-placeholder-count="5">
+          <div style="display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-bottom: 1px solid #E0E6F0; min-height: 48px">
+            <span style="width: 44px; font-family: Montserrat, sans-serif; font-weight: 800; font-size: 17px">{{r.num}}</span>
+            <span style="{{r.chipStyle}}">{{r.status}}</span>
+            <span style="flex: 1; min-width: 0; font-size: 12px; color: #5A6579; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.detail}}</span>
+            <button type="button" onClick="{{r.clear}}" aria-label="{{r.aria}}" style="min-height: 36px; padding: 0 10px; border: 1px solid #E0E6F0; border-radius: 8px; background: #FFFFFF; color: #1E5CB3; font-family: Inter, sans-serif; font-weight: 700; font-size: 12px">Clear</button>
+          </div>
+        </sc-for>
+        <sc-if value="{{noRecords}}" hint-placeholder-val="{{ false }}">
+          <div style="padding: 16px 12px; font-size: 13px; color: #5A6579">None yet.</div>
+        </sc-if>
+      </div>
+    </aside>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":640}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.clock = 7 * 60 + 47;
+    this.cpOrder = ['Start', 'CP1', 'CP2', 'CP3', 'CP4'];
+    this.lastSeen = { 186: ['CP2', 440], 203: ['CP2', 442], 130: ['CP4', 464], 212: ['CP1', 418], 224: ['CP1', 421], 160: ['CP3', 455] };
+    this.state = {
+      mode: 'dnf', where: 'CP2', reason: 'Injury', time: 465,
+      typed: '', pending: [], filter: 'all', flash: '', undoSnap: null,
+      records: {
+        146: { s: 'DNS' }, 233: { s: 'DNS' }, 301: { s: 'DNS' },
+        150: { s: 'DNF', where: 'CP2', reason: 'Injury', t: 432 },
+        175: { s: 'DNF', where: 'CP1', reason: 'Self-withdrew', t: 425 },
+        118: { s: 'DNF', where: 'CP3', reason: 'Medical', t: 458 }
+      }
+    };
+  }
+  fmt(m) {
+    var h = Math.floor(m / 60), mm = m % 60;
+    return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm;
+  }
+  check(num, idx) {
+    var st = this.state;
+    if (num < 100 || num > 349) return { kind: 'bad', note: 'Not in race' };
+    for (var i = 0; i < idx; i++) if (st.pending[i] === num) return { kind: 'bad', note: 'Listed twice' };
+    var rec = st.records[num];
+    if (rec && rec.s === (st.mode === 'dnf' ? 'DNF' : 'DNS')) return { kind: 'bad', note: 'Already ' + rec.s };
+    if (rec) return { kind: 'warn', note: 'Was ' + rec.s + ' — will change' };
+    var seen = this.lastSeen[num];
+    if (st.mode === 'dns' && seen) return { kind: 'warn', note: 'Seen ' + seen[0] + ' — started' };
+    if (st.mode === 'dnf' && seen && this.cpOrder.indexOf(seen[0]) > this.cpOrder.indexOf(st.where)) return { kind: 'warn', note: 'Seen later at ' + seen[0] };
+    return { kind: 'ok', note: '' };
+  }
+  addText(text) {
+    var self = this;
+    var nums = [];
+    String(text).split(/[\s,;]+/).forEach(function (p) { if (/^\d+$/.test(p)) nums.push(+p); });
+    if (!nums.length) { this.setState({ flash: 'Type a number first' }); return; }
+    this.setState({ pending: this.state.pending.concat(nums), typed: '', flash: nums.length === 1 ? nums[0] + ' added' : nums.length + ' numbers added', undoSnap: null });
+  }
+  renderVals() {
+    var self = this;
+    var st = this.state;
+    var pill = function (on) {
+      return 'min-height: 40px; padding: 0 12px; border-radius: 9999px; font-family: Inter, sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; ' + (on ? 'border: 0; background: #0B2D53; color: #FFFFFF' : 'border: 1px solid #E0E6F0; background: #FFFFFF; color: #222A35');
+    };
+    var modes = [['dnf', 'DNF'], ['dns', 'DNS']].map(function (p) {
+      var on = st.mode === p[0];
+      return {
+        label: p[1], on: on,
+        style: 'min-height: 40px; min-width: 72px; border: 0; border-radius: 8px; font-family: Montserrat, sans-serif; font-weight: 800; font-size: 14px; cursor: pointer; ' + (on ? (p[0] === 'dnf' ? 'background: #CC0000; color: #FFFFFF' : 'background: #FFFFFF; color: #222A35; box-shadow: 0 1px 3px rgba(0,0,0,0.08)') : 'background: transparent; color: #5A6579'),
+        pick: function () { self.setState({ mode: p[0], flash: '' }); }
+      };
+    });
+    var wheres = ['CP1', 'CP2', 'CP3', 'CP4', 'On course'].map(function (w) {
+      return { label: w, on: st.where === w, style: pill(st.where === w), pick: function () { self.setState({ where: w }); } };
+    });
+    var reasons = ['Injury', 'Self-withdrew', 'Cut-off', 'Medical', 'Other'].map(function (r) {
+      return { label: r, on: st.reason === r, style: pill(st.reason === r), pick: function () { self.setState({ reason: st.reason === r ? '' : r }); } };
+    });
+
+    var applyCount = 0;
+    var pending = st.pending.map(function (num, i) {
+      var v = self.check(num, i);
+      if (v.kind !== 'bad') applyCount++;
+      var base = 'min-height: 44px; padding: 4px 10px; border-radius: 8px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; font-family: Inter, sans-serif; cursor: pointer; ';
+      var style;
+      if (v.kind === 'ok') style = base + (st.mode === 'dnf' ? 'background: rgba(204,0,0,0.1); color: #CC0000; border: 2px solid #CC0000' : 'background: #FFFFFF; color: #5A6579; border: 1px dashed #5A6579');
+      else if (v.kind === 'warn') style = base + 'background: #FFFFFF; color: #222A35; border: 2px solid #D4AF37';
+      else style = base + 'background: #FFFFFF; color: #5A6579; border: 1px solid #E0E6F0; text-decoration: line-through';
+      return {
+        num: num, note: v.note, style: style,
+        aria: 'Remove ' + num + (v.note ? ', ' + v.note : ''),
+        remove: function () { var arr = self.state.pending.slice(); arr.splice(i, 1); self.setState({ pending: arr, flash: num + ' removed', undoSnap: null }); }
+      };
+    });
+
+    var recs = st.records;
+    var dnsCount = 0, dnfCount = 0;
+    Object.keys(recs).forEach(function (k) { if (recs[k].s === 'DNS') dnsCount++; else dnfCount++; });
+    var records = Object.keys(recs).map(Number).sort(function (a, b) { return a - b; }).filter(function (num) {
+      return st.filter === 'all' || recs[num].s === st.filter;
+    }).map(function (num) {
+      var r = recs[num];
+      var parts = [];
+      if (r.where) parts.push(r.where);
+      if (r.reason) parts.push(r.reason);
+      if (r.t != null) parts.push(self.fmt(r.t));
+      return {
+        num: num, status: r.s,
+        detail: r.s === 'DNS' ? 'Did not start' : parts.join(' · '),
+        chipStyle: 'border-radius: 6px; padding: 2px 8px; font-size: 12px; font-weight: 700; ' + (r.s === 'DNF' ? 'background: rgba(204,0,0,0.1); border: 1px solid #CC0000; color: #CC0000' : 'background: #F7F8FB; border: 1px dashed #5A6579; color: #5A6579'),
+        aria: 'Clear ' + r.s + ' for ' + num,
+        clear: function () {
+          var nr = Object.assign({}, self.state.records); delete nr[num];
+          self.setState({ records: nr, undoSnap: self.state.records, flash: num + ' back in the race' });
+        }
+      };
+    });
+    var filters = [['all', 'All'], ['DNF', 'DNF'], ['DNS', 'DNS']].map(function (p) {
+      var on = st.filter === p[0];
+      return { label: p[1], on: on, style: pill(on).replace('min-height: 40px', 'min-height: 36px'), pick: function () { self.setState({ filter: p[0] }); } };
+    });
+
+    var label = st.mode === 'dnf' ? 'DNF' : 'DNS';
+    return {
+      modes: modes, wheres: wheres, reasons: reasons,
+      isDnf: st.mode === 'dnf', isDns: st.mode === 'dns',
+      timeText: this.fmt(st.time),
+      typed: st.typed, pending: pending, noPending: pending.length === 0,
+      flash: st.flash, canUndo: !!st.undoSnap,
+      records: records, noRecords: records.length === 0,
+      dnsCount: dnsCount, dnfCount: dnfCount, filters: filters,
+      applyLabel: applyCount ? 'Mark ' + applyCount + ' as ' + label : 'Add numbers to mark',
+      applyStyle: 'min-height: 48px; border-radius: 10px; border: 0; font-family: Montserrat, sans-serif; font-weight: 800; font-size: 13px; letter-spacing: 0.6px; text-transform: uppercase; ' + (applyCount ? (st.mode === 'dnf' ? 'background: #CC0000; color: #FFFFFF; cursor: pointer' : 'background: #D4AF37; color: #222A35; cursor: pointer') : 'background: #EEF3FA; color: #5A6579; cursor: not-allowed'),
+      onType: function (e) { self.setState({ typed: e.target.value.replace(/[^\d,;\s]/g, '') }); },
+      onKey: function (e) { if (e.key === 'Enter') self.addText(self.state.typed); },
+      add: function () { self.addText(self.state.typed); },
+      tm5: function () { self.setState({ time: Math.max(390, self.state.time - 5) }); },
+      tp5: function () { self.setState({ time: Math.min(self.clock, self.state.time + 5) }); },
+      clearPending: function () { self.setState({ pending: [], typed: '', flash: 'List cleared', undoSnap: null }); },
+      apply: function () {
+        if (!applyCount) return;
+        var nr = Object.assign({}, self.state.records);
+        self.state.pending.forEach(function (num, i) {
+          if (self.check(num, i).kind === 'bad') return;
+          nr[num] = st.mode === 'dnf' ? { s: 'DNF', where: st.where, reason: st.reason, t: st.time } : { s: 'DNS' };
+        });
+        self.setState({ records: nr, undoSnap: self.state.records, pending: [], flash: applyCount + ' marked ' + label });
+      },
+      undo: function () { if (self.state.undoSnap) self.setState({ records: self.state.undoSnap, undoSnap: null, flash: 'Undone' }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

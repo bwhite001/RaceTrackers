@@ -1,0 +1,59 @@
+/* VK4WIP brand tokens for RaceTracker.
+   Replace the navy / accent colour variables in src/index.css with these.
+   Keep the existing --font-scale, --touch-target-min etc. */
+
+:root {
+  /* Brand */
+  --vk-navy: #0B2D53;      /* app bars, headings, called-in */
+  --vk-blue: #1E5CB3;      /* passed, links, focus, secondary buttons */
+  --vk-gold: #D4AF37;      /* primary button (ink text), call due, pending */
+  --vk-red: #CC0000;       /* DNF, destructive, overdue — sparingly */
+
+  /* Neutrals */
+  --vk-ink: #222A35;       /* body text, text on gold */
+  --vk-muted: #5A6579;     /* secondary text — 4.5:1 on white, don't lighten */
+  --vk-paper: #F7F8FB;     /* page background */
+  --vk-band: #EEF3FA;      /* panels, selected rows */
+  --vk-border: #E0E6F0;
+  --vk-on-navy: #E9F2FF;   /* light text on navy */
+  --vk-white: #FFFFFF;
+
+  /* Tints (the brand tints with rgba, not new hexes) */
+  --vk-blue-tint: rgba(30, 92, 179, 0.10);
+  --vk-gold-tint: rgba(212, 175, 55, 0.10);
+  --vk-red-tint: rgba(204, 0, 0, 0.10);
+  --vk-scrim: rgba(11, 45, 83, 0.55);
+
+  /* Runner states */
+  --state-not-passed-bg: var(--vk-white);
+  --state-not-passed-border: var(--vk-border);
+  --state-passed-bg: var(--vk-blue);
+  --state-called-bg: var(--vk-navy);
+  --state-dns-bg: var(--vk-paper);
+  --state-dns-border: var(--vk-muted);   /* 1px dashed */
+  --state-dnf-bg: var(--vk-red-tint);
+  --state-dnf-border: var(--vk-red);     /* 2px solid */
+  --state-restorable-border: var(--vk-blue); /* 2px dashed */
+
+  /* Shape */
+  --radius-chip: 6px;
+  --radius-btn: 10px;
+  --radius-card: 12px;
+  --radius-sheet: 14px;
+  --shadow-btn: 0 2px 10px rgba(0, 0, 0, 0.08);
+  --shadow-sheet: 0 10px 30px rgba(0, 0, 0, 0.18);
+
+  /* Type */
+  --font-display: 'Montserrat', system-ui, sans-serif; /* 600/700/800 */
+  --font-body: 'Inter', system-ui, sans-serif;         /* 400–700 */
+}
+
+/* Dark mode: navy surfaces, keep state colours; verify contrast per component. */
+.dark {
+  --vk-paper: #071D36;
+  --vk-band: #103A70;
+  --vk-border: #174A92;
+  --vk-ink: #F7F8FB;
+  --vk-muted: #B9CBE6;
+  --vk-white: #0B2D53;
+}

@@ -66,10 +66,10 @@ function buildCrossCheckpointStatus(primaryRunners, secondaryRunners, alertMinut
 }
 
 const STATUS_ICON = {
-  both: '✅',
-  'primary-only': '⏱️',
-  'secondary-only': '⚠️',
-  neither: '⭕',
+  both: '✓ Both',
+  'primary-only': 'Out only',
+  'secondary-only': 'Return only',
+  neither: '—',
 };
 
 /**
@@ -119,15 +119,15 @@ const LinkedCheckpointOverview = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-center">
           <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{rows.filter(r => r.status !== 'neither').length > 0 ? rows.filter(r => r.status === 'both').length : 0}</div>
-          <div className="text-xs text-gray-600 dark:text-gray-400">Both ✅</div>
+          <div className="text-xs text-gray-600 dark:text-gray-400">Both</div>
         </div>
         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-center">
           <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">{counts.primaryOnly}</div>
-          <div className="text-xs text-gray-600 dark:text-gray-400">CP{primaryCpNumber} Only ⏱️</div>
+          <div className="text-xs text-gray-600 dark:text-gray-400">CP{primaryCpNumber} Only</div>
         </div>
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-center">
           <div className="text-2xl font-bold text-red-700 dark:text-red-300">{counts.secondaryOnly}</div>
-          <div className="text-xs text-gray-600 dark:text-gray-400">CP{secondaryCpNumber} Only ⚠️</div>
+          <div className="text-xs text-gray-600 dark:text-gray-400">CP{secondaryCpNumber} Only</div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-center">
           <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">{avgElapsed}</div>
@@ -137,7 +137,7 @@ const LinkedCheckpointOverview = () => {
 
       {counts.alerts > 0 && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">
-          ⚠️ {counts.alerts} runner{counts.alerts !== 1 ? 's' : ''} passed CP{primaryCpNumber} over {alertMinutes} min ago with no CP{secondaryCpNumber} mark — check status.
+          {counts.alerts} runner{counts.alerts !== 1 ? 's' : ''} passed CP{primaryCpNumber} over {alertMinutes} min ago with no CP{secondaryCpNumber} mark — check status.
         </div>
       )}
 
@@ -145,9 +145,9 @@ const LinkedCheckpointOverview = () => {
       <div className="flex gap-2 flex-wrap">
         {[
           { id: FILTER_ALL, label: 'All' },
-          { id: FILTER_BOTH, label: 'Both ✅' },
-          { id: FILTER_PRIMARY_ONLY, label: `CP${primaryCpNumber} Only ⏱️` },
-          { id: FILTER_SECONDARY_ONLY, label: `CP${secondaryCpNumber} Only ⚠️` },
+          { id: FILTER_BOTH, label: 'Both' },
+          { id: FILTER_PRIMARY_ONLY, label: `CP${primaryCpNumber} Only` },
+          { id: FILTER_SECONDARY_ONLY, label: `CP${secondaryCpNumber} Only` },
         ].map(f => (
           <button
             key={f.id}
@@ -191,7 +191,7 @@ const LinkedCheckpointOverview = () => {
                 <td className="py-2 pr-4 text-gray-700 dark:text-gray-300">{row.elapsed}</td>
                 <td className="py-2">
                   {row.isAlert
-                    ? <span className="text-red-600 dark:text-red-400">⚠️ Alert</span>
+                    ? <span className="text-red-600 dark:text-red-400">Alert</span>
                     : STATUS_ICON[row.status]
                   }
                 </td>

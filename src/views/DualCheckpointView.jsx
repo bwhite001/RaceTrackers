@@ -81,7 +81,7 @@ const DualCheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         variant="operational"
         title={currentRace?.name}
         moduleType={MODULE_TYPES.CHECKPOINT}
-        moduleLabel={`🔗 ${primaryName} & ${secondaryName}`}
+        moduleLabel={`${primaryName} & ${secondaryName}`}
         onExit={onExitAttempt}
       />
 

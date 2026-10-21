@@ -136,7 +136,7 @@ test.describe('Linked Checkpoint Journey', () => {
     await step('Home screen — navigate to Checkpoint Operations', async () => {
       await page.goto(BASE_URL);
       await page.waitForSelector('h1', { timeout: 10000 });
-      const cpBtn = page.getByRole('button', { name: /checkpoint operations/i });
+      const cpBtn = page.getByRole('button', { name: /^checkpoint\b/i });
       const visible = await cpBtn.isVisible({ timeout: 5000 }).catch(() => false);
       if (!visible) { test.skip(true, 'Checkpoint Operations button not found'); return; }
       await cpBtn.click();
@@ -228,7 +228,7 @@ test.describe('Linked Checkpoint Journey', () => {
       await page.waitForTimeout(500);
 
       // Summary stats should show at least 1 "Both" and at least 1 "primary-only"
-      await expect(page.getByText(/Both ✅/i)).toBeVisible({ timeout: 5000 });
+      await expect(page.getByRole('button', { name: /^Both$/i })).toBeVisible({ timeout: 5000 });
       await expect(page.getByText(/CP1 Only/i)).toBeVisible({ timeout: 3000 });
     });
   });

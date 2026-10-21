@@ -244,11 +244,32 @@ export const SEGMENT_DURATION_MINUTES = 5;
  * Default Status Colors
  */
 export const DEFAULT_STATUS_COLORS = {
-  'not-started': '#9ca3af',  // Gray-400
-  'passed': '#10b981',       // Green-500
-  'non-starter': '#ef4444',  // Red-500
-  'dnf': '#f59e0b'          // Amber-500
+  'not-started': '#FFFFFF',  // white tile, border carries the state
+  'passed': '#1E5CB3',       // club blue
+  'called-in': '#0B2D53',    // club navy
+  'non-starter': '#5A6579',  // muted, dashed border
+  'dnf': '#CC0000'           // club red
 };
+
+/** Pre-VK4WIP defaults — persisted settings equal to these were never customised. */
+const LEGACY_STATUS_COLORS = {
+  'not-started': '#9ca3af',
+  'passed': '#10b981',
+  'non-starter': '#ef4444',
+  'dnf': '#f59e0b'
+};
+
+/**
+ * Bring persisted status colours onto the club palette without losing a
+ * user's own choices: untouched legacy defaults are replaced, customised
+ * colours are kept, and new keys (called-in) are filled from the defaults.
+ */
+export function upgradeStatusColors(colors) {
+  if (!colors) return { ...DEFAULT_STATUS_COLORS };
+  const untouched = Object.entries(LEGACY_STATUS_COLORS)
+    .every(([k, v]) => String(colors[k] ?? '').toLowerCase() === v);
+  return untouched ? { ...DEFAULT_STATUS_COLORS } : { ...DEFAULT_STATUS_COLORS, ...colors };
+}
 
 /**
  * Default Settings

@@ -1,4 +1,5 @@
 import React from 'react';
+import { ArrowDownTrayIcon, PlusIcon } from '@heroicons/react/24/outline';
 import RACE_TEMPLATES from '../../data/templates/index';
 
 /**
@@ -27,7 +28,7 @@ function TemplateSelectionStep({ onSelect, onImportFromWebScorer }) {
         className="w-full text-left p-4 rounded-lg border-2 border-green-300 dark:border-green-700 hover:border-green-500 dark:hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors group"
       >
         <div className="flex items-center gap-3">
-          <span className="text-2xl">📥</span>
+          <ArrowDownTrayIcon className="w-7 h-7 text-vk-blue" aria-hidden="true" />
           <div>
             <p className="font-medium text-gray-900 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-300">
               Import from WebScorer
@@ -45,7 +46,7 @@ function TemplateSelectionStep({ onSelect, onImportFromWebScorer }) {
         className="w-full text-left p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-navy-500 dark:hover:border-navy-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
       >
         <div className="flex items-center gap-3">
-          <span className="text-2xl">➕</span>
+          <PlusIcon className="w-7 h-7 text-vk-blue" aria-hidden="true" />
           <div>
             <p className="font-medium text-gray-900 dark:text-white group-hover:text-navy-700 dark:group-hover:text-navy-300">
               Start from Scratch
@@ -85,12 +86,12 @@ function TemplateSelectionStep({ onSelect, onImportFromWebScorer }) {
               )}
               {template.defaultStartTime && (
                 <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                  🕐 {template.defaultStartTime.slice(0, 5)}
+                  Start {template.defaultStartTime.slice(0, 5)}
                 </span>
               )}
               {template.baseLocation && (
                 <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300">
-                  📍 {template.baseLocation}
+                  {template.baseLocation}
                 </span>
               )}
             </div>

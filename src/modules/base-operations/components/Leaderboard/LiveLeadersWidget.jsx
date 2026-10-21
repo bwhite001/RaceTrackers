@@ -23,7 +23,6 @@ export default function LiveLeadersWidget({ genderGroups }) {
   return (
     <div className="rounded-lg border-2 border-yellow-200 dark:border-yellow-700 bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 p-4">
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-xl" role="img" aria-label="Crown">👑</span>
         <h2 className="text-base font-semibold text-gray-900 dark:text-white">Current Leaders</h2>
       </div>
 
@@ -44,7 +43,7 @@ export default function LiveLeadersWidget({ genderGroups }) {
                 <span className={`text-xs font-semibold uppercase tracking-wider ${config.color}`}>
                   {config.label}
                 </span>
-                <span className="text-lg" role="img" aria-label="First place">🥇</span>
+                <span aria-label="First place" className="inline-flex w-7 h-7 rounded-full items-center justify-center bg-vk-gold text-vk-ink font-extrabold text-sm">1</span>
               </div>
 
               {/* Bib */}

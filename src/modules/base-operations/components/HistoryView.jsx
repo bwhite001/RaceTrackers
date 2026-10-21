@@ -14,7 +14,6 @@ const HistoryView = ({ batches, checkpoints, onEdit, onVoid }) => {
   if (batches.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-        <span className="text-5xl mb-3" role="img" aria-label="history">📋</span>
         <p className="font-medium">No batches yet</p>
         <p className="text-sm mt-1">Record your first batch to see it appear here</p>
       </div>
@@ -35,7 +34,7 @@ const HistoryView = ({ batches, checkpoints, onEdit, onVoid }) => {
           onClick={() => window.print()}
           className="print:hidden px-3 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
-          🖨 Print Session
+          Print Session
         </button>
       </div>
 

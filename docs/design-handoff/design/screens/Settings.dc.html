@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1E5CB3}a:hover{color:#0B2D53}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #F7F8FB; font-family: Inter, system-ui, sans-serif; color: #222A35; display: flex; flex-direction: column">
+
+  <header style="background: #0B2D53; color: #FFFFFF; padding: 16px 12px 18px; display: flex; align-items: center; gap: 8px">
+    <a href="Home.dc.html" aria-label="Back" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <div style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 18px">Settings</div>
+  </header>
+
+  <main style="flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 18px">
+
+    <section style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="margin: 0; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: #1E5CB3">Display</h2>
+      <div style="background: #FFFFFF; border: 1px solid #E0E6F0; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 18px">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <div style="font-size: 14px; font-weight: 600">Theme</div>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: #EEF3FA; border-radius: 10px; padding: 4px; gap: 4px">
+            <button type="button" style="min-height: 44px; border: 0; border-radius: 8px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.08); font-family: Inter, sans-serif; font-weight: 700; font-size: 14px; color: #0B2D53">Light</button>
+            <button type="button" style="min-height: 44px; border: 0; border-radius: 8px; background: transparent; font-family: Inter, sans-serif; font-weight: 600; font-size: 14px; color: #5A6579">Dark</button>
+            <button type="button" style="min-height: 44px; border: 0; border-radius: 8px; background: transparent; font-family: Inter, sans-serif; font-weight: 600; font-size: 14px; color: #5A6579">Sunlight</button>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; justify-content: space-between; align-items: baseline">
+            <label for="ts" style="font-size: 14px; font-weight: 600">Text size</label>
+            <span style="font-size: 13px; color: #5A6579">Large · 115%</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px">
+            <span style="font-size: 13px; font-weight: 700" aria-hidden="true">A</span>
+            <div style="flex: 1; position: relative; height: 24px; display: flex; align-items: center">
+              <div style="width: 100%; height: 6px; border-radius: 9999px; background: #E0E6F0"></div>
+              <div style="position: absolute; left: 0; width: 60%; height: 6px; border-radius: 9999px; background: #1E5CB3"></div>
+              <div style="position: absolute; left: calc(60% - 12px); width: 24px; height: 24px; border-radius: 9999px; background: #FFFFFF; border: 2px solid #1E5CB3; box-sizing: border-box; box-shadow: 0 1px 3px rgba(0,0,0,0.08)"></div>
+            </div>
+            <span style="font-size: 20px; font-weight: 700" aria-hidden="true">A</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="margin: 0; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: #1E5CB3">Status colours</h2>
+      <div style="background: #FFFFFF; border: 1px solid #E0E6F0; border-radius: 12px; display: flex; flex-direction: column">
+        <button type="button" style="min-height: 56px; padding: 0 16px; border: 0; border-bottom: 1px solid #E0E6F0; background: transparent; display: flex; align-items: center; gap: 12px; font-family: Inter, sans-serif; font-size: 15px; color: #222A35; text-align: left">
+          <span style="width: 28px; height: 28px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E0E6F0"></span><span style="flex: 1">Not yet</span><span style="font-size: 12px; color: #5A6579">White</span>
+        </button>
+        <button type="button" style="min-height: 56px; padding: 0 16px; border: 0; border-bottom: 1px solid #E0E6F0; background: transparent; display: flex; align-items: center; gap: 12px; font-family: Inter, sans-serif; font-size: 15px; color: #222A35; text-align: left">
+          <span style="width: 28px; height: 28px; border-radius: 6px; background: #1E5CB3"></span><span style="flex: 1">Passed</span><span style="font-size: 12px; color: #5A6579">Club blue</span>
+        </button>
+        <button type="button" style="min-height: 56px; padding: 0 16px; border: 0; border-bottom: 1px solid #E0E6F0; background: transparent; display: flex; align-items: center; gap: 12px; font-family: Inter, sans-serif; font-size: 15px; color: #222A35; text-align: left">
+          <span style="width: 28px; height: 28px; border-radius: 6px; background: #0B2D53"></span><span style="flex: 1">Called in</span><span style="font-size: 12px; color: #5A6579">Navy</span>
+        </button>
+        <button type="button" style="min-height: 56px; padding: 0 16px; border: 0; border-bottom: 1px solid #E0E6F0; background: transparent; display: flex; align-items: center; gap: 12px; font-family: Inter, sans-serif; font-size: 15px; color: #222A35; text-align: left">
+          <span style="width: 28px; height: 28px; border-radius: 6px; background: #F7F8FB; border: 1px dashed #5A6579; box-sizing: border-box"></span><span style="flex: 1">Non-starter</span><span style="font-size: 12px; color: #5A6579">Grey, dashed</span>
+        </button>
+        <button type="button" style="min-height: 56px; padding: 0 16px; border: 0; background: transparent; display: flex; align-items: center; gap: 12px; font-family: Inter, sans-serif; font-size: 15px; color: #222A35; text-align: left">
+          <span style="width: 28px; height: 28px; border-radius: 6px; background: rgba(204,0,0,0.1); border: 2px solid #CC0000; box-sizing: border-box"></span><span style="flex: 1">DNF</span><span style="font-size: 12px; color: #5A6579">Red outline</span>
+        </button>
+      </div>
+      <a href="#" style="font-size: 14px; font-weight: 600; align-self: flex-start; padding: 6px 0">Reset to club colours</a>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="margin: 0; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: #1E5CB3">Race data</h2>
+      <a href="ShareConfig.dc.html" style="text-decoration: none; background: #FFFFFF; border: 1px solid #E0E6F0; border-radius: 12px; min-height: 56px; padding: 0 16px; display: flex; align-items: center; gap: 12px; color: #222A35; font-size: 15px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E5CB3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3"/></svg>
+        <span style="flex: 1">Share or import race config</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A6579" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </a>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

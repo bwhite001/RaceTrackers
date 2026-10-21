@@ -348,6 +348,38 @@ export class TimeUtils {
   }
 
   /**
+   * Add (or subtract) whole minutes to an ISO timestamp.
+   * @param {string} iso
+   * @param {number} minutes
+   * @returns {string} ISO
+   */
+  static addMinutes(iso, minutes) {
+    return addMinutes(parseISO(iso), minutes).toISOString();
+  }
+
+  /**
+   * Whole minutes from a to b (b − a), rounded down.
+   * @param {string} a ISO
+   * @param {string} b ISO
+   */
+  static minutesBetween(a, b) {
+    return Math.floor((parseISO(b).getTime() - parseISO(a).getTime()) / 60000);
+  }
+
+  /**
+   * Set the local clock time (HH, MM) on the date of a reference timestamp.
+   * @param {string} refIso
+   * @param {number} hours
+   * @param {number} minutes
+   * @returns {string} ISO
+   */
+  static atLocalTime(refIso, hours, minutes) {
+    const d = parseISO(refIso);
+    d.setHours(hours, minutes, 0, 0);
+    return d.toISOString();
+  }
+
+  /**
    * Calculate elapsed time between a checkpoint timestamp and a batch start time.
    * @param {string} checkpointTime - ISO string of checkpoint passage
    * @param {string} batchStartTime - ISO string of batch start

@@ -266,7 +266,7 @@ const SharedRunnerGrid = ({
                 <div className="flex items-center justify-between w-full">
                     <div className="flex flex-col">{content}</div>
                     <div className="text-xs opacity-75">
-                        {runner.status === RUNNER_STATUSES.PASSED ? "✅" : ""}
+                        {runner.status === RUNNER_STATUSES.PASSED ? "✓" : ""}
                     </div>
                 </div>
             );

@@ -507,11 +507,11 @@ export default function WebScorerImportWizard({ onClose }) {
                   {state.raceName}
                 </h3>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm text-gray-600 dark:text-gray-400">
-                  <span>📅 Date</span><span className="text-gray-900 dark:text-white">{state.raceDate}</span>
-                  <span>🕕 Start</span><span className="text-gray-900 dark:text-white">{state.startTime}</span>
-                  <span>🏁 Checkpoints</span><span className="text-gray-900 dark:text-white">{state.checkpointNames.length}</span>
-                  <span>👟 Runners</span><span className="text-gray-900 dark:text-white">{state.preview?.valid?.length ?? 0}</span>
-                  <span>📦 Categories</span><span className="text-gray-900 dark:text-white">{batchEntries.length || 1}</span>
+                  <span>Date</span><span className="text-gray-900 dark:text-white">{state.raceDate}</span>
+                  <span>Start</span><span className="text-gray-900 dark:text-white">{state.startTime}</span>
+                  <span>Checkpoints</span><span className="text-gray-900 dark:text-white">{state.checkpointNames.length}</span>
+                  <span>Runners</span><span className="text-gray-900 dark:text-white">{state.preview?.valid?.length ?? 0}</span>
+                  <span>Categories</span><span className="text-gray-900 dark:text-white">{batchEntries.length || 1}</span>
                 </div>
                 {batchEntries.length > 0 && (
                   <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-0.5">

@@ -43,11 +43,11 @@ const RunnerCell = ({ runner, isLoading = false, onMark, onUnmark }) => {
       aria-label={`Runner ${runner.number}, status: ${runner.status}`}
     >
       {runner.passedPrimary && !isLocked && (
-    <span data-testid="cell-passed-primary" className="absolute top-0.5 left-0.5 text-[8px] leading-none" aria-hidden="true" title="Passed linked checkpoint">⭐</span>
+    <span data-testid="cell-passed-primary" className="absolute top-1 left-1 w-1.5 h-1.5 rounded-full bg-vk-gold" aria-hidden="true" title="Passed linked checkpoint" />
   )}
   {isLocked && (
-        <span data-testid="cell-locked" className="absolute top-0.5 right-0.5 text-[8px] leading-none opacity-70" aria-hidden="true">
-          🔒
+        <span data-testid="cell-locked" className="absolute top-0.5 right-0.5 text-[9px] leading-none font-bold opacity-80" aria-hidden="true">
+          ✓
         </span>
       )}
       <span className="font-bold text-base leading-none">{runner.number}</span>

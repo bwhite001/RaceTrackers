@@ -23,53 +23,34 @@
     /* Animation Duration */
     --animation-duration: 250ms;
     
-    /* Navy Blue Primary Colors */
-    --color-navy-50: 240 249 255;
-    --color-navy-100: 224 242 254;
-    --color-navy-200: 186 230 253;
-    --color-navy-300: 125 211 252;
-    --color-navy-400: 56 189 248;
-    --color-navy-500: 14 165 233;
-    --color-navy-600: 2 132 199;
-    --color-navy-700: 3 105 161;
-    --color-navy-800: 7 89 133;
-    --color-navy-900: 12 74 110;
-    --color-navy-950: 8 47 73;
+    /* VK4WIP brand tokens (docs/design-handoff/design-tokens/tokens.css) */
+    --vk-navy: #0B2D53;      /* app bars, headings, called-in */
+    --vk-blue: #1E5CB3;      /* passed, links, focus, secondary buttons */
+    --vk-gold: #D4AF37;      /* primary button (ink text), call due, pending */
+    --vk-red: #CC0000;       /* DNF, destructive, overdue — sparingly */
+    --vk-ink: #222A35;       /* body text, text on gold */
+    --vk-muted: #5A6579;     /* secondary text — 4.5:1 on white, don't lighten */
+    --vk-paper: #F7F8FB;     /* page background */
+    --vk-band: #EEF3FA;      /* panels, selected rows */
+    --vk-border: #E0E6F0;
+    --vk-on-navy: #E9F2FF;   /* light text on navy */
+    --vk-white: #FFFFFF;
+    --vk-blue-tint: rgba(30, 92, 179, 0.10);
+    --vk-gold-tint: rgba(212, 175, 55, 0.10);
+    --vk-red-tint: rgba(204, 0, 0, 0.10);
+    --vk-scrim: rgba(11, 45, 83, 0.55);
 
-    /* Red Accent Colors */
-    --color-accent-red-50: 254 242 242;
-    --color-accent-red-100: 254 226 226;
-    --color-accent-red-200: 254 202 202;
-    --color-accent-red-300: 252 165 165;
-    --color-accent-red-400: 248 113 113;
-    --color-accent-red-500: 239 68 68;
-    --color-accent-red-600: 220 38 38;
-    --color-accent-red-700: 185 28 28;
-    --color-accent-red-800: 153 27 27;
-    --color-accent-red-900: 127 29 29;
-    --color-accent-red-950: 69 10 10;
-
-    /* Gold/Yellow Accent Colors */
-    --color-accent-gold-50: 254 252 232;
-    --color-accent-gold-100: 254 249 195;
-    --color-accent-gold-200: 254 240 138;
-    --color-accent-gold-300: 253 224 71;
-    --color-accent-gold-400: 250 204 21;
-    --color-accent-gold-500: 234 179 8;
-    --color-accent-gold-600: 202 138 4;
-    --color-accent-gold-700: 161 98 7;
-    --color-accent-gold-800: 133 77 14;
-    --color-accent-gold-900: 113 63 18;
-    --color-accent-gold-950: 66 32 6;
-
-    /* Status Colors - Fixed runner status palette */
-    --color-status-not-started: 156 163 175; /* gray-400 */
-    --color-status-passed: 34 197 94; /* green-500 */
-    --color-status-non-starter: 239 68 68; /* red-500 */
-    --color-status-dnf: 234 179 8; /* yellow-500 */
+    /* Status colours — space-separated RGB so Settings can recolour them
+       (applyStatusColorsToDOM writes these). Defaults are the club palette. */
+    --color-status-not-started: 255 255 255; /* white tile, border carries it */
+    --color-status-passed: 30 92 179;        /* club blue */
+    --color-status-called-in: 11 45 83;      /* club navy */
+    --color-status-non-starter: 90 101 121;  /* muted, dashed border */
+    --color-status-dnf: 204 0 0;             /* club red */
 
     /* Typography */
-    --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-family-base: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-display: 'Montserrat', system-ui, sans-serif; /* 600/700/800 */
     
     /* Spacing (4px base) */
     --spacing-base: 0.25rem;
@@ -87,18 +68,19 @@
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   }
 
-  /* Dark mode color overrides */
+  /* Dark mode: navy surfaces, keep state colours */
   .dark {
-    /* Adjust navy colors for dark mode - lighter shades */
-    --color-navy-50: 8 47 73;
-    --color-navy-100: 12 74 110;
-    --color-navy-900: 186 230 253;
-    --color-navy-950: 224 242 254;
+    --vk-paper: #071D36;
+    --vk-band: #103A70;
+    --vk-border: #174A92;
+    --vk-ink: #F7F8FB;
+    --vk-muted: #B9CBE6;
+    --vk-white: #0B2D53;
   }
 
   /* Base styles */
   body {
-    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+    @apply bg-vk-paper dark:bg-gray-900 text-vk-ink dark:text-gray-100;
     font-family: var(--font-family-base);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -106,7 +88,7 @@
 
   /* Focus styles for accessibility */
   *:focus-visible {
-    @apply outline-none ring-2 ring-navy-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
+    @apply outline-none ring-2 ring-vk-blue ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
   }
 
   /* Smooth scrolling */
@@ -233,13 +215,15 @@
     @apply w-full px-3 py-2 border border-gray-300 rounded-md bg-white dark:bg-gray-800 dark:border-gray-600 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-transparent;
   }
 
+  /* Not started is a white tile; badges show it as a bordered neutral chip */
   .status-not-started {
-    background-color: rgb(var(--color-status-not-started) / 0.15);
-    color: rgb(var(--color-status-not-started));
+    background-color: #FFFFFF;
+    border: 1px solid #E0E6F0;
+    color: #5A6579;
   }
   .dark .status-not-started {
-    background-color: rgb(var(--color-status-not-started) / 0.2);
-    color: rgb(var(--color-status-not-started) / 0.85);
+    background-color: transparent;
+    color: #B9CBE6;
   }
 
   .status-passed {
@@ -285,8 +269,8 @@
       45deg,
       transparent,
       transparent 10px,
-      rgba(239, 68, 68, 0.1) 10px,
-      rgba(239, 68, 68, 0.1) 20px
+      rgba(204, 0, 0, 0.1) 10px,
+      rgba(204, 0, 0, 0.1) 20px
     );
   }
 
@@ -294,11 +278,11 @@
     background: linear-gradient(
       135deg,
       transparent 25%,
-      rgba(239, 68, 68, 0.8) 25%,
-      rgba(239, 68, 68, 0.8) 50%,
+      rgba(204, 0, 0, 0.8) 25%,
+      rgba(204, 0, 0, 0.8) 50%,
       transparent 50%,
       transparent 75%,
-      rgba(239, 68, 68, 0.8) 75%
+      rgba(204, 0, 0, 0.8) 75%
     );
     background-size: 20px 20px;
   }
@@ -351,7 +335,7 @@
 @layer utilities {
   /* Text color utilities for status */
   .text-status-not-started {
-    color: rgb(var(--color-status-not-started));
+    color: #5A6579;
   }
 
   .text-status-passed {
@@ -496,32 +480,23 @@
   }
 }
 
-/* Sunlight mode — maximum contrast for outdoor/bright-light use */
-.sunlight-mode {
-  --color-status-passed: 22 163 74;   /* green-600 — stronger than green-500 */
-  --color-status-dnf: 202 138 4;      /* amber-600 */
-  --color-status-non-starter: 220 38 38; /* red-600 */
-  --color-status-not-started: 75 85 99;  /* gray-600 */
+/* Sunlight mode — high contrast for direct sun: pure white page, ink text,
+   thicker borders. Stays inside the club palette (spec §4.4). */
+.sunlight-mode body,
+.sunlight-mode .bg-vk-paper {
+  background: #FFFFFF !important;
 }
 
-.sunlight-mode .runner-button {
-  background: #fbbf24 !important; /* accent-gold-400 */
-  color: #000 !important;
-  border-color: #000 !important;
-  font-weight: 900 !important;
+.sunlight-mode body {
+  color: #222A35;
 }
 
-.sunlight-mode .status-passed {
-  background: #16a34a !important; /* green-600 */
-  color: #fff !important;
+.sunlight-mode .text-vk-muted {
+  color: #222A35 !important;
 }
 
-.sunlight-mode .status-dnf {
-  background: #000 !important;
-  color: #fbbf24 !important; /* gold on black */
-}
-
-.sunlight-mode .status-non-starter {
-  background: #dc2626 !important; /* red-600 */
-  color: #fff !important;
+.sunlight-mode .border,
+.sunlight-mode .border-vk-border {
+  border-width: 2px !important;
+  border-color: #5A6579 !important;
 }

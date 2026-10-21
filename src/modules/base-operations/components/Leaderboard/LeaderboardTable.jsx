@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 const MEDALS = {
-  1: { emoji: '🥇', label: 'First place' },
-  2: { emoji: '🥈', label: 'Second place' },
-  3: { emoji: '🥉', label: 'Third place' },
+  1: { label: 'First place' },
+  2: { label: 'Second place' },
+  3: { label: 'Third place' },
 };
 
 const ROW_BG = {
@@ -88,7 +88,7 @@ export default function LeaderboardTable({
                 >
                   <td className="px-4 py-2 text-center font-bold text-gray-700 dark:text-gray-300">
                     {medal ? (
-                      <span aria-label={medal.label}>{medal.emoji}</span>
+                      <span aria-label={medal.label} className={`inline-flex w-[30px] h-[30px] rounded-full items-center justify-center font-extrabold ${entry.rank === 1 ? 'bg-vk-gold text-vk-ink' : 'bg-vk-band text-vk-ink'}`}>{entry.rank}</span>
                     ) : (
                       <span className="text-gray-400">{entry.rank}</span>
                     )}

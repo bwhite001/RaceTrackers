@@ -7,7 +7,7 @@ import { useRaceStore } from '../../store/useRaceStore.js';
 /**
  * DualRunnerGrid — runner grid for dual-checkpoint operations.
  * When the secondary tab is active, runners who already passed the primary
- * checkpoint get a ⭐ indicator so volunteers know who to expect.
+ * checkpoint get a dot indicator so volunteers know who to expect.
  */
 const DualRunnerGrid = () => {
   const {
@@ -75,7 +75,7 @@ const DualRunnerGrid = () => {
         </div>
         {activeTab === 'secondary' && awaitingReturn > 0 && (
           <p className="mt-2 text-xs text-amber-700 dark:text-amber-400 text-center">
-            ⭐ {awaitingReturn} runner{awaitingReturn !== 1 ? 's' : ''} still expected from outbound checkpoint
+            {awaitingReturn} runner{awaitingReturn !== 1 ? 's' : ''} still expected from outbound checkpoint
           </p>
         )}
       </div>

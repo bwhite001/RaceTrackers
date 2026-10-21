@@ -13,7 +13,7 @@ export const applyThemeToDOM = (darkMode) => {
   // Update meta theme-color for PWA
   const metaTheme = document.querySelector('meta[name="theme-color"]');
   if (metaTheme) {
-    metaTheme.setAttribute('content', darkMode ? '#1f2937' : '#ffffff');
+    metaTheme.setAttribute('content', darkMode ? '#071D36' : '#0B2D53');
   }
 };
 

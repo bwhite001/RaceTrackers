@@ -1,0 +1,48 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-10-21T05:27:00Z"},
+  "title": "RaceTracker — VK4WIP UI",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {"x": 0, "y": 0, "w": 1280, "h": 1080, "title": "Brand & components"},
+    "Home.dc.html": {"x": 0, "y": 1460, "w": 390, "h": 844, "title": "Home — choose your role"},
+    "RaceSetup.dc.html": {"x": 470, "y": 1460, "w": 390, "h": 844, "title": "Race setup — runners"},
+    "ShareConfig.dc.html": {"x": 940, "y": 1460, "w": 390, "h": 844, "title": "Share config — QR"},
+    "Settings.dc.html": {"x": 1410, "y": 1460, "w": 390, "h": 844, "title": "Settings"},
+    "CpMarkOff.dc.html": {"x": 0, "y": 2664, "w": 390, "h": 844, "title": "Checkpoint — Mark off", "is_interactive": true},
+    "CpCallout.dc.html": {"x": 470, "y": 2664, "w": 390, "h": 844, "title": "Checkpoint — Callout sheet"},
+    "CpReadout.dc.html": {"x": 940, "y": 2664, "w": 390, "h": 844, "title": "Checkpoint — Read-out (busy block)", "is_interactive": true},
+    "CpOverview.dc.html": {"x": 1410, "y": 2664, "w": 390, "h": 844, "title": "Checkpoint — Overview", "is_interactive": true},
+    "BaseEntry.dc.html": {"x": 0, "y": 3868, "w": 1280, "h": 640, "title": "Base station — Receive (desktop)", "expand": "fill", "is_interactive": true},
+    "BaseOverview.dc.html": {"x": 1360, "y": 3868, "w": 1280, "h": 1240, "title": "Base station — Race overview", "expand": "fill"},
+    "BaseStatus.dc.html": {"x": 2720, "y": 3868, "w": 1280, "h": 640, "title": "Base station — DNF / DNS bulk add", "expand": "fill", "is_interactive": true},
+    "BaseReports.dc.html": {"x": 4080, "y": 3868, "w": 1280, "h": 680, "title": "Base station — Reports & data checks", "expand": "fill", "is_interactive": true},
+    "BaseEntryTablet.dc.html": {"x": 0, "y": 5468, "w": 1112, "h": 834, "title": "Base station — Receive (tablet, landscape)", "is_interactive": true},
+    "BaseEntryPhone.dc.html": {"x": 1192, "y": 5468, "w": 390, "h": 844, "title": "Base station — Receive (phone)", "is_interactive": true}
+  },
+  "order": [
+    "Main.dc.html",
+    "Home.dc.html",
+    "RaceSetup.dc.html",
+    "ShareConfig.dc.html",
+    "Settings.dc.html",
+    "CpMarkOff.dc.html",
+    "CpCallout.dc.html",
+    "CpReadout.dc.html",
+    "CpOverview.dc.html",
+    "BaseEntry.dc.html",
+    "BaseOverview.dc.html",
+    "BaseStatus.dc.html",
+    "BaseReports.dc.html",
+    "BaseEntryTablet.dc.html",
+    "BaseEntryPhone.dc.html"
+  ],
+  "notes": {
+    "setup": {"x": 0, "y": 1180, "text": "Race director — setup & sharing", "kind": "title1", "maxW": 1800},
+    "checkpoint": {"x": 0, "y": 2384, "text": "Checkpoint volunteer — phone", "kind": "title1", "maxW": 1800},
+    "base": {"x": 0, "y": 3588, "text": "Base station operator — desktop", "kind": "title1", "maxW": 5360},
+    "basesmall": {"x": 0, "y": 5208, "text": "Same base screen on tablet & phone", "kind": "title1", "maxW": 1582}
+  },
+  "designSystems": []
+}

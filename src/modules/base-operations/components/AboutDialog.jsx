@@ -109,7 +109,7 @@ const AboutDialog = ({ isOpen, onClose }) => {
                     Development Team
                   </h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Built with ❤️ by the RaceTracker Pro team
+                    Built by the RaceTracker Pro team
                   </p>
                 </div>
                 <div>

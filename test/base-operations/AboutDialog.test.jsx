@@ -82,7 +82,7 @@ describe('AboutDialog', () => {
 
     expect(screen.getByText('Credits')).toBeInTheDocument();
     expect(screen.getByText('Development Team')).toBeInTheDocument();
-    expect(screen.getByText(/Built with ❤️/)).toBeInTheDocument();
+    expect(screen.getByText(/Built by the RaceTracker Pro team/)).toBeInTheDocument();
 
     // Open source libraries
     expect(screen.getByText('Open Source Libraries')).toBeInTheDocument();
@@ -177,7 +177,7 @@ describe('AboutDialog', () => {
     );
 
     expect(screen.getByText('Development Team')).toBeInTheDocument();
-    expect(screen.getByText(/Built with ❤️ by the RaceTracker Pro team/)).toBeInTheDocument();
+    expect(screen.getByText(/Built by the RaceTracker Pro team/)).toBeInTheDocument();
   });
 
   it('shows open source acknowledgments', () => {

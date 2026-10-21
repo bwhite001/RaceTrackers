@@ -24,6 +24,14 @@ const buttonVariants = {
   outline: 'border border-slate-300 bg-transparent hover:bg-slate-50 active:bg-slate-100 text-slate-900 dark:border-navy-600 dark:text-navy-400 dark:hover:bg-navy-800 dark:hover:text-white',
   subtle: 'bg-transparent text-slate-700 hover:bg-slate-100 active:bg-slate-100 dark:text-slate-300 dark:hover:bg-navy-900/40',
   link: 'bg-transparent hover:underline text-navy-900 dark:text-navy-400 p-0',
+  // VK4WIP brand variants (spec §3.4) — use with size="action" or "primary"
+  gold: 'bg-vk-gold text-vk-ink shadow-btn hover:bg-gold-400 active:bg-vk-gold',
+  blueOutline: 'bg-transparent text-vk-blue border-2 border-vk-blue hover:bg-vk-blue-tint dark:text-navy-300 dark:border-navy-300',
+  blue: 'bg-vk-blue text-white hover:bg-navy-700 active:bg-vk-blue',
+  plain: 'bg-white text-vk-ink border border-vk-muted hover:bg-vk-paper dark:bg-gray-800 dark:text-gray-100',
+  red: 'bg-vk-red text-white hover:bg-red-700 active:bg-vk-red',
+  redOutline: 'bg-white text-vk-red border-2 border-vk-red hover:bg-vk-red-tint dark:bg-gray-800',
+  locked: 'bg-white text-vk-muted border-2 border-dashed border-vk-border cursor-not-allowed disabled:!opacity-100 dark:bg-gray-800',
 };
 
 // Button size styles
@@ -32,6 +40,9 @@ const buttonSizes = {
   md: 'px-4 py-2.5 text-base',
   lg: 'px-6 py-3 text-lg',
   xl: 'px-8 py-4 text-xl',
+  // Brand action buttons: Montserrat 800, uppercase, radius 10
+  action: 'min-h-[48px] px-4 font-display font-extrabold text-sm uppercase tracking-[0.6px] !rounded-btn',
+  primary: 'min-h-[52px] px-[18px] font-display font-extrabold text-sm uppercase tracking-[0.6px] !rounded-btn',
 };
 
 // Base button styles

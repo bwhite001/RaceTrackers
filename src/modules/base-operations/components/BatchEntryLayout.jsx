@@ -165,8 +165,8 @@ const BatchEntryLayout = ({ onUnsavedChanges }) => {
         {/* Tab bar */}
         <div className="flex border-b border-gray-200 dark:border-gray-700 px-4">
           {[
-            { id: 'draft',   label: '📝 Draft',   count: draftCount,   ariaLabel: 'Draft' },
-            { id: 'history', label: '📋 History',  count: historyCount, ariaLabel: 'History' },
+            { id: 'draft',   label: 'Draft',   count: draftCount,   ariaLabel: 'Draft' },
+            { id: 'history', label: 'History',  count: historyCount, ariaLabel: 'History' },
           ].map(tab => (
             <button
               key={tab.id}

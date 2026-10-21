@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Checkpoint — mark off runners</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1E5CB3}a:hover{color:#0B2D53}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #F7F8FB; font-family: Inter, system-ui, sans-serif; color: #222A35; display: flex; flex-direction: column; position: relative">
+
+  <header style="background: #0B2D53; color: #FFFFFF; padding: 12px 12px 14px; display: flex; flex-direction: column; gap: 12px">
+    <div style="display: flex; align-items: center; gap: 6px">
+      <a href="Home.dc.html" aria-label="Leave checkpoint" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </a>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex: 1">
+        <div style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 18px">Checkpoint 3</div>
+        <div style="font-size: 12px; color: #E9F2FF">England Creek &amp; Joyners Ridge · VK4PMC</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #E9F2FF; padding-right: 6px">
+        <span style="width: 8px; height: 8px; border-radius: 9999px; background: #D4AF37"></span>Saved
+      </div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <div style="background: rgba(255,255,255,0.08); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px">
+        <div style="font-family: Montserrat, sans-serif; font-weight: 800; font-size: 22px">{{passed}}</div>
+        <div style="font-size: 11px; font-weight: 600; color: #E9F2FF">Passed</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.08); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px">
+        <div style="font-family: Montserrat, sans-serif; font-weight: 800; font-size: 22px">{{toGo}}</div>
+        <div style="font-size: 11px; font-weight: 600; color: #E9F2FF">Still to come</div>
+      </div>
+      <div style="background: #D4AF37; border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; color: #222A35">
+        <div style="font-family: Montserrat, sans-serif; font-weight: 800; font-size: 22px">{{notCalled}}</div>
+        <div style="font-size: 11px; font-weight: 700">To call in</div>
+      </div>
+    </div>
+  </header>
+
+  <div style="padding: 14px 16px 0; display: flex; gap: 8px">
+    <label for="quick" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Bib numbers</label>
+    <input id="quick" type="text" inputmode="numeric" placeholder="Bib numbers, e.g. 157, 161" value="{{entry}}" onChange="{{onType}}" onKeyDown="{{onKey}}" style="flex: 1; min-width: 0; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 18px; color: #222A35; background: #FFFFFF; border: 2px solid #1E5CB3; border-radius: 10px; padding: 10px 12px; min-height: 52px; box-sizing: border-box; outline: none">
+    <button type="button" onClick="{{submit}}" style="font-family: Montserrat, sans-serif; font-weight: 800; font-size: 14px; letter-spacing: 0.6px; text-transform: uppercase; background: #D4AF37; color: #222A35; border: 0; border-radius: 10px; padding: 0 18px; min-height: 52px; box-shadow: 0 2px 10px rgba(0,0,0,0.08)">Mark</button>
+  </div>
+  <div style="padding: 6px 16px 0; min-height: 20px; font-size: 13px; font-weight: 600; color: #1E5CB3" aria-live="polite">{{message}}</div>
+
+  <div style="padding: 8px 16px 0; display: flex; gap: 8px; overflow-x: auto">
+    <sc-for list="{{groups}}" as="g" hint-placeholder-count="5">
+      <button type="button" onClick="{{g.pick}}" style="{{g.style}}">{{g.label}}</button>
+    </sc-for>
+  </div>
+
+  <div style="flex: 1; padding: 12px 16px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 64px; gap: 8px; align-content: start">
+    <sc-for list="{{tiles}}" as="t" hint-placeholder-count="20">
+      <button type="button" onClick="{{t.tap}}" aria-label="{{t.aria}}" style="{{t.style}}">
+        <span style="{{t.numStyle}}">{{t.num}}</span>
+        <span style="font-size: 11px; font-weight: 700">{{t.sub}}</span>
+      </button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{undo.show}}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position: absolute; left: 16px; right: 16px; bottom: 84px; background: #222A35; color: #FFFFFF; border-radius: 12px; padding: 8px 8px 8px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.18)">
+      <span style="flex: 1; font-size: 14px; font-weight: 600">{{undo.text}}</span>
+      <button type="button" onClick="{{undo.act}}" style="min-height: 44px; padding: 0 16px; border: 0; border-radius: 8px; background: #D4AF37; color: #222A35; font-family: Montserrat, sans-serif; font-weight: 800; font-size: 13px; letter-spacing: 0.6px; text-transform: uppercase">Undo</button>
+    </div>
+  </sc-if>
+
+  <nav style="background: #FFFFFF; border-top: 1px solid #E0E6F0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); height: 72px" aria-label="Checkpoint sections">
+    <a href="CpMarkOff.dc.html" aria-current="page" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #0B2D53; font-size: 12px; font-weight: 700; border-top: 3px solid #D4AF37">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0B2D53" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M15 17l2 2 4-4"/></svg>
+      Mark off
+    </a>
+    <a href="CpCallout.dc.html" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #5A6579; font-size: 12px; font-weight: 600; border-top: 3px solid transparent; position: relative">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A6579" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18h.01"/><path d="M8.5 14.5a5 5 0 0 1 7 0"/><path d="M5 11a10 10 0 0 1 14 0"/></svg>
+      Callout
+      <span style="position: absolute; top: 10px; left: calc(50% + 8px); background: #D4AF37; color: #222A35; border-radius: 9999px; min-width: 20px; height: 20px; padding: 0 5px; box-sizing: border-box; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center">{{notCalled}}</span>
+    </a>
+    <a href="CpOverview.dc.html" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #5A6579; font-size: 12px; font-weight: 600; border-top: 3px solid transparent">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A6579" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      Overview
+    </a>
+  </nav>
+
+  <sc-if value="{{sheet.show}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; background: rgba(11,45,83,0.55); display: flex; flex-direction: column; justify-content: flex-end">
+      <button type="button" onClick="{{sheet.cancel}}" aria-label="Close" style="flex: 1; border: 0; background: transparent"></button>
+      <section role="dialog" aria-labelledby="sheethd" style="background: #FFFFFF; border-radius: 14px 14px 0 0; padding: 18px 20px 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 -10px 30px rgba(0,0,0,0.18)">
+        <div style="display: flex; align-items: center; gap: 12px">
+          <div style="font-family: Montserrat, sans-serif; font-weight: 800; font-size: 32px; color: #0B2D53" id="sheethd">{{sheet.num}}</div>
+          <div style="display: flex; flex-direction: column; gap: 2px; flex: 1">
+            <div style="font-weight: 700; font-size: 15px">{{sheet.title}}</div>
+            <div style="font-size: 13px; color: #5A6579">{{sheet.sub}}</div>
+          </div>
+        </div>
+
+        <sc-if value="{{sheet.warn}}" hint-placeholder-val="{{ false }}">
+          <div style="background: rgba(212,175,55,0.1); border: 1px solid #D4AF37; border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.5">Base already has <strong>{{sheet.origText}}</strong>. A changed time goes back on the callout sheet as a correction.</div>
+        </sc-if>
+
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div style="font-size: 12px; font-weight: 700; color: #5A6579; text-transform: uppercase; letter-spacing: 1px">Time passed</div>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <button type="button" onClick="{{sheet.m5}}" aria-label="5 minutes earlier" style="width: 52px; min-height: 52px; border-radius: 10px; border: 1px solid #E0E6F0; background: #F7F8FB; font-family: Inter, sans-serif; font-weight: 700; font-size: 14px; color: #222A35">−5</button>
+            <button type="button" onClick="{{sheet.m1}}" aria-label="1 minute earlier" style="width: 52px; min-height: 52px; border-radius: 10px; border: 1px solid #E0E6F0; background: #F7F8FB; font-family: Inter, sans-serif; font-weight: 700; font-size: 14px; color: #222A35">−1</button>
+            <div style="flex: 1; text-align: center; font-family: Montserrat, sans-serif; font-weight: 800; font-size: 36px; color: #0B2D53; font-variant-numeric: tabular-nums">{{sheet.timeText}}</div>
+            <button type="button" onClick="{{sheet.p1}}" aria-label="1 minute later" style="width: 52px; min-height: 52px; border-radius: 10px; border: 1px solid #E0E6F0; background: #F7F8FB; font-family: Inter, sans-serif; font-weight: 700; font-size: 14px; color: #222A35">+1</button>
+            <button type="button" onClick="{{sheet.p5}}" aria-label="5 minutes later" style="width: 52px; min-height: 52px; border-radius: 10px; border: 1px solid #E0E6F0; background: #F7F8FB; font-family: Inter, sans-serif; font-weight: 700; font-size: 14px; color: #222A35">+5</button>
+          </div>
+          <div style="font-size: 12px; color: #5A6579; text-align: center">{{sheet.hint}}</div>
+        </div>
+
+        <button type="button" onClick="{{sheet.save}}" style="font-family: Montserrat, sans-serif; font-weight: 800; font-size: 14px; letter-spacing: 0.6px; text-transform: uppercase; background: #D4AF37; color: #222A35; border: 0; border-radius: 10px; padding: 14px 18px; min-height: 52px; box-shadow: 0 2px 10px rgba(0,0,0,0.08)">{{sheet.saveLabel}}</button>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+          <button type="button" onClick="{{sheet.cancel}}" style="min-height: 48px; border-radius: 10px; border: 1px solid #E0E6F0; background: #FFFFFF; font-family: Inter, sans-serif; font-weight: 700; font-size: 14px; color: #222A35">Cancel</button>
+          <button type="button" onClick="{{sheet.alt}}" style="min-height: 48px; border-radius: 10px; border: 2px solid #1E5CB3; background: transparent; font-family: Inter, sans-serif; font-weight: 700; font-size: 14px; color: #1E5CB3">{{sheet.altLabel}}</button>
+        </div>
+      </section>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.clock = 7 * 60 + 47;
+    this.state = {
+      group: 140,
+      entry: '',
+      message: 'Tap a number as the runner passes. Tap again to fix its time.',
+      runners: {
+        140: { s: 'called', t: 451 }, 141: { s: 'called', t: 453 },
+        143: { s: 'passed', t: 461 }, 145: { s: 'passed', t: 462 },
+        146: { s: 'dns' }, 150: { s: 'dnf' },
+        152: { s: 'passed', t: 464 }, 155: { s: 'passed', t: 464 }
+      },
+      removed: { 148: 457 },
+      sheet: null,
+      undo: null
+    };
+  }
+  fmt(m) {
+    var h = Math.floor(m / 60), mm = m % 60;
+    return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm;
+  }
+  mark(nums) {
+    var self = this;
+    var r = Object.assign({}, this.state.runners);
+    var removed = Object.assign({}, this.state.removed);
+    var done = [];
+    nums.forEach(function (n) {
+      if (n < 100 || n > 349) return;
+      var cur = r[n];
+      if (cur) return;
+      r[n] = { s: 'passed', t: self.clock };
+      delete removed[n];
+      done.push(n);
+    });
+    var group = this.state.group;
+    if (done.length) group = 100 + Math.floor((done[0] - 100) / 20) * 20;
+    this.setState({
+      runners: r, removed: removed, entry: '', group: group, undo: null,
+      message: done.length ? (done.length === 1 ? done[0] + ' marked at ' + this.fmt(this.clock) : done.length + ' runners marked at ' + this.fmt(this.clock)) : 'No new runners in that entry'
+    });
+  }
+  parse(text) {
+    var out = [];
+    String(text).split(/[\s,]+/).forEach(function (p) { if (/^\d+$/.test(p)) out.push(+p); });
+    return out;
+  }
+  openSheet(num) {
+    var info = this.state.runners[num];
+    if (info && (info.s === 'passed' || info.s === 'called')) {
+      this.setState({ sheet: { num: num, mode: 'edit', draft: info.t, orig: info.t, called: info.s === 'called' }, undo: null });
+    } else if (!info && this.state.removed[num] != null) {
+      var t = this.state.removed[num];
+      this.setState({ sheet: { num: num, mode: 'restore', draft: t, orig: t, called: false }, undo: null });
+    }
+  }
+  renderVals() {
+    var self = this;
+    var st = this.state;
+    var r = st.runners;
+    var tiles = [];
+    for (var n = st.group; n < st.group + 20 && n <= 349; n++) {
+      (function (num) {
+        var info = r[num] || { s: 'none' };
+        var base = 'border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-family: Inter, sans-serif; cursor: pointer; ';
+        var style, sub = '', numStyle = 'font-family: Montserrat, sans-serif; font-weight: 800; font-size: 22px; line-height: 1';
+        if (info.s === 'passed') { style = base + 'background: #1E5CB3; color: #FFFFFF; border: 0'; sub = (info.fix ? '✎ ' : '') + self.fmt(info.t); }
+        else if (info.s === 'called') { style = base + 'background: #0B2D53; color: #FFFFFF; border: 0'; sub = '✓ ' + self.fmt(info.t); }
+        else if (info.s === 'dns') { style = base + 'background: #F7F8FB; color: #5A6579; border: 1px dashed #5A6579'; sub = 'DNS'; numStyle += '; text-decoration: line-through'; }
+        else if (info.s === 'dnf') { style = base + 'background: rgba(204,0,0,0.1); color: #CC0000; border: 2px solid #CC0000'; sub = 'DNF'; }
+        else if (st.removed[num] != null) { style = base + 'background: #FFFFFF; color: #222A35; border: 2px dashed #1E5CB3'; sub = 'was ' + self.fmt(st.removed[num]); }
+        else { style = base + 'background: #FFFFFF; color: #222A35; border: 1px solid #E0E6F0; box-shadow: 0 1px 3px rgba(0,0,0,0.08)'; }
+        tiles.push({
+          num: num, sub: sub, style: style, numStyle: numStyle,
+          aria: num + (sub ? ', ' + sub : ', not yet passed'),
+          tap: function () {
+            var cur = self.state.runners[num];
+            if (!cur && self.state.removed[num] == null) self.mark([num]);
+            else self.openSheet(num);
+          }
+        });
+      })(n);
+    }
+    var groups = [];
+    for (var g = 100; g <= 340; g += 20) {
+      (function (start) {
+        var on = start === st.group;
+        groups.push({
+          label: start + '–' + Math.min(start + 19, 349),
+          style: 'flex-shrink: 0; min-height: 40px; padding: 0 14px; border-radius: 9999px; font-family: Inter, sans-serif; font-size: 13px; font-weight: 700; ' + (on ? 'background: #0B2D53; color: #FFFFFF; border: 0' : 'background: #FFFFFF; color: #222A35; border: 1px solid #E0E6F0'),
+          pick: function () { self.setState({ group: start }); }
+        });
+      })(g);
+    }
+    var groupPassed = 0, groupPassedOnly = 0;
+    Object.keys(r).forEach(function (k) {
+      if (r[k].s === 'passed' || r[k].s === 'called') groupPassed++;
+      if (r[k].s === 'passed') groupPassedOnly++;
+    });
+    var passed = 136 + groupPassed;
+
+    var sh = st.sheet;
+    var sheet = { show: false };
+    if (sh) {
+      var nudge = function (d) { return function () { self.setState({ sheet: Object.assign({}, self.state.sheet, { draft: Math.min(self.clock, Math.max(390, self.state.sheet.draft + d)) }) }); }; };
+      var close = function () { self.setState({ sheet: null }); };
+      var changed = sh.draft !== sh.orig;
+      if (sh.mode === 'edit') {
+        sheet = {
+          show: true, num: sh.num,
+          title: sh.called ? 'Called in to base' : 'Passed · not called in yet',
+          sub: 'Marked at ' + self.fmt(sh.orig),
+          warn: sh.called && changed, origText: self.fmt(sh.orig),
+          timeText: self.fmt(sh.draft),
+          hint: changed ? 'Was ' + self.fmt(sh.orig) : 'Use − / + to correct the time',
+          saveLabel: changed ? 'Save ' + self.fmt(sh.draft) : 'Keep time',
+          altLabel: 'Unmark runner',
+          save: function () {
+            var rr = Object.assign({}, self.state.runners);
+            if (changed) {
+              rr[sh.num] = { s: 'passed', t: sh.draft, fix: true };
+              self.setState({ runners: rr, sheet: null, message: sh.called ? sh.num + ' changed to ' + self.fmt(sh.draft) + ' — back on callout as a correction' : sh.num + ' time changed to ' + self.fmt(sh.draft) });
+            } else close();
+          },
+          alt: function () {
+            var rr = Object.assign({}, self.state.runners);
+            var prev = rr[sh.num];
+            delete rr[sh.num];
+            var rem = Object.assign({}, self.state.removed);
+            rem[sh.num] = prev.t;
+            self.setState({
+              runners: rr, removed: rem, sheet: null, message: '',
+              undo: { num: sh.num, prev: prev }
+            });
+          }
+        };
+      } else {
+        sheet = {
+          show: true, num: sh.num,
+          title: 'Unmarked earlier',
+          sub: 'It had been marked at ' + self.fmt(sh.orig),
+          warn: false, origText: '',
+          timeText: self.fmt(sh.draft),
+          hint: 'Restore the original time, or adjust it',
+          saveLabel: 'Mark at ' + self.fmt(sh.draft),
+          altLabel: 'Use now (' + self.fmt(self.clock) + ')',
+          save: function () {
+            var rr = Object.assign({}, self.state.runners);
+            rr[sh.num] = { s: 'passed', t: sh.draft, fix: sh.draft !== sh.orig };
+            var rem = Object.assign({}, self.state.removed); delete rem[sh.num];
+            self.setState({ runners: rr, removed: rem, sheet: null, message: sh.num + ' marked at ' + self.fmt(sh.draft) });
+          },
+          alt: function () {
+            var rr = Object.assign({}, self.state.runners);
+            rr[sh.num] = { s: 'passed', t: self.clock };
+            var rem = Object.assign({}, self.state.removed); delete rem[sh.num];
+            self.setState({ runners: rr, removed: rem, sheet: null, message: sh.num + ' marked at ' + self.fmt(self.clock) });
+          }
+        };
+      }
+      sheet.cancel = close;
+      sheet.m5 = nudge(-5); sheet.m1 = nudge(-1); sheet.p1 = nudge(1); sheet.p5 = nudge(5);
+    }
+
+    var u = st.undo;
+    var undo = { show: false };
+    if (u) {
+      undo = {
+        show: true,
+        text: u.num + ' unmarked',
+        act: function () {
+          var rr = Object.assign({}, self.state.runners);
+          rr[u.num] = u.prev;
+          var rem = Object.assign({}, self.state.removed); delete rem[u.num];
+          self.setState({ runners: rr, removed: rem, undo: null, message: u.num + ' restored at ' + self.fmt(u.prev.t) });
+        }
+      };
+    }
+
+    return {
+      tiles: tiles, groups: groups,
+      passed: passed,
+      toGo: 240 - passed,
+      notCalled: 5 + groupPassedOnly,
+      entry: st.entry, message: st.message,
+      sheet: sheet, undo: undo,
+      onType: function (e) { self.setState({ entry: e.target.value }); },
+      onKey: function (e) { if (e.key === 'Enter') self.mark(self.parse(self.state.entry)); },
+      submit: function () { self.mark(self.parse(self.state.entry)); }
+    };
+  }
+}
+</script>
+</body>
+</html>

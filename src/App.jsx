@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { MODULE_TYPES } from './shared/store/navigationStore';
 import useSettingsStore from './shared/store/settingsStore';
@@ -20,6 +20,13 @@ import RaceOverview from './views/RaceOverview';
 import RaceEditView from './modules/race-maintenance/views/RaceEditView';
 import LiveDashboardView from './views/LiveDashboardView';
 import Footer from './components/Layout/Footer';
+
+// Screens not yet on the full-bleed VK4WIP shell keep the old padded container
+const Padded = ({ children }) => <div className="container mx-auto px-4 py-8">{children}</div>;
+
+// Operational screens (checkpoint, base station) own the whole viewport
+const OPERATIONAL = /^\/(checkpoint\/\d+$|base-station\/operations)/;
+const FooterGate = () => (OPERATIONAL.test(useLocation().pathname) ? null : <Footer />);
 
 function App() {
   const { initializeSettings: initSettingsStore } = useSettingsStore();
@@ -68,8 +75,8 @@ function App() {
     <ToastProvider>
       <Router>
         <NetworkStatusIndicator />
-        <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
-        <main className="flex-grow container mx-auto px-4 py-8">
+        <div className="flex flex-col min-h-screen bg-vk-paper dark:bg-gray-900">
+        <main className="flex-grow">
           <Routes>
             {/* Home page - accessible to all */}
             <Route path="/" element={<Homepage />} />
@@ -79,7 +86,7 @@ function App() {
               path="/race-management"
               element={
                 <ProtectedRoute moduleType={MODULE_TYPES.RACE_MAINTENANCE}>
-                  <RaceManagementView />
+                  <Padded><RaceManagementView /></Padded>
                 </ProtectedRoute>
               }
             />
@@ -91,8 +98,8 @@ function App() {
                 <ProtectedRoute moduleType={MODULE_TYPES.RACE_MAINTENANCE}>
                   <Routes>
                     <Route path="setup" element={<RaceSetup />} />
-                    <Route path="overview" element={<RaceOverview />} />
-                    <Route path="edit" element={<RaceEditView />} />
+                    <Route path="overview" element={<Padded><RaceOverview /></Padded>} />
+                    <Route path="edit" element={<Padded><RaceEditView /></Padded>} />
                     <Route path="*" element={<Navigate to="/race-maintenance/setup" replace />} />
                   </Routes>
                 </ProtectedRoute>
@@ -105,9 +112,9 @@ function App() {
               element={
                 <ProtectedRoute moduleType={MODULE_TYPES.CHECKPOINT}>
                   <Routes>
-                    <Route path="dual/:primaryCpId/:secondaryCpId" element={<DualCheckpointView />} />
+                    <Route path="dual/:primaryCpId/:secondaryCpId" element={<Padded><DualCheckpointView /></Padded>} />
                     <Route path=":checkpointId" element={<CheckpointView />} />
-                    <Route path=":checkpointId/transfer" element={<TransferView />} />
+                    <Route path=":checkpointId/transfer" element={<Padded><TransferView /></Padded>} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </ProtectedRoute>
@@ -121,7 +128,7 @@ function App() {
                 <ProtectedRoute moduleType={MODULE_TYPES.BASE_STATION}>
                   <Routes>
                     <Route path="operations" element={<BaseStationView />} />
-                    <Route path="dashboard" element={<LiveDashboardView />} />
+                    <Route path="dashboard" element={<Padded><LiveDashboardView /></Padded>} />
                     <Route path="*" element={<Navigate to="/base-station/operations" replace />} />
                   </Routes>
                 </ProtectedRoute>
@@ -133,7 +140,7 @@ function App() {
           </Routes>
         </main>
 
-        <Footer />
+        <FooterGate />
       </div>
     </Router>
     </ToastProvider>

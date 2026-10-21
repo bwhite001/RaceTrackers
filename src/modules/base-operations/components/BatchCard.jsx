@@ -39,7 +39,7 @@ const BatchCard = ({ batch, checkpointName, batchNumber, isHighlighted, onEdit, 
           <span className="font-semibold text-sm">{checkpointName}</span>
           <span className="ml-2 text-sm text-gray-500">⏰ {batch.commonTime}</span>
           {isEdited && (
-            <span title="Edited" className="ml-2 text-xs text-orange-500">✏️</span>
+            <span title="Edited" className="ml-2 text-xs text-vk-muted">✎</span>
           )}
         </div>
         <span className="text-xs text-gray-400 shrink-0">
@@ -68,10 +68,10 @@ const BatchCard = ({ batch, checkpointName, batchNumber, isHighlighted, onEdit, 
             ))}
           </div>
           {/* Metadata */}
-          <p className="text-xs text-gray-500 dark:text-gray-400">📅 Recorded: {submittedAt}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Recorded: {submittedAt}</p>
           {isEdited && batch.editedAt && (
             <p className="text-xs text-orange-500 mt-0.5">
-              ✏️ Edited: {new Date(batch.editedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+              ✎ Edited: {new Date(batch.editedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </p>
           )}
           <div className="flex justify-end mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
