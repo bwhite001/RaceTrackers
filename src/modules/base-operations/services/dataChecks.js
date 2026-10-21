@@ -7,6 +7,7 @@
 import TimeUtils from '../../../services/timeUtils.js';
 import { hhmm } from '../../../services/blocks.js';
 import { recordTime } from './receive.js';
+import { BASE_STATION_CP } from '../../../types/index.js';
 
 export const PACE_LIMIT_KMH = 20;
 
@@ -179,6 +180,21 @@ export function findImpossiblePace({ sightings, order, distances, limitKmh = PAC
 }
 
 /** Run every check and drop resolved issues. */
+/** Checkpoint distances (km) for the pace check; the finish uses the race distance. */
+export function checkpointDistances(checkpoints = [], race = null) {
+  const m = new Map(checkpoints.filter(c => c.distanceKm != null).map(c => [c.number, Number(c.distanceKm)]));
+  if (race?.distanceKm != null) m.set(BASE_STATION_CP, Number(race.distanceKm));
+  return m;
+}
+
+/** Checks that cast doubt on where a runner is — flagged on the leaders table. */
+const POSITION_CHECKS = ['dup', 'order', 'after', 'pace'];
+
+/** Bibs with an open (unresolved) issue that could make their position wrong. */
+export function openIssueNumbers(issues) {
+  return new Set(POSITION_CHECKS.flatMap(id => (issues[id] ?? []).map(i => i.number)));
+}
+
 export function runChecks(input, resolvedKeys = new Set()) {
   const all = {
     dup: findDuplicates(input),

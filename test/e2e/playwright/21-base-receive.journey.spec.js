@@ -79,7 +79,7 @@ async function receiveBlocksJourney(page, step, { checkNoScroll }) {
   });
 
   await step('Also in this call — tap the earlier block to see its numbers again', async () => {
-    await page.getByRole('button', { name: new RegExp(`Show the 5 numbers at ${nextBlock}`) }).click();
+    await page.getByRole('button', { name: new RegExp(`Show the numbers at ${nextBlock}, 5 to record`) }).click();
     await expect(chip(page, 105)).toBeVisible();
     await expect(chip(page, 110)).toHaveCount(0);
     if (checkNoScroll) {
@@ -140,7 +140,7 @@ test.describe('Base — receive checks and actions', () => {
 
     await step('Complete — only the valid and not-seen numbers are recorded', async () => {
       await page.getByRole('button', { name: /^Complete · 2$/ }).click();
-      await expect(page.getByText('2 recorded at CP2')).toBeVisible();
+      await expect(page.getByText('2 recorded at CP2 · 2 skipped (flagged)')).toBeVisible();
       await expect(page.getByText(/2 skipped \(flagged\)/)).toBeVisible();
       await page.getByRole('button', { name: 'Next call' }).click();
       await expect(page.getByTestId('board-count-CP2')).toHaveText('2');
@@ -150,7 +150,7 @@ test.describe('Base — receive checks and actions', () => {
       await page.getByRole('button', { name: /^CP1,/ }).click();
       await add(page, [101]);
       await expect(chip(page, 101)).toHaveAccessibleName(/^Remove 101, Had \d\d:\d\d$/);
-      await expect(page.getByRole('button', { name: /^Complete · 0$/ })).toBeVisible();
+      await expect(page.getByRole('button', { name: /^Log call · 0$/ })).toBeVisible();
     });
   });
 

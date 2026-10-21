@@ -6,6 +6,18 @@ import { hhmm } from '../../../services/blocks.js';
 
 export const REASONS = ['Injury', 'Self-withdrew', 'Cut-off', 'Medical', 'Other'];
 
+/** Reasons the old withdrawal dialog stored, shown as today's list. Stored values are never rewritten. */
+const LEGACY_REASONS = {
+  'Personal Emergency': 'Other',
+  Illness: 'Medical',
+  'Equipment Failure': 'Other',
+  'Weather Conditions': 'Other',
+  'Time Cutoff': 'Cut-off',
+  'Voluntary Withdrawal': 'Self-withdrew',
+};
+
+export const reasonLabel = (reason) => LEGACY_REASONS[reason] ?? reason ?? '';
+
 /**
  * One row per runner who is out of the race, from the out list
  * (withdrawal_records, vet_out_records, checkpoint DNF / non-starter rows).
@@ -19,7 +31,7 @@ export function outRecords(outList = []) {
     const w = r.withdrawalDetails;
     const v = r.vetOutDetails;
     const checkpoint = w ? w.checkpoint : v ? v.checkpoint : null;
-    const reason = w?.reason || (v ? 'Vet out' : '');
+    const reason = reasonLabel(w?.reason) || (v ? 'Vet out' : '');
     const time = w?.withdrawalTime || v?.vetOutTime || null;
     const parts = [checkpoint != null ? `CP${checkpoint}` : (w ? 'On course' : ''), reason, time ? hhmm(time) : ''].filter(Boolean);
     return {

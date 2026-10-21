@@ -180,3 +180,26 @@ Phase A notes:
 - **A7: email shares the race setup as a file.** The setup is races, runners and checkpoints only, with no results, in `race-setup-<name>.json`. Where Web Share can share files it does. Otherwise the file downloads and a short `mailto:` (instructions only, well under 1,800 characters) asks for it to be attached. Import now checks the file's content, not its type, because mail apps hand a `.json` over as `application/octet-stream`, `text/plain` or with no type.
 - **Found while testing A7 (pre-existing): exports of app-created races failed to import.** The Zod runner schema didn't allow `firstName` / `lastName` to be `null`, or `gender` `'X'`. Those are exactly what race setup, the v8 migration and the CSV / XLSX imports store, so "Validation failed" came up for every such file. The schema now accepts them, with a unit test.
 - **A6: the offline suite runs separately.** The main Playwright config blocks service workers, so it can't test offline. `playwright.offline.config.js` serves the production build with service workers allowed (`make test-offline`). The main config ignores `25-offline.spec.js`.
+
+Phase B notes:
+- **B1/B2: checkpoint header.** At 390 px the title row had room for only 128 px of title once Share batch, Transfer and Export sat beside it. So the action icons now share the Marker / Radio Operator row, and the title row holds only back, title and the Saved dot. App bar subtitles wrap to two lines everywhere (base too) instead of ending in an ellipsis. Share batch is an icon button whose name carries the count ("Share batch, 5 runners"). The floating pill is gone.
+- **B4: why "Save 11:14" appeared for an unchanged time.** A runner marked at now has seconds. +5 clamps to the current moment, a few seconds later in the same minute, so the times differed though they looked the same. The sheet now snaps the draft back to the original whenever it shows the same minute (`sameMinute` in `blocks.js`). The Overview stepper (B6) uses the same rule.
+- **B6:** the Overview stepper keeps a draft. "Save HH:MM" (gold) appears only when it differs. Called-in and passed rows have no other gold button, so there is still one gold per row. The A3 note (same block → no correction) shows live while adjusting.
+- **B7:** Exact commits only once a whole time is typed (`HHMM` or `H:MM`), so a half-typed value never selects a wrong time. A rejected time clears the field and turns its border red. The status line says why, and the previous block stays selected. `data-active` on the input tells tests whether Exact is the selected time.
+- **B8:** the "Also in this call" pill counts numbers that will be recorded. Its accessible name is now "Show the numbers at HH:MM, N to record" (it was "Show the N numbers at …", which miscounted once flagged numbers were in). Journey 21 and the validation script were updated.
+- **B9:** the done card's headline now carries the skipped count ("0 recorded at CP2 · 2 skipped (flagged)"); the block summary moved to the second line. Journey 21 was updated.
+- **B11: withdrawal dialog.**
+  - It is now a bottom sheet with checkpoint pills, a 24-hour stepper with the date as text, the five reasons, comments, a red primary and a plain Cancel.
+  - It records through the same store path as bulk DNF (`applyOutStatus`, which now takes `comments`), so the Undo bar after it is exact.
+  - Old reasons are mapped for display only; stored values are never rewritten (`reasonLabel`). The mapping:
+    - Personal Emergency → Other
+    - Illness → Medical
+    - Equipment Failure → Other
+    - Weather Conditions → Other
+    - Time Cutoff → Cut-off
+    - Voluntary Withdrawal → Self-withdrew
+  - "105*" still reverses a withdrawal, but the dialog no longer mentions it. The out list's Clear is the advertised way.
+  - **Vet-out, for Brandon:** vet-out was already unreachable before this change. `VetOutDialog` isn't mounted anywhere, and the store has no `vetOutRunner`. The dialog keeps comments, and choosing Medical relabels them "Comments / vet notes". A separate vet-out record (`vet_out_records`) was not built back in. Say if base needs it.
+- **B12:** the Reports Undo reads "Undo 106: Mark checked" and is dropped when another list is opened. Journey 23 and the validation script were updated.
+- **B13:** a leader gets a gold warning icon (accessible name "Open data issue") when they have an unresolved duplicate, out-of-order time, sighting after DNF / DNS or impossible pace. These are the checks that can put a runner in the wrong place. Skipped checkpoints and unknown bibs don't move a leader, so they aren't flagged. Elapsed shows HH:MM.
+- **Validation script:** OV-06 taps the Overview stepper and expects an immediate save. It now needs a Save tap and is reworked with the pack in Phase D.

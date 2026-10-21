@@ -4,10 +4,9 @@ import useBaseOperationsStore from '../store/baseOperationsStore';
 import { boardCheckpoints, sightingsByCheckpoint, outStatusMap, buildBoard, reportedUpTo } from '../services/receive';
 import { overdueRunners, stillOnCourse, timesMatrix, callLog, awaitingByCheckpoint, raceCounts, OVERDUE_GRACE_MINUTES } from '../services/reports';
 import { outRecords } from '../services/statusValidation';
-import { runChecks, CHECKS, PACE_LIMIT_KMH } from '../services/dataChecks';
+import { runChecks, checkpointDistances, CHECKS, PACE_LIMIT_KMH } from '../services/dataChecks';
 import TimeUtils from '../../../services/timeUtils.js';
 import { hhmm } from '../../../services/blocks.js';
-import { BASE_STATION_CP } from '../../../types/index.js';
 import useNow from '../../../shared/hooks/useNow';
 import ReportsPanel from './ReportsPanel';
 
@@ -43,6 +42,8 @@ const BaseReports = ({ initialReport = 'missing' }) => {
   const [flash, setFlash] = useState('');
   const [undo, setUndo] = useState(null);
   const [busy, setBusy] = useState(false);
+  // Undo belongs to the list it was done in — switching lists drops it
+  const pick = (id) => { setSel(id); setFlash(''); setUndo(null); };
 
   const raceStart = currentRace?.date && currentRace?.startTime
     ? TimeUtils.createRaceTimestamp(currentRace.date, currentRace.startTime.slice(0, 5))
@@ -55,11 +56,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
     status: s, checkpoint: outByNumber.get(n)?.checkpoint ?? null, time: outByNumber.get(n)?.time ?? null,
   }])), [out, outByNumber]);
   const raceNumbers = raceRunnerNumbers;
-  const distances = useMemo(() => {
-    const m = new Map(checkpoints.filter(c => c.distanceKm != null).map(c => [c.number, Number(c.distanceKm)]));
-    if (currentRace?.distanceKm != null) m.set(BASE_STATION_CP, Number(currentRace.distanceKm));
-    return m;
-  }, [checkpoints, currentRace?.distanceKm]);
+  const distances = useMemo(() => checkpointDistances(checkpoints, currentRace), [checkpoints, currentRace]);
   const resolvedKeys = useMemo(() => new Set(resolutions.map(r => r.issueKey)), [resolutions]);
 
   const upTo = useMemo(() => reportedUpTo(runners), [runners]);
@@ -139,7 +136,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
     try {
       const reverse = await action.run();
       setFlash(`${issue.number}: ${action.label}`);
-      setUndo({ run: reverse });
+      setUndo({ run: reverse, label: `${issue.number}: ${action.label}` });
     } catch (err) {
       setFlash(`Could not do that: ${err.message}`);
     } finally {
@@ -173,7 +170,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
       <nav aria-label="Reports" className="flex-[1_1_250px] min-w-0 bg-white dark:bg-gray-800 border border-vk-border dark:border-gray-700 rounded-card overflow-hidden no-print">
         <div className="px-3 pt-2.5 pb-1.5 text-[11px] font-bold tracking-[1px] uppercase text-vk-blue">Reports</div>
         {REPORTS.map(r => (
-          <button key={r.id} type="button" onClick={() => { setSel(r.id); setFlash(''); }} aria-current={sel === r.id ? 'page' : undefined} className={navBtn(sel === r.id)}>
+          <button key={r.id} type="button" onClick={() => pick(r.id)} aria-current={sel === r.id ? 'page' : undefined} className={navBtn(sel === r.id)}>
             <span className="flex-1">{r.title}</span>
             <span className="text-xs font-bold text-vk-muted">{commonCounts[r.id]}</span>
           </button>
@@ -185,7 +182,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
         {CHECKS.map(c => {
           const n = issues[c.id].length;
           return (
-            <button key={c.id} type="button" onClick={() => { setSel(c.id); setFlash(''); }} aria-current={sel === c.id ? 'page' : undefined} className={navBtn(sel === c.id)}>
+            <button key={c.id} type="button" onClick={() => pick(c.id)} aria-current={sel === c.id ? 'page' : undefined} className={navBtn(sel === c.id)}>
               <span className="flex-1">{c.title}</span>
               <span data-testid={`check-count-${c.id}`}
                 className={`min-w-[22px] text-center text-xs font-extrabold rounded-full px-[7px] py-px ${n ? 'bg-vk-red-tint text-vk-red border border-vk-red' : 'bg-vk-band text-vk-navy'}`}>
@@ -342,7 +339,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
           <span className="flex-1 text-xs font-semibold text-vk-blue" aria-live="polite" data-testid="reports-flash">{flash}</span>
           {undo && (
             <button type="button" onClick={async () => { const u = undo; setUndo(null); await u.run(); setFlash('Undone'); }}
-              className="min-h-[32px] px-3 rounded-lg bg-vk-ink text-white font-bold text-xs">Undo</button>
+              className="min-h-[32px] px-3 rounded-lg bg-vk-ink text-white font-bold text-xs">Undo {undo.label}</button>
           )}
         </div>
       </section>

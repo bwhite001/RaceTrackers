@@ -3,7 +3,7 @@ import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 import useCheckpointStore from '../../modules/checkpoint-operations/store/checkpointStore';
 import { computeStats, runnerTime } from '../../modules/checkpoint-operations/services/checkpointStats';
 import TimeUtils from '../../services/timeUtils.js';
-import { hhmm, clampTime } from '../../services/blocks.js';
+import { hhmm, clampTime, sameMinute, toBlock } from '../../services/blocks.js';
 import { checkpointRunnerState, RUNNER_STATE, stateClasses, numberClasses } from '../../design-system/statusStyles';
 import { StatTile, TimeStepper, UndoBar, useUndo } from '../../design-system/components/VK';
 import useCheckpointContext from './useCheckpointContext';
@@ -59,6 +59,8 @@ const CheckpointOverview = () => {
   const undo = useUndo();
   const [filter, setFilter] = useState('all');
   const [open, setOpen] = useState(null);
+  const [draft, setDraft] = useState(null); // stepper value for the open row; saved only on Save
+  const toggle = (number) => { setOpen(open === number ? null : number); setDraft(null); };
 
   const stats = useMemo(() => computeStats(runners), [runners]);
   const rows = useMemo(
@@ -92,6 +94,7 @@ const CheckpointOverview = () => {
       </div>
 
       <div className="bg-white dark:bg-gray-800 border border-vk-border dark:border-gray-700 rounded-card overflow-hidden">
+        <div className="px-3.5 py-2 text-xs font-semibold text-vk-muted dark:text-gray-400 border-b border-vk-border dark:border-gray-700">Tap a runner to fix it</div>
         {rows.length === 0 && <div className="p-4 text-sm text-vk-muted">No runners in this list.</div>}
         {rows.map(({ r, state }) => {
           const isOpen = open === r.number;
@@ -99,13 +102,16 @@ const CheckpointOverview = () => {
           const hasTime = state === RUNNER_STATE.PASSED || state === RUNNER_STATE.CALLED;
           const flag = state === RUNNER_STATE.PASSED ? (r.correction ? 'Correction' : 'Not called') : '';
           const now = nowIso();
+          const pending = isOpen && draft && !sameMinute(draft, t) ? draft : null;
           const actions = [];
           let note = '';
           if (state === RUNNER_STATE.CALLED) {
             actions.push(['blue', 'Undo call-in', `${r.number} back on callout sheet`, () => store.setCalledIn([r.number], false)]);
             actions.push(['plain', 'Reset — not passed', `${r.number} reset — not passed`, () => store.unmarkRunner(r.number)]);
             actions.push(['red', 'Mark DNF', `${r.number} marked DNF`, () => store.setOut(r.number, 'dnf')]);
-            note = `Base already has ${hhmm(t)}. Changing the time sends a correction.`;
+            note = pending && toBlock(pending) === toBlock(t)
+              ? `Same common time (${hhmm(toBlock(t))}) — base doesn't need a correction.`
+              : `Base already has ${hhmm(t)}. Changing the time sends a correction.`;
           } else if (state === RUNNER_STATE.PASSED) {
             actions.push(['blue', 'Mark called in', `${r.number} marked called in`, () => store.setCalledIn([r.number], true)]);
             actions.push(['plain', 'Reset — not passed', `${r.number} reset — not passed`, () => store.unmarkRunner(r.number)]);
@@ -123,7 +129,7 @@ const CheckpointOverview = () => {
 
           return (
             <div key={r.number} className={`border-b border-vk-border dark:border-gray-700 last:border-b-0 ${isOpen ? 'bg-vk-band dark:bg-gray-700' : ''}`}>
-              <button type="button" aria-expanded={isOpen} onClick={() => setOpen(isOpen ? null : r.number)}
+              <button type="button" aria-expanded={isOpen} onClick={() => toggle(r.number)}
                 className="w-full min-h-[52px] px-3.5 flex items-center gap-2.5 text-left">
                 <span className={`w-11 font-display font-extrabold text-lg tabular-nums ${numberClasses(state)} ${state === RUNNER_STATE.DNS ? 'text-vk-muted' : state === RUNNER_STATE.DNF ? 'text-vk-red' : ''}`}>{r.number}</span>
                 <span className={`rounded-chip px-2 py-0.5 text-xs font-bold ${stateClasses(state === RUNNER_STATE.RESTORABLE ? RUNNER_STATE.NONE : state)} !shadow-none ${state === RUNNER_STATE.DNF ? '!border' : ''}`}>{CHIP[state]}</span>
@@ -141,13 +147,23 @@ const CheckpointOverview = () => {
                       <TimeStepper
                         size="md"
                         className="flex-1"
-                        value={t}
+                        value={pending ?? t}
                         min={ctx.earliest}
                         max={now}
-                        onChange={(next) => act(r.number, `${r.number} time ${hhmm(t)} → ${hhmm(next)}`,
-                          () => store.editTime(r.number, clampTime(next, ctx.earliest, nowIso())))}
+                        onChange={setDraft}
                       />
                     </div>
+                  )}
+                  {pending && (
+                    <button type="button"
+                      onClick={async () => {
+                        setDraft(null);
+                        await act(r.number, `${r.number} time ${hhmm(t)} → ${hhmm(pending)}`,
+                          () => store.editTime(r.number, clampTime(pending, ctx.earliest, nowIso())));
+                      }}
+                      className={`min-h-[44px] rounded-btn px-2 text-[13px] font-bold ${actionClass.gold}`}>
+                      Save {hhmm(pending)}
+                    </button>
                   )}
                   <div className="grid grid-cols-2 gap-2">
                     {actions.map(([kind, label, text, run]) => (

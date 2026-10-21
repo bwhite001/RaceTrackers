@@ -3,6 +3,8 @@ import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import { boardCheckpoints, sightingsByCheckpoint, outStatusMap, reportedUpTo } from '../services/receive';
 import { overdueRunners, currentLeaders, awaitingByCheckpoint, raceCounts, OVERDUE_GRACE_MINUTES } from '../services/reports';
+import { runChecks, checkpointDistances, openIssueNumbers, PACE_LIMIT_KMH } from '../services/dataChecks';
+import { outRecords } from '../services/statusValidation';
 import { hhmm } from '../../../services/blocks.js';
 import TimeUtils from '../../../services/timeUtils.js';
 import { BASE_STATION_CP } from '../../../types/index.js';
@@ -27,7 +29,9 @@ const Tile = ({ label, value, sub, className = '', testId }) => (
  * progress, current leaders; then the course map, heads-up grid and imports.
  */
 const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = [], onViewOverdue }) => {
-  const { currentRace, checkpoints = [], runners = [], outList = [], raceRunnerNumbers = [] } = useBaseOperationsStore();
+  const {
+    currentRace, checkpoints = [], runners = [], outList = [], raceRunnerNumbers = [], baseRows = [], resolutions = [], radioCalls = [],
+  } = useBaseOperationsStore();
   const now = useNow(30000);
   const [filter, setFilter] = useState('all');
   const [showAll, setShowAll] = useState(false);
@@ -47,6 +51,11 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
   const overdue = lateRows.filter(r => r.status === 'overdue');
   const awaiting = awaitingByCheckpoint(lateRows);
   const leaders = useMemo(() => currentLeaders({ sightings, order, out, raceStart, meta }), [sightings, order, out, raceStart, meta]);
+  // Same checks as Reports › Needs attention; a leader with an open one may be in the wrong place
+  const flagged = useMemo(() => openIssueNumbers(runChecks({
+    baseRows, order, sightings, outByNumber: new Map(outRecords(outList).map(r => [r.number, r])), radioCalls,
+    distances: checkpointDistances(checkpoints, currentRace), limitKmh: currentRace?.paceLimitKmh ?? PACE_LIMIT_KMH,
+  }, new Set(resolutions.map(r => r.issueKey)))), [baseRows, order, sightings, outList, radioCalls, checkpoints, currentRace, resolutions]);
   const field = raceRunnerNumbers.length || getRunnerTotal(currentRace);
   const activeField = Math.max(0, field - out.size);
   // One definition shared with Reports (D2): on course = in the race, not finished
@@ -153,7 +162,14 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
                     <td className="px-6 py-3">
                       <span className={`inline-flex w-[30px] h-[30px] rounded-full items-center justify-center font-extrabold ${l.rank === 1 ? 'bg-vk-gold text-vk-ink' : 'bg-vk-band text-vk-ink'}`}>{l.rank}</span>
                     </td>
-                    <td className="px-3 py-3 font-display font-extrabold text-base tabular-nums">{l.number}</td>
+                    <td className="px-3 py-3 font-display font-extrabold text-base tabular-nums whitespace-nowrap">
+                      {l.number}
+                      {flagged.has(l.number) && (
+                        <span role="img" aria-label="Open data issue" title="Open data issue — see Reports › Needs attention" className="inline-flex ml-1 align-[-2px]">
+                          <ExclamationTriangleIcon className="w-4 h-4 text-vk-gold" aria-hidden="true" />
+                        </span>
+                      )}
+                    </td>
                     <td className="px-3 py-3">{l.name || '—'}{l.gender && <span className="text-vk-muted"> · {l.gender}</span>}</td>
                     <td className="px-3 py-3">{l.wave ?? '—'}</td>
                     <td className="px-3 py-3 tabular-nums font-semibold">{l.elapsed || '—'}</td>

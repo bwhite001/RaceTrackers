@@ -5,169 +5,99 @@ import userEvent from '@testing-library/user-event';
 import WithdrawalDialog from '../../src/modules/base-operations/components/WithdrawalDialog';
 import useBaseOperationsStore from '../../src/modules/base-operations/store/baseOperationsStore';
 
-// Mock the store
 vi.mock('../../src/modules/base-operations/store/baseOperationsStore');
 
 describe('WithdrawalDialog', () => {
   const mockStore = {
-    withdrawRunner: vi.fn().mockResolvedValue(undefined),
+    currentRace: { date: '2026-11-08', startTime: '06:30' },
+    checkpoints: [{ number: 1, name: 'Northbrook' }, { number: 2, name: 'England Creek' }],
+    outList: [],
+    applyOutStatus: vi.fn().mockResolvedValue([{ num: 105, mode: 'dnf', before: null }]),
+    undoOutStatus: vi.fn().mockResolvedValue(undefined),
     reverseWithdrawal: vi.fn().mockResolvedValue(undefined),
     loading: false,
-    error: null
   };
 
-  const defaultProps = {
-    isOpen: true,
-    onClose: vi.fn(),
-  };
+  const props = { isOpen: true, onClose: vi.fn() };
 
   beforeEach(() => {
     vi.clearAllMocks();
     useBaseOperationsStore.mockImplementation(() => mockStore);
   });
 
-  test('renders dialog when open', () => {
-    render(<WithdrawalDialog {...defaultProps} />);
+  const typeNumber = async (value) => {
+    const input = screen.getByLabelText(/Runner number/i);
+    await userEvent.clear(input);
+    await userEvent.type(input, value);
+  };
 
-    // Header shows title (may appear in multiple places including button)
-    expect(screen.getAllByText('Withdraw Runner').length).toBeGreaterThan(0);
-    expect(screen.getByLabelText(/Runner Number/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Reason/i)).toBeInTheDocument();
+  test('renders as a dialog with where, 24-hour time, the five reasons and comments', () => {
+    render(<WithdrawalDialog {...props} />);
+    expect(screen.getByRole('dialog', { name: 'Withdraw runner' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Where' })).toHaveTextContent('CP1CP2On course');
+    expect(screen.getByRole('group', { name: 'Reason' })).toHaveTextContent('InjurySelf-withdrewCut-offMedicalOther');
+    expect(screen.getByLabelText('5 minutes earlier')).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/\b(AM|PM)\b/);
+    expect(document.querySelector('input[type="datetime-local"]')).toBeNull();
+    expect(screen.getByLabelText(/Comments/i)).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/\*/);
   });
 
   test('does not render when closed', () => {
-    render(<WithdrawalDialog {...defaultProps} isOpen={false} />);
-    expect(screen.queryByText('Withdraw Runner')).not.toBeInTheDocument();
+    render(<WithdrawalDialog {...props} isOpen={false} />);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  test('handles runner number input', async () => {
-    render(<WithdrawalDialog {...defaultProps} />);
-
-    const input = screen.getByLabelText(/Runner Number/i);
-    await userEvent.clear(input);
-    await userEvent.type(input, '105');
-
-    expect(input).toHaveValue('105');
+  test('requires a runner number', async () => {
+    render(<WithdrawalDialog {...props} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Withdraw runner' }));
+    expect(await screen.findByText(/runner number is required/i)).toBeInTheDocument();
+    expect(mockStore.applyOutStatus).not.toHaveBeenCalled();
   });
 
-  test('validates form before submission — missing runner number', async () => {
-    render(<WithdrawalDialog {...defaultProps} />);
-
-    // Clear runner number
-    const input = screen.getByLabelText(/Runner Number/i);
-    await userEvent.clear(input);
-
-    // Submit
-    fireEvent.click(screen.getByRole('button', { name: /submit|withdraw/i }));
-
-    await waitFor(() => {
-      expect(screen.getByText(/runner number is required/i)).toBeInTheDocument();
-    });
-  });
-
-  test('handles successful form submission', async () => {
+  test('withdraws through the bulk DNF path and offers an exact Undo', async () => {
     const onClose = vi.fn();
-    render(<WithdrawalDialog {...defaultProps} onClose={onClose} />);
+    const onDone = vi.fn();
+    render(<WithdrawalDialog {...props} onClose={onClose} onDone={onDone} />);
+    await typeNumber('105');
+    fireEvent.click(screen.getByRole('button', { name: 'CP2' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Medical' }));
+    await userEvent.type(screen.getByLabelText(/Comments/i), 'Rolled ankle');
+    fireEvent.click(screen.getByRole('button', { name: 'Withdraw runner' }));
 
-    // Fill runner number
-    const input = screen.getByLabelText(/Runner Number/i);
-    await userEvent.clear(input);
-    await userEvent.type(input, '105');
-
-    // Submit
-    const submitBtn = screen.getAllByRole('button').find(b => b.type === 'submit');
-    fireEvent.click(submitBtn);
-
-    await waitFor(() => {
-      expect(onClose).toHaveBeenCalled();
-    });
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(mockStore.applyOutStatus).toHaveBeenCalledWith(expect.objectContaining({
+      mode: 'dnf', numbers: [105], where: 2, reason: 'Medical', comments: 'Rolled ankle',
+    }));
+    expect(onDone).toHaveBeenCalledWith('105 withdrawn', expect.any(Function));
+    await onDone.mock.calls[0][1]();
+    expect(mockStore.undoOutStatus).toHaveBeenCalledWith([{ num: 105, mode: 'dnf', before: null }]);
   });
 
-  test('handles form submission errors', async () => {
-    mockStore.withdrawRunner.mockRejectedValue(new Error('Runner not found'));
-    const { container } = render(<WithdrawalDialog {...defaultProps} />);
-
-    const input = screen.getByLabelText(/Runner Number/i);
-    await userEvent.clear(input);
-    await userEvent.type(input, '999');
-
-    // Submit via form submit event
-    const form = container.querySelector('form');
-    fireEvent.submit(form);
-
-    await waitFor(() => {
-      const errorEl = screen.queryByText('Runner not found');
-      const failedEl = screen.queryByText(/failed/i);
-      expect(errorEl || failedEl).toBeTruthy();
-    });
-  });
-
-  test('handles escape / close button', () => {
+  test('shows a store error and stays open', async () => {
+    mockStore.applyOutStatus.mockRejectedValueOnce(new Error('Runner not found'));
     const onClose = vi.fn();
-    render(<WithdrawalDialog {...defaultProps} onClose={onClose} />);
+    render(<WithdrawalDialog {...props} onClose={onClose} />);
+    await typeNumber('999');
+    fireEvent.click(screen.getByRole('button', { name: 'Withdraw runner' }));
+    expect(await screen.findByText('Runner not found')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+  });
 
-    fireEvent.click(screen.getByRole('button', { name: /close/i }));
+  test('"105*" still reverses a withdrawal (kept for existing users, not advertised)', async () => {
+    render(<WithdrawalDialog {...props} />);
+    await typeNumber('105*');
+    fireEvent.click(screen.getByRole('button', { name: 'Put back in the race' }));
+    await waitFor(() => expect(mockStore.reverseWithdrawal).toHaveBeenCalledWith(105));
+  });
+
+  test('Cancel closes; the initial number comes from the prop and has focus', () => {
+    const onClose = vi.fn();
+    render(<WithdrawalDialog {...props} onClose={onClose} runnerNumber="42" />);
+    const input = screen.getByLabelText(/Runner number/i);
+    expect(input).toHaveValue('42');
+    expect(input).toHaveFocus();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(onClose).toHaveBeenCalled();
-  });
-
-  test('supports reversal mode via * suffix', async () => {
-    render(<WithdrawalDialog {...defaultProps} />);
-
-    const input = screen.getByLabelText(/Runner Number/i);
-    // Type number with * to trigger reversal mode
-    await userEvent.clear(input);
-    await userEvent.type(input, '105*');
-
-    // After * is typed, the component strips it and sets isReversal=true
-    // The submit button should change to show reversal context
-    await waitFor(() => {
-      // Header or button should say "Reverse Withdrawal"
-      const headings = screen.getAllByText(/Reverse Withdrawal|Withdraw Runner/);
-      expect(headings.length).toBeGreaterThan(0);
-    });
-  });
-
-  test('shows initial runner number from prop', () => {
-    render(<WithdrawalDialog {...defaultProps} runnerNumber="42" />);
-    expect(screen.getByLabelText(/Runner Number/i)).toHaveValue('42');
-  });
-
-  test('focuses runner input on open', () => {
-    render(<WithdrawalDialog {...defaultProps} />);
-    expect(screen.getByLabelText(/Runner Number/i)).toHaveFocus();
-  });
-
-  test('maintains focus trap', async () => {
-    render(<WithdrawalDialog {...defaultProps} />);
-
-    const firstFocusable = screen.getByLabelText(/Runner Number/i);
-    firstFocusable.focus();
-    expect(firstFocusable).toHaveFocus();
-  });
-
-  test('is accessible — close button labelled', () => {
-    render(<WithdrawalDialog {...defaultProps} />);
-    expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
-  });
-
-  test('disables submit while submitting', async () => {
-    let resolve;
-    mockStore.withdrawRunner.mockReturnValue(new Promise(r => { resolve = r; }));
-    const { container } = render(<WithdrawalDialog {...defaultProps} />);
-
-    const input = screen.getByLabelText(/Runner Number/i);
-    await userEvent.clear(input);
-    await userEvent.type(input, '105');
-
-    const form = container.querySelector('form');
-    fireEvent.submit(form);
-
-    await waitFor(() => {
-      const processing = screen.queryByText('Processing...');
-      const submitBtn = screen.getAllByRole('button').find(b => b.type === 'submit');
-      expect(processing || submitBtn?.disabled).toBeTruthy();
-    });
-
-    resolve();
   });
 });

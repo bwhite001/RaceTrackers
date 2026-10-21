@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import TimeUtils from '../../src/services/timeUtils.js';
 import {
   findDuplicates, findOutOfOrder, findSkipped, findSeenAfterOut, findUnknownBibs, findImpossiblePace, runChecks,
+  openIssueNumbers, checkpointDistances,
 } from '../../src/modules/base-operations/services/dataChecks.js';
 
 const at = (h, m) => TimeUtils.atLocalTime('2026-11-08T00:00:00.000Z', h, m);
@@ -72,5 +73,21 @@ describe('data checks (spec §4.12)', () => {
     };
     expect(runChecks(input).order).toHaveLength(1);
     expect(runChecks(input, new Set(['order:221:2:3'])).order).toHaveLength(0);
+  });
+});
+
+describe('leaders flag (B13)', () => {
+  it('open position issues (duplicate, out of order, after DNF/DNS, pace) flag a bib; skipped and unknown do not', () => {
+    const issues = {
+      dup: [{ number: 105 }], order: [{ number: 106 }], after: [{ number: 101 }], pace: [{ number: 107 }],
+      skip: [{ number: 120 }], unknown: [{ number: 999 }],
+    };
+    expect([...openIssueNumbers(issues)].sort()).toEqual([101, 105, 106, 107]);
+    expect(openIssueNumbers({}).size).toBe(0);
+  });
+
+  it('distances come from checkpoints, with the finish at the race distance', () => {
+    const d = checkpointDistances([{ number: 1, distanceKm: 5 }, { number: 2 }], { distanceKm: 22 });
+    expect([...d]).toEqual([[1, 5], [0, 22]]);
   });
 });

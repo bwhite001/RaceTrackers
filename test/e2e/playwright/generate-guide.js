@@ -112,6 +112,21 @@ const SECTION_MAP = {
   'matrix keeps times for DNS runners':                                     'base-reports',
   'email share stays short':                                                'import-export',
   'import accepts octet-stream':                                            'import-export',
+  // Validation fixes — Phase B (checkpoint)
+  'header shows callsign and frequency in full':                            'checkpoint',
+  'share batch lives in the app bar and covers no tiles':                   'checkpoint',
+  'status line stays in view while the grid scrolls':                       'checkpoint',
+  'stepper back to the original time reads Keep time':                      'checkpoint-fixes',
+  'overview bar keeps DNS muted and labels each part':                      'checkpoint-fixes',
+  'overview stepper is a draft until Save':                                 'checkpoint-fixes',
+  // Validation fixes — Phase B (base)
+  'exact time is pinned and a bad time keeps the block':                    'base-receive',
+  'also in this call counts numbers to record':                             'base-receive',
+  'a call with nothing to record is logged plainly':                        'base-receive',
+  'rejected chips match receive and out list rows are not cut off':         'base-status',
+  'withdrawal dialog uses 24-hour time and can be undone':                  'base-status',
+  'reports undo stays with its list and says what it undoes':               'base-reports',
+  'leaders flag open data issues':                                          'base-status',
 };
 
 const CHAPTERS = [

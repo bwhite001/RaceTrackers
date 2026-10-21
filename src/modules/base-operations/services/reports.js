@@ -182,7 +182,8 @@ export function currentLeaders({ sightings, order, out, raceStart, meta = new Ma
         idx: s.idx,
         lastCp: s.cp,
         time: s.time,
-        elapsed: raceStart ? TimeUtils.formatDuration(raceStart, s.time) : '',
+        // HH:MM — common times have no seconds
+        elapsed: raceStart ? TimeUtils.formatDuration(raceStart, s.time).slice(0, 5) : '',
       };
     })
     .sort((a, b) => b.idx - a.idx || a.time.localeCompare(b.time) || a.number - b.number)

@@ -61,7 +61,7 @@ test.describe('Base — reports and data checks', () => {
       await page.getByTestId('issue-row').getByRole('button', { name: /^Keep / }).first().click();
       await expect(page.getByTestId('check-count-dup')).toHaveText('✓');
       await expect(page.getByText('All sorted')).toBeVisible();
-      await page.getByRole('button', { name: 'Undo' }).click();
+      await page.getByRole('button', { name: /^Undo 105: Keep / }).click();
       await expect(page.getByTestId('check-count-dup')).toHaveText('1');
       await page.getByTestId('issue-row').getByRole('button', { name: /^Keep / }).first().click();
       await expect(page.getByTestId('check-count-dup')).toHaveText('✓');

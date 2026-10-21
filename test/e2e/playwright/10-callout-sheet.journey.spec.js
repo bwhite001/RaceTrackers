@@ -62,7 +62,7 @@ test.describe('Callout Sheet', () => {
 
     await step('Callout Sheet — verify content is visible', async () => {
       // The page should show either the callout sheet heading or an empty state
-      const calloutHeading = page.getByText(/callout sheet/i).first();
+      const calloutHeading = page.getByRole('heading', { name: /callout/i }).first();
       const headingVisible = await calloutHeading.isVisible({ timeout: 5000 }).catch(() => false);
       if (!headingVisible) {
         test.skip(true, 'Callout Sheet component did not render — getTimeSegments may not be implemented');

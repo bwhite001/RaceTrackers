@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { checkStatusNumber, outRecords } from '../../src/modules/base-operations/services/statusValidation.js';
+import { checkStatusNumber, outRecords, reasonLabel } from '../../src/modules/base-operations/services/statusValidation.js';
 
 const order = [{ number: 1, short: 'CP1' }, { number: 2, short: 'CP2' }, { number: 3, short: 'CP3' }, { number: 0, short: 'Finish' }];
 const base = {
@@ -46,6 +46,14 @@ describe('outRecords', () => {
     expect(rows.find(r => r.number === 150).detail).toMatch(/^CP2 · Injury · \d\d:\d\d$/);
     expect(rows.find(r => r.number === 175).detail).toBe('On course · Medical');
     expect(rows.find(r => r.number === 233).detail).toBe('Did not start');
+  });
+
+  it('shows reasons from the old withdrawal dialog as today\'s list, without rewriting them', () => {
+    expect(['Illness', 'Time Cutoff', 'Voluntary Withdrawal', 'Personal Emergency', 'Injury', 'Medical'].map(reasonLabel))
+      .toEqual(['Medical', 'Cut-off', 'Self-withdrew', 'Other', 'Injury', 'Medical']);
+    const rec = { number: 160, status: 'withdrawn', withdrawalDetails: { checkpoint: 1, reason: 'Time Cutoff', withdrawalTime: null } };
+    expect(outRecords([rec])[0].detail).toBe('CP1 · Cut-off');
+    expect(rec.withdrawalDetails.reason).toBe('Time Cutoff');
   });
 });
 

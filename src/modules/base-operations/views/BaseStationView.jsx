@@ -8,7 +8,7 @@ import useBaseOperationsStore from '../store/baseOperationsStore';
 import { useRaceStore } from '../../../store/useRaceStore.js';
 import useSettingsStore from '../../../shared/store/settingsStore';
 import { HOTKEYS, RUNNER_STATUSES } from '../../../types';
-import { BaseAppBar } from '../../../design-system/components/VK';
+import { BaseAppBar, UndoBar, useUndo } from '../../../design-system/components/VK';
 import useNow from '../../../shared/hooks/useNow';
 import { hhmm } from '../../../services/blocks.js';
 import ImportExportModal from '../../../components/ImportExport/ImportExportModal';
@@ -82,6 +82,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const [reportFocus, setReportFocus] = useState(null);
   const [showWithdrawalDialog, setShowWithdrawalDialog] = useState(false);
   const [withdrawalType, setWithdrawalType] = useState('dnf');
+  const withdrawUndo = useUndo();
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
@@ -220,7 +221,9 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
           isOpen={showWithdrawalDialog}
           onClose={() => setShowWithdrawalDialog(false)}
           type={withdrawalType}
+          onDone={withdrawUndo.offer}
         />
+        <UndoBar {...withdrawUndo.bar} className="fixed left-4 right-4 bottom-6 z-40 max-w-xl mx-auto" />
 
 
         <SettingsModal

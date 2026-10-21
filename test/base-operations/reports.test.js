@@ -95,7 +95,7 @@ describe('base reports', () => {
   it('leaders: furthest first, then fastest; elapsed from race start', () => {
     const l = currentLeaders({ sightings, order, out, raceStart: at(6, 30), meta: new Map([[101, { firstName: 'Sarah', lastName: 'J', gender: 'F' }]]) });
     expect(l.slice(0, 3).map(r => [r.rank, r.number, r.lastCp.short])).toEqual([[1, 101, 'Finish'], [2, 102, 'CP2'], [3, 103, 'CP1']]);
-    expect(l[0]).toMatchObject({ name: 'Sarah J', gender: 'F', elapsed: '01:30:00' });
+    expect(l[0]).toMatchObject({ name: 'Sarah J', gender: 'F', elapsed: '01:30' });
   });
 
   it('reportedUpTo ignores exact (manual) times; the board uses it', () => {

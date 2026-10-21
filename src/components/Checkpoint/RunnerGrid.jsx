@@ -3,7 +3,7 @@ import useCheckpointStore from '../../modules/checkpoint-operations/store/checkp
 import { bibGroups, runnerTime } from '../../modules/checkpoint-operations/services/checkpointStats';
 import { parseBibList } from '../../shared/utils/parseBibs';
 import TimeUtils from '../../services/timeUtils.js';
-import { hhmm, toBlock } from '../../services/blocks.js';
+import { hhmm, toBlock, sameMinute } from '../../services/blocks.js';
 import {
   checkpointRunnerState, stateClasses, numberClasses, stateLabel, RUNNER_STATE, STATE_NAMES,
 } from '../../design-system/statusStyles';
@@ -125,11 +125,14 @@ const RunnerGrid = () => {
 
   return (
     <div className="flex flex-col">
-      <div className="px-4 pt-3.5">
-        <QuickEntryBar onMark={handleQuickEntry} />
-      </div>
-      <div className="px-4 pt-1.5 min-h-[20px] text-[13px] font-semibold text-vk-blue" aria-live="polite" data-testid="markoff-status">
-        {message}
+      {/* Sticky so the status line stays in view while the grid scrolls */}
+      <div className="sticky top-0 z-10 bg-vk-paper dark:bg-gray-900 pb-1">
+        <div className="px-4 pt-3.5">
+          <QuickEntryBar onMark={handleQuickEntry} />
+        </div>
+        <div className="px-4 pt-1.5 min-h-[20px] text-[13px] font-semibold text-vk-blue dark:text-vk-on-navy" aria-live="polite" data-testid="markoff-status">
+          {message}
+        </div>
       </div>
 
       {groups.length > 1 && (
@@ -186,7 +189,7 @@ const RunnerGrid = () => {
         <EditSheet
           sheet={sheet}
           earliest={ctx.earliest}
-          onDraft={draft => setSheet(s => ({ ...s, draft }))}
+          onDraft={draft => setSheet(s => ({ ...s, draft: sameMinute(draft, s.orig) ? s.orig : draft }))}
           onSave={save}
           onAlt={alt}
           onClose={closeSheet}

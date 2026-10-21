@@ -346,8 +346,8 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
     await test.step('Dialog — enter runner 110, select reason, then submit', async () => {
       await _page.locator('input#runnerNumber').fill('110');
       await _page.waitForTimeout(200);
-      await _page.locator('select#reason').selectOption('Personal Emergency');
-      await _page.locator('button[form="withdrawal-form"]').click();
+      await _page.getByRole('dialog', { name: 'Withdraw runner' }).getByRole('button', { name: 'Other' }).click();
+      await _page.getByRole('button', { name: 'Withdraw runner', exact: true }).click();
       await _page.locator('input#runnerNumber').waitFor({ state: 'hidden', timeout: 8000 });
     });
   });
@@ -367,7 +367,7 @@ test.describe('Complete Race Simulation — Autumn Ultra 2025', () => {
     await test.step('Dialog — enter runner 101 and submit (DNF has no reason field)', async () => {
       await _page.locator('input#runnerNumber').fill('101');
       await _page.waitForTimeout(200);
-      await _page.getByRole('button', { name: /withdraw runner/i }).click();
+      await _page.getByRole('button', { name: 'Withdraw runner', exact: true }).click();
       await _page.locator('input#runnerNumber').waitFor({ state: 'hidden', timeout: 8000 });
     });
   });

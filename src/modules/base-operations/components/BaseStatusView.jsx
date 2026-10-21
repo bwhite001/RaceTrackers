@@ -5,7 +5,7 @@ import { checkStatusNumber, outRecords, REASONS } from '../services/statusValida
 import { parseBibList } from '../../../shared/utils/parseBibs';
 import TimeUtils from '../../../services/timeUtils.js';
 import { earliestTime } from '../../../services/blocks.js';
-import { stateClasses, RUNNER_STATE } from '../../../design-system/statusStyles';
+import { stateClasses, checkClasses, RUNNER_STATE } from '../../../design-system/statusStyles';
 import { BibChip, TimeStepper } from '../../../design-system/components/VK';
 import useNow from '../../../shared/hooks/useNow';
 
@@ -151,9 +151,7 @@ const BaseStatusView = ({ onWithdrawDetails }) => {
             <BibChip key={c.i} number={c.num} note={c.note}
               className={c.kind === 'ok'
                 ? stateClasses(mode === 'dnf' ? RUNNER_STATE.DNF : RUNNER_STATE.DNS)
-                : c.kind === 'warn'
-                  ? 'bg-white text-vk-ink border-2 border-vk-gold'
-                  : 'bg-white text-vk-muted border border-vk-border line-through'}
+                : checkClasses(c.kind)}
               onClick={() => { setPending(p => p.filter((_, k) => k !== c.i)); setFlash(`${c.num} removed`); setUndo(null); }} />
           ))}
           {!checked.length && (
@@ -201,12 +199,15 @@ const BaseStatusView = ({ onWithdrawDetails }) => {
         </div>
         <div className="max-h-[420px] overflow-y-auto" data-testid="out-list">
           {shown.map(r => (
-            <div key={r.number} className="flex items-center gap-2.5 px-3 py-1.5 border-b border-vk-border dark:border-gray-700 min-h-[48px]">
+            <div key={r.number} className="flex items-center gap-2.5 px-3 py-1.5 border-b border-vk-border dark:border-gray-700 min-h-[48px]" data-testid="out-row">
               <span className="w-11 font-display font-extrabold text-[17px] tabular-nums">{r.number}</span>
-              <span className={`rounded-chip px-2 py-0.5 text-xs font-bold ${r.status === 'DNF'
-                ? 'bg-vk-red-tint border border-vk-red text-vk-red'
-                : 'bg-vk-paper border border-dashed border-vk-muted text-vk-muted'}`}>{r.status}</span>
-              <span className="flex-1 min-w-0 text-xs text-vk-muted truncate">{r.detail}</span>
+              {/* Two lines (status over detail) so "CP1 · Medical · 11:15" is never cut off */}
+              <span className="flex-1 min-w-0 flex flex-col items-start gap-0.5">
+                <span className={`rounded-chip px-2 py-0.5 text-xs font-bold ${r.status === 'DNF'
+                  ? 'bg-vk-red-tint border border-vk-red text-vk-red'
+                  : 'bg-vk-paper border border-dashed border-vk-muted text-vk-muted'}`}>{r.status}</span>
+                <span className="text-xs text-vk-muted break-words" data-testid="out-detail">{r.detail}</span>
+              </span>
               <button type="button" onClick={() => clear(r)} disabled={!r.clearable}
                 aria-label={`Clear ${r.status} for ${r.number}`}
                 title={r.clearable ? undefined : 'Recorded at a checkpoint — clear it there'}

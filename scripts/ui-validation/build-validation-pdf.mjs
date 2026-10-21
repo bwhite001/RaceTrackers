@@ -307,7 +307,7 @@ async function run() {
   await ev('RX-07', '§4.9', 'Add 122, 123', 'Numbers box shows only the current block\'s numbers. Other blocks in the call show underneath as pills: "Also in this call: 07:40 · 5".',
     async p => { await add(p, [122, 123]); });
   await ev('RX-08', '§4.9', 'Tap the "Also in this call" pill', 'Tap to switch back.',
-    async p => { await p.getByRole('button', { name: /^Show the \d+ numbers at/ }).first().click(); });
+    async p => { await p.getByRole('button', { name: /^Show the numbers at/ }).first().click(); });
   await ev('RX-09', '§4.9', `Type an exact time in "Exact" (${hhmm(new Date(Date.now() - 22 * 60000)).replace(':', '')})`, '"Exact" input accepts HH:MM or HHMM between race start and now; sets a non-block time and shows it selected.',
     async p => { await p.locator('#exact-time').fill(hhmm(new Date(Date.now() - 22 * 60000)).replace(':', '')); await add(p, [124]); });
   await ev('RX-10', '§4.9', 'Type an exact time in the future (2359)', 'Exact time must be between race start and now.',
@@ -395,7 +395,7 @@ async function run() {
   await ev('RP-07', '§4.12', 'Click the first "Keep HH:MM"', 'Each issue row: bib, headline, detail, 1–2 action buttons; resolving removes it (Undo).',
     async p => { await p.getByTestId('issue-row').getByRole('button', { name: /^Keep / }).first().click(); });
   await ev('RP-08', '§4.12', 'Click "Undo"', 'Resolving removes it (Undo).',
-    async p => { await p.getByRole('button', { name: 'Undo' }).click(); });
+    async p => { await p.getByRole('button', { name: /^Undo / }).click(); });
   await ev('RP-09', '§4.12 Needs attention', 'Click "Out of order"', 'Time at CP(n+1) < time at CP(n) → Ask CPx (flag for radio check) / Mark checked.',
     async p => { await p.getByRole('button', { name: /^Out of order/ }).click(); });
   await ev('RP-10', '§4.12', 'Click "Ask CP2"', 'Resolutions persist in a new data_issue_resolutions table so resolved items don\'t reappear.',

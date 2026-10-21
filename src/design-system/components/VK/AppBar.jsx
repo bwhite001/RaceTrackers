@@ -54,7 +54,8 @@ const AppBar = ({
       )}
       <div className="flex flex-col gap-0.5 flex-1 min-w-0">
         <h1 className="font-display font-bold text-lg leading-tight truncate">{title}</h1>
-        {subtitle && <div className="text-xs text-vk-on-navy truncate">{subtitle}</div>}
+        {/* Two lines rather than an ellipsis: callsigns and frequencies must stay readable */}
+        {subtitle && <div className="text-xs text-vk-on-navy line-clamp-2 break-words">{subtitle}</div>}
       </div>
       {right && <div className="pr-1.5 flex items-center gap-1">{right}</div>}
     </div>

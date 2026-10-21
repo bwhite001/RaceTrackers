@@ -145,7 +145,7 @@ test.describe('Checkpoint Volunteer – Mark-Off Journey', () => {
     });
 
     await step('Export option — triggers JSON download', async () => {
-      const exportBtn = page.getByRole('button', { name: /export|share|download/i }).first();
+      const exportBtn = page.getByRole('button', { name: /export results/i });
       await expect(exportBtn).toBeVisible({ timeout: 5000 });
       await exportBtn.click();
       // ExportCheckpointResultsModal — wait for the modal heading, then download JSON

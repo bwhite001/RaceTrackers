@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import TimeUtils from '../../src/services/timeUtils.js';
 import {
-  toBlock, blocksBetween, nextBlock, clampTime, parseExactTime, earliestTime, hhmm, isBlockTime,
+  toBlock, blocksBetween, nextBlock, clampTime, parseExactTime, earliestTime, hhmm, isBlockTime, sameMinute,
 } from '../../src/services/blocks.js';
 
 // Local-time ISO helper so the tests don't depend on the machine's timezone
@@ -39,6 +39,13 @@ describe('blocks', () => {
     expect(earliestTime(at(6, 30), at(7, 47))).toBe(at(6, 30));
     expect(earliestTime('2020-01-01T00:00:00.000Z', at(7, 47))).toBe(TimeUtils.addMinutes(at(7, 47), -720));
     expect(earliestTime(at(9, 0), at(7, 47))).toBe(TimeUtils.addMinutes(at(7, 47), -720));
+  });
+
+  it('same minute ignores seconds (a clamp to now lands seconds after the original)', () => {
+    const t = at(7, 14);
+    expect(sameMinute(t, TimeUtils.addMinutes(t, 0.4))).toBe(true);
+    expect(sameMinute(t, TimeUtils.addMinutes(t, 1))).toBe(false);
+    expect(sameMinute(null, t)).toBe(false);
   });
 
   it('knows block boundaries', () => {

@@ -19,6 +19,11 @@ export function hhmm(iso) {
 }
 
 /** Clamp a time to [raceStart, now]. raceStart may be null. */
+/** Same clock minute (what the operator sees) — ISO strings from toISOString(). */
+export function sameMinute(a, b) {
+  return !!a && !!b && a.slice(0, 16) === b.slice(0, 16);
+}
+
 export function clampTime(iso, raceStart, now) {
   let t = iso;
   if (raceStart && t < raceStart) t = raceStart;

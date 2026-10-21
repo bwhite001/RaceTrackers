@@ -346,7 +346,7 @@ const useBaseOperationsStore = create(
       // Actions - DNF / DNS bulk (spec §4.11). Each change is audit-logged by the
       // repository; one silent refresh at the end.
       // prev: Map(bib → out record from outRecords()) for runners already out
-      applyOutStatus: async ({ mode, numbers, where = null, reason = '', time, prev = new Map() }) => {
+      applyOutStatus: async ({ mode, numbers, where = null, reason = '', comments = '', time, prev = new Map() }) => {
         const { currentRaceId } = get();
         if (!currentRaceId) throw new Error('No active race');
         const raceKey = raceKeyOf(currentRaceId);
@@ -356,7 +356,7 @@ const useBaseOperationsStore = create(
           const before = prev.get(num) ?? null;
           if (mode === 'dnf') {
             if (before?.status === 'DNS') await repo.reverseNonStarter(raceKey, num);
-            await repo.withdrawRunner(raceKey, num, where, reason || '', '', time);
+            await repo.withdrawRunner(raceKey, num, where, reason || '', comments, time);
           } else {
             if (before?.kind === 'withdrawal') await repo.reverseWithdrawal(raceKey, num);
             await repo.markAsNonStarter(raceKey, num, '');

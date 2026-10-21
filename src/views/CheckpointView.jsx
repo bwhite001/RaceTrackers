@@ -134,11 +134,8 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
       ),
     },
     callout: {
-      title: 'Callout sheet',
-      subtitle: [
-        [shortName, operator].filter(Boolean).join(' · ') + (baseCallsign ? ` → ${baseCallsign}` : ''),
-        currentRace?.frequency,
-      ].filter(Boolean).join(' · '),
+      title: `${shortName} · Callout`,
+      subtitle: [[operator, baseCallsign].filter(Boolean).join(' → '), currentRace?.frequency].filter(Boolean).join(' · '),
       body: callDue ? (
         <div className="bg-vk-gold text-vk-ink rounded-btn px-3 py-2 flex items-center gap-2.5" role="status">
           <ClockIcon className="w-[18px] h-[18px] shrink-0" aria-hidden="true" />
@@ -147,8 +144,8 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
       ) : null,
     },
     overview: {
-      title: 'Overview',
-      subtitle: `Checkpoint ${cpNumber} · tap a runner to fix it`,
+      title: `${shortName} · Overview`,
+      subtitle: [location, operator].filter(Boolean).join(' · '),
       body: <OverviewProgress stats={stats} />,
     },
   }[activeTab];
@@ -160,15 +157,26 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
         subtitle={role === 'radio' ? 'Radio operator' : header.subtitle}
         onBack={onExitAttempt}
         backLabel="Leave checkpoint"
-        right={(
-          <>
-            <SavedIndicator compact />
-            <HeaderIcon label="Transfer Data" Icon={ArrowsRightLeftIcon} onClick={() => navigate(`/checkpoint/${checkpointId}/transfer`)} />
-            <HeaderIcon label="Export Results" Icon={ArrowDownTrayIcon} onClick={() => setShowExportModal(true)} />
-          </>
-        )}
+        right={<SavedIndicator compact />}
       >
-        <RoleToggle role={role} onChange={setRole} />
+        {/* Actions share the role row so the title and callsigns get the full width */}
+        <div className="flex items-center gap-1">
+          <div className="flex-1 min-w-0"><RoleToggle role={role} onChange={setRole} /></div>
+          {role === 'marker' && (
+            <button type="button" onClick={() => setShowBatchShare(true)}
+              aria-label={`Share batch, ${unsharedCount} runner${unsharedCount === 1 ? '' : 's'}`} title="Share batch"
+              className="relative w-11 h-11 flex items-center justify-center rounded-btn hover:bg-white/10">
+              <QrCodeIcon className="w-[22px] h-[22px]" aria-hidden="true" />
+              {unsharedCount > 0 && (
+                <span className="absolute top-0.5 right-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[11px] font-extrabold text-vk-ink bg-vk-gold rounded-full" aria-hidden="true">
+                  {unsharedCount}
+                </span>
+              )}
+            </button>
+          )}
+          <HeaderIcon label="Transfer Data" Icon={ArrowsRightLeftIcon} onClick={() => navigate(`/checkpoint/${checkpointId}/transfer`)} />
+          <HeaderIcon label="Export Results" Icon={ArrowDownTrayIcon} onClick={() => setShowExportModal(true)} />
+        </div>
         {role === 'marker' && header.body}
       </AppBar>
 
@@ -179,23 +187,6 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             {activeTab === 'callout' && <CalloutSheet onReadOut={() => setReadOut(true)} />}
             {activeTab === 'overview' && <CheckpointOverview />}
           </main>
-
-          {activeTab === 'mark-off' && (
-          <button
-            type="button"
-            onClick={() => setShowBatchShare(true)}
-            className="fixed bottom-[88px] right-4 z-30 flex items-center gap-2 px-4 min-h-[44px] rounded-full bg-vk-navy text-white shadow-sheet font-semibold text-sm"
-            aria-label="Share batch"
-          >
-            <QrCodeIcon className="w-5 h-5" aria-hidden="true" />
-            Share Batch
-            {unsharedCount > 0 && (
-              <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-extrabold text-vk-ink bg-vk-gold rounded-full">
-                {unsharedCount}
-              </span>
-            )}
-          </button>
-          )}
 
           <CheckpointTabBar active={activeTab} onChange={setActiveTab} calloutCount={stats.toCall} />
 
@@ -228,7 +219,6 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
 const OverviewProgress = ({ stats }) => {
   const total = stats.total || 1;
   const pct = (n) => `${(n / total) * 100}%`;
-  const out = stats.dns + stats.dnf;
   return (
     <div className="px-2 flex flex-col gap-2">
       <div className="flex justify-between items-baseline">
@@ -238,12 +228,14 @@ const OverviewProgress = ({ stats }) => {
       <div
         className="flex h-2.5 rounded-full overflow-hidden bg-white/15"
         role="img"
-        aria-label={`${stats.called} called in, ${stats.toCall} passed not called in, ${stats.toCome} to come, ${out} withdrawn`}
+        aria-label={`${stats.called} called in, ${stats.toCall} passed not called in, ${stats.toCome} to come, ${stats.dns} DNS, ${stats.dnf} DNF`}
       >
         <div style={{ width: pct(stats.called) }} className="bg-vk-on-navy" />
         <div style={{ width: pct(stats.toCall) }} className="bg-vk-gold" />
         <div className="flex-1" />
-        <div style={{ width: pct(out) }} className="bg-vk-red" />
+        {/* DNS is muted (never started); only DNF is red (G8) */}
+        <div style={{ width: pct(stats.dns) }} className="border border-dashed border-vk-on-navy/70" data-testid="bar-dns" />
+        <div style={{ width: pct(stats.dnf) }} className="bg-vk-red" data-testid="bar-dnf" />
       </div>
     </div>
   );

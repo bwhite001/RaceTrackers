@@ -45,6 +45,7 @@ const BaseReceive = () => {
   const [undoEntries, setUndoEntries] = useState(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [exactInvalid, setExactInvalid] = useState(false);
 
   const raceStart = currentRace?.date && currentRace?.startTime
     ? TimeUtils.createRaceTimestamp(currentRace.date, currentRace.startTime.slice(0, 5))
@@ -138,12 +139,17 @@ const BaseReceive = () => {
     setFlash('');
   };
 
+  // Commit once a whole time is typed (HHMM or H:MM); show it as HH:MM.
+  // A rejected time clears the field and keeps the block that was selected.
   const onExact = (value) => {
     const v = value.replace(/[^\d:]/g, '').slice(0, 5);
+    setExactInvalid(false);
+    if (!/^\d{4}$|^\d{1,2}:\d{2}$/.test(v)) { setReceive({ manualText: v }); return; }
     const t = parseExactTime(v, now);
-    if (t && t >= earliest && t <= now) { setBlock(t, true, v); return; }
-    setReceive({ manualText: v });
-    if (t) setFlash(`Time must be between ${hhmm(earliest)} and now`);
+    if (t && t >= earliest && t <= now) { setBlock(t, true, hhmm(t)); return; }
+    setReceive({ manualText: '' });
+    setExactInvalid(true);
+    setFlash(t ? `Time must be between ${hhmm(earliest)} and now` : `${v} isn't a time — type HH:MM`);
   };
 
   const complete = async () => {
@@ -157,7 +163,7 @@ const BaseReceive = () => {
       setReceive({
         step: 'done',
         lastCallId: callId,
-        summary: { title: `${goodCount} recorded at ${cur.short}`, sub: label + (bad ? ` · ${bad} skipped (flagged)` : '') },
+        summary: { title: `${goodCount} recorded at ${cur.short}${bad ? ` · ${bad} skipped (flagged)` : ''}`, sub: label },
       });
       clearTransient();
       setFlash('');
@@ -241,6 +247,7 @@ const BaseReceive = () => {
               exactText={rx.manualText}
               onExactChange={onExact}
               exactActive={rx.manual}
+              exactInvalid={exactInvalid}
             />
 
             <div className="flex flex-wrap gap-3 items-stretch">
@@ -261,11 +268,11 @@ const BaseReceive = () => {
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="text-xs font-semibold text-vk-muted">Also in this call:</span>
                     {otherTimes.map(t => {
-                      const n = checked.filter(c => c.t === t).length;
+                      const n = checked.filter(c => c.t === t && isRecordable(c.kind)).length;
                       const manual = toBlock(t) !== t;
                       return (
                         <button key={t} type="button" onClick={() => setBlock(t, manual, manual ? hhmm(t) : '')}
-                          aria-label={`Show the ${n} numbers at ${hhmm(t)}`}
+                          aria-label={`Show the numbers at ${hhmm(t)}, ${n} to record`}
                           className="min-h-[32px] px-2.5 rounded-full border border-vk-blue bg-white text-vk-blue font-bold text-xs dark:bg-gray-800">
                           {hhmm(t)} · {n}
                         </button>
@@ -319,9 +326,13 @@ const BaseReceive = () => {
                 className={`${actionBtn} ${atNow ? 'bg-white text-vk-muted border border-dashed border-vk-border cursor-not-allowed dark:bg-gray-800' : 'bg-vk-blue text-white'}`}>
                 {nextLabel}
               </button>
+              {/* Nothing recordable: still log the call (rejected numbers feed the
+                  Unknown bibs check), but not as the gold primary */}
               <button type="button" onClick={complete} disabled={!rx.entries.length || busy}
-                className={`${actionBtn} bg-vk-gold text-vk-ink shadow-btn disabled:opacity-50 disabled:cursor-not-allowed`}>
-                Complete · {goodCount}
+                className={`${actionBtn} ${rx.entries.length && !goodCount
+                  ? 'bg-white text-vk-ink border border-vk-muted dark:bg-gray-800 dark:text-gray-100'
+                  : 'bg-vk-gold text-vk-ink shadow-btn'} disabled:opacity-50 disabled:cursor-not-allowed`}>
+                {rx.entries.length && !goodCount ? 'Log call · 0' : `Complete · ${goodCount}`}
               </button>
             </div>
           </div>
