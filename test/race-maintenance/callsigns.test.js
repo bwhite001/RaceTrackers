@@ -6,4 +6,7 @@ describe('parseCallsigns', () => {
     expect(parseCallsigns('vk4mud, VK4MKD  vk4ear,vk4mud')).toEqual(['VK4MUD', 'VK4MKD', 'VK4EAR']);
     expect(parseCallsigns('  ')).toEqual([]);
   });
+  it('drops tokens that are not callsign-shaped', () => {
+    expect(parseCallsigns('VK4IE (John), vk4tba')).toEqual(['VK4IE', 'VK4TBA']);
+  });
 });

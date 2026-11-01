@@ -160,4 +160,8 @@ describe('raceResults', () => {
     const r = raceResults({ records: [rec(0, 5, at(8, 0))], checkpoints, outList: [{ number: 5, status: 'non-starter' }], raceNumbers: [5] });
     expect(r.rows[0]).toMatchObject({ status: 'DNS', dnfCheckpoint: null });
   });
+  it('a DNF recorded on a checkpoint device takes that checkpoint', () => {
+    const r = raceResults({ records: [{ checkpointNumber: 2, number: 5, status: 'dnf' }], checkpoints, outList: [{ number: 5, status: 'dnf' }], raceNumbers: [5] });
+    expect(r.rows[0]).toMatchObject({ status: 'DNF', dnfCheckpoint: 2 });
+  });
 });

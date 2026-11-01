@@ -62,12 +62,20 @@ test.describe('Edit race radio details', () => {
       await expect(ops(2)).toHaveValue('vk4bbb vk4ccc');
     });
 
+    await step('A typed checkpoint name survives saving operators on another row', async () => {
+      await page.getByLabel('Checkpoint 2 name').fill('Renamed Two');
+      await ops(1).fill('vk4ddd');
+      await page.getByRole('button', { name: 'Save operators CP1' }).click();
+      await expect(ops(1)).toHaveValue('VK4DDD');
+      await expect(page.getByLabel('Checkpoint 2 name')).toHaveValue('Renamed Two');
+    });
+
     await step('Next saves CP2 too — both survive a reload', async () => {
       await page.getByRole('button', { name: /next/i }).click();
       await expect(page.getByRole('heading', { name: 'Runner Roster', exact: true })).toBeVisible();
       await page.reload();
       await page.getByRole('button', { name: /next/i }).click();
-      await expect(ops(1)).toHaveValue('VK4AAA');
+      await expect(ops(1)).toHaveValue('VK4DDD');
       await expect(ops(2)).toHaveValue('VK4BBB, VK4CCC');
     });
   });

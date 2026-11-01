@@ -433,7 +433,7 @@ export class BaseOperationsRepository extends BaseRepository {
       let timeFromStart = '';
       if (r.finish && start) {
         const secs = Math.floor((new Date(r.finish) - start) / 1000);
-        timeFromStart = [Math.floor(secs / 3600), Math.floor(secs / 60) % 60, secs % 60]
+        if (secs >= 0) timeFromStart = [Math.floor(secs / 3600), Math.floor(secs / 60) % 60, secs % 60]
           .map(n => String(n).padStart(2, '0')).join(':');
       }
       return [r.number, r.status, hhmm(r.finish), timeFromStart, r.notes];

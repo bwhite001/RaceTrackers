@@ -72,6 +72,8 @@ const RaceEditView = () => {
   const [cpEdits, setCpEdits] = useState({}); // { [cp.id]: newName }
   const [cpBatchEdits, setCpBatchEdits] = useState({}); // { [cp.id]: number[] | null }
   const [cpOpsEdits, setCpOpsEdits] = useState({}); // { [cp.id]: 'VK4ABC, VK4DEF' }
+  const namesSaved = useRef({});
+  const wavesSaved = useRef({});
   const opsSaved = useRef({}); // { [cp.id]: saved text }, to tell which fields are unsaved
   const [cpSaving, setCpSaving] = useState({});
   const [newCpName, setNewCpName] = useState('');
@@ -113,13 +115,20 @@ const RaceEditView = () => {
   // Populate checkpoint edits map
   useEffect(() => {
     if (checkpoints) {
-      setCpEdits(Object.fromEntries(checkpoints.map(cp => [cp.id, cp.name])));
+      // keep unsaved names and waves typed in other rows; only clean rows take the DB value
+      const keep = (prev, id, v, savedMap) =>
+        prev[id] !== undefined && JSON.stringify(prev[id]) !== JSON.stringify(savedMap.current[id]) ? prev[id] : v;
+      const names = Object.fromEntries(checkpoints.map(cp => [cp.id, cp.name]));
+      setCpEdits(prev => Object.fromEntries(Object.entries(names).map(([id, v]) => [id, keep(prev, id, v, namesSaved)])));
+      namesSaved.current = names;
       const saved = Object.fromEntries(checkpoints.map(cp => [cp.id, (cp.operatorCallsigns ?? []).join(', ')]));
       // keep unsaved text typed in other rows; only clean rows take the DB value
       setCpOpsEdits(prev => Object.fromEntries(Object.entries(saved).map(([id, v]) =>
         [id, prev[id] !== undefined && prev[id] !== opsSaved.current[id] ? prev[id] : v])));
       opsSaved.current = saved;
-      setCpBatchEdits(Object.fromEntries(checkpoints.map(cp => [cp.id, cp.allowedBatches ?? null])));
+      const waves = Object.fromEntries(checkpoints.map(cp => [cp.id, cp.allowedBatches ?? null]));
+      setCpBatchEdits(prev => Object.fromEntries(Object.entries(waves).map(([id, v]) => [id, keep(prev, id, v, wavesSaved)])));
+      wavesSaved.current = waves;
     }
   }, [checkpoints]);
 

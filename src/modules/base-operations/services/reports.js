@@ -208,6 +208,8 @@ export function raceResults({ records, checkpoints, outList, raceNumbers }) {
   const sightings = sightingsByCheckpoint(records);
   const out = outStatusMap(outList, records);
   const dnfAt = new Map(outRecords(outList).map(o => [o.number, o.checkpoint ?? null]));
+  // a DNF recorded on a checkpoint device and transferred has no withdrawal record: use its row's checkpoint
+  for (const r of records) if (r.status === 'dnf' && dnfAt.get(r.number) == null && dnfAt.has(r.number)) dnfAt.set(r.number, r.checkpointNumber);
   const rows = [...raceNumbers].sort((a, b) => a - b).map(number => {
     const times = {};
     for (const cp of order) {

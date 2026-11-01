@@ -191,6 +191,12 @@ describe('BaseOperationsRepository reports read base records', () => {
     expect(content).toMatch(/^4,DNF,,,/m);
     expect(content).toMatch(/^500,Finished,08:20,01:50:00,/m);
   });
+  it('Time from Start is blank when the finish precedes the start', async () => {
+    await db.base_station_runners.put(row(99760, 2, 0, 6, 0));
+    try {
+      expect((await repo.generateRaceResults(997)).content).toMatch(/^2,Finished,06:00,,/m);
+    } finally { await db.base_station_runners.delete(99760); }
+  });
   it('Missing Numbers excludes passed, DNS and DNF runners', async () => {
     expect((await repo.getMissingRunners(997, 2)).map(r => r.number)).toEqual([2, 500]);
     expect((await repo.generateMissingNumbersReport(997, 1)).content).toContain('Total Missing: 0');
