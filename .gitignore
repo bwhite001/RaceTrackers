@@ -55,4 +55,5 @@ coverage/
 dev-dist/
 playwright-report/
 test/e2e/playwright/downloads/
-docs/
+docs/*
+!docs/guides/
