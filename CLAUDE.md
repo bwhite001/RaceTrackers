@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 RaceTracker Pro — offline-first React PWA for race timing and checkpoint management (50–1,000+ runners). Built with React 18, Zustand, Dexie/IndexedDB, Vite, and Tailwind CSS.
 
+Repo: https://github.com/bwhite001/RaceTrackers — CI in `.github/workflows/`: `ci.yml`, `test-suites.yml` (+ `test-suites-smart.yml`), `generate-guides.yml`, `deploy.yml`.
+
 ## Commands
 
 Prefer `make` for everyday tasks — run `make` or `make help` to list all targets.
@@ -33,6 +35,12 @@ make test-components
 # E2E tests (make auto-builds first)
 make test-e2e            # Headed
 make test-e2e-ci         # Headless
+make test-confidence     # 00-full-confidence journey across all 3 operator roles
+
+# Playwright directly (three configs)
+npx playwright test                                        # playwright.config.js (default)
+npx playwright test --config playwright.mobile.config.js   # mobile viewports
+npx playwright test --config playwright.live.config.js     # 08-complete-race-simulation only
 
 # Single file / pattern (no make target — use npx directly)
 npx vitest run test/path/to/file.test.jsx
@@ -46,10 +54,18 @@ make seed                # Populate complete dataset in IndexedDB
 make seed-minimal
 make clear-data
 
+# Docs generation (require a prior E2E run — see Playwright Screenshot Guide below)
+make guide               # user-guide + annotated role journey docs
+make guide-pdfs
+make journey-pdfs
+
 # Housekeeping
 make install             # npm install
+make dev-fixtures        # Copy sample XLSX into public/import/ for the dev file picker
 make clean               # Remove dist/ and dev-dist/
 ```
+
+There is no linter or formatter configured — no ESLint, no Prettier. Don't look for `make lint`.
 
 ## Architecture
 
@@ -78,21 +94,31 @@ endOperation(); // unlocks
 
 All routes must be wrapped in `<ProtectedRoute moduleType={MODULE_TYPES.X}>` (see `src/App.jsx`).
 
-### State Management (Zustand — 3 stores)
+### State Management (Zustand — 3 global + 4 module stores)
 
+Global:
 1. **`useRaceStore`** (`src/store/useRaceStore.js`, 800+ lines) — global race data, persisted to localStorage. Key methods: `loadRaceData()`, `loadCheckpointRunners()`, `loadBaseStationRunners()`, `updateRunnerStatus()`.
 2. **`useNavigationStore`** (`src/shared/store/navigationStore.js`) — operation locks, NOT persisted (resets on reload).
 3. **`useSettingsStore`** (`src/shared/store/settingsStore.js`) — user preferences, persisted.
 
+Per-module (each backed by its own Repository, not `StorageService`):
+- `raceMaintenanceStore` → `RaceMaintenanceRepository`
+- `checkpointStore` → `CheckpointRepository`
+- `useDualCheckpointStore` → `CheckpointRepository` — operates two **linked checkpoints** at once (`primary`/`secondary` runner lists, `activeTab` decides which receives marks). Any mark/bulk op must go through `_activeCpNumber()`.
+- `baseOperationsStore` → `BaseOperationsRepository`
+
 ### Data Flow
 
+Two coexisting paths — check which one a component is on before adding DB calls:
+
 ```
-Components → Zustand stores → StorageService → Dexie/IndexedDB
+legacy:  Components → useRaceStore → StorageService (src/services/storage.js) → Dexie
+module:  Components → module store  → <Module>Repository                      → Dexie
 ```
 
-`src/services/storage.js` is the primary place for database operations. **Exception:** The base-operations module uses `BaseOperationsRepository.js` which accesses Dexie directly — this is intentional for isolation of the base station's complex audit/withdrawal logic.
+New module work goes through the module's Repository. `StorageService` remains for `useRaceStore` and the shared import/export path.
 
-### Database Schema (Dexie v8)
+### Database Schema (Dexie v10)
 
 All runner tables use compound indexes that must be queried in exact order:
 
@@ -104,9 +130,20 @@ await db.checkpoint_runners
   .first();
 ```
 
-Schema changes require `.version(N).stores({...})`. Provide an `.upgrade()` callback for data migrations — Dexie does not auto-migrate.
+Schema changes require `.version(N).stores({...})`. Provide an `.upgrade()` callback for data migrations — Dexie does not auto-migrate. Additive nullable *data* columns need no index and no `.upgrade()`; only indexed fields belong in the `.stores()` string.
 
-**v8 schema highlights:** Runners have `firstName/lastName/gender/batchNumber` fields. Checkpoint runners have a 3-time model: `actualTime/commonTime/commonTimeLabel/calledIn`. Base station runners have `markOffEntryTime`. New tables: `race_batches`, `imported_checkpoint_results`.
+Note: in `schema.js` the version blocks are not in numeric order (`version(10)` is declared above `version(9)`). Dexie doesn't care, but don't assume the last block is the newest.
+
+- **v8:** Runners gain `firstName/lastName/gender/batchNumber`. Checkpoint runners gain the 3-time model: `actualTime/commonTime/commonTimeLabel/calledIn`. Base station runners gain `markOffEntryTime`. New tables: `race_batches`, `imported_checkpoint_results`.
+- **v9:** GPS course data — `races.courseGpx/courseBounds`, `checkpoints.latitude/longitude` (data columns).
+- **v10:** `checkpoints.allowedBatches` — nullable means all waves.
+
+### Import / Export / Transfer
+
+- `src/services/import-export/` — `ImportService`, `ExportService`, `ValidationSchemas` (Zod). Versioned JSON race export/import.
+- `src/utils/xlsxImport.js` + `race-maintenance/components/WebScorerImportWizard.jsx` — create a race from a WebScorer `.xlsx` participant list.
+- `checkpoint-operations/services/TransferService.js` + `components/transfer/` — offline checkpoint→base handoff via QR (`qram` chunked codes, `pako` compression, camera scan). Used when there is no network at all.
+- `src/services/gpxUtils.js` — GPX course parsing for the Leaflet map views.
 
 ### Runner Range System
 
@@ -117,7 +154,7 @@ Schema changes require `.version(N).stores({...})`. Provide an `.upgrade()` call
 - `src/App.jsx` — route definitions and ProtectedRoute patterns
 - `src/store/useRaceStore.js` — primary state store (read carefully before modifying)
 - `src/services/storage.js` — all database operations via StorageService
-- `src/shared/services/database/schema.js` — Dexie schema v8 and migration history
+- `src/shared/services/database/schema.js` — Dexie schema v10 and migration history
 - `src/shared/store/navigationStore.js` — operation lock enforcement
 - `src/types/index.js` — constants, enums, JSDoc type definitions (`BASE_STATION_CP`, `RUNNER_STATUSES`, etc.)
 - `src/modules/base-operations/views/BaseStationView.jsx` — base station entry view
@@ -201,7 +238,7 @@ If this is a new section, also add to the `CHAPTERS` array:
 ```bash
 make build
 npx playwright test test/e2e/playwright/16-my-feature.journey.spec.js
-npm run generate:guide
+make guide   # generate:guide + generate:journeys
 ```
 
 Commit the updated `docs/guides/user-guide.md`, `docs/guides/user-guide.html`, and `docs/guides/assets/*.png` alongside the feature code.
