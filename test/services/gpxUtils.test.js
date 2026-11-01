@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseGpx } from '../../src/services/gpxUtils';
+import { getAllTemplates } from '../../src/data/templates/index.js';
 
 const SAMPLE_GPX = `<?xml version="1.0"?>
 <gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1">
@@ -46,5 +47,27 @@ describe('parseGpx', () => {
     expect(result.trackPoints).toEqual([]);
     expect(result.waypoints).toEqual([]);
     expect(result.bounds).toBeNull();
+  });
+});
+
+describe('template course GPX', () => {
+  it.each(getAllTemplates().map(t => [t.id, t.courseGpx]))('%s template GPX parses', (_, gpx) => {
+    const parsed = parseGpx(gpx);
+    expect(parsed).not.toBeNull();
+    expect(parsed.trackPoints.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('Mt Glorious track is the real course', () => {
+    const { trackPoints } = parseGpx(getAllTemplates().find(t => t.id === 'mt-glorious-mountain-trail').courseGpx);
+    const metres = ([a, b], [c, d]) => Math.hypot((a - c) * 110950, (b - d) * 99000);
+    const length = trackPoints.slice(1).reduce((km, p, i) => km + metres(trackPoints[i], p) / 1000, 0);
+    expect(trackPoints.length).toBeGreaterThanOrEqual(100);
+    expect(length).toBeGreaterThan(19);
+    expect(length).toBeLessThan(24);
+    // Passes CP1–4 within 100 m, in course order
+    const cps = [[-27.321677, 152.714852], [-27.345838, 152.730526], [-27.366238, 152.730747], [-27.34649, 152.750306]];
+    const hits = cps.map(cp => trackPoints.findIndex(p => metres(p, cp) < 100));
+    expect(hits.every(i => i >= 0)).toBe(true);
+    expect(hits).toEqual([...hits].sort((a, b) => a - b));
   });
 });

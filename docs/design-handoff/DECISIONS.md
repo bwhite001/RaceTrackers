@@ -321,3 +321,10 @@ Completed after Part E (the two simplifications from the first pass):
 - **Still not built:** the base → checkpoint "Field changes" broadcast. The brief excluded it, and it depends on the sharing spec, which isn't in this repo.
 - **Validation pack:** regenerated with 162 events, all completed, with no gaps in the evidence.
 
+
+## Rehearsal fixes
+
+- **Mt Glorious course (task 6):** the track is traced from TRAQ's map for the base map only, and the map itself isn't in the repo.
+  - **Cateng Break:** the map draws this as a hairpin with a separate line each way, so each dot is used once and nothing is retraced.
+  - **Finish:** the dots form three parallel chains. The track runs out along the green track, back up one brown track, then down the other to the Finish star. The map doesn't show the direction through this section, so the order is a best reading.
+  - **Length:** 20.8 km against the 22 km course, because straight lines between dots cut the corners.

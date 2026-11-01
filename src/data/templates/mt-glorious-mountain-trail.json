@@ -101,13 +101,13 @@
       "primary": "147.225 MHz (+0.6, CTCSS 91.5)",
       "fallback": "147.500 MHz simplex"
     },
-    "baseOperationalBy": "0630 hrs",
+    "baseOperationalBy": "0530 hrs",
     "historicalDates": [
       "2024-11-10",
       "2025-11-09"
     ],
     "notes": [
-      "Base station must be operational by 0630 hrs",
+      "Base station must be operational by 0530 hrs",
       "All operators should arrive 30 minutes before race start",
       "Checkpoint operators need 4WD vehicles for access",
       "Mobile coverage is limited in some areas - rely on radio"

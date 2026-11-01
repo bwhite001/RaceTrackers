@@ -66,6 +66,7 @@ const RaceSetup = ({ onExitAttempt, setHasUnsavedChanges }) => {
         startTime: template.defaultStartTime?.slice(0, 5) || '',
         checkpoints: template.checkpoints || [],
         runnerRanges: template.runnerRanges || [],
+        courseGpx: template.courseGpx ?? null,
         _templateBatches: template.defaultBatches || []
       }));
     }
