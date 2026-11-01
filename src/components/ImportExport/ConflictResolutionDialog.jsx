@@ -23,6 +23,10 @@ export const ConflictResolutionDialog = ({ conflicts, onResolve, onCancel }) => 
     }));
   };
 
+  /** Set every conflict to the same choice (a re-imported setup can have dozens). */
+  const resolveAll = (choice) =>
+    setResolutions(Object.fromEntries(conflicts.map(c => [c.id, choice])));
+
   /**
    * Submit resolutions when all conflicts resolved
    */
@@ -227,6 +231,18 @@ export const ConflictResolutionDialog = ({ conflicts, onResolve, onCancel }) => 
             conflicts resolved
           </div>
           <div className="flex gap-3">
+            <button
+              onClick={() => resolveAll('existing')}
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+            >
+              Keep existing for all
+            </button>
+            <button
+              onClick={() => resolveAll('incoming')}
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+            >
+              Use incoming for all
+            </button>
             <button
               onClick={onCancel}
               className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"

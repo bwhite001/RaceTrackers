@@ -329,3 +329,7 @@ Completed after Part E (the two simplifications from the first pass):
   - **Finish:** the dots form three parallel chains. The track runs out along the green track, back up one brown track, then down the other to the Finish star. The map doesn't show the direction through this section, so the order is a best reading.
   - **Length:** 20.8 km against the 22 km course, because straight lines between dots cut the corners.
 - **Due timing (task 7):** a checkpoint's Due clock starts at the later of the last call and the earliest possible arrival, the leader's time at the previous checkpoint (race start for the first) plus the leg at 15 km/h (`DUE_LEADER_KMH`). With no distance for either end it behaves as before.
+- **Edit operators, frequency, base callsign (task 8):** Frequency and base callsign sit on the Core Details step and save with Next. Operators are one text field per checkpoint with its own Save, like the rename.
+  - **Re-import keeps marks:** `ImportService` writes by id with `put` and never touches `checkpoint_runners`, and the setup file doesn't carry them, so marks survive (spec 36 proves it).
+  - **Conflict dialog:** a re-imported setup raises one conflict per runner (64 for the demo race) and each needed its own tap. Added "Use incoming for all" and "Keep existing for all".
+  - **Known gap, not fixed:** conflicts are keyed by bare id, so a race, runner and checkpoint with the same id share one choice. The all-or-nothing buttons avoid it; picking mixed choices by hand could still cross over.

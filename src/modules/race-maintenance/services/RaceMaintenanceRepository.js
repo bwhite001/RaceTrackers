@@ -294,7 +294,7 @@ export class RaceMaintenanceRepository extends BaseRepository {
   }
 
   async updateRace(raceId, updates) {
-    const allowed = ['name', 'date', 'startTime', 'description', 'runnerRanges'];
+    const allowed = ['name', 'date', 'startTime', 'description', 'runnerRanges', 'frequency', 'baseCallsign'];
     const safe = Object.fromEntries(
       Object.entries(updates).filter(([k]) => allowed.includes(k))
     );

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import useRaceMaintenanceStore from '../store/raceMaintenanceStore';
 import { useToast } from '../../../shared/components/ui/Toast';
+import { parseCallsigns } from '../services/callsigns.js';
 import RosterImport from '../components/RosterImport.jsx';
 import { useRaceStore } from '../../../store/useRaceStore.js';
 import {
@@ -53,13 +54,14 @@ const RaceEditView = () => {
   } = useRaceMaintenanceStore();
 
   // ── Core Details form state ──────────────────────────────────────────────
-  const [coreForm, setCoreForm] = useState({ name: '', date: '', startTime: '', description: '' });
+  const [coreForm, setCoreForm] = useState({ name: '', date: '', startTime: '', description: '', frequency: '', baseCallsign: '' });
   const [coreErrors, setCoreErrors] = useState({});
   const [coreSaving, setCoreSaving] = useState(false);
 
   // ── Checkpoints editing state ────────────────────────────────────────────
   const [cpEdits, setCpEdits] = useState({}); // { [cp.id]: newName }
   const [cpBatchEdits, setCpBatchEdits] = useState({}); // { [cp.id]: number[] | null }
+  const [cpOpsEdits, setCpOpsEdits] = useState({}); // { [cp.id]: 'VK4ABC, VK4DEF' }
   const [cpSaving, setCpSaving] = useState({});
   const [newCpName, setNewCpName] = useState('');
   const [addingCp, setAddingCp] = useState(false);
@@ -91,6 +93,8 @@ const RaceEditView = () => {
         date: currentRace.date || '',
         startTime: currentRace.startTime || '',
         description: currentRace.description || '',
+        frequency: currentRace.frequency || '',
+        baseCallsign: currentRace.baseCallsign || '',
       });
     }
   }, [currentRace]);
@@ -99,6 +103,7 @@ const RaceEditView = () => {
   useEffect(() => {
     if (checkpoints) {
       setCpEdits(Object.fromEntries(checkpoints.map(cp => [cp.id, cp.name])));
+      setCpOpsEdits(Object.fromEntries(checkpoints.map(cp => [cp.id, (cp.operatorCallsigns ?? []).join(', ')])));
       setCpBatchEdits(Object.fromEntries(checkpoints.map(cp => [cp.id, cp.allowedBatches ?? null])));
     }
   }, [checkpoints]);
@@ -129,6 +134,18 @@ const RaceEditView = () => {
       addToast({ variant: 'error', message: 'Failed to rename checkpoint.' });
     } finally {
       setCpSaving(prev => ({ ...prev, [cp.id]: false }));
+    }
+  };
+
+  const handleSaveCheckpointOperators = async (cp) => {
+    setCpSaving(prev => ({ ...prev, [`ops-${cp.id}`]: true }));
+    try {
+      await updateCheckpoint(cp.id, { operatorCallsigns: parseCallsigns(cpOpsEdits[cp.id]) });
+      addToast({ variant: 'success', message: `Checkpoint ${cp.number} operators saved.` });
+    } catch {
+      addToast({ variant: 'error', message: 'Failed to save checkpoint operators.' });
+    } finally {
+      setCpSaving(prev => ({ ...prev, [`ops-${cp.id}`]: false }));
     }
   };
 
@@ -300,6 +317,19 @@ const RaceEditView = () => {
               </FormGroup>
 
               <FormGroup>
+                <FormLabel htmlFor="frequency">Frequency (MHz)</FormLabel>
+                <Input id="frequency" name="frequency" value={coreForm.frequency} onChange={handleCoreChange} placeholder="147.225" />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel htmlFor="baseCallsign">Base callsign</FormLabel>
+                <Input id="baseCallsign" name="baseCallsign" value={coreForm.baseCallsign} onChange={handleCoreChange} placeholder="VK4WIP" />
+                <FormHelperText>
+                  Shown at every checkpoint and on the base station. Saved when you press Next.
+                </FormHelperText>
+              </FormGroup>
+
+              <FormGroup>
                 <FormLabel htmlFor="description">Description</FormLabel>
                 <Textarea
                   id="description"
@@ -359,6 +389,24 @@ const RaceEditView = () => {
                       disabled={cpSaving[cp.id] || cpEdits[cp.id] === cp.name}
                     >
                       {cpSaving[cp.id] ? 'Saving…' : 'Save'}
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-3 pl-10">
+                    <Input
+                      value={cpOpsEdits[cp.id] ?? ''}
+                      onChange={(e) => setCpOpsEdits(prev => ({ ...prev, [cp.id]: e.target.value }))}
+                      className="flex-1"
+                      placeholder="Operator callsigns, e.g. VK4ABC, VK4DEF"
+                      aria-label={`Operators for CP${cp.number}`}
+                    />
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleSaveCheckpointOperators(cp)}
+                      disabled={cpSaving[`ops-${cp.id}`]}
+                      aria-label={`Save operators CP${cp.number}`}
+                    >
+                      {cpSaving[`ops-${cp.id}`] ? 'Saving…' : 'Save'}
                     </Button>
                   </div>
                   {availableBatches.length > 1 && (
