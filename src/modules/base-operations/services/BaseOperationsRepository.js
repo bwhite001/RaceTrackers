@@ -1046,6 +1046,28 @@ export class BaseOperationsRepository extends BaseRepository {
   // REPORTS GENERATION
   // ============================================================================
 
+  /** The one switch over report types. Rejects on an unknown type or a failed read. */
+  async generateReport(raceId, reportType, options = {}) {
+    switch (reportType) {
+      case 'missing':
+        return this.generateMissingNumbersReport(raceId, options.checkpoint ?? 1, options.format ?? 'csv');
+      case 'outList':
+        return this.generateOutListReport(raceId);
+      case 'checkpointLog':
+        return this.generateCheckpointLogReport(raceId, options.checkpoint ?? 1);
+      case 'summary':
+        return this.generateRaceResults(raceId, options.format ?? 'csv');
+      case 'finisherList':
+        return this.generateFinisherListReport(raceId);
+      case 'officialsReport':
+        return this.generateOfficialsReport(raceId);
+      case 'splitTimes':
+        return this.generateSplitTimesReport(raceId);
+      default:
+        throw new Error(`Unknown report type: ${reportType}`);
+    }
+  }
+
   async generateMissingNumbersReport(raceId, checkpoint, format = 'csv') {
     try {
       const race = await db.races.get(raceId);

@@ -15,12 +15,7 @@ describe('ReportsPanel', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockRepoInstance = {
-      generateMissingNumbersReport: vi.fn().mockResolvedValue(mockReport),
-      generateOutListReport: vi.fn().mockResolvedValue(mockReport),
-      generateCheckpointLogReport: vi.fn().mockResolvedValue(mockReport),
-      generateRaceResults: vi.fn().mockResolvedValue(mockReport),
-    };
+    mockRepoInstance = { generateReport: vi.fn().mockResolvedValue(mockReport) };
     BaseOperationsRepository.mockImplementation(() => mockRepoInstance);
     useBaseOperationsStore.mockImplementation(() => ({ currentRaceId: 42, checkpoints: [] }));
     // Suppress Blob/URL.createObjectURL in jsdom
@@ -43,20 +38,30 @@ describe('ReportsPanel', () => {
     fireEvent.click(screen.getByText('Generate Report'));
 
     await waitFor(() => {
-      expect(mockRepoInstance.generateMissingNumbersReport).toHaveBeenCalled();
+      expect(mockRepoInstance.generateReport).toHaveBeenCalledWith(42, 'missing', expect.any(Object));
     });
   });
 
-  test('handles report generation errors', async () => {
-    mockRepoInstance.generateMissingNumbersReport.mockRejectedValue(new Error('Test error'));
+  test('a failed report tells the operator', async () => {
+    mockRepoInstance.generateReport.mockRejectedValue(new Error('Test error'));
     render(<ReportsPanel />);
-
     fireEvent.click(screen.getByText('Generate Report'));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not generate the report: Test error');
+  });
 
-    // Error is logged; no crash — component still renders
-    await waitFor(() => {
-      expect(screen.getByText('Generate Report')).toBeInTheDocument();
+  test.each([['Finisher List', 'finisherList'], ['Full Officials Report', 'officialsReport'], ['Split Times', 'splitTimes']])(
+    '%s generates', async (label, type) => {
+      render(<ReportsPanel />);
+      fireEvent.click(screen.getByText(label));
+      fireEvent.click(screen.getByText('Generate Report'));
+      await waitFor(() => expect(mockRepoInstance.generateReport).toHaveBeenCalledWith(42, type, expect.any(Object)));
     });
+
+  test('uses the raceId prop with no store race', async () => {
+    useBaseOperationsStore.mockImplementation(() => ({ currentRaceId: null, checkpoints: [] }));
+    render(<ReportsPanel raceId={7} />);
+    fireEvent.click(screen.getByText('Generate Report'));
+    await waitFor(() => expect(mockRepoInstance.generateReport).toHaveBeenCalledWith(7, 'missing', expect.any(Object)));
   });
 
   test('opens report builder dialog', () => {
@@ -74,7 +79,7 @@ describe('ReportsPanel', () => {
     fireEvent.click(screen.getByText('Generate Report'));
 
     await waitFor(() => {
-      expect(mockRepoInstance.generateRaceResults).toHaveBeenCalled();
+      expect(mockRepoInstance.generateReport).toHaveBeenCalledWith(42, 'summary', expect.any(Object));
     });
   });
 
@@ -86,7 +91,7 @@ describe('ReportsPanel', () => {
 
   test('handles loading state', async () => {
     // Loading state is local (generating spinner during async call)
-    mockRepoInstance.generateMissingNumbersReport.mockImplementation(
+    mockRepoInstance.generateReport.mockImplementation(
       () => new Promise(() => {}) // never resolves — stays in loading
     );
     render(<ReportsPanel />);
@@ -118,7 +123,7 @@ describe('ReportsPanel', () => {
     fireEvent.click(screen.getByText('Generate Report'));
 
     await waitFor(() => {
-      expect(mockRepoInstance.generateMissingNumbersReport).toHaveBeenCalledWith(99, expect.any(Number), expect.any(String));
+      expect(mockRepoInstance.generateReport).toHaveBeenCalledWith(99, 'missing', expect.any(Object));
     });
   });
 });

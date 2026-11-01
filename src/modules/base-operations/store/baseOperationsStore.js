@@ -500,25 +500,7 @@ const useBaseOperationsStore = create(
       generateReport: async (reportType, options = {}) => {
         const { currentRaceId } = get();
         if (!currentRaceId) throw new Error('No active race');
-        const repo = new BaseOperationsRepository();
-        switch (reportType) {
-          case 'missing':
-            return repo.generateMissingNumbersReport(currentRaceId, options.checkpoint ?? 1, options.format ?? 'csv');
-          case 'outList':
-            return repo.generateOutListReport(currentRaceId);
-          case 'checkpointLog':
-            return repo.generateCheckpointLogReport(currentRaceId, options.checkpoint ?? 1);
-          case 'summary':
-            return repo.generateRaceResults(currentRaceId, options.format ?? 'csv');
-          case 'finisherList':
-            return repo.generateFinisherListReport(currentRaceId);
-          case 'officialsReport':
-            return repo.generateOfficialsReport(currentRaceId);
-          case 'splitTimes':
-            return repo.generateSplitTimesReport(currentRaceId);
-          default:
-            throw new Error(`Unknown report type: ${reportType}`);
-        }
+        return new BaseOperationsRepository().generateReport(currentRaceId, reportType, options);
       },
 
       downloadReport: (report) => {

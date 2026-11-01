@@ -46,3 +46,10 @@ describe('baseOperationsStore report methods', () => {
     expect(() => downloadReport({ content: null, filename: 'test.csv' })).not.toThrow();
   });
 });
+
+describe('baseOperationsStore generateReport dispatch', () => {
+  it('rejects an unknown report type', async () => {
+    const { generateReport } = useBaseOperationsStore.getState();
+    await expect(generateReport('nope')).rejects.toThrow('Unknown report type: nope');
+  });
+});

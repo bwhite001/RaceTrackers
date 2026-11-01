@@ -118,6 +118,7 @@ const ReportsPanel = ({ raceId: raceIdProp } = {}) => {
   const [includeNotes, setIncludeNotes] = useState(true);
   const [showPreview, setShowPreview] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState(null);
 
   const store = useBaseOperationsStore();
   const checkpoints = raceIdProp ? [] : (store.checkpoints ?? []);
@@ -125,14 +126,7 @@ const ReportsPanel = ({ raceId: raceIdProp } = {}) => {
   const generateReport = async (reportType, options = {}) => {
     const id = raceIdProp ?? store.currentRaceId;
     if (!id) throw new Error('No active race');
-    const repo = new BaseOperationsRepository();
-    switch (reportType) {
-      case 'missing':      return repo.generateMissingNumbersReport(id, options.checkpoint ?? 1, options.format ?? 'csv');
-      case 'outList':      return repo.generateOutListReport(id);
-      case 'checkpointLog':return repo.generateCheckpointLogReport(id, options.checkpoint ?? 1);
-      case 'summary':      return repo.generateRaceResults(id, options.format ?? 'csv');
-      default: throw new Error(`Unknown report type: ${reportType}`);
-    }
+    return new BaseOperationsRepository().generateReport(id, reportType, options);
   };
 
   const downloadReport = (report) => {
@@ -152,6 +146,7 @@ const ReportsPanel = ({ raceId: raceIdProp } = {}) => {
 
   const handleGenerate = async () => {
     setGenerating(true);
+    setError(null);
     try {
       const report = await generateReport(selectedReport, {
         format: selectedFormat,
@@ -165,8 +160,9 @@ const ReportsPanel = ({ raceId: raceIdProp } = {}) => {
       } else {
         await downloadReport(report);
       }
-    } catch (error) {
-      console.error('Failed to generate report:', error);
+    } catch (err) {
+      console.error('Failed to generate report:', err);
+      setError(`Could not generate the report: ${err.message}`);
     } finally {
       setGenerating(false);
     }
@@ -329,6 +325,10 @@ const ReportsPanel = ({ raceId: raceIdProp } = {}) => {
           </div>
         </div>
       </div>
+
+      {error && (
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>
+      )}
 
       {/* Generate Button */}
       <div className="flex items-center justify-end space-x-3">
