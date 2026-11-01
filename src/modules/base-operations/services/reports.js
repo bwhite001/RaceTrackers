@@ -5,6 +5,8 @@
 import TimeUtils from '../../../services/timeUtils.js';
 import { hhmm } from '../../../services/blocks.js';
 import { BASE_STATION_CP } from '../../../types/index.js';
+import { sightingsByCheckpoint, outStatusMap, boardCheckpoints } from './receive.js';
+import { outRecords } from './statusValidation.js';
 
 const median = (xs) => {
   if (!xs.length) return null;
@@ -192,4 +194,30 @@ export function currentLeaders({ sightings, order, out, raceStart, meta = new Ma
     })
     .sort((a, b) => b.idx - a.idx || a.time.localeCompare(b.time) || a.number - b.number)
     .map((r, i) => ({ ...r, rank: i + 1 }));
+}
+
+/**
+ * The one read of race results (exports and the Live Dashboard build on it).
+ * A runner who is out is DNS/DNF whatever else was recorded; otherwise a Finish
+ * sighting means Finished.
+ * @returns {{ order: Array, rows: Array<{ number, status: 'Finished'|'On course'|'DNS'|'DNF',
+ *   dnfCheckpoint: number|null, times: Object<number,string>, finish: string|null }> }}
+ */
+export function raceResults({ records, checkpoints, outList, raceNumbers }) {
+  const order = boardCheckpoints(checkpoints);
+  const sightings = sightingsByCheckpoint(records);
+  const out = outStatusMap(outList, records);
+  const dnfAt = new Map(outRecords(outList).map(o => [o.number, o.checkpoint ?? null]));
+  const rows = [...raceNumbers].sort((a, b) => a - b).map(number => {
+    const times = {};
+    for (const cp of order) {
+      const t = sightings.get(cp.number)?.get(number);
+      if (t && cp.number !== BASE_STATION_CP) times[cp.number] = t;
+    }
+    const finish = sightings.get(BASE_STATION_CP)?.get(number) ?? null;
+    const o = out.get(number);
+    const status = o ?? (finish ? 'Finished' : 'On course');
+    return { number, status, dnfCheckpoint: o === 'DNF' ? dnfAt.get(number) ?? null : null, times, finish };
+  });
+  return { order, rows };
 }

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import TimeUtils from '../../src/services/timeUtils.js';
 import {
   lastSeen, legMedians, overdueRunners, stillOnCourse, timesMatrix, callLog, currentLeaders,
-  awaitingByCheckpoint, raceCounts,
+  awaitingByCheckpoint, raceCounts, raceResults,
 } from '../../src/modules/base-operations/services/reports.js';
 import { reportedUpTo, buildBoard, askReminders } from '../../src/modules/base-operations/services/receive.js';
 
@@ -131,5 +131,28 @@ describe('ask reminders (E3)', () => {
       [1, [{ id: 2, number: 120 }]],
     ]);
     expect(askReminders([], board).size).toBe(0);
+  });
+});
+
+describe('raceResults', () => {
+  const checkpoints = [{ number: 1, name: 'CP1' }, { number: 2, name: 'CP2' }];
+  const rec = (cp, number, t) => ({ checkpointNumber: cp, number, status: 'passed', commonTime: t });
+  const records = [rec(1, 1, at(7, 0)), rec(2, 1, at(7, 30)), rec(0, 1, at(8, 0)), rec(1, 2, at(7, 5)), rec(1, 4, at(7, 10))];
+  const outList = [
+    { number: 3, status: 'non-starter' },
+    { number: 4, status: 'withdrawn', withdrawalDetails: { checkpoint: 1, reason: '', withdrawalTime: at(7, 20) } },
+  ];
+  const { order, rows } = raceResults({ records, checkpoints, outList, raceNumbers: [1, 2, 3, 4] });
+
+  it('lists checkpoints in course order, then Finish', () => expect(order.map(c => c.short)).toEqual(['CP1', 'CP2', 'Finish']));
+  it('reads each runner from base records', () => {
+    expect(rows[0]).toMatchObject({ number: 1, status: 'Finished', finish: at(8, 0), times: { 1: at(7, 0), 2: at(7, 30) } });
+    expect(rows[1]).toMatchObject({ number: 2, status: 'On course', finish: null });
+    expect(rows[2]).toMatchObject({ number: 3, status: 'DNS', times: {} });
+    expect(rows[3]).toMatchObject({ number: 4, status: 'DNF', dnfCheckpoint: 1, times: { 1: at(7, 10) } });
+  });
+  it('out status wins over a Finish sighting', () => {
+    const r = raceResults({ records: [rec(0, 5, at(8, 0))], checkpoints, outList: [{ number: 5, status: 'non-starter' }], raceNumbers: [5] });
+    expect(r.rows[0]).toMatchObject({ status: 'DNS', dnfCheckpoint: null });
   });
 });

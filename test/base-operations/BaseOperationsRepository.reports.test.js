@@ -113,3 +113,26 @@ describe('BaseOperationsRepository new reports', () => {
     });
   });
 });
+
+describe('BaseOperationsRepository getRaceResults', () => {
+  const raceId = 998;
+  beforeEach(async () => {
+    await db.races.put({ id: raceId, name: 'Results Race', date: '2026-03-02' });
+    await db.checkpoints.put({ id: 9101, raceId, number: 1, name: 'CP1' });
+    await db.runners.put({ id: 10101, raceId, number: 101, firstName: 'Alice', lastName: 'Smith', gender: 'F', batchNumber: 1, notes: 'n', status: 'passed' });
+    await db.base_station_runners.bulkPut([
+      { id: 20101, raceId, number: 101, status: 'superseded', commonTime: '2026-03-02T09:00:00.000Z', checkpointNumber: 1 },
+      { id: 20102, raceId, number: 101, status: 'passed', commonTime: '2026-03-02T08:30:00.000Z', checkpointNumber: 1 },
+      { id: 20103, raceId, number: 500, status: 'passed', commonTime: '2026-03-02T08:30:00.000Z', checkpointNumber: 1 },
+    ]);
+    await db.field_changes.put({ raceId, number: 500, kind: 'late', cancelledAt: null });
+  });
+
+  it('getRaceResults ignores superseded rows and includes late entries', async () => {
+    const { race, rows } = await new BaseOperationsRepository().getRaceResults(raceId);
+    expect(race.name).toBe('Results Race');
+    expect(rows.find(r => r.number === 101)).toMatchObject({ firstName: 'Alice', notes: 'n' });
+    expect(rows.find(r => r.number === 101).times[1]).toBe('2026-03-02T08:30:00.000Z');
+    expect(rows.find(r => r.number === 500)).toMatchObject({ firstName: '', status: 'On course' });
+  });
+});

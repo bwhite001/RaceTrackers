@@ -2,6 +2,9 @@ import { BaseRepository } from '../../../shared/services/database/BaseRepository
 import db from '../../../shared/services/database/schema';
 import { BASE_STATION_CP } from '../../../types/index.js';
 import TimeUtils from '../../../services/timeUtils.js';
+import StorageService from '../../../services/storage.js';
+import { raceResults } from './reports.js';
+import { fieldNumbers } from './field.js';
 
 /** checkpoint_runners statuses that record a runner actually passing. */
 const SIGHTING = new Set(['passed', 'called-in', 'marked-off']);
@@ -950,6 +953,35 @@ export class BaseOperationsRepository extends BaseRepository {
       console.error('Error getting missing runners:', error);
       return [];
     }
+  }
+
+  /**
+   * Every runner's result, merged from checkpoint and base records (as the base
+   * store does), with name fields; blank for a late entry with no runners row.
+   * Throws on failure: a report must not silently show an empty race.
+   */
+  async getRaceResults(raceId) {
+    const [race, checkpoints, runners, cpRows, baseRows, outList, fieldChanges] = await Promise.all([
+      db.races.get(raceId),
+      db.checkpoints.where('raceId').equals(raceId).toArray(),
+      db.runners.where('raceId').equals(raceId).toArray(),
+      StorageService.getCheckpointRunners(raceId),
+      this.getBaseStationRunners(raceId),
+      this.getOutList(raceId),
+      this.getFieldChanges(raceId),
+    ]);
+    const records = [...cpRows, ...baseRows.filter(r => r.status !== 'superseded')];
+    const raceNumbers = fieldNumbers(runners.map(r => r.number), fieldChanges);
+    const { order, rows } = raceResults({ records, checkpoints, outList, raceNumbers });
+    const byNumber = new Map(runners.map(r => [r.number, r]));
+    return {
+      race,
+      order,
+      rows: rows.map(row => {
+        const r = byNumber.get(row.number) ?? {};
+        return { ...row, firstName: r.firstName ?? '', lastName: r.lastName ?? '', gender: r.gender ?? '', batchNumber: r.batchNumber ?? '', notes: r.notes ?? '' };
+      }),
+    };
   }
 
   async getOutList(raceId) {
