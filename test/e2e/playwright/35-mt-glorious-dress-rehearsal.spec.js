@@ -630,6 +630,8 @@ test.describe('Mt Glorious dress rehearsal', () => {
       if (rows.length !== 128) note('Base', `Times CSV has ${rows.length} rows, expected 128`);
       if (mismatches.length) note('Base', `Times differ from the source in ${mismatches.length} cells: ${mismatches.slice(0, 12).join('; ')}`);
       else log('Every CP and finish time at base matches the source block for block');
+      const notFinished = rows.filter(r => /\d\d:\d\d/.test(r[6] ?? '') && r[1] !== 'Finished').map(r => `${r[0]}:${r[1] || 'blank'}`);
+      if (notFinished.length) note('Base', `Times CSV Status is not Finished for ${notFinished.length} finishers: ${notFinished.slice(0, 8).join(' ')}`);
       log(`Statuses: ${JSON.stringify(rows.reduce((a, r) => ({ ...a, [r[1]]: (a[r[1]] ?? 0) + 1 }), {}))}`);
 
       // Exports TRAQ would ask for
@@ -655,6 +657,10 @@ test.describe('Mt Glorious dress rehearsal', () => {
           if (label === 'Missing Numbers Report') {
             const total = text.match(/Total Missing:\s*(\d+)/)?.[1];
             if (total !== '0') note('Exports', `Missing Numbers says Total Missing: ${total ?? 'absent'}, expected 0 for CP1`);
+          }
+          if (label === 'Out List Report') {
+            const stray = text.split('\n').filter(l => /^\d+,/.test(l) && /(^|,)\s*\.\s*(,|$)|\.\s$|\. ?"/.test(l));
+            if (stray.length) note('Exports', `Out List has a stray ". " in ${stray.length} rows: ${stray.slice(0, 3).join(' | ')}`);
           }
           if (label === 'Split Times') splitText = text;
         });
@@ -694,6 +700,10 @@ test.describe('Mt Glorious dress rehearsal', () => {
         await page.locator('input[type="file"]').last().setInputFiles(file);
         await expect(page.getByText(/imported — \d+ runners/)).toBeVisible({ timeout: 5000 });
         log(await page.getByText(/imported — \d+ runners/).innerText());
+      });
+      await check('Base', 'Overview shows CP1 at 100%', async () => {
+        const cpText = (await page.locator('section[aria-labelledby="cphd"]').innerText()).replace(/\s+/g, ' ');
+        if (!/CP1\D*121\D*100%/.test(cpText)) throw new Error(`CP1 progress is not 100%: ${cpText.slice(0, 120)}`);
       });
       await shot(base, '30-cp3-imported');
       await baseTab(page, 'Reports').click();

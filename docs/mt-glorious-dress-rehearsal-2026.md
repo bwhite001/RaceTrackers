@@ -9,8 +9,8 @@ nothing, including the file a coordinator would most likely send to TRAQ.
 
 **On race day, use Reports › Times by checkpoint › CSV.** It was checked cell by cell and is correct.
 
-**Update, 3.18.1:** all 13 bugs are fixed (see "Status" below) and the rehearsal now fails on any
-finding. It ends with 0 findings.
+**Update, 3.18.1:** all 13 bugs are fixed (see "Status" below). The rehearsal asserts bugs 1-7 and
+9-13 and ends with 0 findings; bug 8 is covered by spec 36. The Base GPS question is still open.
 
 ## How it was run
 
@@ -42,7 +42,8 @@ The invoice PDF held no race data. Results are in `test-results/mt-glorious/` (g
 
 ## Status
 
-All fixed on `feature/vk4wip-ui`, and re-checked by the rehearsal (`expect(findings).toEqual([])`).
+All 13 fixed on `feature/vk4wip-ui`. Bugs 1-7 and 9-13 are asserted by the rehearsal
+(`expect(findings).toEqual([])`); bug 8 is covered by `36-edit-race-radio.spec.js`.
 
 | # | Status | Fix |
 |---|---|---|
@@ -52,13 +53,14 @@ All fixed on `feature/vk4wip-ui`, and re-checked by the rehearsal (`expect(findi
 | 4 | Fixed | Live Dashboard reads base's records (121/128 for CP1) |
 | 5 | Fixed | Checkpoint coordinates kept from the Manual tab and the template (4 of 4, also on a CP device) |
 | 6 | Fixed | Template course loads into the new race and parses |
-| 7 | Fixed | Due starts only once a runner could have arrived |
+| 7 | Fixed | Due starts only once a runner could have arrived (asserted: no Due before the first possible arrival) |
 | 8 | Fixed | Operators, frequency and base callsign editable after setup |
 | 9 | Fixed | Share batch counts entries not yet called in (0 after the race) |
 | 10 | Fixed | Stray `. ` removed from DNF notes |
 | 11 | Fixed | Overview percentages use starters |
 | 12 | Fixed | Out-of-order offers Ask for both checkpoints |
 | 13 | Fixed | Times CSV Status says Finished |
+| GPS | Open, not an app bug | Base GPS in the brief is the Lawton Road gate (see "Worth checking outside the app"). Waiting on Alan for the corrected coordinates; the template's `baseGPS` still holds the gate coordinates |
 
 ## Bugs (as found)
 
@@ -151,6 +153,6 @@ on two runners, one of whom finished:
 - Base device failure and recovery
 
 The spec records problems as it goes rather than stopping the race, then asserts the list is empty,
-so a green run means no findings. `findings.json` is written first so a red run can be read.
+so a green run means none of the checks above found anything. `findings.json` is written first so a red run can be read.
 `fixtures/MGMT_NOV25.xlsx` is caught by the `*.xlsx`
 gitignore rule and needs `git add -f` if the spec is committed.
