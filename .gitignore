@@ -49,3 +49,11 @@ playwright-report/journey-report.html
 
 # Git worktrees
 .worktrees/
+
+# Generated output and local working docs
+coverage/
+dev-dist/
+playwright-report/
+test/e2e/playwright/downloads/
+docs/racetracker-race-day-fixes.md
+docs/superpowers/plans/2026-11-01-mt-glorious-rehearsal-fixes.md
