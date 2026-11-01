@@ -2,7 +2,6 @@ import { BaseRepository } from '../../../shared/services/database/BaseRepository
 import db from '../../../shared/services/database/schema';
 import { BASE_STATION_CP } from '../../../types/index.js';
 import TimeUtils from '../../../services/timeUtils.js';
-import StorageService from '../../../services/storage.js';
 import { raceResults } from './reports.js';
 import { fieldNumbers } from './field.js';
 
@@ -783,15 +782,18 @@ export class BaseOperationsRepository extends BaseRepository {
     });
   }
 
+  /** Throwing reads (getRaceResults); the public getters below swallow errors for their other callers. */
+  _withdrawnRunners(raceId) {
+    return db.withdrawal_records.where('raceId').equals(raceId).and(record => record.reversedAt === null).toArray();
+  }
+
+  _vetOutRunners(raceId) {
+    return db.vet_out_records.where('raceId').equals(raceId).toArray();
+  }
+
   async getWithdrawnRunners(raceId) {
     try {
-      const withdrawals = await db.withdrawal_records
-        .where('raceId')
-        .equals(raceId)
-        .and(record => record.reversedAt === null)
-        .toArray();
-      
-      return withdrawals;
+      return await this._withdrawnRunners(raceId);
     } catch (error) {
       console.error('Error getting withdrawn runners:', error);
       return [];
@@ -800,10 +802,7 @@ export class BaseOperationsRepository extends BaseRepository {
 
   async getVetOutRunners(raceId) {
     try {
-      return await db.vet_out_records
-        .where('raceId')
-        .equals(raceId)
-        .toArray();
+      return await this._vetOutRunners(raceId);
     } catch (error) {
       console.error('Error getting vet-out runners:', error);
       return [];
@@ -958,19 +957,22 @@ export class BaseOperationsRepository extends BaseRepository {
   /**
    * Every runner's result, merged from checkpoint and base records (as the base
    * store does), with name fields; blank for a late entry with no runners row.
-   * Throws on failure: a report must not silently show an empty race.
+   * Rejects if any read fails (it reads past the swallowing getters): a report must not silently show an empty race.
    */
   async getRaceResults(raceId) {
     const [race, checkpoints, runners, cpRows, baseRows, outList, fieldChanges] = await Promise.all([
       db.races.get(raceId),
       db.checkpoints.where('raceId').equals(raceId).toArray(),
       db.runners.where('raceId').equals(raceId).toArray(),
-      StorageService.getCheckpointRunners(raceId),
-      this.getBaseStationRunners(raceId),
-      this.getOutList(raceId),
+      db.checkpoint_runners.where('raceId').equals(raceId).sortBy('id'),
+      this.table.where('raceId').equals(raceId).toArray(),
+      this._outList(raceId),
       this.getFieldChanges(raceId),
     ]);
-    const records = [...cpRows, ...baseRows.filter(r => r.status !== 'superseded')];
+    // first row per checkpoint + bib, as StorageService.getCheckpointRunners does
+    const seen = new Set();
+    const cpUnique = cpRows.filter(r => { const k = `${r.checkpointNumber}:${r.number}`; return !seen.has(k) && seen.add(k); });
+    const records = [...cpUnique, ...baseRows.filter(r => r.status !== 'superseded')];
     const raceNumbers = fieldNumbers(runners.map(r => r.number), fieldChanges);
     const { order, rows } = raceResults({ records, checkpoints, outList, raceNumbers });
     const byNumber = new Map(runners.map(r => [r.number, r]));
@@ -984,54 +986,58 @@ export class BaseOperationsRepository extends BaseRepository {
     };
   }
 
+  async _outList(raceId) {
+    // Get withdrawal and vet-out details from dedicated records tables
+    const withdrawals = await this._withdrawnRunners(raceId);
+    const vetOuts = await this._vetOutRunners(raceId);
+
+    // Get DNF/non-starter runners from checkpoint_runners (most up-to-date status)
+    const cpRunners = await db.checkpoint_runners
+      .where('raceId')
+      .equals(raceId)
+      .and(r => r.status === 'dnf' || r.status === 'non-starter')
+      .toArray();
+
+    // Deduplicate by runner number (keep worst status entry)
+    const statusPriority = { 'non-starter': 1, 'dnf': 2 };
+    const cpByNumber = new Map();
+    for (const r of cpRunners) {
+      const existing = cpByNumber.get(r.number);
+      if (!existing || (statusPriority[r.status] ?? 0) > (statusPriority[existing.status] ?? 0)) {
+        cpByNumber.set(r.number, r);
+      }
+    }
+
+    const withdrawnNumbers = new Set(withdrawals.map(w => w.runnerNumber));
+    const vetOutNumbers = new Set(vetOuts.map(v => v.runnerNumber));
+
+    // Build runners from withdrawal_records, vet_out_records, and cp dnf/non-starter
+    const allNumbers = new Set([
+      ...withdrawnNumbers,
+      ...vetOutNumbers,
+      ...cpByNumber.keys(),
+    ]);
+
+    const allBaseRunners = await db.runners.where('raceId').equals(raceId).toArray();
+    const baseByNumber = Object.fromEntries(allBaseRunners.map(r => [r.number, r]));
+
+    const outList = [...allNumbers].map(number => {
+      const base = baseByNumber[number] ?? { number };
+      const withdrawal = withdrawals.find(w => w.runnerNumber === number) || null;
+      const vetOut = vetOuts.find(v => v.runnerNumber === number) || null;
+      const cpEntry = cpByNumber.get(number);
+      const status = withdrawal ? 'withdrawn'
+        : vetOut ? 'vet-out'
+        : cpEntry?.status ?? base.status ?? 'unknown';
+      return { ...base, status, withdrawalDetails: withdrawal, vetOutDetails: vetOut };
+    });
+
+    return outList.sort((a, b) => a.number - b.number);
+  }
+
   async getOutList(raceId) {
     try {
-      // Get withdrawal and vet-out details from dedicated records tables
-      const withdrawals = await this.getWithdrawnRunners(raceId);
-      const vetOuts = await this.getVetOutRunners(raceId);
-
-      // Get DNF/non-starter runners from checkpoint_runners (most up-to-date status)
-      const cpRunners = await db.checkpoint_runners
-        .where('raceId')
-        .equals(raceId)
-        .and(r => r.status === 'dnf' || r.status === 'non-starter')
-        .toArray();
-
-      // Deduplicate by runner number (keep worst status entry)
-      const statusPriority = { 'non-starter': 1, 'dnf': 2 };
-      const cpByNumber = new Map();
-      for (const r of cpRunners) {
-        const existing = cpByNumber.get(r.number);
-        if (!existing || (statusPriority[r.status] ?? 0) > (statusPriority[existing.status] ?? 0)) {
-          cpByNumber.set(r.number, r);
-        }
-      }
-
-      const withdrawnNumbers = new Set(withdrawals.map(w => w.runnerNumber));
-      const vetOutNumbers = new Set(vetOuts.map(v => v.runnerNumber));
-
-      // Build runners from withdrawal_records, vet_out_records, and cp dnf/non-starter
-      const allNumbers = new Set([
-        ...withdrawnNumbers,
-        ...vetOutNumbers,
-        ...cpByNumber.keys(),
-      ]);
-
-      const allBaseRunners = await db.runners.where('raceId').equals(raceId).toArray();
-      const baseByNumber = Object.fromEntries(allBaseRunners.map(r => [r.number, r]));
-
-      const outList = [...allNumbers].map(number => {
-        const base = baseByNumber[number] ?? { number };
-        const withdrawal = withdrawals.find(w => w.runnerNumber === number) || null;
-        const vetOut = vetOuts.find(v => v.runnerNumber === number) || null;
-        const cpEntry = cpByNumber.get(number);
-        const status = withdrawal ? 'withdrawn'
-          : vetOut ? 'vet-out'
-          : cpEntry?.status ?? base.status ?? 'unknown';
-        return { ...base, status, withdrawalDetails: withdrawal, vetOutDetails: vetOut };
-      });
-
-      return outList.sort((a, b) => a.number - b.number);
+      return await this._outList(raceId);
     } catch (error) {
       console.error('Error getting out list:', error);
       return [];

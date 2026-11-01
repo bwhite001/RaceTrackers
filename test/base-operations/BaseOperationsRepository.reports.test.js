@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BaseOperationsRepository } from 'modules/base-operations/services/BaseOperationsRepository';
 import db from 'shared/services/database/schema';
 
@@ -134,5 +134,17 @@ describe('BaseOperationsRepository getRaceResults', () => {
     expect(rows.find(r => r.number === 101)).toMatchObject({ firstName: 'Alice', notes: 'n' });
     expect(rows.find(r => r.number === 101).times[1]).toBe('2026-03-02T08:30:00.000Z');
     expect(rows.find(r => r.number === 500)).toMatchObject({ firstName: '', status: 'On course' });
+  });
+
+  it('rejects when a read fails instead of reporting an empty race', async () => {
+    const repo = new BaseOperationsRepository();
+    const spy = vi.spyOn(db.withdrawal_records, 'where').mockImplementation(() => { throw new Error('read failed'); });
+    try {
+      await expect(repo.getRaceResults(raceId)).rejects.toThrow('read failed');
+    } finally { spy.mockRestore(); }
+    const base = vi.spyOn(db.base_station_runners, 'where').mockImplementation(() => { throw new Error('base failed'); });
+    try {
+      await expect(repo.getRaceResults(raceId)).rejects.toThrow('base failed');
+    } finally { base.mockRestore(); }
   });
 });
