@@ -219,6 +219,11 @@ describe('BaseOperationsRepository reports read base records', () => {
     const { content } = await repo.generateSplitTimesReport(997);
     expect(content).toMatch(/^4,,,07:10,DNF,—,DNF$/m);
   });
+  it('Out List has no stray punctuation for a DNF with no reason', async () => {
+    await db.withdrawal_records.update(99741, { reason: '', comments: '' });
+    const { content } = await repo.generateOutListReport(997);
+    expect(content.split('\n').find(l => l.startsWith('4,')).endsWith(',')).toBe(true);
+  });
   it('Missing Numbers rejects on a failed read instead of reporting none missing', async () => {
     const spy = vi.spyOn(db.withdrawal_records, 'where').mockImplementation(() => { throw new Error('read failed'); });
     try {

@@ -67,6 +67,11 @@ describe('base reports', () => {
     ]);
   });
 
+  it('timesMatrix names finishers and runners still out there', () => {
+    const rows = timesMatrix({ sightings, order, out: new Map(), raceNumbers: [101, 104] });
+    expect(rows.map(r => r.status)).toEqual(['Finished', 'On course']);
+  });
+
   it('times matrix never replaces a recorded time; DNF only in an empty cell; late times flagged', () => {
     const m = timesMatrix({
       sightings, order,

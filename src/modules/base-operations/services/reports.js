@@ -147,7 +147,7 @@ export function timesMatrix({ sightings, order, out, raceNumbers, missed = new S
       if (missed.has(`${number}:${cp.number}`)) return { text: 'missed', flag: false, missed: true };
       return { text: '—', flag: false };
     });
-    const status = !o ? '' : o.status === 'DNS' ? 'DNS'
+    const status = !o ? (sightings.get(BASE_STATION_CP)?.has(number) ? 'Finished' : 'On course') : o.status === 'DNS' ? 'DNS'
       : o.checkpoint != null ? `DNF @${order.find(c => c.number === o.checkpoint)?.short ?? `CP${o.checkpoint}`}` : 'DNF';
     return { number, status, cells };
   });

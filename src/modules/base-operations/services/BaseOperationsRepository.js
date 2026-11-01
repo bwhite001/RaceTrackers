@@ -8,6 +8,9 @@ import { hhmm } from '../../../services/blocks.js';
 
 const csvLine = cells => cells.map(c => (typeof c === 'string' && c.includes(',') ? `"${c}"` : c)).join(',');
 
+// Non-empty parts joined with '. ', so a blank reason or comment leaves no stray punctuation.
+const joinNote = (...parts) => parts.filter(p => p != null && String(p) !== '').join('. ');
+
 /** checkpoint_runners statuses that record a runner actually passing. */
 const SIGHTING = new Set(['passed', 'called-in', 'marked-off']);
 
@@ -596,6 +599,8 @@ export class BaseOperationsRepository extends BaseRepository {
         .where(['raceId', 'checkpointNumber', 'number'])
         .equals([raceId, checkpoint, runnerNumber])
         .first();
+      const detail = joinNote(reason, comments);
+      const notes = detail ? `DNF: ${detail}` : 'DNF';
 
       if (checkpoint == null) {
         // nothing to mark at a checkpoint
@@ -609,7 +614,7 @@ export class BaseOperationsRepository extends BaseRepository {
           status: 'dnf',
           markOffTime: timestamp,
           callInTime: timestamp,
-          notes: `DNF: ${reason}. ${comments || ''}`,
+          notes,
           dnfPrev: existing.dnfPrev ?? { status: existing.status, markOffTime: existing.markOffTime ?? null, callInTime: existing.callInTime ?? null, notes: existing.notes ?? null },
         });
       } else {
@@ -620,7 +625,7 @@ export class BaseOperationsRepository extends BaseRepository {
           status: 'dnf',
           markOffTime: timestamp,
           callInTime: timestamp,
-          notes: `DNF: ${reason}. ${comments || ''}`
+          notes
         });
       }
 
@@ -1112,10 +1117,10 @@ export class BaseOperationsRepository extends BaseRepository {
         
         if (runner.withdrawalDetails) {
           time = new Date(runner.withdrawalDetails.withdrawalTime).toLocaleString();
-          reason = `${runner.withdrawalDetails.reason}. ${runner.withdrawalDetails.comments || ''}`;
+          reason = joinNote(runner.withdrawalDetails.reason, runner.withdrawalDetails.comments);
         } else if (runner.vetOutDetails) {
           time = new Date(runner.vetOutDetails.vetOutTime).toLocaleString();
-          reason = `${runner.vetOutDetails.reason}. ${runner.vetOutDetails.medicalNotes || ''}`;
+          reason = joinNote(runner.vetOutDetails.reason, runner.vetOutDetails.medicalNotes);
         } else if (runner.recordedTime) {
           time = new Date(runner.recordedTime).toLocaleString();
           reason = runner.notes || '';
