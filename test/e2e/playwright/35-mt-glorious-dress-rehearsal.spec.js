@@ -1,0 +1,734 @@
+/**
+ * Mt Glorious Mountain Trails — full dress rehearsal for Sun 8 Nov 2026.
+ *
+ * The real wizard and template set the race up; the 128-bib field and every
+ * checkpoint time are the real 2025 race (fixtures/MGMT_NOV25.xlsx), moved 30
+ * minutes earlier to fit the 06:30 start. Five isolated browsers play base
+ * (tablet) and CP1–4 (phones). The only link between them is the setup file and
+ * "the radio": each call is read off the checkpoint's screen and typed into base.
+ *
+ * Finish times aren't in the sheet (TRAQ timed the finish), so they are made up
+ * from each runner's CP3→CP4 pace. Bib 92's CP2 correction to 07:30 assumes the
+ * sheet's 8.40 was a typo for 8.00.
+ *
+ * Problems are collected rather than stopping the race, written to
+ * test-results/mt-glorious/ with a screenshot of each milestone, and asserted
+ * empty at the end: a green run means no bugs.
+ *
+ * Run: npx playwright test test/e2e/playwright/35-mt-glorious-dress-rehearsal.spec.js --workers=1
+ */
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import XLSX from 'xlsx';
+import { test, expect } from '@playwright/test';
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const SHEET = path.join(HERE, 'fixtures/MGMT_NOV25.xlsx');
+const OUT = path.resolve(HERE, '../../../test-results/mt-glorious');
+const BASE = 'http://localhost:3000';
+
+const RACE = { name: 'Mt Glorious Mountain Trail', date: '2026-11-08', start: '06:30' };
+const SHIFT = 30; // 2025 started 07:00, 2026 starts 06:30
+const GPS = { 1: [-27.321677, 152.714852], 2: [-27.345838, 152.730526], 3: [-27.366238, 152.730747], 4: [-27.34649, 152.750306] };
+const OPERATORS = { 1: 'VK4MUD', 2: 'VK4IE', 3: 'VK4PMC', 4: 'VK4AJG' };
+const CPS = [1, 2, 3, 4];
+const SILENT = { cp: 4, from: 8 * 60 + 40, to: 9 * 60 + 5 }; // a radio outage, to test a long catch-up call
+
+const EXPORTS = ['Missing Numbers Report', 'Out List Report', 'Checkpoint Log Report', 'Race Summary Report', 'Finisher List', 'Full Officials Report', 'Split Times'];
+
+const pad = (n) => String(n).padStart(2, '0');
+const fmt = (m) => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
+const block = (m) => m - (m % 5);
+const mins = (hm) => { const [h, x] = hm.split(':').map(Number); return h * 60 + x; };
+
+// ── The race, from the spreadsheet ─────────────────────────────────────────
+/** Excel "8.05" means 08:05. */
+const sheetMinutes = (v) => {
+  if (!v) return null;
+  const [h, m] = Number(v).toFixed(2).split('.').map(Number);
+  return h * 60 + m - SHIFT;
+};
+
+function loadRace() {
+  const wb = XLSX.read(fs.readFileSync(SHEET), { type: 'buffer' });
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: null }).slice(1);
+  const runners = rows.map(r => {
+    const comment = String(r[6] ?? '').trim();
+    const times = [2, 3, 4, 5].map(i => sheetMinutes(r[i]));
+    const [, , cp3, cp4] = times;
+    return {
+      bib: parseInt(r[0], 10), comment, times, dns: comment === 'DNS', dnf: comment === 'Withdrawn CP3',
+      finish: cp4 ? cp4 + Math.max(15, Math.round((cp4 - cp3) * 1.5)) : null, // ponytail: synthetic, the sheet has no finish
+    };
+  });
+  return runners.sort((a, b) => a.bib - b.bib);
+}
+
+// ── Devices ────────────────────────────────────────────────────────────────
+const findings = [];
+const diary = [];
+let raceClock = 'setup';
+const note = (area, msg) => { findings.push({ at: raceClock, area, msg }); console.log(`  [finding ${raceClock}] ${area}: ${msg}`); };
+const log = (msg) => { diary.push({ at: raceClock, msg }); console.log(`  [${raceClock}] ${msg}`); };
+
+/** Run a check without stopping the race; a failure becomes a finding. */
+const check = async (area, what, fn) => {
+  try { return await fn(); } catch (e) {
+    note(area, `${what}: ${String(e.message).split('\n').slice(0, 4).join(' ').replace(/\x1b\[\d+m/g, '').slice(0, 300)}`);
+    return undefined;
+  }
+};
+
+async function openDevice(browser, label, viewport) {
+  const ctx = await browser.newContext({
+    baseURL: BASE, viewport, timezoneId: 'Australia/Brisbane', locale: 'en-AU', serviceWorkers: 'block', acceptDownloads: true,
+  });
+  await ctx.clock.install({ time: new Date('2026-11-01T19:00:00+10:00') });
+  const page = await ctx.newPage();
+  page.setDefaultTimeout(10000);
+  const device = { label, ctx, page };
+  page.on('pageerror', e => note(label, `Uncaught error: ${e.message.slice(0, 200)}`));
+  page.on('console', m => {
+    if (m.type() === 'error' && !/favicon|Failed to load resource/.test(m.text())) note(label, `Console error: ${m.text().slice(0, 200)}`);
+  });
+  page.on('dialog', async d => { note(label, `Browser dialog: ${d.message().slice(0, 120)}`); await d.accept(); });
+  return device;
+}
+
+/** Jump a device's clock (firing its timers, so useNow refreshes) to race-day minute m. */
+async function setClock(device, m, date = RACE.date) {
+  const t = new Date(`${date}T${fmt(m)}:05+10:00`).getTime();
+  await device.ctx.clock.setSystemTime(t - 31000);
+  await device.ctx.clock.fastForward(31000);
+}
+
+const shot = async (device, name) => {
+  await device.page.screenshot({ path: path.join(OUT, `${name}.png`) }).catch(() => {});
+};
+
+// ── Selectors ──────────────────────────────────────────────────────────────
+const cpTab = (page, name) => page.getByRole('navigation', { name: 'Checkpoint tabs' }).getByRole('button', { name: new RegExp(`^${name}`) });
+const baseTab = (page, name) => page.getByRole('tab', { name });
+const blockBtn = (page, hm) => page.getByRole('group', { name: 'Common time block' }).getByRole('button', { name: new RegExp(`^${hm}`) });
+
+/** Every checkpoint on this device should carry its coordinates: a finding if not. */
+async function checkGps({ page, label }, what) {
+  const saved = await page.evaluate(() => new Promise((res, rej) => {
+    const open = indexedDB.open('RaceTrackerDB');
+    open.onerror = rej;
+    open.onsuccess = e => { const q = e.target.result.transaction('checkpoints').objectStore('checkpoints').getAll(); q.onsuccess = () => res(q.result); };
+  }));
+  const withGps = saved.filter(c => c.latitude != null).length;
+  log(`${label}: checkpoints with GPS: ${withGps} of ${saved.length}`);
+  if (withGps !== 4 || saved.length !== 4) note(label, `${what}: ${withGps} of ${saved.length} checkpoints have coordinates, expected 4 of 4`);
+}
+
+// ── Setup ──────────────────────────────────────────────────────────────────
+async function setupRace(base) {
+  const { page } = base;
+  await page.goto('/race-maintenance/setup');
+  await page.locator('button').filter({ hasText: RACE.name }).first().click();
+
+  await page.waitForSelector('#name');
+  await check('Setup', 'template fills the 06:30 start', () => expect(page.locator('#startTime')).toHaveValue(RACE.start, { timeout: 2000 }));
+  await check('Setup', 'template fills 4 checkpoints', () => expect(page.locator('#numCheckpoints')).toHaveValue('4', { timeout: 2000 }));
+  await page.fill('#date', RACE.date);
+  await page.getByRole('button', { name: /next: runner setup/i }).click();
+
+  await page.waitForSelector('#min');
+  await page.fill('#min', '1');
+  await page.fill('#max', '128');
+  await page.getByRole('button', { name: /add range/i }).click();
+  await page.getByRole('button', { name: /next.*waves/i }).click();
+  await page.getByRole('button', { name: /next.*course map/i }).click();
+
+  await page.getByRole('heading', { name: /course map/i }).waitFor();
+  await shot(base, '01-course-map-step');
+  await check('Setup', 'template course shows on the map step', () => expect(page.getByText(/GPX loaded/)).toBeVisible({ timeout: 1500 }));
+  await page.getByRole('tab', { name: 'Manual' }).click();
+  for (const cp of CPS) {
+    await page.locator(`input[aria-label^="CP${cp} - "][aria-label$="Lat"]`).fill(String(GPS[cp][0]));
+    await page.locator(`input[aria-label^="CP${cp} - "][aria-label$="Lng"]`).fill(String(GPS[cp][1]));
+  }
+  await page.getByRole('button', { name: /save & continue/i }).click();
+  await page.getByRole('button', { name: /^next$/i }).first().click();
+  await page.waitForURL(/race-maintenance\/overview/, { timeout: 20000 });
+  await shot(base, '02-race-created');
+  await checkGps(base, 'GPS typed on the Manual tab was not saved');
+
+  // The start list arrives Saturday: load it the way the coordinator would
+  await page.getByRole('button', { name: /advanced tools/i }).click();
+  await page.locator('input[type="file"]').first().setInputFiles(SHEET);
+  await page.getByRole('button', { name: /next: preview/i }).click();
+  await shot(base, '03-roster-preview');
+  await page.getByRole('button', { name: /^Import 128 Runners$/ }).click();
+  await expect(page.getByText(/import complete/i)).toBeVisible();
+  log(`Roster import: ${await page.getByText(/import complete/i).innerText()}`);
+}
+
+async function exportSetup(base) {
+  const { page } = base;
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await page.getByRole('button', { name: /share or import race config/i }).click();
+  await expect(page.getByRole('heading', { name: /scan to load this race/i })).toBeVisible();
+  await shot(base, '04-share-race');
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Download' }).click()]);
+  const file = path.join(OUT, dl.suggestedFilename());
+  await dl.saveAs(file);
+  const pkg = JSON.parse(fs.readFileSync(file, 'utf8'));
+  log(`Setup file ${dl.suggestedFilename()}: ${pkg.data.runners?.length} runners, ${pkg.data.checkpoints?.length} checkpoints, frequency ${pkg.data.races?.[0]?.frequency}`);
+  await page.getByRole('button', { name: 'Close share race' }).click();
+  return file;
+}
+
+async function loadOntoDevice(device, file) {
+  const { page } = device;
+  await page.goto('/race-management');
+  await page.getByRole('button', { name: /import race/i }).first().click();
+  const dialog = page.getByRole('dialog', { name: /import.*export/i });
+  await dialog.getByRole('button', { name: /import configuration/i }).click();
+  await dialog.locator('input[type="file"]').setInputFiles(file);
+  await expect(dialog.getByText(/file loaded successfully/i)).toBeVisible();
+  await dialog.locator('button.btn-primary').click();
+  await expect(dialog).toBeHidden({ timeout: 10000 });
+}
+
+async function openCheckpoint(device, cp) {
+  const { page } = device;
+  await page.goto('/');
+  await page.getByRole('button', { name: /^checkpoint\b/i }).click();
+  const modal = page.getByRole('dialog');
+  await modal.locator('button').filter({ has: page.locator('h3') }).first().click();
+  const picker = page.getByRole('dialog').filter({ hasText: /select your checkpoint/i });
+  await picker.waitFor();
+  await picker.getByRole('button').filter({ hasText: new RegExp(`^CP${cp}`) }).first().click();
+  await page.waitForURL(new RegExp(`/checkpoint/${cp}`));
+  await page.waitForSelector('#quick-entry-input');
+}
+
+async function openBase(base) {
+  const { page } = base;
+  await page.goto('/');
+  await page.getByRole('button', { name: /base station/i }).click();
+  await page.getByRole('dialog').locator('button').filter({ has: page.locator('h3') }).first().click();
+  await page.getByRole('heading', { name: /who's calling/i }).waitFor({ timeout: 20000 });
+}
+
+// ── Radio ──────────────────────────────────────────────────────────────────
+/** What the operator sees on the Callout sheet: [{ time, numbers }]. */
+async function readCallout(page) {
+  await cpTab(page, 'Callout').click();
+  await page.getByTestId('pending-block').first().waitFor();
+  const blocks = [];
+  for (const text of await page.getByTestId('pending-block').allInnerTexts()) {
+    const [head, ...rest] = text.split('\n');
+    blocks.push({ time: head.match(/(\d\d:\d\d)/)[1], numbers: rest.join(' ').match(/\d+/g).map(Number) });
+  }
+  return blocks;
+}
+
+/** One radio call, heard and typed at base. Returns what base recorded. */
+async function baseReceive(base, label, blocks) {
+  const { page } = base;
+  await baseTab(page, 'Receive').click().catch(() => {});
+  await page.getByRole('button', { name: new RegExp(`^${label},`) }).click();
+  const flags = [];
+  for (const b of blocks) {
+    await blockBtn(page, b.time).click({ timeout: 4000 });
+    for (const n of b.numbers) {
+      await page.fill('#bib-heard', String(n));
+      await page.keyboard.press('Enter');
+      await expect(page.getByTestId('rx-flash')).toContainText(`${n} added`);
+    }
+    for (const name of await page.getByTestId('rx-numbers').getByRole('button').evaluateAll(els => els.map(e => e.getAttribute('aria-label') || e.innerText))) {
+      if (name.includes(',')) flags.push(name);
+    }
+  }
+  await page.getByRole('button', { name: /^(Complete|Log call) · \d+$/ }).click();
+  const summary = await page.getByRole('status').first().innerText();
+  await page.getByRole('button', { name: 'Next call' }).click();
+  return { summary: summary.replace(/\n/g, ' · '), flags };
+}
+
+/** Checkpoint confirms base copied: read-out for a big call, one tap otherwise. */
+async function confirmSent(page, count) {
+  if (count > 5) {
+    await page.getByRole('button', { name: 'Read out' }).click();
+    const done = page.getByText(/^All \d+ copied$/);
+    for (;;) {
+      const over = await page.getByText(/^Over \d+ of \d+$/).innerText();
+      for (const box of await page.getByRole('checkbox', { name: /^Read out / }).all()) await box.check();
+      await page.getByRole('button', { name: 'Base copied — next' }).click();
+      await expect(done.or(page.getByText(/^Over \d+ of \d+$/).filter({ hasNotText: over }))).toBeVisible();
+      if (await done.isVisible()) break;
+    }
+    await page.getByRole('button', { name: 'Back to callout', exact: true }).click();
+  } else {
+    await page.getByRole('button', { name: /base copied — mark sent/i }).click();
+  }
+  await cpTab(page, 'Mark off').click();
+}
+
+/** On a hard stop: keep what was found, and a screenshot of every device. */
+async function page_guard(stations, fn) {
+  try { await fn(); } catch (e) {
+    for (const s of stations) await shot(s, `FAILED-${s.label}`);
+    fs.writeFileSync(path.join(OUT, 'findings.json'), JSON.stringify({ stopped: raceClock, findings, diary }, null, 2));
+    throw e;
+  }
+}
+
+test.describe('Mt Glorious dress rehearsal', () => {
+  test.describe.configure({ retries: 0 });
+
+  test('the 2025 spreadsheet creates a race through the WebScorer wizard', async ({ browser }) => {
+    fs.mkdirSync(OUT, { recursive: true });
+    const device = await openDevice(browser, 'Wizard', { width: 1280, height: 900 });
+    const { page } = device;
+    await page.goto('/race-maintenance/setup');
+    await page.getByRole('button', { name: /import from webscorer/i }).click();
+    await page.locator('input[type="file"]').setInputFiles(SHEET);
+    await expect(page.getByText('128 rows loaded')).toBeVisible();
+    await shot(device, '00-webscorer-mapping');
+    await page.getByRole('button', { name: /next: race details/i }).click();
+    await page.getByPlaceholder(/BTM2026/).fill('Wizard check');
+    await page.locator('input[type="date"]').fill(RACE.date);
+    await page.getByRole('button', { name: /next: confirm/i }).click();
+    await page.getByRole('button', { name: 'Create Race (128 runners)' }).click();
+    await page.waitForURL(/race-maintenance\/overview/);
+    await device.ctx.close();
+  });
+
+  test('set up the race, run all five stations through it, reconcile the result', async ({ browser }) => {
+    test.setTimeout(30 * 60 * 1000);
+    fs.mkdirSync(OUT, { recursive: true });
+    const runners = loadRace();
+    const byBib = new Map(runners.map(r => [r.bib, r]));
+    const base = await openDevice(browser, 'Base', { width: 1112, height: 834 });
+    const cps = {};
+    for (const cp of CPS) cps[cp] = await openDevice(browser, `CP${cp}`, { width: 390, height: 844 });
+    const stations = [base, ...Object.values(cps)];
+
+    // Passes and calls still waiting, per checkpoint
+    const passes = new Map(); // `${cp}:${minute}` → bibs
+    for (const r of runners) {
+      r.times.forEach((t, i) => {
+        if (!t) return;
+        const k = `${i + 1}:${t}`;
+        passes.set(k, [...(passes.get(k) ?? []), r.bib]);
+      });
+    }
+    const waiting = { 1: [], 2: [], 3: [], 4: [] };
+    const called = { 1: new Set(), 2: new Set(), 3: new Set(), 4: new Set() };
+    const finishes = runners.filter(r => r.finish && !r.dnf);
+
+    await test.step('Week before — coordinator sets the race up from the template', async () => {
+      await setupRace(base);
+      const file = await exportSetup(base);
+      for (const cp of CPS) await loadOntoDevice(cps[cp], file);
+      await checkGps(cps[1], 'GPS lost in the setup file');
+    });
+
+    await test.step('Race morning — every station opens the race', async () => {
+      raceClock = '05:30';
+      for (const s of stations) await setClock(s, mins('05:30'));
+      await openBase(base);
+      await shot(base, '05-base-opened');
+      for (const cp of CPS) {
+        await openCheckpoint(cps[cp], cp);
+        await check(`CP${cp}`, 'shows its operator', () => expect(cps[cp].page.getByText(new RegExp(OPERATORS[cp])).first()).toBeVisible({ timeout: 2000 }));
+      }
+      await shot(cps[1], '06-cp1-opened');
+      await cpTab(cps[1].page, 'Callout').click();
+      await shot(cps[1], '07-cp1-callout-empty');
+      await cpTab(cps[1].page, 'Mark off').click();
+    });
+
+    await test.step('06:25 — organiser reports the non-starters to base', async () => {
+      raceClock = '06:25';
+      await setClock(base, mins('06:25'));
+      const dns = runners.filter(r => r.dns).map(r => r.bib);
+      const { page } = base;
+      await baseTab(page, 'DNF / DNS').click();
+      await page.getByRole('group', { name: 'Status to apply' }).getByRole('button', { name: 'DNS' }).click();
+      await page.fill('#bulk-bibs', dns.join(' '));
+      await page.keyboard.press('Enter');
+      await page.getByRole('button', { name: `Mark ${dns.length} as DNS` }).click();
+      await expect(page.getByTestId('status-flash')).toHaveText(`${dns.length} marked DNS`);
+      await shot(base, '08-dns-applied');
+      await baseTab(page, 'Receive').click();
+      log(`DNS: ${dns.join(', ')}`);
+    });
+
+    const call = async (cp, m) => {
+      const device = cps[cp];
+      const expected = waiting[cp];
+      const blocks = await readCallout(device.page);
+      const heard = blocks.flatMap(b => b.numbers);
+      const missing = expected.filter(e => !heard.includes(e.bib)).map(e => e.bib);
+      if (missing.length) note(`CP${cp}`, `Marked but not on the callout sheet: ${missing.join(', ')}`);
+      for (const n of heard) {
+        const e = expected.find(x => x.bib === n);
+        if (e && fmt(block(e.t)) !== blocks.find(b => b.numbers.includes(n)).time) {
+          note(`CP${cp}`, `Bib ${n} marked ${fmt(e.t)} but called at block ${blocks.find(b => b.numbers.includes(n)).time}`);
+        }
+      }
+      await setClock(base, m);
+      const result = await baseReceive(base, `CP${cp}`, blocks);
+      if (result.flags.length) log(`CP${cp} call flagged at base: ${result.flags.join(' | ')}`);
+      if (!new RegExp(`^${heard.length} recorded`).test(result.summary)) note('Base', `CP${cp} call of ${heard.length}: ${result.summary}`);
+      await confirmSent(device.page, heard.length);
+      heard.forEach(n => called[cp].add(n));
+      waiting[cp] = [];
+      log(`CP${cp} → base: ${blocks.map(b => `${b.time} ×${b.numbers.length}`).join(', ')}`);
+    };
+
+    const pendingFinish = new Set(finishes.map(r => r.bib));
+    const receiveFinish = async (m) => {
+      const due = finishes.filter(r => pendingFinish.has(r.bib) && r.finish + 5 <= m);
+      if (!due.length) return;
+      const blocks = [...new Set(due.map(r => block(r.finish)))].sort((a, b) => a - b)
+        .map(b => ({ time: fmt(b), numbers: due.filter(r => block(r.finish) === b).map(r => r.bib) }));
+      await setClock(base, m);
+      const result = await baseReceive(base, 'Finish', blocks);
+      if (result.flags.length) log(`Finish call flagged: ${result.flags.join(' | ')}`);
+      due.forEach(r => pendingFinish.delete(r.bib));
+    };
+
+    const board = [];
+    const falseDue = { 1: [], 2: [], 3: [], 4: [] };
+    const events = new Map();
+    const at = (hm, title, fn) => events.set(mins(hm), { title, fn });
+
+    at('07:15', 'CP2 phone restarts, and base reloads, mid-race', async () => {
+      const before = await cps[2].page.getByText('Passed').first().locator('..').innerText();
+      await cps[2].page.reload();
+      await cps[2].page.waitForSelector('#quick-entry-input');
+      const after = await cps[2].page.getByText('Passed').first().locator('..').innerText();
+      if (before !== after) note('CP2', `Passed tile changed across reload: ${before} → ${after}`);
+      await base.page.reload();
+      await base.page.getByRole('heading', { name: /who's calling/i }).waitFor();
+      await shot(base, '09-base-mid-race');
+    });
+
+    at('07:50', 'Base looks at overdue and the checks mid-race', async () => {
+      const { page } = base;
+      await baseTab(page, 'Reports').click();
+      await shot(base, '10-reports-mid-race');
+      const overdue = await page.getByRole('button', { name: /^Overdue runners/ }).innerText();
+      const checks = {};
+      for (const id of ['dup', 'order', 'skip', 'after', 'unknown', 'pace']) checks[id] = await page.getByTestId(`check-count-${id}`).innerText();
+      log(`Mid-race: ${overdue.replace(/\n/g, ' ')}; checks ${JSON.stringify(checks)}`);
+      await baseTab(page, 'Overview').click();
+      await shot(base, '11-overview-mid-race');
+      await baseTab(page, 'Receive').click();
+      await shot(base, '12-receive-mid-race');
+    });
+
+    at('08:00', 'Base sees CP2 missed 92 (CP3 has it, CP2 has not)', async () => {
+      const { page } = base;
+      await check('Base', 'CP2 shows Missed: 92', () => expect(page.getByTestId('missed-CP2')).toContainText('92', { timeout: 2000 }));
+      await shot(base, '12b-missed-92');
+    });
+
+    at('09:00', 'CP4 has been silent since 08:40 (repeater trouble)', async () => {
+      const { page } = base;
+      log(`Board: ${(await page.getByTestId('board-CP4').innerText()).replace(/\n/g, ' ')}`);
+      await baseTab(page, 'Overview').click();
+      await shot(base, '12c-cp4-silent');
+      await baseTab(page, 'Reports').click();
+      log(`During the outage: ${(await page.getByRole('button', { name: /^Overdue runners/ }).innerText()).replace(/\n/g, ' ')}`);
+      await baseTab(page, 'Receive').click();
+    });
+
+    at('08:20', 'Bib 92: base queries CP2, CP2 corrects by radio', async () => {
+      const { page } = base;
+      await setClock(base, mins('08:20'));
+      await setClock(cps[2], mins('08:20'));
+      await baseTab(page, 'Reports').click();
+      await check('Base', 'out-of-order check sees bib 92', () => expect(page.getByTestId('check-count-order')).toHaveText('1', { timeout: 3000 }));
+      await page.getByRole('button', { name: /^Out of order/ }).click();
+      await shot(base, '13-out-of-order');
+      const rows = await page.getByTestId('issue-row').allInnerTexts();
+      log(`Out of order: ${rows.map(r => r.replace(/\n/g, ' ')).join(' | ')}`);
+      await page.getByTestId('issue-row').filter({ hasText: '92' }).getByRole('button', { name: 'Ask CP2' }).click();
+      await baseTab(page, 'Receive').click();
+      await shot(base, '14-ask-cp2');
+
+      // CP2 moves 92 from 08:10 to 07:30 on the tile
+      const cp2 = cps[2].page;
+      await cp2.getByRole('group', { name: 'Bib groups' }).getByRole('button', { name: /^81/ }).click();
+      await cp2.getByRole('button', { name: /^Runner 92,/ }).click();
+      const sheet = cp2.getByRole('dialog');
+      await sheet.waitFor();
+      for (let i = 0; i < 8; i++) await sheet.getByLabel('5 minutes earlier').click();
+      await shot(cps[2], '15-cp2-edit-92');
+      await sheet.getByRole('button', { name: /^Save / }).click();
+      await cpTab(cp2, 'Callout').click();
+      const row = await cp2.getByTestId('correction-row').innerText();
+      log(`CP2 corrections card: ${row.replace(/\n/g, ' ')}`);
+      await shot(cps[2], '16-cp2-correction-card');
+
+      await page.getByRole('button', { name: /^CP2,/ }).click();
+      await page.getByRole('button', { name: 'Correction', exact: true }).click();
+      await page.fill('#corr-bib', '92');
+      await check('Base', 'correction shows the old time', () => expect(page.getByTestId('corr-had')).toHaveText('Had 08:10', { timeout: 2000 }));
+      await page.getByRole('group', { name: 'Common time block' }).getByRole('button', { name: /^07:30/ }).click();
+      await page.getByRole('button', { name: 'Apply correction · 07:30' }).click();
+      await shot(base, '17-base-correction');
+      await page.getByRole('button', { name: /^Back to call/ }).click();
+      await page.getByRole('button', { name: 'Cancel call' }).click();
+      await cp2.getByRole('button', { name: 'Base copied — correction sent' }).click();
+      await cpTab(cp2, 'Mark off').click();
+
+      const asked = page.getByRole('button', { name: /^Asked CP\d about 92$/ });
+      if (await asked.isVisible()) await asked.click();
+      await baseTab(page, 'Reports').click();
+      await check('Base', 'out-of-order clears after the correction', () => expect(page.getByTestId('check-count-order')).toHaveText('✓', { timeout: 3000 }));
+      await baseTab(page, 'Receive').click();
+    });
+
+    const standDown = (cp, hm) => at(hm, `CP${cp} sweep through — CP${cp} stands down`, async () => {
+      const device = cps[cp];
+      await cpTab(device.page, 'Callout').click();
+      await device.page.getByRole('button', { name: 'Request stand down' }).click();
+      await device.page.getByRole('dialog').getByRole('textbox').last().fill(`sweep passed ${hm}`);
+      await device.page.getByRole('button', { name: 'Log request' }).click();
+      await cpTab(device.page, 'Mark off').click();
+      const { page } = base;
+      await page.getByRole('button', { name: `Stand-down check CP${cp}` }).click();
+      const sheet = page.getByRole('dialog', { name: `Stand-down check · CP${cp}` });
+      await shot(base, `18-stand-down-cp${cp}`);
+      log(`Stand-down CP${cp}: seen further "${(await sheet.getByTestId('seen-further').innerText()).replace(/\n/g, ' ').slice(0, 120)}"; to account for "${(await sheet.getByTestId('not-seen-past').innerText()).replace(/\n/g, ' ').slice(0, 140)}"`);
+      await sheet.getByRole('button', { name: 'Stand down', exact: true }).click();
+      await sheet.getByRole('button', { name: 'Tap again to stand down' }).click();
+      await expect(sheet.getByRole('status')).toHaveText(new RegExp(`CP${cp} stood down`));
+      await sheet.getByRole('button', { name: 'Close' }).click();
+    });
+    standDown(1, '07:45');
+    standDown(2, '08:40');
+
+    at('09:10', 'Bib 20 withdraws at CP3: official message, then DNF at base', async () => {
+      const cp3 = cps[3].page;
+      await cpTab(cp3, 'Callout').click();
+      await cp3.getByRole('button', { name: 'Official message' }).click();
+      const sheet = cp3.getByRole('dialog');
+      await sheet.getByLabel('Originator (name / role)').fill('Paul VK4PMC, CP3');
+      await sheet.getByLabel('Message', { exact: true }).fill('Runner 20 withdrawn at CP3');
+      await sheet.getByLabel('Signed by originator').check();
+      await shot(cps[3], '19-cp3-official-message');
+      await cp3.getByRole('button', { name: 'Log message' }).click();
+      await cpTab(cp3, 'Mark off').click();
+
+      const { page } = base;
+      await page.evaluate(() => document.activeElement?.blur());
+      await page.keyboard.press('d');
+      await page.locator('input#runnerNumber').fill('20');
+      await page.getByRole('group', { name: 'Where' }).getByRole('button', { name: 'CP3' }).click();
+      await shot(base, '20-withdraw-20');
+      await page.getByRole('button', { name: 'Withdraw runner', exact: true }).click();
+      await page.locator('input#runnerNumber').waitFor({ state: 'hidden' });
+    });
+    standDown(3, '09:15');
+    standDown(4, '09:40');
+
+    await test.step('Race — minute by minute, 06:30 to the last finisher', async () => {
+      await page_guard(stations, async () => {
+      const end = Math.max(...finishes.map(r => r.finish)) + 10;
+      for (let m = mins(RACE.start); m <= end; m++) {
+        raceClock = fmt(m);
+        for (const cp of CPS) {
+          const bibs = passes.get(`${cp}:${m}`);
+          if (bibs) {
+            await setClock(cps[cp], m);
+            await cps[cp].page.fill('#quick-entry-input', bibs.join(', '));
+            await cps[cp].page.keyboard.press('Enter');
+            await expect(cps[cp].page.getByTestId('markoff-status')).toContainText(bibs.length === 1 ? String(bibs[0]) : `${bibs.length} runners marked`);
+            waiting[cp].push(...bibs.map(bib => ({ bib, t: m })));
+          }
+          // Brief: every 5–10 competitors, no more than about 5 minutes late
+          const silent = cp === SILENT.cp && m >= SILENT.from && m < SILENT.to;
+          if (!silent && (waiting[cp].length >= 5 || (waiting[cp].length && m - waiting[cp][0].t >= 5))) {
+            await setClock(cps[cp], m);
+            await call(cp, m);
+          }
+        }
+        if (m % 5 === 0) {
+          await receiveFinish(m);
+          await setClock(base, m);
+          const labels = await base.page.getByRole('button', { name: /^(CP\d|Finish), / }).evaluateAll(els => els.map(e => e.getAttribute('aria-label')));
+          board.push({ at: fmt(m), labels });
+          for (const cp of CPS) {
+            const first = Math.min(...runners.map(r => r.times[cp - 1] ?? Infinity));
+            if (m < first && labels.some(l => l.startsWith(`CP${cp}, Due`))) falseDue[cp].push(fmt(m));
+          }
+        }
+        const ev = events.get(m);
+        if (ev) {
+          for (const s of stations) await setClock(s, m);
+          await test.step(`${fmt(m)} ${ev.title}`, async () => {
+            log(ev.title);
+            await check('Event', ev.title, ev.fn);
+          });
+        }
+      }
+      raceClock = 'after';
+      });
+    });
+
+    await test.step('After the race — base reconciles against the source', async () => {
+      const m = mins('10:45');
+      raceClock = fmt(m);
+      for (const s of stations) await setClock(s, m);
+      const { page } = base;
+
+      await baseTab(page, 'Overview').click();
+      await shot(base, '21-final-overview');
+      log(`Overview: ${(await page.getByTestId('stats-grid').innerText()).replace(/\n/g, ' ')}`);
+
+      await baseTab(page, 'Reports').click();
+      await shot(base, '22-final-reports');
+      const checks = {};
+      for (const id of ['dup', 'order', 'skip', 'after', 'unknown', 'pace']) checks[id] = await page.getByTestId(`check-count-${id}`).innerText();
+      log(`Final checks: ${JSON.stringify(checks)}`);
+      for (const [id, want] of Object.entries({ dup: '✓', order: '✓', skip: '✓', after: '✓', unknown: '✓' })) {
+        if (checks[id] !== want) note('Base', `Final check "${id}" reads ${checks[id]}, expected ${want}`);
+      }
+      await page.getByRole('button', { name: /^Impossible pace/ }).click();
+      await shot(base, '23-pace');
+      log(`Pace: ${(await page.getByTestId('issue-row').allInnerTexts()).map(r => r.replace(/\n/g, ' ')).join(' | ')}`);
+
+      await page.getByRole('button', { name: /^Overdue runners/ }).click();
+      await check('Base', 'nobody overdue at the end', () => expect(page.getByText('No runners overdue.')).toBeVisible({ timeout: 2000 }));
+      await page.getByRole('button', { name: /^Still on course/ }).click();
+      await shot(base, '24-still-on-course');
+      log(`Still on course: ${(await page.locator('section[aria-labelledby="rephd"]').innerText()).replace(/\n/g, ' ').slice(0, 300)}`);
+      await page.getByRole('button', { name: /^Call log/ }).click();
+      await shot(base, '25-call-log');
+
+      await page.getByRole('button', { name: /^Times by checkpoint/ }).click();
+      await shot(base, '26-times');
+      const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'CSV', exact: true }).click()]);
+      const csvFile = path.join(OUT, 'times-by-checkpoint.csv');
+      await dl.saveAs(csvFile);
+      const [head, ...rows] = fs.readFileSync(csvFile, 'utf8').trim().split('\n').map(l => l.split(','));
+      log(`CSV header: ${head.join(',')}; ${rows.length} rows`);
+      const mismatches = [];
+      for (const row of rows) {
+        const r = byBib.get(Number(row[0]));
+        if (!r) { mismatches.push(`bib ${row[0]} not in source`); continue; }
+        const want = r.times.map((t, i) => (t ? fmt(block(r.bib === 92 && i === 1 ? mins('07:30') : t)) : null));
+        want.push(r.finish && !r.dnf ? fmt(block(r.finish)) : null);
+        want.forEach((w, i) => {
+          const got = row[i + 2] ?? '';
+          if (w && got !== w) mismatches.push(`bib ${r.bib} ${head[i + 2]}: got "${got}", want ${w}`);
+          if (!w && /\d\d:\d\d/.test(got)) mismatches.push(`bib ${r.bib} ${head[i + 2]}: got "${got}", want nothing`);
+        });
+      }
+      if (rows.length !== 128) note('Base', `Times CSV has ${rows.length} rows, expected 128`);
+      if (mismatches.length) note('Base', `Times differ from the source in ${mismatches.length} cells: ${mismatches.slice(0, 12).join('; ')}`);
+      else log('Every CP and finish time at base matches the source block for block');
+      log(`Statuses: ${JSON.stringify(rows.reduce((a, r) => ({ ...a, [r[1]]: (a[r[1]] ?? 0) + 1 }), {}))}`);
+
+      // Exports TRAQ would ask for
+      await page.getByRole('button', { name: /^Exports/ }).click();
+      await shot(base, '27-exports');
+      let splitText = '';
+      const panel = page.locator('section[aria-labelledby="rephd"]');
+      const preview = panel.locator('#showPreview');
+      if (await preview.isChecked()) await preview.uncheck();
+      for (const label of EXPORTS) {
+        await check('Exports', label, async () => {
+          await panel.getByRole('button', { name: new RegExp(`^${label}`) }).click();
+          const [file] = await Promise.all([page.waitForEvent('download', { timeout: 5000 }), panel.getByRole('button', { name: /generate|download/i }).last().click()]);
+          const to = path.join(OUT, `export-${label.replace(/\W+/g, '-').toLowerCase()}-${file.suggestedFilename()}`);
+          await file.saveAs(to);
+          const text = fs.readFileSync(to, 'utf8');
+          log(`Export "${label}": ${file.suggestedFilename()}, ${text.split('\n').length} lines, starts ${JSON.stringify(text.slice(0, 200))}`);
+          if (label === 'Finisher List') {
+            const data = text.trim().split('\n').filter(l => /^\s*"?\d+"?\s*,/.test(l)).length;
+            if (data !== 120) note('Exports', `Finisher List has ${data} data rows, expected 120`);
+          }
+          if (label === 'Race Summary Report' && /not-started/.test(text)) note('Exports', 'Race Summary still has not-started runners');
+          if (label === 'Missing Numbers Report') {
+            const total = text.match(/Total Missing:\s*(\d+)/)?.[1];
+            if (total !== '0') note('Exports', `Missing Numbers says Total Missing: ${total ?? 'absent'}, expected 0 for CP1`);
+          }
+          if (label === 'Split Times') splitText = text;
+        });
+      }
+      // Split Times must agree with the Times by checkpoint CSV, cell for cell
+      const unq = (l) => l.split(',').map(c => c.replace(/^"|"$/g, '').trim());
+      const splitRows = splitText.split(/\r?\n/).filter(l => /^"?\d+"?,/.test(l)).map(unq);
+      const csvByBib = new Map(rows.map(r => [r[0], r]));
+      const bad = [];
+      for (const sr of splitRows) {
+        const cr = csvByBib.get(sr[0]);
+        if (!cr) { bad.push(`bib ${sr[0]} not in CSV`); continue; }
+        for (let i = 0; i < 5; i++) { // CP1-4 then Finish: CSV cols 2-6, Split cols 3-7
+          const want = /\d\d:\d\d/.test(cr[i + 2] ?? '') ? cr[i + 2] : null;
+          const got = /\d\d:\d\d/.test(sr[i + 3] ?? '') ? sr[i + 3] : null;
+          if (want !== got) bad.push(`bib ${sr[0]} col ${i + 1}: Split ${got}, CSV ${want}`);
+        }
+      }
+      if (splitRows.length !== rows.length) note('Exports', `Split Times has ${splitRows.length} rows, CSV has ${rows.length}`);
+      if (bad.length) note('Exports', `Split Times differs from the CSV in ${bad.length} cells: ${bad.slice(0, 8).join('; ')}`);
+      for (const cp of CPS) if (falseDue[cp].length) note('Base', `CP${cp} showed Due before any runner could have reached it, at ${falseDue[cp].join(' ')}`);
+      fs.writeFileSync(path.join(OUT, 'board.json'), JSON.stringify(board, null, 1));
+    });
+
+    await test.step('After the race — CP3 hands its results file to base', async () => {
+      const cp3 = cps[3].page;
+      await cpTab(cp3, 'Mark off').click();
+      await cp3.getByRole('button', { name: 'Export Results' }).click();
+      await shot(cps[3], '29-cp3-export');
+      const [dl] = await Promise.all([cp3.waitForEvent('download'), cp3.getByRole('button', { name: 'Download JSON' }).click()]);
+      const file = path.join(OUT, dl.suggestedFilename());
+      await dl.saveAs(file);
+      await cp3.getByRole('button', { name: 'close' }).click();
+      const { page } = base;
+      await baseTab(page, 'Overview').click();
+      await check('Base', 'imports the CP3 results file', async () => {
+        await page.locator('input[type="file"]').last().setInputFiles(file);
+        await expect(page.getByText(/imported — \d+ runners/)).toBeVisible({ timeout: 5000 });
+        log(await page.getByText(/imported — \d+ runners/).innerText());
+      });
+      await shot(base, '30-cp3-imported');
+      await baseTab(page, 'Reports').click();
+      const checks = {};
+      for (const id of ['dup', 'order', 'skip', 'after', 'unknown', 'pace']) checks[id] = await page.getByTestId(`check-count-${id}`).innerText();
+      log(`Checks after importing CP3: ${JSON.stringify(checks)}`);
+      await page.getByRole('button', { name: /^Times by checkpoint/ }).click();
+      await shot(base, '31-times-after-import');
+      await check('Base', 'Live Dashboard opens', async () => {
+        await page.getByRole('button', { name: 'Live Dashboard' }).click();
+        await page.waitForURL(/dashboard/, { timeout: 5000 });
+        await page.waitForTimeout(500);
+        await shot(base, '32-live-dashboard');
+        const dash = (await page.locator('body').innerText()).replace(/\s+/g, ' ');
+        log(`Live Dashboard: ${dash.slice(0, 240)}`);
+        if (!dash.includes('121/128')) note('Base', `Live Dashboard does not show 121/128 for CP1: ${dash.slice(0, 160)}`);
+      });
+    });
+
+    await test.step('After the race — what each checkpoint device says', async () => {
+      for (const cp of CPS) {
+        const { page } = cps[cp];
+        await cpTab(page, 'Mark off').click();
+        const header = (await page.locator('header, [class*="bg-vk-navy"]').first().innerText()).replace(/\n/g, ' ');
+        const unsent = await page.getByRole('button', { name: /Share batch/ }).getAttribute('aria-label').catch(() => '');
+        log(`CP${cp} final: ${header.slice(0, 160)} | ${unsent}`);
+        if (cp === 1 && !/Share batch, 0 runners/.test(unsent ?? '')) note('CP1', `Share batch badge after the race says "${unsent}", expected "Share batch, 0 runners"`);
+        await cpTab(page, 'Overview').click();
+        await shot(cps[cp], `28-cp${cp}-final`);
+      }
+    });
+
+    fs.writeFileSync(path.join(OUT, 'findings.json'), JSON.stringify({ findings, diary }, null, 2));
+    console.log(`\n${findings.length} findings — ${path.join(OUT, 'findings.json')}`);
+    for (const s of stations) await s.ctx.close();
+    expect(findings).toEqual([]); // a green run means no bugs
+  });
+});

@@ -168,6 +168,54 @@ A race director can give each wave a custom name (e.g. "Wave B") and a specific 
 
 ![Template card — "Bibs set at setup"; choosing it starts the runner step empty](assets/the-mt-glorious-template-has-no-fixed-bib-range-step-01.jpg)
 
+### Race edit changes operators and frequency
+
+
+
+**Edit race — set the frequency, then the operators for CP1**
+
+![Edit race — set the frequency, then the operators for CP1](assets/race-edit-changes-operators-and-frequency-step-01.jpg)
+
+**Checkpoint 1 — the new operator shows in the header**
+
+![Checkpoint 1 — the new operator shows in the header](assets/race-edit-changes-operators-and-frequency-step-02.jpg)
+
+**Callout — "VK4ABC → VK4WIP · 147.175"**
+
+![Callout — "VK4ABC → VK4WIP · 147.175"](assets/race-edit-changes-operators-and-frequency-step-03.jpg)
+
+### Unsaved operators survive saving another row and Next
+
+
+
+**Type operators into CP1 and CP2, save only CP1 — CP2 keeps its text**
+
+![Type operators into CP1 and CP2, save only CP1 — CP2 keeps its text](assets/unsaved-operators-survive-saving-another-row-and-next-step-01.jpg)
+
+**Next saves CP2 too — both survive a reload**
+
+![Next saves CP2 too — both survive a reload](assets/unsaved-operators-survive-saving-another-row-and-next-step-02.jpg)
+
+### An edited setup keeps marks already on a device
+
+
+
+**Mark bib 100 at checkpoint 1**
+
+![Mark bib 100 at checkpoint 1](assets/an-edited-setup-keeps-marks-already-on-a-device-step-01.jpg)
+
+**Edit the frequency, then download the setup**
+
+![Edit the frequency, then download the setup](assets/an-edited-setup-keeps-marks-already-on-a-device-step-02.jpg)
+
+**Import the setup on the same device, updating the existing race**
+
+![Import the setup on the same device, updating the existing race](assets/an-edited-setup-keeps-marks-already-on-a-device-step-03.jpg)
+
+**Checkpoint 1 — runner 100 still shows its time**
+
+![Checkpoint 1 — runner 100 still shows its time](assets/an-edited-setup-keeps-marks-already-on-a-device-step-04.jpg)
+
 ## Running a Checkpoint
 
 Steps for checkpoint volunteers. Covers opening a checkpoint, marking off runners individually and in bulk, reviewing counts, exporting data, and transferring data to another device via QR code.
