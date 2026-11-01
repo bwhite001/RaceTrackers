@@ -219,6 +219,12 @@ describe('BaseOperationsRepository reports read base records', () => {
     const { content } = await repo.generateSplitTimesReport(997);
     expect(content).toMatch(/^4,,,07:10,DNF,—,DNF$/m);
   });
+  it('Missing Numbers rejects on a failed read instead of reporting none missing', async () => {
+    const spy = vi.spyOn(db.withdrawal_records, 'where').mockImplementation(() => { throw new Error('read failed'); });
+    try {
+      await expect(repo.generateMissingNumbersReport(997, 1)).rejects.toThrow('Failed to generate missing numbers report');
+    } finally { spy.mockRestore(); }
+  });
   it('a failed read fails the report instead of exporting an empty race', async () => {
     const spy = vi.spyOn(db.withdrawal_records, 'where').mockImplementation(() => { throw new Error('read failed'); });
     try {

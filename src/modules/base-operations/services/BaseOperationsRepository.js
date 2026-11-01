@@ -903,15 +903,11 @@ export class BaseOperationsRepository extends BaseRepository {
   // MISSING NUMBERS & OUT LIST
   // ============================================================================
 
+  /** Rejects on a failed read: the Missing Numbers sheet must not say "none missing" for an unreadable database. */
   async getMissingRunners(raceId, checkpoint) {
-    try {
-      const { rows } = await this.getRaceResults(raceId);
-      return rows.filter(r => r.status !== 'DNS' && r.status !== 'DNF'
-        && !(checkpoint === BASE_STATION_CP ? r.finish : r.times[checkpoint]));
-    } catch (error) {
-      console.error('Error getting missing runners:', error);
-      return [];
-    }
+    const { rows } = await this.getRaceResults(raceId);
+    return rows.filter(r => r.status !== 'DNS' && r.status !== 'DNF'
+      && !(checkpoint === BASE_STATION_CP ? r.finish : r.times[checkpoint]));
   }
 
   /**
