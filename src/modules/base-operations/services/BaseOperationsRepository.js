@@ -4,6 +4,9 @@ import { BASE_STATION_CP } from '../../../types/index.js';
 import TimeUtils from '../../../services/timeUtils.js';
 import { raceResults } from './reports.js';
 import { fieldNumbers } from './field.js';
+import { hhmm } from '../../../services/blocks.js';
+
+const csvLine = cells => cells.map(c => (typeof c === 'string' && c.includes(',') ? `"${c}"` : c)).join(',');
 
 /** checkpoint_runners statuses that record a runner actually passing. */
 const SIGHTING = new Set(['passed', 'called-in', 'marked-off']);
@@ -410,51 +413,28 @@ export class BaseOperationsRepository extends BaseRepository {
 
   async generateRaceResults(raceId, format = 'csv') {
     try {
-      const race = await db.races.get(raceId);
-      const runners = await db.runners.where('raceId').equals(raceId).toArray();
-      
-      if (format === 'csv') {
-        return this._generateCSV(race, runners);
-      }
-      throw new Error('Unsupported export format');
+      if (format !== 'csv') throw new Error('Unsupported export format');
+      const { race, rows } = await this.getRaceResults(raceId);
+      return this._generateCSV(race, rows);
     } catch (error) {
       console.error('Error generating race results:', error);
       throw new Error('Failed to generate race results');
     }
   }
 
-  _generateCSV(race, runners) {
-    const headers = [
-      'Runner Number',
-      'Status',
-      'Recorded Time',
-      'Time from Start',
-      'Notes'
-    ];
+  _generateCSV(race, results) {
+    const headers = ['Runner Number', 'Status', 'Recorded Time', 'Time from Start', 'Notes'];
+    const start = race.startTime ? new Date(`${race.date}T${race.startTime}`) : null;
 
-    const raceStartTime = new Date(`${race.date}T${race.startTime}`);
-    
-    const rows = runners.map(runner => {
+    const rows = results.map(r => {
       let timeFromStart = '';
-      if (runner.recordedTime && runner.status === 'passed') {
-        const recordedTime = new Date(runner.recordedTime);
-        const diffMs = recordedTime.getTime() - raceStartTime.getTime();
-        const hours = Math.floor(diffMs / (1000 * 60 * 60));
-        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-        timeFromStart = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      if (r.finish && start) {
+        const secs = Math.floor((new Date(r.finish) - start) / 1000);
+        timeFromStart = [Math.floor(secs / 3600), Math.floor(secs / 60) % 60, secs % 60]
+          .map(n => String(n).padStart(2, '0')).join(':');
       }
-
-      return [
-        runner.number,
-        runner.status,
-        runner.recordedTime ? new Date(runner.recordedTime).toLocaleString() : '',
-        timeFromStart,
-        runner.notes || ''
-      ];
+      return [r.number, r.status, hhmm(r.finish), timeFromStart, r.notes];
     });
-
-    rows.sort((a, b) => a[0] - b[0]);
 
     const csvContent = [
       `# Race: ${race.name}`,
@@ -463,9 +443,7 @@ export class BaseOperationsRepository extends BaseRepository {
       `# Exported: ${new Date().toLocaleString()}`,
       '',
       headers.join(','),
-      ...rows.map(row => row.map(cell => 
-        typeof cell === 'string' && cell.includes(',') ? `"${cell}"` : cell
-      ).join(','))
+      ...rows.map(csvLine)
     ].join('\n');
 
     return {
@@ -927,27 +905,9 @@ export class BaseOperationsRepository extends BaseRepository {
 
   async getMissingRunners(raceId, checkpoint) {
     try {
-      // Get all runners for the race
-      const allRunners = await db.runners.where('raceId').equals(raceId).toArray();
-      
-      // Get runners who have passed this checkpoint (from checkpoint_runners, not base_station_runners)
-      const passedRunners = await db.checkpoint_runners
-        .where(['raceId', 'checkpointNumber'])
-        .equals([raceId, checkpoint])
-        .and(runner => runner.status === 'passed')
-        .toArray();
-      
-      const passedNumbers = new Set(passedRunners.map(r => r.number));
-      
-      // Find missing runners
-      const missingRunners = allRunners.filter(runner => 
-        !passedNumbers.has(runner.number) && 
-        runner.status !== 'non-starter' &&
-        runner.status !== 'withdrawn' &&
-        runner.status !== 'vet-out'
-      );
-      
-      return missingRunners.sort((a, b) => a.number - b.number);
+      const { rows } = await this.getRaceResults(raceId);
+      return rows.filter(r => r.status !== 'DNS' && r.status !== 'DNF'
+        && !(checkpoint === BASE_STATION_CP ? r.finish : r.times[checkpoint]));
     } catch (error) {
       console.error('Error getting missing runners:', error);
       return [];
@@ -1220,24 +1180,13 @@ export class BaseOperationsRepository extends BaseRepository {
    */
   async generateFinisherListReport(raceId) {
     try {
-      const race = await db.races.get(raceId);
-      const finishers = await db.base_station_runners
-        .where('raceId').equals(raceId)
-        .filter(r => r.status === 'passed' || r.status === 'finished')
-        .toArray();
-      finishers.sort((a, b) => new Date(a.commonTime) - new Date(b.commonTime));
-
-      const runnerDetails = await db.runners.where('raceId').equals(raceId).toArray();
-      const nameMap = Object.fromEntries(runnerDetails.map(r => [r.number, r]));
+      const { race, rows: results } = await this.getRaceResults(raceId);
+      const finishers = results
+        .filter(r => r.status === 'Finished')
+        .sort((a, b) => a.finish.localeCompare(b.finish) || a.number - b.number);
 
       const headers = ['Runner #', 'First Name', 'Last Name', 'Finish Time', 'Notes'];
-      const rows = finishers.map(r => {
-        const info = nameMap[r.number] ?? {};
-        const finishTime = r.commonTime
-          ? new Date(r.commonTime).toLocaleTimeString()
-          : '';
-        return [r.number, info.firstName ?? '', info.lastName ?? '', finishTime, r.notes ?? ''];
-      });
+      const rows = finishers.map(r => [r.number, r.firstName, r.lastName, hhmm(r.finish), r.notes]);
 
       const csvLines = [
         `# Finisher List`,
@@ -1247,9 +1196,7 @@ export class BaseOperationsRepository extends BaseRepository {
         `# Total Finishers: ${finishers.length}`,
         '',
         headers.join(','),
-        ...rows.map(row => row.map(cell =>
-          typeof cell === 'string' && cell.includes(',') ? `"${cell}"` : cell
-        ).join(',')),
+        ...rows.map(csvLine),
       ].join('\n');
 
       return {
@@ -1268,43 +1215,17 @@ export class BaseOperationsRepository extends BaseRepository {
    */
   async generateOfficialsReport(raceId) {
     try {
-      const race = await db.races.get(raceId);
-      const checkpoints = await db.checkpoints.where('raceId').equals(raceId).sortBy('number');
-      const runners = await db.runners.where('raceId').equals(raceId).sortBy('number');
-      const cpRunners = await db.checkpoint_runners.where('raceId').equals(raceId).toArray();
-      const bsRunners = await db.base_station_runners.where('raceId').equals(raceId).toArray();
+      const { race, order, rows: results } = await this.getRaceResults(raceId);
+      const cps = order.filter(cp => cp.number !== BASE_STATION_CP);
 
-      const cpIndex = {};
-      for (const r of cpRunners) {
-        cpIndex[`${r.number}-${r.checkpointNumber}`] = r;
-      }
-      const bsIndex = Object.fromEntries(bsRunners.map(r => [r.number, r]));
-
-      const cpHeaders = checkpoints.map(cp => cp.name || `CP${cp.number}`);
-      const headers = ['Runner #', 'First Name', 'Last Name', 'Gender', 'Batch', ...cpHeaders, 'Finish Time', 'Status', 'Notes'];
-
-      const rows = runners.map(runner => {
-        const cpTimes = checkpoints.map(cp => {
-          const entry = cpIndex[`${runner.number}-${cp.number}`];
-          if (!entry) return '';
-          return entry.markOffTime
-            ? new Date(entry.markOffTime).toLocaleTimeString()
-            : (entry.status ?? '');
-        });
-        const bs = bsIndex[runner.number];
-        const finishTime = bs?.commonTime ? new Date(bs.commonTime).toLocaleTimeString() : '';
-        return [
-          runner.number,
-          runner.firstName ?? '',
-          runner.lastName ?? '',
-          runner.gender ?? '',
-          runner.batchNumber ?? '',
-          ...cpTimes,
-          finishTime,
-          bs?.status ?? runner.status ?? '',
-          runner.notes ?? '',
-        ];
-      });
+      const headers = ['Runner #', 'First Name', 'Last Name', 'Gender', 'Batch', ...cps.map(cp => cp.name), 'Finish Time', 'Status', 'Notes'];
+      const rows = results.map(r => [
+        r.number, r.firstName, r.lastName, r.gender, r.batchNumber,
+        ...cps.map(cp => hhmm(r.times[cp.number])),
+        hhmm(r.finish),
+        r.status,
+        r.notes,
+      ]);
 
       const csvLines = [
         `# Full Officials Report`,
@@ -1312,10 +1233,8 @@ export class BaseOperationsRepository extends BaseRepository {
         `# Date: ${race.date}`,
         `# Generated: ${new Date().toLocaleString()}`,
         '',
-        headers.join(','),
-        ...rows.map(row => row.map(cell =>
-          typeof cell === 'string' && cell.includes(',') ? `"${cell}"` : cell
-        ).join(',')),
+        csvLine(headers),
+        ...rows.map(csvLine),
       ].join('\n');
 
       return {
@@ -1330,41 +1249,20 @@ export class BaseOperationsRepository extends BaseRepository {
   }
 
   /**
-   * Split Times — one row per runner, one column per checkpoint.
+   * Split Times — one row per runner, one column per checkpoint, then Finish.
    */
   async generateSplitTimesReport(raceId) {
     try {
-      const race = await db.races.get(raceId);
-      const checkpoints = await db.checkpoints.where('raceId').equals(raceId).sortBy('number');
-      const runners = await db.runners.where('raceId').equals(raceId).sortBy('number');
-      const cpRunners = await db.checkpoint_runners.where('raceId').equals(raceId).toArray();
+      const { race, order, rows: results } = await this.getRaceResults(raceId);
+      const cps = order.filter(cp => cp.number !== BASE_STATION_CP);
 
-      const cpIndex = {};
-      for (const r of cpRunners) {
-        cpIndex[`${r.number}-${r.checkpointNumber}`] = r;
-      }
-
-      const cpHeaders = checkpoints.map(cp => cp.name || `CP${cp.number}`);
-      const headers = ['Runner #', 'First Name', 'Last Name', ...cpHeaders, 'Overall Status'];
-
-      const rows = runners.map(runner => {
-        const splits = checkpoints.map(cp => {
-          const entry = cpIndex[`${runner.number}-${cp.number}`];
-          if (!entry) return '—';
-          if (entry.status === 'dnf') return 'DNF';
-          if (entry.status === 'dns' || entry.status === 'non-starter') return 'DNS';
-          return entry.markOffTime
-            ? new Date(entry.markOffTime).toLocaleTimeString()
-            : '—';
-        });
-        return [
-          runner.number,
-          runner.firstName ?? '',
-          runner.lastName ?? '',
-          ...splits,
-          runner.status ?? '',
-        ];
-      });
+      const headers = ['Runner #', 'First Name', 'Last Name', ...cps.map(cp => cp.name), 'Finish', 'Overall Status'];
+      const rows = results.map(r => [
+        r.number, r.firstName, r.lastName,
+        ...cps.map(cp => hhmm(r.times[cp.number]) || (r.dnfCheckpoint === cp.number ? 'DNF' : '—')),
+        hhmm(r.finish) || '—',
+        r.status,
+      ]);
 
       const csvLines = [
         `# Split Times Report`,
@@ -1372,10 +1270,8 @@ export class BaseOperationsRepository extends BaseRepository {
         `# Date: ${race.date}`,
         `# Generated: ${new Date().toLocaleString()}`,
         '',
-        headers.join(','),
-        ...rows.map(row => row.map(cell =>
-          typeof cell === 'string' && cell.includes(',') ? `"${cell}"` : cell
-        ).join(',')),
+        csvLine(headers),
+        ...rows.map(csvLine),
       ].join('\n');
 
       return {
