@@ -333,3 +333,5 @@ Completed after Part E (the two simplifications from the first pass):
   - **Re-import keeps marks:** `ImportService` writes by id with `put` and never touches `checkpoint_runners`, and the setup file doesn't carry them, so marks survive (spec 36 proves it).
   - **Conflict dialog:** a re-imported setup raises one conflict per runner (64 for the demo race) and each needed its own tap. Added "Use incoming for all" and "Keep existing for all".
   - **Known gap, not fixed:** conflicts are keyed by bare id, so a race, runner and checkpoint with the same id share one choice. The all-or-nothing buttons avoid it; picking mixed choices by hand could still cross over.
+- **Small screen fixes (task 10):** the share badge counts entries not yet called in; overview percentages use starters (field minus DNS, capped at 100); an out-of-order issue offers Ask for both checkpoints.
+  - **Spec 08 label left at "6 of 10":** the plan expected "6 of 9", but the journey's runner 110 withdrawal is recorded as DNF, so DNS is 0 and starters stay 10.

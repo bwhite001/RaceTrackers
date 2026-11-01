@@ -74,7 +74,7 @@ export function findOutOfOrder({ sightings, order }) {
       if (b.time < a.time) {
         issues.push({
           key: `order:${number}:${a.cp.number}:${b.cp.number}`,
-          check: 'order', number, askCp: b.cp,
+          check: 'order', number, askCp: b.cp, alsoAskCp: a.cp,
           head: `${b.cp.short} before ${a.cp.short}`,
           detail: `${a.cp.short} ${hhmm(a.time)} → ${b.cp.short} ${hhmm(b.time)}`,
         });

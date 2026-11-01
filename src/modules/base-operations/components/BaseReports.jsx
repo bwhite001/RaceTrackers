@@ -129,6 +129,8 @@ const BaseReports = ({ initialReport = 'missing' }) => {
       default:
         return [
           { label: `Ask ${issue.askCp.short}`, primary: true, run: ack(issue, `ask ${issue.askCp.short}`) },
+          // Out of order fits either reading on times alone, so offer both checkpoints
+          ...(issue.alsoAskCp ? [{ label: `Ask ${issue.alsoAskCp.short}`, run: ack(issue, `ask ${issue.alsoAskCp.short}`) }] : []),
           { label: 'Mark checked', run: ack(issue, 'checked') },
         ];
     }

@@ -70,6 +70,7 @@ test.describe('Base — reports and data checks', () => {
     await step('Out of order — Mark checked; the check clears', async () => {
       await page.getByRole('button', { name: /^Out of order/ }).click();
       await expect(page.getByTestId('issue-row')).toContainText('CP2 before CP1');
+      await expect(page.getByTestId('issue-row').getByRole('button', { name: /^Ask CP/ })).toHaveCount(2);
       await page.getByRole('button', { name: 'Mark checked' }).click();
       await expect(page.getByTestId('check-count-order')).toHaveText('✓');
     });

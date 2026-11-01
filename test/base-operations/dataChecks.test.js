@@ -32,6 +32,12 @@ describe('data checks (spec §4.12)', () => {
     expect(issues).toEqual([expect.objectContaining({ key: 'order:221:2:3', head: 'CP3 before CP2', detail: 'CP2 07:35 → CP3 07:25' })]);
   });
 
+  it('an out-of-order issue can ask either checkpoint', () => {
+    const [issue] = findOutOfOrder({ sightings: S([[2, [[221, at(7, 35)]]], [3, [[221, at(7, 25)]]]]), order });
+    expect(issue.askCp.short).toBe('CP3');
+    expect(issue.alsoAskCp.short).toBe('CP2');
+  });
+
   it('skipped: seen later, missing an earlier checkpoint', () => {
     const issues = findSkipped({ sightings: S([[1, [[186, at(6, 55)]]], [3, [[186, at(7, 40)]]]]), order });
     expect(issues.map(i => [i.key, i.head, i.detail])).toEqual([['skip:186:2', 'Not reported at CP2', 'CP1 06:55 → CP3 07:40']]);

@@ -61,6 +61,7 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
   // One definition shared with Reports (D2): on course = in the race, not finished
   const fieldUnknown = !!currentRace?.bibsOnTheDay && !raceRunnerNumbers.length;
   const tiles = useMemo(() => raceCounts({ sightings, out, raceNumbers: raceRunnerNumbers }), [sightings, out, raceRunnerNumbers]);
+  const starters = field - tiles.dns; // DNS never started, so they are not in the percentage
   const waves = [...new Set(raceRunners.map(r => r.batchNumber).filter(Boolean))].sort((a, b) => a - b);
 
   const filtered = leaders.filter(l => filter === 'all'
@@ -119,7 +120,7 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
           <h2 id="cphd" className="font-display font-bold text-lg text-vk-navy dark:text-white">Checkpoint progress</h2>
           {order.map(cp => {
             const count = sightings.get(cp.number)?.size ?? 0;
-            const pct = field ? Math.round((count / field) * 100) : 0;
+            const pct = starters ? Math.min(100, Math.round((count / starters) * 100)) : 0;
             const finish = cp.number === BASE_STATION_CP;
             const closed = !finish && activeField > 0 && count >= activeField;
             return (
@@ -128,7 +129,7 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
                   <span className="font-bold">{cp.short}</span>
                   <span><strong>{count}</strong> <span className="text-vk-muted">· {pct}%</span></span>
                 </div>
-                <div className="h-3 rounded-full bg-vk-band dark:bg-gray-700 overflow-hidden" role="img" aria-label={`${cp.short}: ${count} of ${field}`}>
+                <div className="h-3 rounded-full bg-vk-band dark:bg-gray-700 overflow-hidden" role="img" aria-label={`${cp.short}: ${count} of ${starters}`}>
                   <div className={`h-full ${finish ? 'bg-vk-gold' : closed ? 'bg-vk-navy' : 'bg-vk-blue'}`} style={{ width: `${pct}%` }} />
                 </div>
               </div>

@@ -107,7 +107,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     (async () => {
       const ts = await TransferService.getLastShareTimestamp(raceId, cpNumber);
       const payload = await TransferService.buildPayload(raceId, cpNumber, { isDelta: true, sinceTimestamp: ts });
-      if (!cancelled) setUnsharedCount(payload.count);
+      if (!cancelled) setUnsharedCount(payload.entries.filter(e => !e.cin).length);
     })().catch(() => {});
     return () => { cancelled = true; };
   }, [currentRace?.id, checkpointId, runners, cpNumber]);
