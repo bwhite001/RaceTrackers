@@ -5,6 +5,7 @@ import {
   buildBoard, checkCall, isRecordable, outStatusMap, sightingsByCheckpoint, askReminders, boardCheckpoints, CALL_DUE_MINUTES, CHECK,
 } from '../services/receive';
 import { missedReminders, missedText, standDownLists, MISSED_CONFIRMED } from '../services/missed';
+import { checkpointDistances } from '../services/dataChecks';
 import TimeUtils from '../../../services/timeUtils.js';
 import {
   toBlock, hhmm, blocksBetween, earliestTime, parseExactTime, BLOCK_MINUTES,
@@ -59,11 +60,12 @@ const BaseReceive = () => {
   const out = useMemo(() => outStatusMap(outList, runners), [outList, runners]);
   const sightings = useMemo(() => sightingsByCheckpoint(runners), [runners]);
   const raceNumbers = useMemo(() => new Set(raceRunnerNumbers), [raceRunnerNumbers]);
+  const distances = useMemo(() => checkpointDistances(checkpoints, currentRace), [checkpoints, currentRace]);
   const board = useMemo(() => buildBoard({
-    checkpoints, records: runners, radioCalls, now, raceStart,
+    checkpoints, records: runners, radioCalls, now, raceStart, distances,
     fieldSize: raceRunnerNumbers.length, outCount: out.size,
     dueMinutes: currentRace?.baseCallDueMinutes ?? CALL_DUE_MINUTES,
-  }), [checkpoints, runners, radioCalls, now, raceStart, raceRunnerNumbers.length, out.size, currentRace?.baseCallDueMinutes]);
+  }), [checkpoints, runners, radioCalls, now, raceStart, raceRunnerNumbers.length, out.size, currentRace?.baseCallDueMinutes, distances]);
 
   // "Ask CPx" reminders set in Reports › Needs attention, until marked asked
   const asks = useMemo(() => askReminders(resolutions, board), [resolutions, board]);

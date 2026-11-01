@@ -95,3 +95,22 @@ describe('buildBoard', () => {
     expect(closed[0].status).toBe('closed');
   });
 });
+
+describe('buildBoard Due timing', () => {
+  const checkpoints = [{ number: 1 }, { number: 2 }];
+  const distances = new Map([[1, 5], [2, 11], [0, 22]]);
+  const board = (records, now) => buildBoard({ checkpoints, records, now, raceStart: at(6, 30), fieldSize: 10, distances });
+  const cp1Seen = [{ checkpointNumber: 1, number: 1, status: 'passed', commonTime: at(7, 0) }];
+  it('CP1 stays OK until a runner could have arrived', () => {
+    expect(board([], at(6, 55))[0].status).toBe('ok');
+    expect(board([], at(7, 0))[0].status).toBe('due');
+  });
+  it('CP2 counts from the leader at CP1', () => {
+    expect(board(cp1Seen, at(7, 15))[1].status).toBe('ok');
+    expect(board(cp1Seen, at(7, 32))[1].status).toBe('due');
+  });
+  it('without distances it behaves as before', () => {
+    const b = buildBoard({ checkpoints, records: cp1Seen, now: at(7, 15), raceStart: at(6, 30), fieldSize: 10 });
+    expect(b[1].status).toBe('due');
+  });
+});

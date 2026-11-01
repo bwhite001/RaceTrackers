@@ -70,8 +70,8 @@ const BaseReports = ({ initialReport = 'missing' }) => {
   const onCourse = useMemo(() => stillOnCourse({ sightings, order, out, raceNumbers }), [sightings, order, out, raceNumbers]);
   const missed = useMemo(() => confirmedMissed(resolutions), [resolutions]);
   const matrix = useMemo(() => timesMatrix({ sightings, order, out: outForMatrix, raceNumbers, missed }), [sightings, order, outForMatrix, raceNumbers, missed]);
-  const board = useMemo(() => buildBoard({ checkpoints, records: runners, radioCalls, now, raceStart, fieldSize: raceNumbers.length, outCount: out.size }),
-    [checkpoints, runners, radioCalls, now, raceStart, raceNumbers.length, out.size]);
+  const board = useMemo(() => buildBoard({ checkpoints, records: runners, radioCalls, now, raceStart, fieldSize: raceNumbers.length, outCount: out.size, distances }),
+    [checkpoints, runners, radioCalls, now, raceStart, raceNumbers.length, out.size, distances]);
   const calls = useMemo(() => callLog({ radioCalls, board }), [radioCalls, board]);
   const issues = useMemo(() => runChecks({
     baseRows, order, sightings, outByNumber, radioCalls, distances, limitKmh: currentRace?.paceLimitKmh ?? PACE_LIMIT_KMH,

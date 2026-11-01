@@ -9,6 +9,7 @@ import TimeUtils from '../../../services/timeUtils.js';
 import { toBlock, hhmm } from '../../../services/blocks.js';
 import { BASE_STATION_CP } from '../../../types/index.js';
 
+export const DUE_LEADER_KMH = 15;  // leader pace assumed when judging the earliest possible arrival
 export const CALL_DUE_MINUTES = 8;   // base: no call for 8+ min with runners expected
 export const BEHIND_MINUTES = 15;    // show "N min behind" from 15 min
 
@@ -163,7 +164,7 @@ export function checkCall(entries, ctx) {
 /**
  * Checkpoint board rows: count, last call, how far behind, Due / OK / Closed.
  */
-export function buildBoard({ checkpoints, records, radioCalls = [], now, raceStart, fieldSize, outCount = 0, dueMinutes = CALL_DUE_MINUTES }) {
+export function buildBoard({ checkpoints, records, radioCalls = [], now, raceStart, fieldSize, outCount = 0, dueMinutes = CALL_DUE_MINUTES, distances = new Map() }) {
   const cps = boardCheckpoints(checkpoints);
   const seen = sightingsByCheckpoint(records);
   const upTo = reportedUpTo(records, radioCalls);
@@ -184,7 +185,13 @@ export function buildBoard({ checkpoints, records, radioCalls = [], now, raceSta
     const stoodDown = radioCalls.some(c => c.kind === 'stand-down' && !c.undoneAt && c.checkpointNumber === cp.number);
     const closed = stoodDown || (activeField > 0 && here.size >= activeField);
     const expected = prev ? prevCount > here.size : !!raceStarted;
-    const waitedFrom = lastCallAt ?? (raceStarted ? raceStart : null);
+    // Earliest a runner could be here: leader at the previous checkpoint (or the start) + leg at DUE_LEADER_KMH
+    const farKm = distances.get(cp.number);
+    const nearKm = prev ? distances.get(prev.number) : 0;
+    const from = prev ? [...(seen.get(prev.number)?.values() ?? [])].sort()[0] : raceStart;
+    const firstArrival = from && farKm != null && nearKm != null && farKm > nearKm
+      ? new Date(new Date(from).getTime() + (farKm - nearKm) / DUE_LEADER_KMH * 3600000).toISOString() : null;
+    const waitedFrom = [lastCallAt ?? (raceStarted ? raceStart : null), firstArrival].filter(Boolean).sort().at(-1) ?? null;
     const waited = waitedFrom ? TimeUtils.minutesBetween(waitedFrom, now) : 0;
     const due = !closed && expected && waited >= dueMinutes;
 

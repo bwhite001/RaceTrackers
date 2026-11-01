@@ -328,3 +328,4 @@ Completed after Part E (the two simplifications from the first pass):
   - **Cateng Break:** the map draws this as a hairpin with a separate line each way, so each dot is used once and nothing is retraced.
   - **Finish:** the dots form three parallel chains. The track runs out along the green track, back up one brown track, then down the other to the Finish star. The map doesn't show the direction through this section, so the order is a best reading.
   - **Length:** 20.8 km against the 22 km course, because straight lines between dots cut the corners.
+- **Due timing (task 7):** a checkpoint's Due clock starts at the later of the last call and the earliest possible arrival, the leader's time at the previous checkpoint (race start for the first) plus the leg at 15 km/h (`DUE_LEADER_KMH`). With no distance for either end it behaves as before.
