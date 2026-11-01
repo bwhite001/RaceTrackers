@@ -47,6 +47,31 @@ test.describe('Edit race radio details', () => {
     });
   });
 
+  test('unsaved operators survive saving another row and Next', async ({ page, step }) => {
+    await page.setViewportSize(PHONE);
+    const raceId = await seedRace(page, BASE);
+    const ops = (n) => page.getByLabel(`Operators for CP${n}`);
+
+    await step('Type operators into CP1 and CP2, save only CP1 — CP2 keeps its text', async () => {
+      await page.goto(`${BASE}/race-maintenance/edit?raceId=${raceId}`);
+      await page.getByRole('button', { name: /next/i }).click();
+      await ops(1).fill('vk4aaa');
+      await ops(2).fill('vk4bbb vk4ccc');
+      await page.getByRole('button', { name: 'Save operators CP1' }).click();
+      await expect(ops(1)).toHaveValue('VK4AAA');
+      await expect(ops(2)).toHaveValue('vk4bbb vk4ccc');
+    });
+
+    await step('Next saves CP2 too — both survive a reload', async () => {
+      await page.getByRole('button', { name: /next/i }).click();
+      await expect(page.getByRole('heading', { name: 'Runner Roster', exact: true })).toBeVisible();
+      await page.reload();
+      await page.getByRole('button', { name: /next/i }).click();
+      await expect(ops(1)).toHaveValue('VK4AAA');
+      await expect(ops(2)).toHaveValue('VK4BBB, VK4CCC');
+    });
+  });
+
   test('an edited setup keeps marks already on a device', async ({ page, step }) => {
     await page.setViewportSize(PHONE);
     const raceId = await seedRace(page, BASE);

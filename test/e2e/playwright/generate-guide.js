@@ -169,6 +169,7 @@ const SECTION_MAP = {
   'a race with bibs assigned on the day':                                   'setup',
   'the Mt Glorious template has no fixed bib range':                        'setup',
   'race edit changes operators and frequency':                              'setup',
+  'unsaved operators survive saving another row and Next':                  'setup',
   'an edited setup keeps marks already on a device':                        'setup',
   // Race-day fixes — Parts C / D (housekeeping)
   // 'no vet-out wording' is a regression check, deliberately not a guide section

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import useRaceMaintenanceStore from '../store/raceMaintenanceStore';
 import { useToast } from '../../../shared/components/ui/Toast';
@@ -38,6 +38,16 @@ const RaceEditView = () => {
       }
       setCoreSaving(false);
     }
+    if (currentStep === 1) {
+      // save every operators field still holding unsaved text
+      const dirty = checkpoints.filter(cp => (cpOpsEdits[cp.id] ?? '') !== (opsSaved.current[cp.id] ?? ''));
+      try {
+        for (const cp of dirty) await saveOperators(cp);
+      } catch {
+        addToast({ variant: 'error', message: 'Failed to save checkpoint operators.' });
+        return;
+      }
+    }
     setCurrentStep(s => Math.min(s + 1, STEPS.length - 1));
   };
 
@@ -62,6 +72,7 @@ const RaceEditView = () => {
   const [cpEdits, setCpEdits] = useState({}); // { [cp.id]: newName }
   const [cpBatchEdits, setCpBatchEdits] = useState({}); // { [cp.id]: number[] | null }
   const [cpOpsEdits, setCpOpsEdits] = useState({}); // { [cp.id]: 'VK4ABC, VK4DEF' }
+  const opsSaved = useRef({}); // { [cp.id]: saved text }, to tell which fields are unsaved
   const [cpSaving, setCpSaving] = useState({});
   const [newCpName, setNewCpName] = useState('');
   const [addingCp, setAddingCp] = useState(false);
@@ -103,7 +114,11 @@ const RaceEditView = () => {
   useEffect(() => {
     if (checkpoints) {
       setCpEdits(Object.fromEntries(checkpoints.map(cp => [cp.id, cp.name])));
-      setCpOpsEdits(Object.fromEntries(checkpoints.map(cp => [cp.id, (cp.operatorCallsigns ?? []).join(', ')])));
+      const saved = Object.fromEntries(checkpoints.map(cp => [cp.id, (cp.operatorCallsigns ?? []).join(', ')]));
+      // keep unsaved text typed in other rows; only clean rows take the DB value
+      setCpOpsEdits(prev => Object.fromEntries(Object.entries(saved).map(([id, v]) =>
+        [id, prev[id] !== undefined && prev[id] !== opsSaved.current[id] ? prev[id] : v])));
+      opsSaved.current = saved;
       setCpBatchEdits(Object.fromEntries(checkpoints.map(cp => [cp.id, cp.allowedBatches ?? null])));
     }
   }, [checkpoints]);
@@ -137,10 +152,16 @@ const RaceEditView = () => {
     }
   };
 
+  const saveOperators = async (cp) => {
+    const list = parseCallsigns(cpOpsEdits[cp.id]);
+    await updateCheckpoint(cp.id, { operatorCallsigns: list });
+    setCpOpsEdits(prev => ({ ...prev, [cp.id]: list.join(', ') }));
+  };
+
   const handleSaveCheckpointOperators = async (cp) => {
     setCpSaving(prev => ({ ...prev, [`ops-${cp.id}`]: true }));
     try {
-      await updateCheckpoint(cp.id, { operatorCallsigns: parseCallsigns(cpOpsEdits[cp.id]) });
+      await saveOperators(cp);
       addToast({ variant: 'success', message: `Checkpoint ${cp.number} operators saved.` });
     } catch {
       addToast({ variant: 'error', message: 'Failed to save checkpoint operators.' });
