@@ -53,9 +53,10 @@ describe('normaliseTemplate', () => {
       expect(n.runnerRanges).toEqual([{ min: 1, max: 128 }]);
     });
 
-    it('strips GPS but keeps operator callsigns', () => {
+    it('turns location into coordinates and keeps operator callsigns', () => {
       const n = normaliseTemplate(richTemplate);
-      expect(n.checkpoints[0]).toEqual({ number: 1, name: 'CP1 - Northbrook', orderSequence: 1, operatorCallsigns: ['VK4SIR'] });
+      expect(n.checkpoints[0]).toMatchObject({ latitude: -27.32, longitude: 152.71 });
+      expect(n.checkpoints[0]).toEqual({ number: 1, name: 'CP1 - Northbrook', orderSequence: 1, latitude: -27.32, longitude: 152.71, operatorCallsigns: ['VK4SIR'] });
       expect(n.checkpoints[1].operatorCallsigns).toBeUndefined();
       expect(n.checkpoints[0].location).toBeUndefined();
       expect(n.checkpoints[0].metadata).toBeUndefined();

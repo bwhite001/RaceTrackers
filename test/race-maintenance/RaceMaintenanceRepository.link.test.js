@@ -62,4 +62,15 @@ describe('RaceMaintenanceRepository — checkpoint linking', () => {
     const cp2 = await db.checkpoints.where({ raceId: 1, number: 2 }).first();
     expect(cp2.linkedCheckpointNumber ?? null).toBeNull();
   });
+
+  it('createRace keeps checkpoint coordinates', async () => {
+    const id = await RaceMaintenanceRepository.createRace({
+      name: 'GPS', date: '2026-11-08', startTime: '06:30', minRunner: 1, maxRunner: 2,
+      runnerRanges: [{ min: 1, max: 2 }],
+      checkpoints: [{ number: 1, name: 'CP1', latitude: -27.321677, longitude: 152.714852 }, { number: 2, name: 'CP2' }],
+    });
+    const [a, b] = await db.checkpoints.where('raceId').equals(id).sortBy('number');
+    expect(a).toMatchObject({ latitude: -27.321677, longitude: 152.714852 });
+    expect(b.latitude).toBeUndefined();
+  });
 });
