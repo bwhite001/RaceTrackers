@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useBaseOperationsStore from '../modules/base-operations/store/baseOperationsStore';
-import RaceMaintenanceRepository from '../modules/race-maintenance/services/RaceMaintenanceRepository';
+import { BaseOperationsRepository } from '../modules/base-operations/services/BaseOperationsRepository';
 import { useRaceStore } from '../store/useRaceStore';
 
 /**
@@ -13,74 +13,42 @@ function LiveDashboardView() {
   const navigate = useNavigate();
   const { currentRaceId, checkpoints } = useBaseOperationsStore();
   const { currentRaceId: storeRaceId } = useRaceStore();
-  const [cpRunners, setCpRunners] = React.useState([]);
-  const [allRunners, setAllRunners] = React.useState([]);
+  const [rows, setRows] = useState([]);
+  const [error, setError] = useState(null);
   const [showPII, setShowPII] = useState(false);
 
   const raceId = currentRaceId || storeRaceId;
 
+  // ponytail: loads on open, not live polling; add an interval if base leaves it on screen
   useEffect(() => {
     if (!raceId) return;
-    import('../shared/services/database/schema').then(({ default: db }) => {
-      db.checkpoint_runners.where('raceId').equals(raceId).toArray().then(setCpRunners);
-      db.runners.where('raceId').equals(raceId).toArray().then(setAllRunners);
-    });
+    let live = true;
+    new BaseOperationsRepository().getRaceResults(raceId)
+      .then(r => { if (live) { setRows(r.rows); setError(null); } })
+      .catch(e => { if (live) setError(e?.message || 'Could not read base records'); });
+    return () => { live = false; };
   }, [raceId]);
 
-  // Build progress matrix: { [number]: { [cpNumber]: time } }
-  const progressMatrix = useMemo(() => {
-    const matrix = {};
-    for (const r of cpRunners) {
-      if (r.status === 'passed' || r.status === 'marked-off' || r.status === 'called-in') {
-        const time = r.commonTime || r.callInTime || r.markOffTime;
-        if (time) {
-          if (!matrix[r.number]) matrix[r.number] = {};
-          matrix[r.number][r.checkpointNumber] = time;
-        }
-      }
-    }
-    return matrix;
-  }, [cpRunners]);
+  const sortedRunners = useMemo(() => [...rows].sort((a, b) => a.number - b.number), [rows]);
 
-  const sortedRunners = useMemo(() => {
-    return [...allRunners].sort((a, b) => a.number - b.number);
-  }, [allRunners]);
+  // Count runners with a sighting per checkpoint
+  const cpPassedCounts = useMemo(() => {
+    const counts = {};
+    for (const r of rows) {
+      for (const cp of Object.keys(r.times || {})) counts[cp] = (counts[cp] || 0) + 1;
+    }
+    return counts;
+  }, [rows]);
 
   const sortedCheckpoints = useMemo(() => {
     return [...(checkpoints || [])].sort((a, b) => a.number - b.number);
   }, [checkpoints]);
 
-  // Count passed per checkpoint (unique runner numbers)
-  const cpPassedCounts = useMemo(() => {
-    const seen = {};
-    for (const r of cpRunners) {
-      if (r.status === 'passed' || r.status === 'marked-off' || r.status === 'called-in') {
-        if (!seen[r.checkpointNumber]) seen[r.checkpointNumber] = new Set();
-        seen[r.checkpointNumber].add(r.number);
-      }
-    }
-    return Object.fromEntries(Object.entries(seen).map(([k, v]) => [k, v.size]));
-  }, [cpRunners]);
-
-  // Derive per-runner overall status from checkpoint data + stored status
-  const runnerStatusMap = useMemo(() => {
-    // Which runners have at least one CP pass (on course)
-    const onCourse = new Set();
-    for (const r of cpRunners) {
-      if (r.status === 'passed' || r.status === 'marked-off' || r.status === 'called-in') {
-        onCourse.add(r.number);
-      }
-    }
-    return { onCourse };
-  }, [cpRunners]);
-
   const deriveStatus = (runner) => {
-    const s = (runner.status || '').toLowerCase();
-    if (s === 'dnf') return 'dnf';
-    if (s === 'dns' || s === 'non-starter') return 'dns';
-    if (s === 'passed') return 'finished';
-    if (runnerStatusMap.onCourse.has(runner.number)) return 'active';
-    return 'not-started';
+    if (runner.status === 'Finished') return 'finished';
+    if (runner.status === 'DNF') return 'dnf';
+    if (runner.status === 'DNS') return 'dns';
+    return Object.keys(runner.times || {}).length > 0 ? 'active' : 'not-started';
   };
 
   const STATUS_STYLES = {
@@ -147,6 +115,12 @@ function LiveDashboardView() {
         </button>
       </div>
 
+      {error && (
+        <div role="alert" className="rounded-lg border border-vk-red bg-vk-red-tint text-vk-red px-4 py-3 text-sm">
+          Could not read base records: {error}
+        </div>
+      )}
+
       {/* Checkpoint summary bar */}
       {sortedCheckpoints.length > 0 && (
         <div className="flex gap-3 flex-wrap">
@@ -184,6 +158,7 @@ function LiveDashboardView() {
                   <th className="px-3 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Gender</th>
                 </>
               )}
+              <th className="px-3 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Status</th>
               {sortedCheckpoints.map(cp => (
                 <th key={cp.number} className="px-3 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">
                   CP{cp.number}
@@ -195,15 +170,15 @@ function LiveDashboardView() {
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-900">
             {sortedRunners.length === 0 ? (
               <tr>
-                <td colSpan={sortedCheckpoints.length + (showPII ? 3 : 1)} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={sortedCheckpoints.length + (showPII ? 4 : 2)} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                   No runners found. Make sure a race is active.
                 </td>
               </tr>
             ) : sortedRunners.map(runner => {
-              const matrix = progressMatrix[runner.number] || {};
+              const matrix = runner.times || {};
               const cpCount = Object.keys(matrix).length;
               return (
-                <tr key={runner.id ?? runner.number} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                <tr key={runner.number} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                   <td className="px-4 py-2 font-mono font-medium text-gray-900 dark:text-white">
                     #{runner.number}
                     {cpCount > 0 && (
@@ -220,6 +195,12 @@ function LiveDashboardView() {
                       </td>
                     </>
                   )}
+                  <td className="px-3 py-2">
+                    {(() => {
+                      const st = deriveStatus(runner);
+                      return <span className={`px-2 py-0.5 rounded text-xs font-medium ${STATUS_STYLES[st]}`}>{STATUS_LABELS[st]}</span>;
+                    })()}
+                  </td>
                   {sortedCheckpoints.map(cp => (
                     <td key={cp.number} className={`px-3 py-2 font-mono text-xs ${
                       matrix[cp.number] ? 'text-navy-700 dark:text-navy-400 font-medium' : 'text-gray-300 dark:text-gray-600'

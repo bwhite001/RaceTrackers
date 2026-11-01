@@ -27,27 +27,9 @@ vi.mock('store/useRaceStore', () => ({
   })),
 }));
 
-// Mock the dynamic import of the database schema
-vi.mock('../../src/shared/services/database/schema', () => ({
-  default: {
-    checkpoint_runners: {
-      where: vi.fn(() => ({
-        equals: vi.fn(() => ({
-          toArray: vi.fn(() => Promise.resolve([])),
-        })),
-      })),
-    },
-    runners: {
-      where: vi.fn(() => ({
-        equals: vi.fn(() => ({
-          toArray: vi.fn(() => Promise.resolve([
-            { id: 1, number: 101, status: 'passed', firstName: 'Alice', lastName: 'Smith' },
-            { id: 2, number: 102, status: 'not-started', firstName: null, lastName: null },
-          ])),
-        })),
-      })),
-    },
-  },
+const { getRaceResults } = vi.hoisted(() => ({ getRaceResults: vi.fn() }));
+vi.mock('../../src/modules/base-operations/services/BaseOperationsRepository', () => ({
+  BaseOperationsRepository: vi.fn(() => ({ getRaceResults })),
 }));
 
 import useBaseOperationsStore from '../../src/modules/base-operations/store/baseOperationsStore.js';
@@ -60,17 +42,17 @@ const CHECKPOINTS = [
   { number: 3, name: 'Finish' },
 ];
 
-const RUNNERS = [
-  { number: 101, status: 'passed', firstName: 'Alice', lastName: 'Smith' },
-  { number: 102, status: 'not-started', firstName: null, lastName: null },
+const ROWS = [
+  { number: 101, status: 'Finished', times: { 1: '2026-11-01T06:30:00.000Z' }, firstName: 'Alice', lastName: 'Smith', gender: 'F' },
+  { number: 102, status: 'On course', times: {}, firstName: null, lastName: null },
 ];
 
 beforeEach(() => {
   vi.clearAllMocks();
+  getRaceResults.mockResolvedValue({ race: {}, order: [101, 102], rows: ROWS });
   useBaseOperationsStore.mockReturnValue({
     currentRaceId: 1,
     checkpoints: CHECKPOINTS,
-    runners: RUNNERS,
     loadBaseStationData: vi.fn(),
   });
   RaceMaintenanceRepository.getBatches.mockResolvedValue([]);
@@ -117,10 +99,10 @@ describe('LiveDashboardView', () => {
     });
   });
 
-  it('renders checkpoint time cells with "—" when no commonTime data', async () => {
+  it('renders checkpoint time cells with "—" when no sighting', async () => {
     render(<LiveDashboardView />);
     await waitFor(() => {
-      // With no checkpoint_runners, all time cells should be "—"
+      // Bib 102 has no sightings, so its time cells should be "—"
       const dashes = screen.getAllByText('—');
       expect(dashes.length).toBeGreaterThan(0);
     });
@@ -131,5 +113,18 @@ describe('LiveDashboardView', () => {
     await waitFor(() => {
       expect(screen.getAllByText(/^#\d+/).length).toBeGreaterThanOrEqual(2);
     });
+  });
+
+  it('counts and times come from base records', async () => {
+    render(<LiveDashboardView />);
+    expect(await screen.findByText('1/2')).toBeInTheDocument();
+    expect(screen.getByText('Finished')).toBeInTheDocument();
+    expect(screen.getByText('Not Started')).toBeInTheDocument(); // 102 has no sighting
+  });
+
+  it('shows an error, not an empty dashboard, when the read fails', async () => {
+    getRaceResults.mockRejectedValue(new Error('db down'));
+    render(<LiveDashboardView />);
+    expect(await screen.findByRole('alert')).toHaveTextContent(/db down/);
   });
 });
