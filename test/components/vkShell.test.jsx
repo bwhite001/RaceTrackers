@@ -65,6 +65,50 @@ describe('BottomSheet', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(onClose).toHaveBeenCalled();
   });
+
+  // Parents pass an inline onClose and re-render on a clock tick (useNow)
+  const Withdraw = ({ tick, open = true }) => (
+    <>
+      <button type="button">Opener</button>
+      <BottomSheet open={open} onClose={() => {}} labelledBy="hd">
+        <h2 id="hd">Withdraw {tick}</h2>
+        <input aria-label="Runner number" />
+        <textarea aria-label="Comments" />
+      </BottomSheet>
+    </>
+  );
+
+  it('keeps focus in the field the user chose when the parent re-renders', () => {
+    const { rerender } = render(<Withdraw tick={1} />);
+    screen.getByLabelText('Comments').focus();
+    rerender(<Withdraw tick={2} />);
+    expect(screen.getByLabelText('Comments')).toHaveFocus();
+  });
+
+  it('Escape calls the latest onClose after a re-render', () => {
+    const first = vi.fn();
+    const second = vi.fn();
+    const sheet = (fn) => (
+      <BottomSheet open onClose={fn} labelledBy="hd"><h2 id="hd">x</h2><button type="button">Ok</button></BottomSheet>
+    );
+    const { rerender } = render(sheet(first));
+    rerender(sheet(second));
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(second).toHaveBeenCalledTimes(1);
+    expect(first).not.toHaveBeenCalled();
+  });
+
+  it('returns focus to the opener on close, not on re-render', () => {
+    const { rerender } = render(<Withdraw tick={1} open={false} />);
+    screen.getByRole('button', { name: 'Opener' }).focus();
+    rerender(<Withdraw tick={1} />);
+    expect(screen.getByLabelText('Runner number')).toHaveFocus();
+    screen.getByLabelText('Comments').focus();
+    rerender(<Withdraw tick={2} />);
+    expect(screen.getByLabelText('Comments')).toHaveFocus();
+    rerender(<Withdraw tick={2} open={false} />);
+    expect(screen.getByRole('button', { name: 'Opener' })).toHaveFocus();
+  });
 });
 
 describe('useUndo + UndoBar', () => {

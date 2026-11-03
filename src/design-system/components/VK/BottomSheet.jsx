@@ -9,6 +9,10 @@ const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select
  */
 const BottomSheet = ({ open, onClose, labelledBy, children }) => {
   const sheetRef = useRef(null);
+  // Callers pass an inline onClose and re-render on a clock; reading it from a
+  // ref keeps the open effect from re-running and pulling focus to the first field.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!open) return undefined;
@@ -17,7 +21,7 @@ const BottomSheet = ({ open, onClose, labelledBy, children }) => {
     sheet?.querySelector(FOCUSABLE)?.focus();
 
     const onKey = (e) => {
-      if (e.key === 'Escape') { e.stopPropagation(); onClose(); return; }
+      if (e.key === 'Escape') { e.stopPropagation(); onCloseRef.current(); return; }
       if (e.key !== 'Tab' || !sheet) return;
       const items = [...sheet.querySelectorAll(FOCUSABLE)];
       if (!items.length) return;
@@ -31,13 +35,13 @@ const BottomSheet = ({ open, onClose, labelledBy, children }) => {
       document.removeEventListener('keydown', onKey, true);
       previous?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex flex-col justify-end bg-[rgba(11,45,83,0.55)]">
-      <button type="button" aria-label="Close" onClick={onClose} className="flex-1 w-full cursor-default" tabIndex={-1} />
+      <button type="button" aria-label="Close" onClick={() => onCloseRef.current()} className="flex-1 w-full cursor-default" tabIndex={-1} />
       <section
         ref={sheetRef}
         role="dialog"
