@@ -168,37 +168,21 @@ A race director can give each wave a custom name (e.g. "Wave B") and a specific 
 
 ![Template card — "Bibs set at setup"; choosing it starts the runner step empty](assets/the-mt-glorious-template-has-no-fixed-bib-range-step-01.jpg)
 
-### Race edit changes operators and frequency
+### Race edit changes frequency
 
 
 
-**Edit race — set the frequency, then the operators for CP1**
+**Edit race — set the frequency; there is no callsign field**
 
-![Edit race — set the frequency, then the operators for CP1](assets/race-edit-changes-operators-and-frequency-step-01.jpg)
+![Edit race — set the frequency; there is no callsign field](assets/race-edit-changes-frequency-step-01.jpg)
 
-**Checkpoint 1 — the new operator shows in the header**
+**Callout — the new frequency, and no callsigns anywhere on the checkpoint**
 
-![Checkpoint 1 — the new operator shows in the header](assets/race-edit-changes-operators-and-frequency-step-02.jpg)
+![Callout — the new frequency, and no callsigns anywhere on the checkpoint](assets/race-edit-changes-frequency-step-02.jpg)
 
-**Callout — "VK4ABC → VK4WIP · 147.175"**
+**Base — the board names checkpoints without callsigns**
 
-![Callout — "VK4ABC → VK4WIP · 147.175"](assets/race-edit-changes-operators-and-frequency-step-03.jpg)
-
-### Unsaved operators survive saving another row and Next
-
-
-
-**Type operators into CP1 and CP2, save only CP1 — CP2 keeps its text**
-
-![Type operators into CP1 and CP2, save only CP1 — CP2 keeps its text](assets/unsaved-operators-survive-saving-another-row-and-next-step-01.jpg)
-
-**A typed checkpoint name survives saving operators on another row**
-
-![A typed checkpoint name survives saving operators on another row](assets/unsaved-operators-survive-saving-another-row-and-next-step-02.jpg)
-
-**Next saves CP2 too — both survive a reload**
-
-![Next saves CP2 too — both survive a reload](assets/unsaved-operators-survive-saving-another-row-and-next-step-03.jpg)
+![Base — the board names checkpoints without callsigns](assets/race-edit-changes-frequency-step-03.jpg)
 
 ### An edited setup keeps marks already on a device
 
@@ -392,21 +376,25 @@ When a checkpoint volunteer marks a runner as called in, the pending count badge
 
 ![Tap back button — returns to /checkpoint/1](assets/back-button-returns-to-the-checkpoint-view-step-02.jpg)
 
-### Header shows callsign and frequency in full
+### Header shows location and frequency in full
 
 
 
-**Mark off — location and callsign wrap to two lines rather than cut off**
+**Mark off — the location wraps rather than cut off; no callsign**
 
-![Mark off — location and callsign wrap to two lines rather than cut off](assets/header-shows-callsign-and-frequency-in-full-step-01.jpg)
+![Mark off — the location wraps rather than cut off; no callsign](assets/header-shows-location-and-frequency-in-full-step-01.jpg)
 
-**Callout — "CP3 · Callout", VK4PMC → VK4WIP · 147.225**
+**Callout — "CP3 · Callout" and the frequency 147.225; no callsigns**
 
-![Callout — "CP3 · Callout", VK4PMC → VK4WIP · 147.225](assets/header-shows-callsign-and-frequency-in-full-step-02.jpg)
+![Callout — "CP3 · Callout" and the frequency 147.225; no callsigns](assets/header-shows-location-and-frequency-in-full-step-02.jpg)
+
+**Callout — tracking only: no message or stand-down log**
+
+![Callout — tracking only: no message or stand-down log](assets/header-shows-location-and-frequency-in-full-step-03.jpg)
 
 **Overview — "CP3 · Overview"; the tap hint heads the list**
 
-![Overview — "CP3 · Overview"; the tap hint heads the list](assets/header-shows-callsign-and-frequency-in-full-step-03.jpg)
+![Overview — "CP3 · Overview"; the tap hint heads the list](assets/header-shows-location-and-frequency-in-full-step-04.jpg)
 
 ### Share batch lives in the app bar and covers no tiles
 
@@ -427,18 +415,6 @@ When a checkpoint volunteer marks a runner as called in, the pending count badge
 **Scroll the grid to the bottom and tap a DNS runner — the message is on screen**
 
 ![Scroll the grid to the bottom and tap a DNS runner — the message is on screen](assets/status-line-stays-in-view-while-the-grid-scrolls-step-01.jpg)
-
-### Official message has the WICEN fields and a log
-
-
-
-**Official message — date prefilled (en-AU); Log is locked until originator and message are in**
-
-![Official message — date prefilled (en-AU); Log is locked until originator and message are in](assets/official-message-has-the-wicen-fields-and-a-log-step-01.jpg)
-
-**Open it again — the checkpoint log lists the message with its fields**
-
-![Open it again — the checkpoint log lists the message with its fields](assets/official-message-has-the-wicen-fields-and-a-log-step-02.jpg)
 
 ### Checkpoint marks a bib not in the setup
 
@@ -1719,10 +1695,10 @@ What to say on air. The app never shows radio wording — use these notes alongs
 
 ### Checkpoint: official message
 
-1. Callout sheet › **Official message**. The sheet numbers the message and fills in From, To (base) and today's date.
-2. Enter the originator's name / role (required), the message, and tick **Signed by originator** once they have signed the written copy.
-3. Call base: "VK4WIP this is VK4[CALLSIGN] Official Message", wait for base to ready the log pad, then read the number, date / time, originator and message.
-4. Tap **Log message**. Every message and stand-down request is listed under **Checkpoint log** on that device.
+Official messages are written on the paper message pad, not in the app.
+
+1. Write the message on the pad: sender, recipient, message number, date / time and the message. The originator signs it.
+2. Call base: "VK4WIP this is VK4[CALLSIGN] Official Message", wait for base to ready the log pad, then read the number, date / time, originator and message.
 
 ### Base: receiving a call
 
