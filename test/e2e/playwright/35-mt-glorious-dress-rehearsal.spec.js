@@ -22,6 +22,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import XLSX from 'xlsx';
 import { test, expect } from '@playwright/test';
+import { installOverlay, caption, CAPTION_HEIGHT } from '../../../scripts/videos/overlay.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SHEET = path.join(HERE, 'fixtures/MGMT_NOV25.xlsx');
@@ -66,6 +67,16 @@ function loadRace() {
 }
 
 // ── Devices ────────────────────────────────────────────────────────────────
+// RACE_VIDEO_DIR=<dir>: record every device with captions and paced ticks, for scripts/videos/compose-race.mjs
+const VIDEO_DIR = process.env.RACE_VIDEO_DIR;
+const timeline = [];
+/** Caption a device on video, and add the line to the side-by-side's caption track. */
+const say = async (device, text) => {
+  if (!VIDEO_DIR) return;
+  timeline.push({ t: Date.now(), clock: raceClock, device: device.label, text });
+  await caption(device.page, text);
+};
+
 const findings = [];
 const diary = [];
 let raceClock = 'setup';
@@ -81,13 +92,16 @@ const check = async (area, what, fn) => {
 };
 
 async function openDevice(browser, label, viewport) {
+  const size = VIDEO_DIR ? { ...viewport, height: viewport.height + CAPTION_HEIGHT } : viewport;
   const ctx = await browser.newContext({
-    baseURL: BASE, viewport, timezoneId: 'Australia/Brisbane', locale: 'en-AU', serviceWorkers: 'block', acceptDownloads: true,
+    baseURL: BASE, viewport: size, timezoneId: 'Australia/Brisbane', locale: 'en-AU', serviceWorkers: 'block', acceptDownloads: true,
+    ...(VIDEO_DIR && { recordVideo: { dir: VIDEO_DIR, size } }),
   });
   await ctx.clock.install({ time: new Date('2026-11-01T19:00:00+10:00') });
+  if (VIDEO_DIR) await installOverlay(ctx);
   const page = await ctx.newPage();
   page.setDefaultTimeout(10000);
-  const device = { label, ctx, page };
+  const device = { label, ctx, page, startedAt: Date.now() };
   page.on('pageerror', e => note(label, `Uncaught error: ${e.message.slice(0, 200)}`));
   page.on('console', m => {
     if (m.type() === 'error' && !/favicon|Failed to load resource/.test(m.text())) note(label, `Console error: ${m.text().slice(0, 200)}`);
@@ -333,11 +347,14 @@ test.describe('Mt Glorious dress rehearsal', () => {
 
     await test.step('Race morning — every station opens the race', async () => {
       raceClock = '05:30';
+      if (VIDEO_DIR) timeline.push({ t: Date.now(), clock: '05:30', start: true, text: 'Race morning: base and CP1–4 open the race on their own devices' });
       for (const s of stations) await setClock(s, mins('05:30'));
       await openBase(base);
+      await say(base, 'Base VK4WIP is open and listening');
       await shot(base, '05-base-opened');
       for (const cp of CPS) {
         await openCheckpoint(cps[cp], cp);
+        await say(cps[cp], 'Set up and ready');
         await check(`CP${cp}`, 'shows its operator', () => expect(cps[cp].page.getByText(new RegExp(OPERATORS[cp])).first()).toBeVisible({ timeout: 2000 }));
       }
       await shot(cps[1], '06-cp1-opened');
@@ -351,6 +368,7 @@ test.describe('Mt Glorious dress rehearsal', () => {
       await setClock(base, mins('06:25'));
       const dns = runners.filter(r => r.dns).map(r => r.bib);
       const { page } = base;
+      await say(base, `The organiser reports ${dns.length} non-starters: base marks them DNS`);
       await baseTab(page, 'DNF / DNS').click();
       await page.getByRole('group', { name: 'Status to apply' }).getByRole('button', { name: 'DNS' }).click();
       await page.fill('#bulk-bibs', dns.join(' '));
@@ -376,6 +394,8 @@ test.describe('Mt Glorious dress rehearsal', () => {
         }
       }
       await setClock(base, m);
+      await say(device, `Calling base with ${heard.length} runner${heard.length === 1 ? '' : 's'}`);
+      await say(base, `CP${cp} calls in ${heard.length} runner${heard.length === 1 ? '' : 's'}: base types each number`);
       const result = await baseReceive(base, `CP${cp}`, blocks);
       if (result.flags.length) log(`CP${cp} call flagged at base: ${result.flags.join(' | ')}`);
       if (!new RegExp(`^${heard.length} recorded`).test(result.summary)) note('Base', `CP${cp} call of ${heard.length}: ${result.summary}`);
@@ -392,6 +412,7 @@ test.describe('Mt Glorious dress rehearsal', () => {
       const blocks = [...new Set(due.map(r => block(r.finish)))].sort((a, b) => a - b)
         .map(b => ({ time: fmt(b), numbers: due.filter(r => block(r.finish) === b).map(r => r.bib) }));
       await setClock(base, m);
+      await say(base, `${due.length} runner${due.length === 1 ? '' : 's'} across the finish line`);
       const result = await baseReceive(base, 'Finish', blocks);
       if (result.flags.length) log(`Finish call flagged: ${result.flags.join(' | ')}`);
       due.forEach(r => pendingFinish.delete(r.bib));
@@ -491,12 +512,6 @@ test.describe('Mt Glorious dress rehearsal', () => {
     });
 
     const standDown = (cp, hm) => at(hm, `CP${cp} sweep through — CP${cp} stands down`, async () => {
-      const device = cps[cp];
-      await cpTab(device.page, 'Callout').click();
-      await device.page.getByRole('button', { name: 'Request stand down' }).click();
-      await device.page.getByRole('dialog').getByRole('textbox').last().fill(`sweep passed ${hm}`);
-      await device.page.getByRole('button', { name: 'Log request' }).click();
-      await cpTab(device.page, 'Mark off').click();
       const { page } = base;
       await page.getByRole('button', { name: `Stand-down check CP${cp}` }).click();
       const sheet = page.getByRole('dialog', { name: `Stand-down check · CP${cp}` });
@@ -510,18 +525,7 @@ test.describe('Mt Glorious dress rehearsal', () => {
     standDown(1, '07:45');
     standDown(2, '08:40');
 
-    at('09:10', 'Bib 20 withdraws at CP3: official message, then DNF at base', async () => {
-      const cp3 = cps[3].page;
-      await cpTab(cp3, 'Callout').click();
-      await cp3.getByRole('button', { name: 'Official message' }).click();
-      const sheet = cp3.getByRole('dialog');
-      await sheet.getByLabel('Originator (name / role)').fill('Paul VK4PMC, CP3');
-      await sheet.getByLabel('Message', { exact: true }).fill('Runner 20 withdrawn at CP3');
-      await sheet.getByLabel('Signed by originator').check();
-      await shot(cps[3], '19-cp3-official-message');
-      await cp3.getByRole('button', { name: 'Log message' }).click();
-      await cpTab(cp3, 'Mark off').click();
-
+    at('09:10', 'Bib 20 withdraws at CP3: CP3 radios it in, base records the DNF', async () => {
       const { page } = base;
       await page.evaluate(() => document.activeElement?.blur());
       await page.keyboard.press('d');
@@ -543,6 +547,7 @@ test.describe('Mt Glorious dress rehearsal', () => {
           const bibs = passes.get(`${cp}:${m}`);
           if (bibs) {
             await setClock(cps[cp], m);
+            await say(cps[cp], `${bibs.length} runner${bibs.length === 1 ? '' : 's'} through at ${fmt(m)}`);
             await cps[cp].page.fill('#quick-entry-input', bibs.join(', '));
             await cps[cp].page.keyboard.press('Enter');
             await expect(cps[cp].page.getByTestId('markoff-status')).toContainText(bibs.length === 1 ? String(bibs[0]) : `${bibs.length} runners marked`);
@@ -565,11 +570,13 @@ test.describe('Mt Glorious dress rehearsal', () => {
             if (m < first && labels.some(l => l.startsWith(`CP${cp}, Due`))) falseDue[cp].push(fmt(m));
           }
         }
+        if (VIDEO_DIR) await base.page.waitForTimeout(250);
         const ev = events.get(m);
         if (ev) {
           for (const s of stations) await setClock(s, m);
           await test.step(`${fmt(m)} ${ev.title}`, async () => {
             log(ev.title);
+            await say(base, ev.title);
             await check('Event', ev.title, ev.fn);
           });
         }
@@ -583,6 +590,8 @@ test.describe('Mt Glorious dress rehearsal', () => {
       raceClock = fmt(m);
       for (const s of stations) await setClock(s, m);
       const { page } = base;
+      await say(base, 'Race over: 120 finishers, 7 DNS, 1 DNF. Base checks every report');
+      if (VIDEO_DIR) timeline.push({ t: Date.now() + 12000, clock: '10:45', end: true, text: '' });
 
       await baseTab(page, 'Overview').click();
       await shot(base, '21-final-overview');
@@ -738,7 +747,12 @@ test.describe('Mt Glorious dress rehearsal', () => {
 
     fs.writeFileSync(path.join(OUT, 'findings.json'), JSON.stringify({ findings, diary }, null, 2));
     console.log(`\n${findings.length} findings — ${path.join(OUT, 'findings.json')}`);
+    const videos = VIDEO_DIR ? stations.map(s => ({ label: s.label, startedAt: s.startedAt, video: s.page.video() })) : [];
     for (const s of stations) await s.ctx.close();
+    if (VIDEO_DIR) {
+      for (const v of videos) { await v.video.saveAs(path.join(VIDEO_DIR, `${v.label}.webm`)); await v.video.delete(); }
+      fs.writeFileSync(path.join(VIDEO_DIR, 'timeline.json'), JSON.stringify({ devices: videos.map(({ label, startedAt }) => ({ label, startedAt })), timeline }, null, 1));
+    }
     expect(findings).toEqual([]); // a green run means no bugs
   });
 });

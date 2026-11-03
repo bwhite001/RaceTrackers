@@ -47,6 +47,11 @@ test.describe('Checkpoint fixes', () => {
       expect(await fits(sub)).toBe(true);
     });
 
+    await step('Callout — tracking only: no message or stand-down log', async () => {
+      await expect(page.getByRole('button', { name: 'Official message' })).toHaveCount(0);
+      await expect(page.getByRole('button', { name: 'Request stand down' })).toHaveCount(0);
+    });
+
     await step('Overview — "CP3 · Overview"; the tap hint heads the list', async () => {
       await tab(page, 'Overview').click();
       await expect(page.getByRole('heading', { name: 'CP3 · Overview' })).toBeVisible();
@@ -112,32 +117,6 @@ test.describe('Checkpoint fixes', () => {
       const dnsBg = await page.getByTestId('bar-dns').evaluate(el => getComputedStyle(el).backgroundColor);
       expect(dnsBg).toBe('rgba(0, 0, 0, 0)');
       await expect(page.getByTestId('bar-dns')).toHaveCSS('border-top-style', 'dashed');
-    });
-  });
-
-  test('official message has the WICEN fields and a log', async ({ page, step }) => {
-    await openCp3(page);
-    await tab(page, 'Callout').click();
-    const dialog = page.getByRole('dialog');
-
-    await step('Official message — date prefilled (en-AU); Log is locked until originator and message are in', async () => {
-      await page.getByRole('button', { name: 'Official message' }).click();
-      await expect(dialog.getByLabel('Date')).toHaveValue(/^\d\d\/\d\d\/\d{4}$/);
-      await dialog.getByLabel('Message').fill('Request extra water at CP3');
-      await expect(dialog.getByRole('button', { name: 'Log message' })).toBeDisabled();
-      await dialog.getByLabel(/^Originator/).fill('Sue Smith, CP3 marshal');
-      await dialog.getByLabel('Signed by originator').check();
-      await dialog.getByRole('button', { name: 'Log message' }).click();
-      await expect(page.getByText(/^Message 1 logged at \d\d:\d\d$/)).toBeVisible();
-    });
-
-    await step('Open it again — the checkpoint log lists the message with its fields', async () => {
-      await page.getByRole('button', { name: 'Official message' }).click();
-      await expect(dialog.getByRole('heading', { name: 'Official message 2' })).toBeVisible();
-      const log = dialog.getByTestId('checkpoint-log');
-      await expect(log).toContainText(/Message 1 · \d\d:\d\d · to VK4WIP/);
-      await expect(log).toContainText('Sue Smith, CP3 marshal · signed');
-      await expect(log).toContainText('Request extra water at CP3');
     });
   });
 

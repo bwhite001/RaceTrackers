@@ -157,7 +157,6 @@ const SECTION_MAP = {
   'undo bar clears itself after about six seconds':                         'navigation',
   // Validation fixes — Phase E
   'ask reminder':                                                           'base-receive',
-  'official message has the WICEN fields and a log':                        'checkpoint',
   // Race-day fixes — Part A (corrections)
   'checkpoint corrections card':                                            'checkpoint-fixes',
   'unmarking a called-in runner is a not-passed correction':                'checkpoint-fixes',

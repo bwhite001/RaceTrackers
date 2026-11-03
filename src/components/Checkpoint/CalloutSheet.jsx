@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import useCheckpointStore from '../../modules/checkpoint-operations/store/checkpointStore';
 import { pendingRunners, groupByBlock, calledBlocks, correctionRows } from '../../modules/checkpoint-operations/services/checkpointStats';
-import SettingsRepository from '../../shared/services/database/SettingsRepository';
 import TimeUtils from '../../services/timeUtils.js';
 import { hhmm, BLOCK_MINUTES } from '../../services/blocks.js';
-import { BottomSheet, UndoBar, useUndo } from '../../design-system/components/VK';
+import { UndoBar, useUndo } from '../../design-system/components/VK';
 import { Button } from '../../design-system/components';
-import useCheckpointContext from './useCheckpointContext';
 
 const blockRange = (block) => `${hhmm(block)} – ${hhmm(TimeUtils.addMinutes(block, BLOCK_MINUTES))}`;
 const RECENT_CALLED = 2;
@@ -18,10 +16,8 @@ const RECENT_CALLED = 2;
  */
 const CalloutSheet = ({ onReadOut }) => {
   const { runners = [], setCalledIn, sendCorrections, snapshot, restoreSnapshot } = useCheckpointStore();
-  const ctx = useCheckpointContext();
   const undo = useUndo();
   const [showAllCalled, setShowAllCalled] = useState(false);
-  const [logType, setLogType] = useState(null);
   const [message, setMessage] = useState('');
 
   const pending = pendingRunners(runners);
@@ -140,122 +136,10 @@ const CalloutSheet = ({ onReadOut }) => {
 
       <div className="min-h-[18px] text-[13px] font-semibold text-vk-blue text-center" aria-live="polite">{message}</div>
 
-      <div className="grid grid-cols-2 gap-2 mt-2">
-        <Button variant="plain" size="action" className="!normal-case !font-sans !font-bold !tracking-normal !text-[13px] !text-vk-navy !border-vk-border" onClick={() => setLogType('official')}>Official message</Button>
-        <Button variant="plain" size="action" className="!normal-case !font-sans !font-bold !tracking-normal !text-[13px] !text-vk-navy !border-vk-border" onClick={() => setLogType('standdown')}>Request stand down</Button>
-      </div>
       <div className="text-xs text-vk-muted text-center">Send every 5–10 competitors, no more than ~5 min late</div>
 
       <UndoBar {...undo.bar} className="fixed left-4 right-4 bottom-[84px] z-40 max-w-xl mx-auto" />
-
-      {logType && (
-        <CheckpointLogSheet
-          type={logType}
-          raceId={ctx.race?.id}
-          checkpointNumber={ctx.checkpointNumber}
-          sender={ctx.operator || ctx.shortName}
-          recipient={ctx.baseCallsign}
-          onClose={() => setLogType(null)}
-          onSaved={(text) => { setLogType(null); setMessage(text); }}
-        />
-      )}
     </div>
-  );
-};
-
-/**
- * Official message / stand-down request, kept in an on-device checkpoint log.
- * WICEN: an official message has sender, recipient, message number,
- * date / time and the originator's signature.
- */
-const CheckpointLogSheet = ({ type, raceId, checkpointNumber, sender, recipient, onClose, onSaved }) => {
-  const key = `checkpointLog:${raceId}:${checkpointNumber}`;
-  const [log, setLog] = useState([]);
-  const [to, setTo] = useState(recipient);
-  const [date, setDate] = useState(() => TimeUtils.formatTime(TimeUtils.getCurrentTimestamp(), 'dd/MM/yyyy'));
-  const [originator, setOriginator] = useState('');
-  const [signed, setSigned] = useState(false);
-  const [text, setText] = useState('');
-  const official = type === 'official';
-
-  useEffect(() => {
-    SettingsRepository.getSetting(key, []).then(v => setLog(Array.isArray(v) ? v : []));
-  }, [key]);
-
-  const nextNo = log.filter(e => e.type === 'official').length + 1;
-  const ready = official ? !!text.trim() && !!originator.trim() : true;
-  const save = async () => {
-    const entry = {
-      type, at: TimeUtils.getCurrentTimestamp(), from: sender, to, text: text.trim(),
-      ...(official && { number: nextNo, date: date.trim(), originator: originator.trim(), signed }),
-    };
-    await SettingsRepository.saveSetting(key, [...log, entry]);
-    onSaved(official ? `Message ${nextNo} logged at ${hhmm(entry.at)}` : `Stand-down request logged at ${hhmm(entry.at)}`);
-  };
-  const field = 'min-h-[48px] rounded-btn border border-vk-border px-3 font-normal dark:bg-gray-700';
-
-  return (
-    <BottomSheet open onClose={onClose} labelledBy="log-hd">
-      <h2 id="log-hd" className="font-display font-extrabold text-xl text-vk-navy dark:text-white">
-        {official ? `Official message ${nextNo}` : 'Request stand down'}
-      </h2>
-      <div className="grid grid-cols-2 gap-2 text-sm">
-        <div><span className="text-vk-muted">From</span> <strong>{sender}</strong></div>
-        <div><span className="text-vk-muted">Time</span> <strong>{hhmm(TimeUtils.getCurrentTimestamp())}</strong></div>
-      </div>
-      {official && (
-        <div className="grid grid-cols-2 gap-2">
-          <label className="flex flex-col gap-1 text-sm font-semibold">
-            To
-            <input value={to} onChange={e => setTo(e.target.value)} className={field} />
-          </label>
-          <label className="flex flex-col gap-1 text-sm font-semibold">
-            Date
-            <input value={date} onChange={e => setDate(e.target.value)} inputMode="numeric" className={field} />
-          </label>
-          <label className="col-span-2 flex flex-col gap-1 text-sm font-semibold">
-            Originator (name / role)
-            <input value={originator} onChange={e => setOriginator(e.target.value)} required aria-required="true"
-              placeholder="e.g. Sue Smith, CP3 marshal" className={field} />
-          </label>
-        </div>
-      )}
-      <label className="flex flex-col gap-1 text-sm font-semibold">
-        {official ? 'Message' : 'Note'}
-        <textarea value={text} onChange={e => setText(e.target.value)} rows={4}
-          placeholder={official ? '' : 'e.g. sweep vehicle passed at 09:40'}
-          className="rounded-btn border border-vk-border px-3 py-2 font-normal dark:bg-gray-700" />
-      </label>
-      {official && (
-        <label className="flex items-center gap-2.5 min-h-[44px] text-sm font-semibold">
-          <input type="checkbox" checked={signed} onChange={e => setSigned(e.target.checked)} className="w-5 h-5" />
-          Signed by originator
-        </label>
-      )}
-      <Button variant="gold" size="primary" fullWidth disabled={!ready} onClick={save}>
-        {official ? 'Log message' : 'Log request'}
-      </Button>
-      <Button variant="plain" size="action" fullWidth onClick={onClose}>Cancel</Button>
-      {log.length > 0 && (
-        <section aria-labelledby="cplog-hd" className="flex flex-col gap-1.5">
-          <h3 id="cplog-hd" className="text-xs font-bold text-vk-muted uppercase tracking-[0.8px]">Checkpoint log · {log.length}</h3>
-          <ul className="flex flex-col gap-1.5 max-h-[160px] overflow-y-auto" data-testid="checkpoint-log">
-            {[...log].reverse().map((e, i) => (
-              <li key={i} className="bg-vk-paper dark:bg-gray-900 rounded-btn px-3 py-2 text-[13px] leading-snug">
-                <div className="font-bold">
-                  {e.type === 'official' ? `Message ${e.number}` : 'Stand-down request'} · {hhmm(e.at)}
-                  {e.type === 'official' && ` · to ${e.to}`}
-                </div>
-                {e.type === 'official' && (
-                  <div className="text-vk-muted">{[e.date, e.originator, e.signed ? 'signed' : 'not signed'].filter(Boolean).join(' · ')}</div>
-                )}
-                {e.text && <div className="break-words">{e.text}</div>}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-    </BottomSheet>
   );
 };
 
