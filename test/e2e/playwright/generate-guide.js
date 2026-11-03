@@ -167,7 +167,7 @@ const SECTION_MAP = {
   'base records a late entry and adds an unknown bib to the field':         'base-receive',
   'a race with bibs assigned on the day':                                   'setup',
   'the Mt Glorious template has no fixed bib range':                        'setup',
-  'race edit changes frequency':                              'setup',
+  'race edit changes frequency':                                            'setup',
   'an edited setup keeps marks already on a device':                        'setup',
   // Race-day fixes — Parts C / D (housekeeping)
   // 'no vet-out wording' is a regression check, deliberately not a guide section
@@ -198,8 +198,9 @@ const CHAPTERS = [
 ];
 
 // Radio wording is deliberately kept out of the app screens (VK4WIP redesign);
-// it lives here, appended to the guide from the design handoff notes.
-const RADIO_PROCEDURE = path.join(ROOT, 'docs', 'design-handoff', 'docs', 'radio-procedure.md');
+// it lives here, appended to the guide. Kept in docs/guides/ (tracked), so CI's
+// fresh checkout has it.
+const RADIO_PROCEDURE = path.join(ROOT, 'docs', 'guides', 'radio-procedure.md');
 const RADIO_CHAPTER = {
   key: 'radio-procedure',
   title: 'Radio Procedure (WICEN)',
@@ -208,7 +209,8 @@ const RADIO_CHAPTER = {
 
 /** Sections from "## …" onward of radio-procedure.md (drops its own title and preamble). */
 function radioProcedureMarkdown() {
-  if (!fs.existsSync(RADIO_PROCEDURE)) return '';
+  // Fail loudly: a missing file would publish a guide without its radio chapter
+  if (!fs.existsSync(RADIO_PROCEDURE)) throw new Error(`Missing ${path.relative(ROOT, RADIO_PROCEDURE)} - the Radio Procedure chapter is built from it`);
   const md = fs.readFileSync(RADIO_PROCEDURE, 'utf8');
   const i = md.indexOf('\n## ');
   return i >= 0 ? md.slice(i + 1).trim() : '';
