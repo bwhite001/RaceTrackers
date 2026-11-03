@@ -18,7 +18,8 @@ const BottomSheet = ({ open, onClose, labelledBy, children }) => {
     if (!open) return undefined;
     const previous = document.activeElement;
     const sheet = sheetRef.current;
-    sheet?.querySelector(FOCUSABLE)?.focus();
+    // Open at the top: focusing a button low in a tall sheet would scroll its title away
+    sheet?.querySelector(FOCUSABLE)?.focus({ preventScroll: true });
 
     const onKey = (e) => {
       if (e.key === 'Escape') { e.stopPropagation(); onCloseRef.current(); return; }
@@ -47,7 +48,7 @@ const BottomSheet = ({ open, onClose, labelledBy, children }) => {
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}
-        className="bg-white dark:bg-gray-800 rounded-t-sheet px-5 pt-[18px] pb-6 flex flex-col gap-4 shadow-[0_-10px_30px_rgba(0,0,0,0.18)] max-w-lg w-full mx-auto"
+        className="bg-white dark:bg-gray-800 rounded-t-sheet px-5 pt-[18px] pb-6 flex flex-col gap-4 shadow-[0_-10px_30px_rgba(0,0,0,0.18)] max-w-lg w-full mx-auto max-h-[calc(100dvh-1rem)] overflow-y-auto"
       >
         {children}
       </section>

@@ -29,4 +29,31 @@ test.describe('Bottom sheets', () => {
       await expect(page.locator('#comments')).toHaveValue('fell at the 3 km mark');
     });
   });
+
+  test('a long stand-down check shows its title and scrolls to Stand down', async ({ page, step }) => {
+    await page.setViewportSize({ width: 1112, height: 500 });
+    await seedRace(page, BASE);
+    await page.goto(`${BASE}/base-station/operations`);
+    await expect(page.getByRole('heading', { name: /who's calling/i })).toBeVisible({ timeout: 15000 });
+
+    await step('Stand-down check CP2 with every bib still to account for — the title is on screen', async () => {
+      await page.getByRole('button', { name: 'Stand-down check CP2' }).click();
+      const sheet = page.getByRole('dialog', { name: 'Stand-down check · CP2' });
+      await expect(sheet.getByRole('heading', { name: 'Stand-down check · CP2' })).toBeInViewport();
+      const standDown = sheet.getByRole('button', { name: 'Stand down', exact: true });
+      await standDown.scrollIntoViewIfNeeded();
+      await expect(standDown).toBeInViewport();
+    });
+
+    await step('A short sheet (edit a time) is unchanged — nothing to scroll', async () => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto(`${BASE}/checkpoint/1`);
+      const tile = page.getByRole('button', { name: /^Runner 100,/ });
+      await tile.click();
+      await tile.click();
+      const sheet = page.getByRole('dialog');
+      await expect(sheet).toBeVisible();
+      expect(await sheet.evaluate(el => el.scrollHeight <= el.clientHeight)).toBe(true);
+    });
+  });
 });
