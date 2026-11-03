@@ -34,8 +34,9 @@ function director(page, ctx) {
     await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 18 });
     await sleep(page, 260);
   };
-  // Keep the post-click pause short: the next caption should arrive with the new screen, not a second after it
-  const click = async (loc, after = 300) => { await point(loc); await loc.click(); await sleep(page, Math.min(after, 400)); };
+  // Keep the post-click pause short so the next caption arrives with the new screen; a pause of 2 s or more
+  // is a deliberate hold on a screen worth seeing (a sheet, Overview, Reports), so it's kept
+  const click = async (loc, after = 300) => { await point(loc); await loc.click(); await sleep(page, after >= 2000 ? after : Math.min(after, 400)); };
   const type = async (loc, text, after = 500) => {
     await point(loc);
     await loc.click();
