@@ -9,9 +9,10 @@ export class RaceMaintenanceRepository extends BaseRepository {
   async createRace(raceConfig) {
     try {
       return await db.transaction('rw', [db.races, db.runners, db.checkpoints, db.race_batches], async () => {
-        // Create race
+        // Create race (callsigns aren't tracked: a template or old setup may still carry baseCallsign)
+        const { baseCallsign: _untracked, ...race } = raceConfig;
         const raceId = await this.add({
-          ...raceConfig,
+          ...race,
           createdAt: new Date().toISOString()
         });
 
@@ -27,7 +28,6 @@ export class RaceMaintenanceRepository extends BaseRepository {
             ...(checkpoint.distanceKm != null && { distanceKm: checkpoint.distanceKm }),
             ...(checkpoint.latitude != null && { latitude: checkpoint.latitude }),
             ...(checkpoint.longitude != null && { longitude: checkpoint.longitude }),
-            ...(checkpoint.operatorCallsigns?.length && { operatorCallsigns: checkpoint.operatorCallsigns }),
           }));
           await db.checkpoints.bulkAdd(checkpoints);
         } else {
@@ -294,7 +294,7 @@ export class RaceMaintenanceRepository extends BaseRepository {
   }
 
   async updateRace(raceId, updates) {
-    const allowed = ['name', 'date', 'startTime', 'description', 'runnerRanges', 'frequency', 'baseCallsign'];
+    const allowed = ['name', 'date', 'startTime', 'description', 'runnerRanges', 'frequency'];
     const safe = Object.fromEntries(
       Object.entries(updates).filter(([k]) => allowed.includes(k))
     );

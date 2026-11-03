@@ -6,7 +6,7 @@ import { earliestTime } from '../../services/blocks.js';
 
 /**
  * Race + checkpoint details every checkpoint tab needs: the live clock, the
- * earliest allowed time (race start), labels and callsigns from race config.
+ * earliest allowed time (race start) and labels from race config.
  */
 export default function useCheckpointContext() {
   const { currentRace: race, checkpoints = [] } = useRaceMaintenanceStore();
@@ -16,7 +16,6 @@ export default function useCheckpointContext() {
   const raceStart = race?.date && race?.startTime
     ? TimeUtils.createRaceTimestamp(race.date, race.startTime.slice(0, 5))
     : null;
-  const operators = checkpoint?.operatorCallsigns ?? [];
   return {
     race,
     checkpoint,
@@ -26,8 +25,6 @@ export default function useCheckpointContext() {
     earliest: earliestTime(raceStart, now),
     shortName: `CP${checkpointNumber ?? ''}`,
     location: checkpoint?.locationName || checkpoint?.name || '',
-    operator: operators[0] ?? '',
-    baseCallsign: race?.baseCallsign || 'VK4WIP',
     frequency: race?.frequency || '',
     callDueMinutes: race?.callDueMinutes ?? 5,
     overSize: race?.overSize ?? 5,

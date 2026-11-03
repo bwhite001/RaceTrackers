@@ -113,7 +113,7 @@ const SECTION_MAP = {
   'email share stays short':                                                'import-export',
   'import accepts octet-stream':                                            'import-export',
   // Validation fixes — Phase B (checkpoint)
-  'header shows callsign and frequency in full':                            'checkpoint',
+  'header shows location and frequency in full':                            'checkpoint',
   'share batch lives in the app bar and covers no tiles':                   'checkpoint',
   'status line stays in view while the grid scrolls':                       'checkpoint',
   'stepper back to the original time reads Keep time':                      'checkpoint-fixes',
@@ -167,8 +167,7 @@ const SECTION_MAP = {
   'base records a late entry and adds an unknown bib to the field':         'base-receive',
   'a race with bibs assigned on the day':                                   'setup',
   'the Mt Glorious template has no fixed bib range':                        'setup',
-  'race edit changes operators and frequency':                              'setup',
-  'unsaved operators survive saving another row and Next':                  'setup',
+  'race edit changes frequency':                              'setup',
   'an edited setup keeps marks already on a device':                        'setup',
   // Race-day fixes — Parts C / D (housekeeping)
   // 'no vet-out wording' is a regression check, deliberately not a guide section

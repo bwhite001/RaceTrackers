@@ -73,4 +73,15 @@ describe('RaceMaintenanceRepository — checkpoint linking', () => {
     expect(a).toMatchObject({ latitude: -27.321677, longitude: 152.714852 });
     expect(b.latitude).toBeUndefined();
   });
+
+  it('createRace stores no operator or base callsigns (not tracked)', async () => {
+    const id = await RaceMaintenanceRepository.createRace({
+      name: 'Old setup', date: '2026-11-08', startTime: '06:30', minRunner: 1, maxRunner: 2, baseCallsign: 'VK4WIP',
+      runnerRanges: [{ min: 1, max: 2 }],
+      checkpoints: [{ number: 1, name: 'CP1', operatorCallsigns: ['VK4IE'] }],
+    });
+    const [cp] = await db.checkpoints.where('raceId').equals(id).toArray();
+    expect(cp.operatorCallsigns).toBeUndefined();
+    expect((await db.races.get(id)).baseCallsign).toBeUndefined();
+  });
 });

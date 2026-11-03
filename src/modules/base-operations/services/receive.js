@@ -94,9 +94,8 @@ export function boardCheckpoints(checkpoints = []) {
       number: cp.number,
       short: `CP${cp.number}`,
       name: cp.locationName || cp.name || `Checkpoint ${cp.number}`,
-      ops: cp.operatorCallsigns ?? [],
     }));
-  return [...cps, { number: BASE_STATION_CP, short: 'Finish', name: 'Finish', ops: [] }];
+  return [...cps, { number: BASE_STATION_CP, short: 'Finish', name: 'Finish' }];
 }
 
 /**

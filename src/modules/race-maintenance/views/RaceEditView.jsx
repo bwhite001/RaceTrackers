@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import useRaceMaintenanceStore from '../store/raceMaintenanceStore';
 import { useToast } from '../../../shared/components/ui/Toast';
-import { parseCallsigns } from '../services/callsigns.js';
 import RosterImport from '../components/RosterImport.jsx';
 import { useRaceStore } from '../../../store/useRaceStore.js';
 import {
@@ -38,16 +37,6 @@ const RaceEditView = () => {
       }
       setCoreSaving(false);
     }
-    if (currentStep === 1) {
-      // save every operators field still holding unsaved text
-      const dirty = checkpoints.filter(cp => (cpOpsEdits[cp.id] ?? '') !== (opsSaved.current[cp.id] ?? ''));
-      try {
-        for (const cp of dirty) await saveOperators(cp);
-      } catch {
-        addToast({ variant: 'error', message: 'Failed to save checkpoint operators.' });
-        return;
-      }
-    }
     setCurrentStep(s => Math.min(s + 1, STEPS.length - 1));
   };
 
@@ -64,17 +53,15 @@ const RaceEditView = () => {
   } = useRaceMaintenanceStore();
 
   // ── Core Details form state ──────────────────────────────────────────────
-  const [coreForm, setCoreForm] = useState({ name: '', date: '', startTime: '', description: '', frequency: '', baseCallsign: '' });
+  const [coreForm, setCoreForm] = useState({ name: '', date: '', startTime: '', description: '', frequency: '' });
   const [coreErrors, setCoreErrors] = useState({});
   const [coreSaving, setCoreSaving] = useState(false);
 
   // ── Checkpoints editing state ────────────────────────────────────────────
   const [cpEdits, setCpEdits] = useState({}); // { [cp.id]: newName }
   const [cpBatchEdits, setCpBatchEdits] = useState({}); // { [cp.id]: number[] | null }
-  const [cpOpsEdits, setCpOpsEdits] = useState({}); // { [cp.id]: 'VK4ABC, VK4DEF' }
   const namesSaved = useRef({});
   const wavesSaved = useRef({});
-  const opsSaved = useRef({}); // { [cp.id]: saved text }, to tell which fields are unsaved
   const [cpSaving, setCpSaving] = useState({});
   const [newCpName, setNewCpName] = useState('');
   const [addingCp, setAddingCp] = useState(false);
@@ -107,7 +94,6 @@ const RaceEditView = () => {
         startTime: currentRace.startTime || '',
         description: currentRace.description || '',
         frequency: currentRace.frequency || '',
-        baseCallsign: currentRace.baseCallsign || '',
       });
     }
   }, [currentRace]);
@@ -121,11 +107,6 @@ const RaceEditView = () => {
       const names = Object.fromEntries(checkpoints.map(cp => [cp.id, cp.name]));
       setCpEdits(prev => Object.fromEntries(Object.entries(names).map(([id, v]) => [id, keep(prev, id, v, namesSaved)])));
       namesSaved.current = names;
-      const saved = Object.fromEntries(checkpoints.map(cp => [cp.id, (cp.operatorCallsigns ?? []).join(', ')]));
-      // keep unsaved text typed in other rows; only clean rows take the DB value
-      setCpOpsEdits(prev => Object.fromEntries(Object.entries(saved).map(([id, v]) =>
-        [id, prev[id] !== undefined && prev[id] !== opsSaved.current[id] ? prev[id] : v])));
-      opsSaved.current = saved;
       const waves = Object.fromEntries(checkpoints.map(cp => [cp.id, cp.allowedBatches ?? null]));
       setCpBatchEdits(prev => Object.fromEntries(Object.entries(waves).map(([id, v]) => [id, keep(prev, id, v, wavesSaved)])));
       wavesSaved.current = waves;
@@ -158,24 +139,6 @@ const RaceEditView = () => {
       addToast({ variant: 'error', message: 'Failed to rename checkpoint.' });
     } finally {
       setCpSaving(prev => ({ ...prev, [cp.id]: false }));
-    }
-  };
-
-  const saveOperators = async (cp) => {
-    const list = parseCallsigns(cpOpsEdits[cp.id]);
-    await updateCheckpoint(cp.id, { operatorCallsigns: list });
-    setCpOpsEdits(prev => ({ ...prev, [cp.id]: list.join(', ') }));
-  };
-
-  const handleSaveCheckpointOperators = async (cp) => {
-    setCpSaving(prev => ({ ...prev, [`ops-${cp.id}`]: true }));
-    try {
-      await saveOperators(cp);
-      addToast({ variant: 'success', message: `Checkpoint ${cp.number} operators saved.` });
-    } catch {
-      addToast({ variant: 'error', message: 'Failed to save checkpoint operators.' });
-    } finally {
-      setCpSaving(prev => ({ ...prev, [`ops-${cp.id}`]: false }));
     }
   };
 
@@ -352,14 +315,6 @@ const RaceEditView = () => {
               </FormGroup>
 
               <FormGroup>
-                <FormLabel htmlFor="baseCallsign">Base callsign</FormLabel>
-                <Input id="baseCallsign" name="baseCallsign" value={coreForm.baseCallsign} onChange={handleCoreChange} placeholder="VK4WIP" />
-                <FormHelperText>
-                  Shown at every checkpoint and on the base station. Saved when you press Next.
-                </FormHelperText>
-              </FormGroup>
-
-              <FormGroup>
                 <FormLabel htmlFor="description">Description</FormLabel>
                 <Textarea
                   id="description"
@@ -419,24 +374,6 @@ const RaceEditView = () => {
                       disabled={cpSaving[cp.id] || cpEdits[cp.id] === cp.name}
                     >
                       {cpSaving[cp.id] ? 'Saving…' : 'Save'}
-                    </Button>
-                  </div>
-                  <div className="flex items-center gap-3 pl-10">
-                    <Input
-                      value={cpOpsEdits[cp.id] ?? ''}
-                      onChange={(e) => setCpOpsEdits(prev => ({ ...prev, [cp.id]: e.target.value }))}
-                      className="flex-1"
-                      placeholder="Operator callsigns, e.g. VK4ABC, VK4DEF"
-                      aria-label={`Operators for CP${cp.number}`}
-                    />
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleSaveCheckpointOperators(cp)}
-                      disabled={cpSaving[`ops-${cp.id}`]}
-                      aria-label={`Save operators CP${cp.number}`}
-                    >
-                      {cpSaving[`ops-${cp.id}`] ? 'Saving…' : 'Save'}
                     </Button>
                   </div>
                   {availableBatches.length > 1 && (

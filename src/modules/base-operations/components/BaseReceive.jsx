@@ -327,7 +327,7 @@ const BaseReceive = () => {
                     <StatusPill status={row.status} />
                   </span>
                   <span className="text-xs font-semibold text-vk-muted">
-                    {[row.ops[0], row.lastBlock ? `up to ${hhmm(row.lastBlock)}` : 'no calls yet'].filter(Boolean).join(' · ')}
+                    {row.lastBlock ? `up to ${hhmm(row.lastBlock)}` : 'no calls yet'}
                   </span>
                   {asks.has(row.number) && (
                     <span className="text-xs font-bold text-vk-ink bg-vk-gold-tint border border-vk-gold rounded-chip px-1.5">Ask about {askText(row.number)}</span>
@@ -396,7 +396,7 @@ const BaseReceive = () => {
           <div className="bg-white dark:bg-gray-800 border-2 border-vk-gold rounded-card p-3 flex flex-col gap-2.5">
             <div className="flex items-center gap-2.5">
               <h1 id="rxhd" className="font-display font-extrabold text-xl text-vk-navy dark:text-white">{cur.short}</h1>
-              <div className="text-[13px] text-vk-muted flex-1 min-w-0 truncate">{[cur.ops[0], cur.name].filter(Boolean).join(' · ')}</div>
+              <div className="text-[13px] text-vk-muted flex-1 min-w-0 truncate">{cur.name}</div>
               <div className="text-[13px] font-bold text-vk-blue whitespace-nowrap">{goodCount} to record</div>
               <button type="button" onClick={openCorrection}
                 className="min-h-[40px] px-3 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs dark:bg-gray-800 dark:text-gray-100">

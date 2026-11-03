@@ -53,11 +53,9 @@ describe('normaliseTemplate', () => {
       expect(n.runnerRanges).toEqual([{ min: 1, max: 128 }]);
     });
 
-    it('turns location into coordinates and keeps operator callsigns', () => {
+    it('turns location into coordinates and drops operator callsigns (not tracked)', () => {
       const n = normaliseTemplate(richTemplate);
-      expect(n.checkpoints[0]).toMatchObject({ latitude: -27.32, longitude: 152.71 });
-      expect(n.checkpoints[0]).toEqual({ number: 1, name: 'CP1 - Northbrook', orderSequence: 1, latitude: -27.32, longitude: 152.71, operatorCallsigns: ['VK4SIR'] });
-      expect(n.checkpoints[1].operatorCallsigns).toBeUndefined();
+      expect(n.checkpoints[0]).toEqual({ number: 1, name: 'CP1 - Northbrook', orderSequence: 1, latitude: -27.32, longitude: 152.71 });
       expect(n.checkpoints[0].location).toBeUndefined();
       expect(n.checkpoints[0].metadata).toBeUndefined();
     });
@@ -67,14 +65,10 @@ describe('normaliseTemplate', () => {
       const n = normaliseTemplate(raw);
       expect(n.defaultStartTime).toBe('06:30:00');
       expect(n.runnerRanges).toEqual([]);
-      expect(n.checkpoints.map(c => [c.distanceKm, c.operatorCallsigns])).toEqual([
-        [5, ['VK4MUD', 'VK4MKD', 'VK4EAR']],
-        [11, ['VK4IE', 'VK4TBA']],
-        [14.5, ['VK4PMC', 'VK4JBX']],
-        [17.5, ['VK4AJG', 'VK4DTB']],
-      ]);
+      expect(n.checkpoints.map(c => c.distanceKm)).toEqual([5, 11, 14.5, 17.5]);
+      expect(n.checkpoints.some(c => 'operatorCallsigns' in c)).toBe(false);
       expect(n.checkpoints[2].locationName).toBe('England Creek Rd & Joyners Ridge Rd');
-      expect(n.raceDefaults).toEqual({ baseCallsign: 'VK4WIP', frequency: '147.225', distanceKm: 22 });
+      expect(n.raceDefaults).toEqual({ frequency: '147.225', distanceKm: 22 });
     });
 
     it('defaults defaultBatches to empty array', () => {

@@ -117,8 +117,6 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
 
   const shortName = `CP${cpNumber}`;
   const location = checkpoint?.locationName || checkpoint?.name || '';
-  const operator = checkpoint?.operatorCallsigns?.[0] ?? '';
-  const baseCallsign = currentRace?.baseCallsign || 'VK4WIP';
 
   if (readOut) {
     return <ReadOutView onClose={() => setReadOut(false)} />;
@@ -127,7 +125,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   const header = {
     'mark-off': {
       title: `Checkpoint ${cpNumber}`,
-      subtitle: [location, operator].filter(Boolean).join(' · '),
+      subtitle: location,
       body: (
         <div className="grid grid-cols-3 gap-2">
           <StatTile variant="onNavy" value={stats.passed} label="Passed" />
@@ -138,7 +136,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     },
     callout: {
       title: `${shortName} · Callout`,
-      subtitle: [[operator, baseCallsign].filter(Boolean).join(' → '), currentRace?.frequency].filter(Boolean).join(' · '),
+      subtitle: currentRace?.frequency || '',
       body: callDue ? (
         <div className="bg-vk-gold text-vk-ink rounded-btn px-3 py-2 flex items-center gap-2.5" role="status">
           <ClockIcon className="w-[18px] h-[18px] shrink-0" aria-hidden="true" />
@@ -148,7 +146,7 @@ const CheckpointView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     },
     overview: {
       title: `${shortName} · Overview`,
-      subtitle: [location, operator].filter(Boolean).join(' · '),
+      subtitle: location,
       body: <OverviewProgress stats={stats} />,
     },
   }[activeTab];

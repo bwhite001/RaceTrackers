@@ -32,7 +32,6 @@ const BASE = 'http://localhost:3000';
 const RACE = { name: 'Mt Glorious Mountain Trail', date: '2026-11-08', start: '06:30' };
 const SHIFT = 30; // 2025 started 07:00, 2026 starts 06:30
 const GPS = { 1: [-27.321677, 152.714852], 2: [-27.345838, 152.730526], 3: [-27.366238, 152.730747], 4: [-27.34649, 152.750306] };
-const OPERATORS = { 1: 'VK4MUD', 2: 'VK4IE', 3: 'VK4PMC', 4: 'VK4AJG' };
 const CPS = [1, 2, 3, 4];
 const SILENT = { cp: 4, from: 8 * 60 + 40, to: 9 * 60 + 5 }; // a radio outage, to test a long catch-up call
 
@@ -355,7 +354,7 @@ test.describe('Mt Glorious dress rehearsal', () => {
       for (const cp of CPS) {
         await openCheckpoint(cps[cp], cp);
         await say(cps[cp], 'Set up and ready');
-        await check(`CP${cp}`, 'shows its operator', () => expect(cps[cp].page.getByText(new RegExp(OPERATORS[cp])).first()).toBeVisible({ timeout: 2000 }));
+        await check(`CP${cp}`, 'shows no callsign (not tracked)', () => expect(cps[cp].page.getByText(/VK4/)).toHaveCount(0, { timeout: 2000 }));
       }
       await shot(cps[1], '06-cp1-opened');
       await cpTab(cps[1].page, 'Callout').click();

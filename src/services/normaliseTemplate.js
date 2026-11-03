@@ -8,9 +8,9 @@
 export function normaliseTemplate(raw) {
   const isRichFormat = raw.defaultRunnerRangeStart != null;
 
-  // Checkpoints — keep distance and operator callsigns ("VK4IE (John)" → "VK4IE"); location "lat, lng" becomes numeric coordinates when both parse
+  // Checkpoints — keep location and distance; "lat, lng" becomes numeric coordinates when both parse.
+  // Operator callsigns in metadata aren't tracked, so they aren't copied.
   const checkpoints = (raw.checkpoints || []).map(cp => {
-    const callsigns = (cp.metadata?.operators || []).map(o => String(o).split(' ')[0]).filter(Boolean);
     const [lat, lng] = String(cp.location ?? '').split(',').map(s => s.trim());
     const latitude = Number(lat), longitude = Number(lng);
     const hasCoords = lat && lng && Number.isFinite(latitude) && Number.isFinite(longitude);
@@ -21,7 +21,6 @@ export function normaliseTemplate(raw) {
       ...(cp.locationName && { locationName: cp.locationName }),
       ...(hasCoords && { latitude, longitude }),
       ...(cp.distanceKm != null && { distanceKm: cp.distanceKm }),
-      ...(callsigns.length && { operatorCallsigns: callsigns }),
     };
   });
 

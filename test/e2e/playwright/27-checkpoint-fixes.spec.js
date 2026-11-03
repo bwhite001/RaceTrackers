@@ -30,19 +30,20 @@ const markDnsInOverview = async (page, n) => {
 };
 
 test.describe('Checkpoint fixes', () => {
-  test('header shows callsign and frequency in full', async ({ page, step }) => {
+  test('header shows location and frequency in full', async ({ page, step }) => {
     await openCp3(page);
 
-    await step('Mark off — location and callsign wrap to two lines rather than cut off', async () => {
-      const sub = page.getByText('England Creek Rd & Joyners Ridge Rd · VK4PMC');
+    await step('Mark off — the location wraps rather than cut off; no callsign', async () => {
+      const sub = page.getByText('England Creek Rd & Joyners Ridge Rd', { exact: true });
       await expect(sub).toBeInViewport();
       expect(await fits(sub)).toBe(true);
     });
 
-    await step('Callout — "CP3 · Callout", VK4PMC → VK4WIP · 147.225', async () => {
+    await step('Callout — "CP3 · Callout" and the frequency 147.225; no callsigns', async () => {
       await tab(page, 'Callout').click();
       await expect(page.getByRole('heading', { name: 'CP3 · Callout' })).toBeVisible();
-      const sub = page.getByText('VK4PMC → VK4WIP · 147.225');
+      await expect(page.getByText(/VK4/)).toHaveCount(0);
+      const sub = page.getByText('147.225', { exact: true });
       await expect(sub).toBeInViewport();
       expect(await fits(sub)).toBe(true);
     });

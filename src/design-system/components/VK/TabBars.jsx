@@ -55,11 +55,12 @@ export const BASE_TABS = [
 ];
 
 /**
- * Base station header: badge, "Base · VK4WIP", frequency + clock, inline tabs.
+ * Base station header: badge, "Base · VK4WIP" (the club station), frequency + clock, inline tabs.
  * Single row on tablet; tabs scroll horizontally on phone.
  */
+const BASE_CALLSIGN = 'VK4WIP';
+
 export const BaseAppBar = ({
-  baseCallsign = 'VK4WIP',
   frequency,
   nowText,
   active,
@@ -78,7 +79,7 @@ export const BaseAppBar = ({
       >
         <ClubBadge size={32} />
         <span className="flex flex-col">
-          <span className="font-display font-extrabold text-[15px] leading-tight">Base · {baseCallsign}</span>
+          <span className="font-display font-extrabold text-[15px] leading-tight">Base · {BASE_CALLSIGN}</span>
           <span className="text-[11px] text-vk-on-navy">
             {[frequency, nowText && `now ${nowText}`].filter(Boolean).join(' · ')}
           </span>

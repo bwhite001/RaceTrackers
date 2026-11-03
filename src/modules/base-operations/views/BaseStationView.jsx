@@ -169,7 +169,6 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     <HotkeysProvider hotkeys={hotkeys}>
       <div className="min-h-screen bg-vk-paper dark:bg-gray-900 flex flex-col">
         <BaseAppBar
-          baseCallsign={currentRace?.baseCallsign || 'VK4WIP'}
           frequency={currentRace?.frequency}
           nowText={hhmm(now)}
           active={activeTab}
