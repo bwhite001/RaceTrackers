@@ -6,8 +6,8 @@ import { describe, it, expect } from 'vitest';
 import db from '../../src/shared/services/database/schema.js';
 
 describe('Database Schema v8 - Basic Validation', () => {
-  it('should be at schema version 8', () => {
-    expect(db.verno).toBe(11);
+  it('should be at the current schema version (12)', () => {
+    expect(db.verno).toBe(12);
   });
 
   it('should create all 13 required tables', () => {

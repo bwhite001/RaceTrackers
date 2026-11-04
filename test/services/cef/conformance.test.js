@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import vectors from '../../../docs/protocol/test-vectors.json';
+import vectors from './test-vectors.json';
 import { encodeTime, decodeTime, encodeAprs, decodeAprs } from '../../../src/services/cef/aprsText';
 
 describe('spec §9 epoch vectors', () => {
