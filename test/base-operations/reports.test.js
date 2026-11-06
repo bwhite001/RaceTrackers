@@ -97,10 +97,11 @@ describe('base reports', () => {
     expect(log).toEqual([{ number: 1, short: 'CP1', calls: 2, numbers: 3, corrections: 0, lastCall: at(7, 15), upTo: at(7, 10) }]);
   });
 
-  it('leaders: furthest first, then fastest; elapsed from race start', () => {
-    const l = currentLeaders({ sightings, order, out, raceStart: at(6, 30), meta: new Map([[101, { firstName: 'Sarah', lastName: 'J', gender: 'F' }]]) });
+  it('leaders: furthest first, then fastest; the time at the last checkpoint (the start is not tracked)', () => {
+    const l = currentLeaders({ sightings, order, out, meta: new Map([[101, { firstName: 'Sarah', lastName: 'J', gender: 'F' }]]) });
     expect(l.slice(0, 3).map(r => [r.rank, r.number, r.lastCp.short])).toEqual([[1, 101, 'Finish'], [2, 102, 'CP2'], [3, 103, 'CP1']]);
-    expect(l[0]).toMatchObject({ name: 'Sarah J', gender: 'F', elapsed: '01:30' });
+    expect(l[0]).toMatchObject({ name: 'Sarah J', gender: 'F', at: '08:00' });
+    expect(l[0].elapsed).toBeUndefined();
   });
 
   it('reportedUpTo ignores exact (manual) times; the board uses it', () => {

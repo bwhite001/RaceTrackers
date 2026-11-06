@@ -7,7 +7,7 @@ import { describe, it, expect } from 'vitest';
 import { appliesAt, boardCheckpoints, buildBoard, checkCall } from '../../src/modules/base-operations/services/receive.js';
 import { missedReminders, standDownLists } from '../../src/modules/base-operations/services/missed.js';
 import { findSkipped } from '../../src/modules/base-operations/services/dataChecks.js';
-import { timesMatrix } from '../../src/modules/base-operations/services/reports.js';
+import { timesMatrix, currentLeaders } from '../../src/modules/base-operations/services/reports.js';
 
 const T = (m) => `2026-11-08T0${7 + Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}:00.000Z`;
 const checkpoints = [1, 2, 3].map(n => ({ number: n, allowedBatches: [1, 2] })).concat({ number: 4, allowedBatches: null });
@@ -66,5 +66,14 @@ describe('waves at a checkpoint', () => {
   it('times by checkpoint: blank, not "—", where the runner never goes', () => {
     const rows = timesMatrix({ sightings, order, out: new Map(), raceNumbers: [150], batchOf });
     expect(rows[0].cells.map(c => c.text)).toEqual(['', '', '', '07:30', '—']);
+  });
+
+  it('leaders: each course ranked on its own, longest course first', () => {
+    // 150 (11 km) reached CP4 before 10 (22 km) got there; 20 (22 km) is at CP1
+    const s = S([[1, [[10, T(0)], [20, T(5)]]], [2, [[10, T(20)]]], [3, [[10, T(40)]]], [4, [[150, T(30)]]]]);
+    const l = currentLeaders({ sightings: s, order, out: new Map(), batchOf });
+    expect(l.map(r => [r.course, r.rank, r.number])).toEqual([
+      ['CP1, CP2, CP3, CP4', 1, 10], ['CP1, CP2, CP3, CP4', 2, 20], ['CP4', 1, 150],
+    ]);
   });
 });

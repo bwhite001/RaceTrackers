@@ -111,5 +111,17 @@ test.describe('Waves at checkpoints', () => {
       await expect(sheet.getByTestId('not-seen-past')).not.toContainText('142');
       await page.keyboard.press('Escape');
     });
+
+    await step('Overview — 22 km and 11 km leaders ranked apart, with the time at their last checkpoint', async () => {
+      await page.getByRole('tab', { name: 'Overview' }).click();
+      const table = page.getByRole('table').filter({ has: page.getByRole('columnheader', { name: 'Time' }) });
+      await expect(table.getByRole('columnheader', { name: 'Via CP1, CP2, CP3, CP4' })).toBeVisible();
+      await expect(table.getByRole('columnheader', { name: 'Via CP4', exact: true })).toBeVisible();
+      for (const bib of ['10', '150']) {
+        const row = table.getByRole('row').filter({ has: page.getByRole('cell', { name: bib, exact: true }) });
+        await expect(row.getByRole('cell').first()).toHaveText('1');
+        await expect(row.getByRole('cell').nth(4)).toHaveText('07:30');
+      }
+    });
   });
 });

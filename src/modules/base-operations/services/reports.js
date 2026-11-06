@@ -172,29 +172,39 @@ export function callLog({ radioCalls, board }) {
 }
 
 /**
- * Current leaders: furthest along the course first, then fastest there.
- * Elapsed is from race start.
+ * Current leaders: furthest along the course first, then fastest there. Each
+ * course (the checkpoints a runner's wave passes) is ranked on its own.
  */
-export function currentLeaders({ sightings, order, out, raceStart, meta = new Map() }) {
+export function currentLeaders({ sightings, order, out, meta = new Map(), batchOf }) {
   const seen = lastSeen(sightings, order);
+  // Runners whose waves pass different checkpoints (22 km vs 11 km) are ranked apart
+  const courseOf = (n) => order.filter(cp => cp.number !== BASE_STATION_CP && appliesAt(cp, n, batchOf)).map(cp => cp.short);
+  const ranks = new Map();
   return [...seen.entries()]
     .filter(([num]) => !out.has(num))
     .map(([number, s]) => {
       const m = meta.get(number) ?? {};
+      const course = courseOf(number);
       return {
         number,
         name: [m.firstName, m.lastName].filter(Boolean).join(' '),
         gender: m.gender && m.gender !== 'X' ? m.gender : '',
         wave: m.batchNumber ?? null,
+        course: course.join(', '),
+        stops: course.length,
         idx: s.idx,
         lastCp: s.cp,
         time: s.time,
-        // HH:MM — common times have no seconds
-        elapsed: raceStart ? TimeUtils.formatDuration(raceStart, s.time).slice(0, 5) : '',
+        at: hhmm(s.time), // the start isn't tracked: the time at the last checkpoint
       };
     })
-    .sort((a, b) => b.idx - a.idx || a.time.localeCompare(b.time) || a.number - b.number)
-    .map((r, i) => ({ ...r, rank: i + 1 }));
+    .sort((a, b) => b.stops - a.stops || a.course.localeCompare(b.course)
+      || b.idx - a.idx || a.time.localeCompare(b.time) || a.number - b.number)
+    .map(r => {
+      const rank = (ranks.get(r.course) ?? 0) + 1;
+      ranks.set(r.course, rank);
+      return { ...r, rank };
+    });
 }
 
 /**

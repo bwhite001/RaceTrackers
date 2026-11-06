@@ -6,7 +6,6 @@ import { overdueRunners, currentLeaders, awaitingByCheckpoint, raceCounts, OVERD
 import { runChecks, checkpointDistances, openIssueNumbers, PACE_LIMIT_KMH } from '../services/dataChecks';
 import { outRecords } from '../services/statusValidation';
 import { hhmm } from '../../../services/blocks.js';
-import TimeUtils from '../../../services/timeUtils.js';
 import { BASE_STATION_CP } from '../../../types/index.js';
 import useNow from '../../../shared/hooks/useNow';
 import HeadsUpGrid from './HeadsUpGrid';
@@ -37,9 +36,6 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
   const [showAll, setShowAll] = useState(false);
   const [showNames, setShowNames] = useState(false);
 
-  const raceStart = currentRace?.date && currentRace?.startTime
-    ? TimeUtils.createRaceTimestamp(currentRace.date, currentRace.startTime.slice(0, 5))
-    : null;
   const order = useMemo(() => boardCheckpoints(checkpoints), [checkpoints]);
   const sightings = useMemo(() => sightingsByCheckpoint(runners), [runners]);
   const out = useMemo(() => outStatusMap(outList, runners), [outList, runners]);
@@ -50,7 +46,7 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
   }), [sightings, order, out, now, upTo, currentRace?.overdueGraceMinutes]);
   const overdue = lateRows.filter(r => r.status === 'overdue');
   const awaiting = awaitingByCheckpoint(lateRows);
-  const leaders = useMemo(() => currentLeaders({ sightings, order, out, raceStart, meta }), [sightings, order, out, raceStart, meta]);
+  const leaders = useMemo(() => currentLeaders({ sightings, order, out, meta, batchOf }), [sightings, order, out, meta, batchOf]);
   // Same checks as Reports › Needs attention; a leader with an open one may be in the wrong place
   const flagged = useMemo(() => openIssueNumbers(runChecks({
     baseRows, order, sightings, outByNumber: new Map(outRecords(outList).map(r => [r.number, r])), radioCalls,
@@ -67,7 +63,14 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
   const filtered = leaders.filter(l => filter === 'all'
     || (filter === 'F' && l.gender === 'F') || (filter === 'M' && l.gender === 'M')
     || (filter.startsWith('w') && String(l.wave) === filter.slice(1)));
-  const shown = showAll ? filtered : filtered.slice(0, LEADERS_SHOWN);
+  // Top few of each course (22 km and 11 km are ranked apart), headed when there's more than one
+  const perCourse = new Map();
+  const shown = showAll ? filtered : filtered.filter(l => {
+    const n = (perCourse.get(l.course) ?? 0) + 1;
+    perCourse.set(l.course, n);
+    return n <= LEADERS_SHOWN;
+  });
+  const courses = new Set(filtered.map(l => l.course)).size;
 
   const overdueAt = [...new Set(overdue.map(o => o.nextCp.short))];
   const filters = [['all', 'All'], ['F', 'Female'], ['M', 'Male'], ...(waves.length > 1 ? waves.map(w => [`w${w}`, `Wave ${w}`]) : [])];
@@ -159,14 +162,20 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
             <table className="w-full border-collapse text-sm min-w-[560px]">
               <thead>
                 <tr className="bg-vk-band dark:bg-gray-700 text-left">
-                  {['Rank', 'Bib', 'Name', 'Wave', 'Elapsed', 'Last seen'].map((h, i) => (
+                  {['Rank', 'Bib', 'Name', 'Wave', 'Time', 'Last seen'].map((h, i) => (
                     <th key={h} scope="col" className={`py-2.5 text-xs font-bold text-vk-muted uppercase tracking-[0.8px] ${i === 0 ? 'px-6' : 'px-3'}`}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {shown.map(l => (
-                  <tr key={l.number} className="border-b border-vk-border dark:border-gray-700">
+                {shown.map((l, i) => (
+                  <React.Fragment key={l.number}>
+                  {courses > 1 && l.course !== shown[i - 1]?.course && (
+                    <tr className="bg-vk-band/50 dark:bg-gray-700/50">
+                      <th colSpan={6} scope="colgroup" className="px-6 py-1.5 text-left text-xs font-bold text-vk-muted">Via {l.course}</th>
+                    </tr>
+                  )}
+                  <tr className="border-b border-vk-border dark:border-gray-700">
                     <td className="px-6 py-3">
                       <span className={`inline-flex w-[30px] h-[30px] rounded-full items-center justify-center font-extrabold ${l.rank === 1 ? 'bg-vk-gold text-vk-ink' : 'bg-vk-band text-vk-ink'}`}>{l.rank}</span>
                     </td>
@@ -180,9 +189,10 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
                     </td>
                     <td className="px-3 py-3">{l.name || '—'}{l.gender && <span className="text-vk-muted"> · {l.gender}</span>}</td>
                     <td className="px-3 py-3">{l.wave ?? '—'}</td>
-                    <td className="px-3 py-3 tabular-nums font-semibold">{l.elapsed || '—'}</td>
+                    <td className="px-3 py-3 tabular-nums font-semibold">{l.at}</td>
                     <td className="px-3 py-3"><span className="bg-vk-band dark:bg-gray-700 rounded-chip px-2 py-0.5 text-xs font-bold">{l.lastCp.short}</span></td>
                   </tr>
+                  </React.Fragment>
                 ))}
                 {!shown.length && (
                   <tr><td colSpan={6} className="px-6 py-4 text-vk-muted">No runners recorded yet.</td></tr>
@@ -191,8 +201,8 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
             </table>
           </div>
           <div className="px-6 py-3.5 border-t border-vk-border dark:border-gray-700 flex justify-between items-center flex-wrap gap-2">
-            <span className="text-[13px] text-vk-muted">Elapsed from race start · updates as calls are logged</span>
-            {filtered.length > LEADERS_SHOWN && (
+            <span className="text-[13px] text-vk-muted">Time at the last checkpoint · updates as calls are logged</span>
+            {(showAll || filtered.length > shown.length) && filtered.length > LEADERS_SHOWN && (
               <button type="button" onClick={() => setShowAll(v => !v)} className="text-sm font-semibold text-vk-blue">
                 {showAll ? 'Show top 5' : `Show all ${filtered.length} runners`}
               </button>

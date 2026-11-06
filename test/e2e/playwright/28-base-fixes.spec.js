@@ -181,7 +181,7 @@ test.describe('Base fixes', () => {
   test('leaders flag open data issues', async ({ page, step }) => {
     await openBase(page, { withBaseData: true });
 
-    await step('Overview — 106 (out of order) and 107 (impossible pace) carry the warning; elapsed is HH:MM', async () => {
+    await step('Overview — 106 (out of order) and 107 (impossible pace) carry the warning; time is HH:MM', async () => {
       await page.getByRole('tab', { name: 'Overview' }).click();
       await expect(leaderRow(page, 106).getByRole('img', { name: 'Open data issue' })).toBeVisible();
       await expect(leaderRow(page, 107).getByRole('img', { name: 'Open data issue' })).toBeVisible();
