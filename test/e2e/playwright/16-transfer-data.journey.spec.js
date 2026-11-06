@@ -224,7 +224,8 @@ test.describe('Checkpoint Volunteer — Transfer Data Journey', () => {
       await expect(page.getByRole('button', { name: /start scanning/i })).toBeVisible();
     });
 
-    await step('Receive tab — file import fallback is visible', async () => {
+    await step('Start Scanning — the file import fallback is offered under the camera', async () => {
+      await page.getByRole('button', { name: /start scanning/i }).click();
       await expect(page.getByText(/import from file instead/i)).toBeVisible();
     });
   });

@@ -11,7 +11,7 @@
  */
 
 import { test, expect } from './fixtures.js';
-import { goHome, fillReactInput } from './helpers.js';
+import { goHome, fillReactInput, finishSetupWizard } from './helpers.js';
 
 const RACE_NAME = 'Mountain Ultra 2025';
 const RACE_DATE = '2025-09-20';
@@ -78,16 +78,10 @@ test.describe('Race Director – Race Setup Journey', () => {
       await page.waitForTimeout(100);
       await page.getByRole('button', { name: /add range/i }).click();
       await page.waitForTimeout(200);
-      // "Create Race" on Runner Ranges step moves to Batches step
-      await page.getByRole('button', { name: /create race|save|finish/i }).click();
     });
 
-    await step('Step 4 of 4 — Waves: confirm wave and save race', async () => {
-      // Batches step — click "Create Race" to actually save the race
-      const batchesCreateBtn = page.getByRole('button', { name: /create race/i });
-      if (await batchesCreateBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await batchesCreateBtn.click();
-      }
+    await step('Waves, course map and checkpoint links — accept the defaults to create the race', async () => {
+      await finishSetupWizard(page);
     });
 
     await step('Race overview — name, 3 checkpoints and 15 runners correct', async () => {

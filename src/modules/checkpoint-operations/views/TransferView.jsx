@@ -18,7 +18,9 @@ export default function TransferView() {
   const { checkpointId } = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('send');
-  const { currentRace } = useRaceMaintenanceStore();
+  const { currentRace, loadCurrentRace } = useRaceMaintenanceStore();
+  // Opened directly or after a reload, the race isn't in memory yet: load it as the checkpoint view does
+  useEffect(() => { if (!currentRace) loadCurrentRace(); }, [currentRace, loadCurrentRace]);
 
   const checkpointNumber = parseInt(checkpointId, 10);
   const raceId = currentRace?.id ?? null;

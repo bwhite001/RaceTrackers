@@ -13,7 +13,7 @@
  */
 
 import { test, expect } from './fixtures.js';
-import { goHome, seedRace, pickFirstRaceInModal } from './helpers.js';
+import { goHome, seedRace, pickFirstRaceInModal, pickFirstCheckpointIfModal } from './helpers.js';
 
 const RACE = {
   name: 'Checkpoint Journey Race',
@@ -37,8 +37,9 @@ test.describe('Checkpoint Volunteer – Mark-Off Journey', () => {
     });
 
     await step('Select Race modal — choose race from list', async () => {
-      // Race selection modal
+      // Race selection modal, then which checkpoint this device operates
       await pickFirstRaceInModal(page);
+      await pickFirstCheckpointIfModal(page);
     });
 
     await step('Checkpoint view — runner grid loaded with bib numbers 200–210', async () => {

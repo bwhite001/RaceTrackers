@@ -10,7 +10,7 @@
  */
 
 import { test, expect } from './fixtures.js';
-import { goHome, seedRace, fillReactInput } from './helpers.js';
+import { goHome, seedRace, fillReactInput, finishSetupWizard } from './helpers.js';
 
 const RACE_A = {
   name: 'Management Race Alpha',
@@ -88,15 +88,11 @@ test.describe('Race Management Journey', () => {
       await page.waitForSelector('#min');
       await page.fill('#min', String(RACE_B.runnerRange.min));
       await page.fill('#max', String(RACE_B.runnerRange.max));
-      await page.getByRole('button', { name: /create race|save|finish/i }).click();
+      await page.getByRole('button', { name: /add range/i }).click();
     });
 
-    await step('Step 4 of 4 — Waves: confirm and save', async () => {
-      // Batches step — click Create Race again to actually save
-      const batchCreateBtn = page.getByRole('button', { name: /create race/i });
-      if (await batchCreateBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await batchCreateBtn.click();
-      }
+    await step('Waves, course map and checkpoint links — accept the defaults to create the race', async () => {
+      await finishSetupWizard(page);
     });
 
     await step('Race overview — second race created successfully', async () => {
@@ -111,10 +107,9 @@ test.describe('Race Management Journey', () => {
       // seedRace ends on overview page
       await page.waitForURL(/race-maintenance\/overview/);
 
-      // 6 runners (400–405)
-      await expect(page.getByText('6', { exact: true }).first()).toBeVisible();
-      // 2 checkpoints — use a more specific selector to avoid strict mode violation
-      await expect(page.getByText('2', { exact: true }).first()).toBeVisible();
+      // 6 runners (400–405), 2 checkpoints
+      await expect(page.getByText('6 runners', { exact: true })).toBeVisible();
+      await expect(page.getByText('2 checkpoints').first()).toBeVisible();
     });
   });
 

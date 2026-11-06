@@ -322,21 +322,22 @@ export async function createRace(page, {
   await page.getByRole('button', { name: /add range/i }).click();
   await page.waitForTimeout(200);
 
-  // Submit to Batches step
-  const createBtn = page.getByRole('button', { name: /create race|save|finish|submit/i });
-  await createBtn.click();
-
-  // Step 3 — Batches/Waves (new step)
-  // The "Create Race" from Runner Ranges goes to Batches step — click Create Race again
-  const createBtn2 = page.getByRole('button', { name: /create race/i });
-  if (await createBtn2.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await createBtn2.click();
-  }
-
-  // Should redirect to race overview
-  await page.waitForURL(/race-maintenance\/overview/);
-
+  await finishSetupWizard(page);
   return name;
+}
+
+/**
+ * From the Runner Setup step to the race overview: Waves → Course map
+ * (skipped) → Link checkpoints → overview.
+ */
+export async function finishSetupWizard(page) {
+  await page.getByRole('button', { name: /next: waves/i }).click();
+  await page.getByRole('button', { name: /next: course map/i }).click();
+  await page.getByRole('button', { name: 'Skip for now' }).click();
+  // Link checkpoints step (Next), then the overview
+  const next = page.getByRole('button', { name: /^next$/i }).first();
+  if (await next.waitFor({ timeout: 5000 }).then(() => true, () => false)) await next.click();
+  await page.waitForURL(/race-maintenance\/overview/, { timeout: 20000 });
 }
 
 /**

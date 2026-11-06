@@ -229,7 +229,7 @@ test.describe('Linked Checkpoint Journey', () => {
 
       // Summary stats should show at least 1 "Both" and at least 1 "primary-only"
       await expect(page.getByRole('button', { name: /^Both$/i })).toBeVisible({ timeout: 5000 });
-      await expect(page.getByText(/CP1 Only/i)).toBeVisible({ timeout: 3000 });
+      await expect(page.getByText(/CP1 Only/i).first()).toBeVisible({ timeout: 3000 });
     });
   });
 });

@@ -44,7 +44,7 @@ test.describe('Import / Export Journey', () => {
       await seedRace(page, RACE);
       await selectModuleWithFirstRace(page, /base station/i);
       await page.waitForURL(/base-station\/operations/, { timeout: 15000 });
-      await expect(page.locator('#commonTime').first()).toBeVisible({ timeout: 10000 });
+      await expect(page.getByRole('heading', { name: /who's calling/i })).toBeVisible({ timeout: 15000 });
     });
 
     await step('Base Station header — tap Import/Export button', async () => {
