@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import {
-  buildBoard, checkCall, isRecordable, outStatusMap, sightingsByCheckpoint, askReminders, boardCheckpoints, CALL_DUE_MINUTES, CHECK,
+  buildBoard, checkCall, isRecordable, outStatusMap, sightingsByCheckpoint, askReminders, boardCheckpoints, appliesAt, CALL_DUE_MINUTES, CHECK,
 } from '../services/receive';
 import { missedReminders, missedText, standDownLists, MISSED_CONFIRMED } from '../services/missed';
 import { checkpointDistances } from '../services/dataChecks';
@@ -37,7 +37,7 @@ const actionBtn = 'min-h-[48px] rounded-btn font-display font-extrabold text-xs 
 const BaseReceive = () => {
   const store = useBaseOperationsStore();
   const {
-    currentRace, checkpoints = [], runners = [], radioCalls = [], outList = [], raceRunnerNumbers = [], resolutions = [],
+    currentRace, checkpoints = [], runners = [], radioCalls = [], outList = [], raceRunnerNumbers = [], raceRunnerBatches: batchOf = new Map(), resolutions = [],
     receive, setReceive, resetReceive, recordCall, undoCall, setResolutionsAsked, recordCorrection,
     recordMissed, recordStandDown, addResolution, removeResolution,
   } = store;
@@ -63,9 +63,9 @@ const BaseReceive = () => {
   const distances = useMemo(() => checkpointDistances(checkpoints, currentRace), [checkpoints, currentRace]);
   const board = useMemo(() => buildBoard({
     checkpoints, records: runners, radioCalls, now, raceStart, distances,
-    fieldSize: raceRunnerNumbers.length, outCount: out.size,
+    fieldSize: raceRunnerNumbers.length, outCount: out.size, raceNumbers: raceRunnerNumbers, out, batchOf,
     dueMinutes: currentRace?.baseCallDueMinutes ?? CALL_DUE_MINUTES,
-  }), [checkpoints, runners, radioCalls, now, raceStart, raceRunnerNumbers.length, out.size, currentRace?.baseCallDueMinutes, distances]);
+  }), [checkpoints, runners, radioCalls, now, raceStart, raceRunnerNumbers, out, batchOf, currentRace?.baseCallDueMinutes, distances]);
 
   // "Ask CPx" reminders set in Reports › Needs attention, until marked asked
   const asks = useMemo(() => askReminders(resolutions, board), [resolutions, board]);
@@ -84,7 +84,7 @@ const BaseReceive = () => {
   // Runners a checkpoint missed (Part E1): the Skipped check, by checkpoint
   const order = useMemo(() => boardCheckpoints(checkpoints), [checkpoints]);
   const resolvedKeys = useMemo(() => new Set(resolutions.map(r => r.issueKey)), [resolutions]);
-  const missed = useMemo(() => missedReminders({ sightings, order, resolvedKeys }), [sightings, order, resolvedKeys]);
+  const missed = useMemo(() => missedReminders({ sightings, order, resolvedKeys, batchOf }), [sightings, order, resolvedKeys, batchOf]);
 
   // A draft saved for another race (persisted across reloads) is ignored
   const rx = receive && (!receive.raceId || receive.raceId === store.currentRaceId) ? receive : { step: 'idle', entries: [] };
@@ -94,8 +94,8 @@ const BaseReceive = () => {
     raceNumbers,
     out,
     logged: sightings.get(cur.number) ?? new Map(),
-    prev: prevCp ? { short: prevCp.short, seen: sightings.get(prevCp.number) ?? new Map() } : null,
-  }) : []), [cur, prevCp, rx.entries, raceNumbers, out, sightings]);
+    prev: prevCp ? { short: prevCp.short, seen: sightings.get(prevCp.number) ?? new Map(), applies: (n) => appliesAt(prevCp, n, batchOf) } : null,
+  }) : []), [cur, prevCp, rx.entries, raceNumbers, out, sightings, batchOf]);
   const goodCount = checked.filter(c => isRecordable(c.kind)).length;
 
   // ── actions ──────────────────────────────────────────────────────────────
@@ -601,7 +601,7 @@ const BaseReceive = () => {
       {standDownCp != null && (() => {
         const row = board.find(b => b.number === standDownCp);
         const lists = standDownLists({
-          cpNumber: standDownCp, order, sightings, raceNumbers: raceRunnerNumbers, out,
+          cpNumber: standDownCp, order, sightings, raceNumbers: raceRunnerNumbers, out, batchOf,
           fieldKnown: !(currentRace?.bibsOnTheDay && !raceRunnerNumbers.length),
         });
         return (

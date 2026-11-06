@@ -1,7 +1,7 @@
 import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import useBaseOperationsStore from '../store/baseOperationsStore';
-import { boardCheckpoints, sightingsByCheckpoint, outStatusMap, reportedUpTo } from '../services/receive';
+import { boardCheckpoints, sightingsByCheckpoint, outStatusMap, reportedUpTo, appliesAt } from '../services/receive';
 import { overdueRunners, currentLeaders, awaitingByCheckpoint, raceCounts, OVERDUE_GRACE_MINUTES } from '../services/reports';
 import { runChecks, checkpointDistances, openIssueNumbers, PACE_LIMIT_KMH } from '../services/dataChecks';
 import { outRecords } from '../services/statusValidation';
@@ -30,7 +30,7 @@ const Tile = ({ label, value, sub, className = '', testId }) => (
  */
 const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = [], onViewOverdue }) => {
   const {
-    currentRace, checkpoints = [], runners = [], outList = [], raceRunnerNumbers = [], baseRows = [], resolutions = [], radioCalls = [],
+    currentRace, checkpoints = [], runners = [], outList = [], raceRunnerNumbers = [], raceRunnerBatches: batchOf = new Map(), baseRows = [], resolutions = [], radioCalls = [],
   } = useBaseOperationsStore();
   const now = useNow(30000);
   const [filter, setFilter] = useState('all');
@@ -54,8 +54,8 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
   // Same checks as Reports › Needs attention; a leader with an open one may be in the wrong place
   const flagged = useMemo(() => openIssueNumbers(runChecks({
     baseRows, order, sightings, outByNumber: new Map(outRecords(outList).map(r => [r.number, r])), radioCalls,
-    distances: checkpointDistances(checkpoints, currentRace), limitKmh: currentRace?.paceLimitKmh ?? PACE_LIMIT_KMH,
-  }, new Set(resolutions.map(r => r.issueKey)))), [baseRows, order, sightings, outList, radioCalls, checkpoints, currentRace, resolutions]);
+    distances: checkpointDistances(checkpoints, currentRace), limitKmh: currentRace?.paceLimitKmh ?? PACE_LIMIT_KMH, batchOf,
+  }, new Set(resolutions.map(r => r.issueKey)))), [baseRows, order, sightings, outList, radioCalls, checkpoints, currentRace, resolutions, batchOf]);
   const field = raceRunnerNumbers.length || getRunnerTotal(currentRace);
   const activeField = Math.max(0, field - out.size);
   // One definition shared with Reports (D2): on course = in the race, not finished
@@ -120,16 +120,21 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
           <h2 id="cphd" className="font-display font-bold text-lg text-vk-navy dark:text-white">Checkpoint progress</h2>
           {order.map(cp => {
             const count = sightings.get(cp.number)?.size ?? 0;
-            const pct = starters ? Math.min(100, Math.round((count / starters) * 100)) : 0;
+            // A checkpoint only some waves pass is measured against those waves
+            const waved = cp.allowedBatches?.length && batchOf.size;
+            const cpNumbers = waved ? raceRunnerNumbers.filter(n => appliesAt(cp, n, batchOf)) : null;
+            const cpStarters = waved ? cpNumbers.filter(n => out.get(n) !== 'DNS').length : starters;
+            const cpActive = waved ? cpNumbers.filter(n => !out.has(n)).length : activeField;
+            const pct = cpStarters ? Math.min(100, Math.round((count / cpStarters) * 100)) : 0;
             const finish = cp.number === BASE_STATION_CP;
-            const closed = !finish && activeField > 0 && count >= activeField;
+            const closed = !finish && cpActive > 0 && count >= cpActive;
             return (
               <div key={cp.number} className="flex flex-col gap-1.5">
                 <div className="flex justify-between text-sm">
                   <span className="font-bold">{cp.short}</span>
                   <span><strong>{count}</strong> <span className="text-vk-muted">· {pct}%</span></span>
                 </div>
-                <div className="h-3 rounded-full bg-vk-band dark:bg-gray-700 overflow-hidden" role="img" aria-label={`${cp.short}: ${count} of ${starters}`}>
+                <div className="h-3 rounded-full bg-vk-band dark:bg-gray-700 overflow-hidden" role="img" aria-label={`${cp.short}: ${count} of ${cpStarters}`}>
                   <div className={`h-full ${finish ? 'bg-vk-gold' : closed ? 'bg-vk-navy' : 'bg-vk-blue'}`} style={{ width: `${pct}%` }} />
                 </div>
               </div>

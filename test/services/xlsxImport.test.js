@@ -137,3 +137,53 @@ describe('FIELD_OPTIONS', () => {
     expect(FIELD_OPTIONS).toContainEqual(expect.objectContaining({ value: 'firstName' }));
   });
 });
+
+// ---------------------------------------------------------------------------
+// Race-office entry lists (Mt Glorious 2026 layout, synthetic names)
+// ---------------------------------------------------------------------------
+describe('entry list with Race No, Name, Category and Wave', () => {
+  const headers = ['Event', 'Name', 'Race No', 'Category', 'Gender', 'Age', 'Team', 'Wave'];
+
+  it('detects Race No as the bib, Name as full name, and Wave (not Category) as the wave', () => {
+    const { mappings } = detectColumnMappings(headers);
+    expect(mappings['Race No']).toBe('number');
+    expect(mappings['Name']).toBe('fullName');
+    expect(mappings['Wave']).toBe('batchNumber');
+    expect(mappings['Category']).toBe('ignore');
+    expect(mappings['Event']).toBe('ignore');
+  });
+
+  it('Category is still the wave when there is no Wave column', () => {
+    const { mappings } = detectColumnMappings(['Bib', 'Category']);
+    expect(mappings['Category']).toBe('batchNumber');
+  });
+
+  it('splits a single Name column into first and last', () => {
+    const { mappings } = detectColumnMappings(['Race No', 'Name']);
+    const { valid } = applyMappingsToRows([
+      { 'Race No': '1', Name: 'Jane Smith' },
+      { 'Race No': '2', Name: 'VAN DER BERG, Pieter' },
+      { 'Race No': '3', Name: 'Mary Anne  de Silva' },
+      { 'Race No': '4', Name: 'Cher' },
+    ], mappings);
+    expect(valid.map(r => [r.firstName, r.lastName])).toEqual([
+      ['Jane', 'Smith'], ['Pieter', 'VAN DER BERG'], ['Mary Anne de', 'Silva'], ['Cher', null],
+    ]);
+  });
+
+  it('separate first / last columns win over a full name', () => {
+    const { valid } = applyMappingsToRows(
+      [{ n: '5', f: 'Ann', l: 'Lee', full: 'Someone Else' }],
+      { n: 'number', f: 'firstName', l: 'lastName', full: 'fullName' },
+    );
+    expect([valid[0].firstName, valid[0].lastName]).toEqual(['Ann', 'Lee']);
+  });
+
+  it('wave labels number in order of first appearance', () => {
+    const { mappings } = detectColumnMappings(headers);
+    const { valid } = applyMappingsToRows([
+      { 'Race No': '1', Wave: 'Championship' }, { 'Race No': '60', Wave: 'Community' }, { 'Race No': '150', Wave: 'Wave 1' },
+    ], mappings);
+    expect(valid.map(r => r.batchNumber)).toEqual([1, 2, 3]);
+  });
+});

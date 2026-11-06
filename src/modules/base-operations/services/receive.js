@@ -85,6 +85,17 @@ export function reportedUpTo(records, radioCalls = []) {
   return out;
 }
 
+/**
+ * Does this checkpoint see this bib? A checkpoint with no wave list sees every
+ * wave; a bib with no wave (late entry, or no batchOf given) is seen everywhere.
+ * @param {Map<number, number>} [batchOf]  bib → wave (batchNumber)
+ */
+export function appliesAt(cp, number, batchOf) {
+  const waves = cp?.allowedBatches;
+  if (!waves?.length || !batchOf?.has(number)) return true;
+  return waves.includes(batchOf.get(number));
+}
+
 /** Board order: race checkpoints ascending, then Finish (base station, cp 0). */
 export function boardCheckpoints(checkpoints = []) {
   const cps = [...checkpoints]
@@ -94,6 +105,7 @@ export function boardCheckpoints(checkpoints = []) {
       number: cp.number,
       short: `CP${cp.number}`,
       name: cp.locationName || cp.name || `Checkpoint ${cp.number}`,
+      allowedBatches: cp.allowedBatches ?? null,
     }));
   return [...cps, { number: BASE_STATION_CP, short: 'Finish', name: 'Finish' }];
 }
@@ -106,7 +118,8 @@ export function boardCheckpoints(checkpoints = []) {
  * @param {Map<number,string>} ctx.out        bib → 'DNF' | 'DNS'
  * @param {number[]} ctx.earlier              numbers already heard earlier in this call
  * @param {Map<number,string>} ctx.logged     bib → time already recorded at this checkpoint
- * @param {{ short: string, seen: Map<number,string> } | null} ctx.prev  previous checkpoint
+ * @param {{ short: string, seen: Map<number,string>, applies?: (n: number) => boolean } | null} ctx.prev
+ *   previous checkpoint; applies() false for a bib whose wave doesn't pass it
  * @param {boolean} [late]                   base accepted this number as a late entry
  * @returns {{ kind: 'ok'|'info'|'warn'|'bad', note: string, canAdd?: boolean }}
  *   A number outside the field is not rejected outright (bibs change on the
@@ -121,7 +134,7 @@ export function checkBaseNumber(num, { raceNumbers, out, earlier = [], logged, p
   if (out.has(num)) return { kind: CHECK.BAD, note: out.get(num) };
   if (earlier.includes(num)) return { kind: CHECK.WARN, note: 'Said twice' };
   if (logged?.has(num)) return { kind: CHECK.WARN, note: `Had ${hhmm(logged.get(num))}` };
-  if (prev && !prev.seen?.has(num)) return { kind: CHECK.INFO, note: `Not seen ${prev.short}` };
+  if (prev && !prev.seen?.has(num) && (prev.applies?.(num) ?? true)) return { kind: CHECK.INFO, note: `Not seen ${prev.short}` };
   return { kind: CHECK.OK, note: '' };
 }
 
@@ -163,7 +176,7 @@ export function checkCall(entries, ctx) {
 /**
  * Checkpoint board rows: count, last call, how far behind, Due / OK / Closed.
  */
-export function buildBoard({ checkpoints, records, radioCalls = [], now, raceStart, fieldSize, outCount = 0, dueMinutes = CALL_DUE_MINUTES, distances = new Map() }) {
+export function buildBoard({ checkpoints, records, radioCalls = [], now, raceStart, fieldSize, outCount = 0, dueMinutes = CALL_DUE_MINUTES, distances = new Map(), raceNumbers = [], out = new Map(), batchOf = new Map() }) {
   const cps = boardCheckpoints(checkpoints);
   const seen = sightingsByCheckpoint(records);
   const upTo = reportedUpTo(records, radioCalls);
@@ -174,7 +187,6 @@ export function buildBoard({ checkpoints, records, radioCalls = [], now, raceSta
   return cps.map((cp, i) => {
     const here = seen.get(cp.number) ?? new Map();
     const prev = i > 0 ? cps[i - 1] : null;
-    const prevCount = prev ? (seen.get(prev.number)?.size ?? 0) : null;
     const calls = radioCalls.filter(c => c.checkpointNumber === cp.number && !c.undoneAt);
     const lastCallAt = calls.map(c => c.receivedAt).sort().at(-1) ?? null;
     const lastBlock = upTo.get(cp.number) ?? null;
@@ -182,8 +194,14 @@ export function buildBoard({ checkpoints, records, radioCalls = [], now, raceSta
     const behind = lastBlock ? Math.max(0, TimeUtils.minutesBetween(lastBlock, nowBlock)) : null;
     // Closed when everyone is through, or base stood the checkpoint down (Part E2)
     const stoodDown = radioCalls.some(c => c.kind === 'stand-down' && !c.undoneAt && c.checkpointNumber === cp.number);
-    const closed = stoodDown || (activeField > 0 && here.size >= activeField);
-    const expected = prev ? prevCount > here.size : !!raceStarted;
+    // A checkpoint only some waves pass closes on those waves' field
+    const cpField = cp.allowedBatches?.length && batchOf.size
+      ? [...raceNumbers].filter(n => !out.has(n) && appliesAt(cp, n, batchOf)).length : activeField;
+    const closed = stoodDown || (cpField > 0 && here.size >= cpField);
+    // Expected: someone through the previous checkpoint who also passes this one, not yet here
+    const expected = prev
+      ? [...(seen.get(prev.number)?.keys() ?? [])].some(n => !here.has(n) && !out.has(n) && appliesAt(cp, n, batchOf))
+      : !!raceStarted;
     // Earliest a runner could be here: leader at the previous checkpoint (or the start) + leg at DUE_LEADER_KMH
     const farKm = distances.get(cp.number);
     const nearKm = prev ? distances.get(prev.number) : 0;

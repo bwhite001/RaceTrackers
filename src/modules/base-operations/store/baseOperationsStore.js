@@ -62,6 +62,7 @@ const useBaseOperationsStore = create(
 
       outList: [],
       raceRunnerNumbers: [],
+      raceRunnerBatches: new Map(), // bib → wave, for checkpoints only some waves pass
       fieldChanges: [],
       radioCalls: [],
       baseRows: [],
@@ -190,6 +191,7 @@ const useBaseOperationsStore = create(
             stats,
             // Base's field = setup runners + late entries (race-day Part B)
             raceRunnerNumbers: fieldNumbers(raceRunnerRows.map(r => r.number), fieldChanges),
+            raceRunnerBatches: new Map(raceRunnerRows.filter(r => r.batchNumber != null).map(r => [r.number, r.batchNumber])),
             fieldChanges,
             radioCalls,
             outList,

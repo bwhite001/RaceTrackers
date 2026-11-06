@@ -36,6 +36,7 @@ const SECTION_MAP = {
   'runner name/gender section appears after adding a range':             'setup',
   'waves step shows default wave and allows adding more':                'setup',
   'wave name and time fields are editable and save':                     'setup',
+  'an 11 km field seen only at CP4 is not missed at CP1 to CP3':          'setup',
   'callout sheet tab shows runners who passed but not called in':        'checkpoint',
   'pending count badge decrements when runner is called in':             'checkpoint',
   'home page landing shows the race management module card':             'navigation',

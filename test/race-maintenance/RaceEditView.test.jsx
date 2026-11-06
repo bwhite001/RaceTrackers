@@ -6,9 +6,8 @@ import RaceEditView from '../../src/modules/race-maintenance/views/RaceEditView'
 
 // ── Mocks ─────────────────────────────────────────────────────────────────
 
-vi.mock('../../src/store/useRaceStore.js', () => ({
-  useRaceStore: vi.fn(() => ({ runners: [] })),
-}));
+// This race's runners and wave names, as RaceEditView reads them from the database
+const mockDb = vi.hoisted(() => ({ runners: [], batches: [] }));
 
 vi.mock('../../src/shared/components/ui/Toast', () => ({
   useToast: () => ({ addToast: vi.fn() }),
@@ -22,12 +21,14 @@ vi.mock('../../src/modules/race-maintenance/components/RosterImport.jsx', () => 
   default: () => <div data-testid="roster-import" />,
 }));
 
-// Stub the database schema import used for hasCheckpointRunnerData
+// Stub the database schema import (checkpoint runner count, runners, wave names)
 vi.mock('../../src/shared/services/database/schema.js', () => ({
   default: {
     checkpoint_runners: {
       where: () => ({ equals: () => ({ count: async () => 0 }) }),
     },
+    runners: { where: () => ({ equals: () => ({ sortBy: async () => mockDb.runners }) }) },
+    race_batches: { where: () => ({ equals: () => ({ sortBy: async () => mockDb.batches }) }) },
   },
 }));
 
@@ -188,10 +189,8 @@ describe('RaceEditView', () => {
   });
 
   it('shows waves checkboxes when runners have multiple batch numbers', async () => {
-    const useRaceStore = (await import('../../src/store/useRaceStore.js')).useRaceStore;
-    useRaceStore.mockReturnValue({ runners: [
-      { batchNumber: 1 }, { batchNumber: 1 }, { batchNumber: 2 },
-    ] });
+    mockDb.runners = [{ number: 1, batchNumber: 1 }, { number: 2, batchNumber: 1 }, { number: 3, batchNumber: 2 }];
+    mockDb.batches = [{ batchNumber: 1, batchName: 'Championship' }, { batchNumber: 2, batchName: 'Wave 2' }];
 
     renderAt('?raceId=1');
     await waitFor(() => expect(screen.getByDisplayValue('Coastal Classic')).toBeInTheDocument());
@@ -199,13 +198,13 @@ describe('RaceEditView', () => {
 
     await waitFor(() => expect(screen.getAllByLabelText(/wave 1/i).length).toBeGreaterThan(0));
     expect(screen.getAllByLabelText(/wave 2/i).length).toBeGreaterThan(0);
+    // The imported name says which wave is which; a name that only repeats the number is not shown twice
+    expect(screen.getAllByText('Wave 1 · Championship').length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Wave 2 · /)).toBeNull();
   });
 
   it('does not show wave controls when all runners are in one batch', async () => {
-    const useRaceStore = (await import('../../src/store/useRaceStore.js')).useRaceStore;
-    useRaceStore.mockReturnValue({ runners: [
-      { batchNumber: 1 }, { batchNumber: 1 },
-    ] });
+    mockDb.runners = [{ number: 1, batchNumber: 1 }, { number: 2, batchNumber: 1 }];
 
     renderAt('?raceId=1');
     await waitFor(() => expect(screen.getByDisplayValue('Coastal Classic')).toBeInTheDocument());
@@ -216,10 +215,7 @@ describe('RaceEditView', () => {
 
   it('calls updateCheckpoint with allowedBatches when Save Waves is clicked', async () => {
     const { default: useStore } = await import('../../src/modules/race-maintenance/store/raceMaintenanceStore');
-    const useRaceStore = (await import('../../src/store/useRaceStore.js')).useRaceStore;
-    useRaceStore.mockReturnValue({ runners: [
-      { batchNumber: 1 }, { batchNumber: 2 },
-    ] });
+    mockDb.runners = [{ number: 1, batchNumber: 1 }, { number: 2, batchNumber: 2 }];
 
     renderAt('?raceId=1');
     await waitFor(() => expect(screen.getByDisplayValue('Coastal Classic')).toBeInTheDocument());

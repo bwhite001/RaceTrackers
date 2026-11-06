@@ -5,7 +5,7 @@
 import TimeUtils from '../../../services/timeUtils.js';
 import { hhmm } from '../../../services/blocks.js';
 import { BASE_STATION_CP } from '../../../types/index.js';
-import { sightingsByCheckpoint, outStatusMap, boardCheckpoints } from './receive.js';
+import { sightingsByCheckpoint, outStatusMap, boardCheckpoints, appliesAt } from './receive.js';
 import { outRecords } from './statusValidation.js';
 
 const median = (xs) => {
@@ -133,7 +133,7 @@ export function stillOnCourse({ sightings, order, out, raceNumbers }) {
  * @param {Map<number,{status:'DNF'|'DNS', checkpoint?:number|null, time?:string|null}>} out
  * @returns {Array<{ number, status: string, cells: Array<{ text: string, flag: boolean }> }>}
  */
-export function timesMatrix({ sightings, order, out, raceNumbers, missed = new Set() }) {
+export function timesMatrix({ sightings, order, out, raceNumbers, missed = new Set(), batchOf }) {
   return [...raceNumbers].sort((a, b) => a - b).map(number => {
     const o = out.get(number);
     const cells = order.map(cp => {
@@ -145,6 +145,7 @@ export function timesMatrix({ sightings, order, out, raceNumbers, missed = new S
       if (o?.status === 'DNF' && o.checkpoint != null && o.checkpoint === cp.number) return { text: 'DNF', flag: false };
       // The checkpoint confirmed it never saw this runner (Part E1)
       if (missed.has(`${number}:${cp.number}`)) return { text: 'missed', flag: false, missed: true };
+      if (!appliesAt(cp, number, batchOf)) return { text: '', flag: false }; // their wave doesn't pass here
       return { text: '—', flag: false };
     });
     const status = !o ? (sightings.get(BASE_STATION_CP)?.has(number) ? 'Finished' : 'On course') : o.status === 'DNS' ? 'DNS'

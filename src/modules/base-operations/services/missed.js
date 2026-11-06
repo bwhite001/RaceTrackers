@@ -6,6 +6,7 @@
  * and clears itself when the checkpoint calls the bib in or base resolves it.
  */
 import { findSkipped } from './dataChecks.js';
+import { appliesAt } from './receive.js';
 
 /** Resolution meaning "the checkpoint confirmed they didn't see this runner". */
 export const MISSED_CONFIRMED = 'missed-confirmed';
@@ -14,9 +15,9 @@ export const MISSED_CONFIRMED = 'missed-confirmed';
  * Open missed reminders by checkpoint: Map(cp → [{ number, issueKey, seenAt }]).
  * Resolved skip issues (asked, checked, confirmed missed) are left out.
  */
-export function missedReminders({ sightings, order, resolvedKeys = new Set() }) {
+export function missedReminders({ sightings, order, resolvedKeys = new Set(), batchOf }) {
   const out = new Map();
-  for (const issue of findSkipped({ sightings, order })) {
+  for (const issue of findSkipped({ sightings, order, batchOf })) {
     if (resolvedKeys.has(issue.key)) continue;
     const cp = issue.askCp.number;
     if (!out.has(cp)) out.set(cp, []);
@@ -48,13 +49,13 @@ export function confirmedMissed(resolutions = []) {
  * and not seen past here (still to account for). fieldKnown is false for a
  * "bibs assigned on the day" race with no bibs yet.
  */
-export function standDownLists({ cpNumber, order, sightings, raceNumbers = [], out = new Map(), fieldKnown = true }) {
+export function standDownLists({ cpNumber, order, sightings, raceNumbers = [], out = new Map(), fieldKnown = true, batchOf }) {
   const idx = order.findIndex(c => c.number === cpNumber);
   const here = sightings.get(cpNumber) ?? new Map();
   const seenFurther = [];
   const notSeenPast = [];
   for (const number of [...raceNumbers].sort((a, b) => a - b)) {
-    if (out.has(number) || here.has(number)) continue;
+    if (out.has(number) || here.has(number) || !appliesAt(order[idx], number, batchOf)) continue;
     const seenAt = order.map((c, i) => ({ c, i })).filter(({ c }) => sightings.get(c.number)?.has(number));
     const later = seenAt.find(({ i }) => i > idx);
     if (later) seenFurther.push({ number, at: later.c.short });

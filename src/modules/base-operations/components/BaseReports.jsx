@@ -35,7 +35,7 @@ const Th = ({ children, first, right }) => (
 const BaseReports = ({ initialReport = 'missing' }) => {
   const store = useBaseOperationsStore();
   const {
-    currentRace, checkpoints = [], runners = [], radioCalls = [], outList = [], raceRunnerNumbers = [],
+    currentRace, checkpoints = [], runners = [], radioCalls = [], outList = [], raceRunnerNumbers = [], raceRunnerBatches: batchOf = new Map(),
     baseRows = [], resolutions = [], downloadReport,
   } = store;
   const now = useNow(30000);
@@ -69,14 +69,14 @@ const BaseReports = ({ initialReport = 'missing' }) => {
   const counts = useMemo(() => raceCounts({ sightings, out, raceNumbers: raceRunnerNumbers }), [sightings, out, raceRunnerNumbers]);
   const onCourse = useMemo(() => stillOnCourse({ sightings, order, out, raceNumbers }), [sightings, order, out, raceNumbers]);
   const missed = useMemo(() => confirmedMissed(resolutions), [resolutions]);
-  const matrix = useMemo(() => timesMatrix({ sightings, order, out: outForMatrix, raceNumbers, missed }), [sightings, order, outForMatrix, raceNumbers, missed]);
-  const board = useMemo(() => buildBoard({ checkpoints, records: runners, radioCalls, now, raceStart, fieldSize: raceNumbers.length, outCount: out.size, distances }),
-    [checkpoints, runners, radioCalls, now, raceStart, raceNumbers.length, out.size, distances]);
+  const matrix = useMemo(() => timesMatrix({ sightings, order, out: outForMatrix, raceNumbers, missed, batchOf }), [sightings, order, outForMatrix, raceNumbers, missed, batchOf]);
+  const board = useMemo(() => buildBoard({ checkpoints, records: runners, radioCalls, now, raceStart, fieldSize: raceNumbers.length, outCount: out.size, distances, raceNumbers, out, batchOf }),
+    [checkpoints, runners, radioCalls, now, raceStart, raceNumbers, out, distances, batchOf]);
   const calls = useMemo(() => callLog({ radioCalls, board }), [radioCalls, board]);
   const issues = useMemo(() => runChecks({
     baseRows, order, sightings, outByNumber, radioCalls, distances, limitKmh: currentRace?.paceLimitKmh ?? PACE_LIMIT_KMH,
-    raceNumbers: new Set(raceNumbers),
-  }, resolvedKeys), [baseRows, order, sightings, outByNumber, radioCalls, distances, currentRace?.paceLimitKmh, resolvedKeys, raceNumbers]);
+    raceNumbers: new Set(raceNumbers), batchOf,
+  }, resolvedKeys), [baseRows, order, sightings, outByNumber, radioCalls, distances, currentRace?.paceLimitKmh, resolvedKeys, raceNumbers, batchOf]);
 
   const issueTotal = Object.values(issues).reduce((n, list) => n + list.length, 0);
   const commonCounts = {

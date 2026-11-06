@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import useRaceMaintenanceStore from '../store/raceMaintenanceStore';
 import { useToast } from '../../../shared/components/ui/Toast';
 import RosterImport from '../components/RosterImport.jsx';
-import { useRaceStore } from '../../../store/useRaceStore.js';
 import {
   Card, CardBody, CardFooter,
   Button,
@@ -17,7 +16,6 @@ const RaceEditView = () => {
   const rawId = searchParams.get('raceId');
   const raceId = rawId ? parseInt(rawId, 10) : null;
   const { addToast } = useToast();
-  const { runners } = useRaceStore();
 
   const STEPS = ['Core Details', 'Checkpoints', 'Runner Info'];
   const [currentStep, setCurrentStep] = useState(0);
@@ -67,7 +65,19 @@ const RaceEditView = () => {
   const [addingCp, setAddingCp] = useState(false);
   const [hasRunnerData, setHasRunnerData] = useState(false);
 
-  // Derive unique batch numbers from loaded runners
+  // This race's runners and wave names, read here: the global race store may hold another race (or none)
+  const [runners, setRunners] = useState([]);
+  const [batchNames, setBatchNames] = useState(new Map());
+  useEffect(() => {
+    if (!raceId) return;
+    import('../../../shared/services/database/schema.js').then(({ default: db }) => Promise.all([
+      db.runners.where('raceId').equals(raceId).sortBy('number'),
+      db.race_batches.where('raceId').equals(raceId).sortBy('batchNumber'),
+    ])).then(([rs, bs]) => {
+      setRunners(rs);
+      setBatchNames(new Map(bs.map(b => [b.batchNumber, b.batchName])));
+    }).catch(() => {});
+  }, [raceId, currentRace]); // currentRace reloads after a roster import
   const availableBatches = [...new Set(runners.map(r => r.batchNumber).filter(Boolean))].sort((a, b) => a - b);
 
   // Load race on mount
@@ -397,7 +407,7 @@ const RaceEditView = () => {
                               onChange={() => handleToggleCpBatch(cp, b)}
                               aria-label={`Checkpoint ${cp.number} wave ${b}`}
                             />
-                            Wave {b}
+                            Wave {b}{batchNames.get(b) && batchNames.get(b) !== `Wave ${b}` ? ` · ${batchNames.get(b)}` : ''}
                           </label>
                         ))}
                         <Button

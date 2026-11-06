@@ -16,6 +16,7 @@ export const FIELD_OPTIONS = [
   { value: 'number',      label: 'Bib # (required)' },
   { value: 'firstName',   label: 'First Name' },
   { value: 'lastName',    label: 'Last Name' },
+  { value: 'fullName',    label: 'Full Name (split into first / last)' },
   { value: 'gender',      label: 'Gender' },
   { value: 'age',         label: 'Age' },
   { value: 'batchNumber', label: 'Wave / Batch' },
@@ -24,9 +25,10 @@ export const FIELD_OPTIONS = [
 
 /** Fuzzy-match rules: appField → patterns (lowercase, trimmed). */
 const FIELD_PATTERNS = {
-  number:      ['#', 'bib', 'bib number', 'bib numbers', 'number', 'participant id', 'id'],
+  number:      ['#', 'bib', 'bib number', 'bib numbers', 'bib no', 'race no', 'race number', 'number', 'participant id', 'id'],
   firstName:   ['first', 'first name', 'firstname', 'given', 'given name'],
   lastName:    ['last', 'last name', 'lastname', 'surname', 'family', 'family name'],
+  fullName:    ['name', 'full name', 'runner name', 'participant name', 'competitor name'],
   gender:      ['sex', 'gender', 'm/f'],
   age:         ['age', 'years', 'dob', 'date of birth'],
   batchNumber: ['wave', 'batch', 'batch number', 'batchnumber', 'category', 'sub-event', 'subevent', 'division'],
@@ -38,7 +40,8 @@ const FIELD_PATTERNS = {
 
 /**
  * Auto-detect which xlsx column maps to which app field.
- * Each app field can only be assigned once (first match wins).
+ * Each app field can only be assigned once; when several headers match, the
+ * earlier pattern wins ("Wave" over "Category" for the wave column).
  *
  * @param {string[]} headers - xlsx column header names
  * @returns {{ mappings: Object<string, string>, autoDetected: Set<string> }}
@@ -46,26 +49,16 @@ const FIELD_PATTERNS = {
 export function detectColumnMappings(headers) {
   const mappings = {};
   const autoDetected = new Set();
-  const usedFields = new Set();
+  const lower = (h) => h.trim().toLowerCase();
 
-  for (const header of headers) {
-    const lower = header.trim().toLowerCase();
-    let matched = false;
-
-    for (const [field, patterns] of Object.entries(FIELD_PATTERNS)) {
-      if (!usedFields.has(field) && patterns.includes(lower)) {
-        mappings[header] = field;
-        autoDetected.add(header);
-        usedFields.add(field);
-        matched = true;
-        break;
-      }
-    }
-
-    if (!matched) {
-      mappings[header] = 'ignore';
+  for (const [field, patterns] of Object.entries(FIELD_PATTERNS)) {
+    const header = patterns.map(p => headers.find(h => !(h in mappings) && lower(h) === p)).find(Boolean);
+    if (header) {
+      mappings[header] = field;
+      autoDetected.add(header);
     }
   }
+  for (const header of headers) if (!(header in mappings)) mappings[header] = 'ignore';
 
   return { mappings, autoDetected };
 }
@@ -117,11 +110,19 @@ export function applyMappingsToRows(rows, mappings) {
       return;
     }
 
-    // firstName
-    const firstName = (fieldToCol.firstName ? (row[fieldToCol.firstName] ?? '') : '').toString().trim() || null;
-
-    // lastName
-    const lastName = (fieldToCol.lastName ? (row[fieldToCol.lastName] ?? '') : '').toString().trim() || null;
+    // firstName / lastName — or one "Name" column split: "SMITH, Jane" or "Jane Smith"
+    let firstName = (fieldToCol.firstName ? (row[fieldToCol.firstName] ?? '') : '').toString().trim() || null;
+    let lastName = (fieldToCol.lastName ? (row[fieldToCol.lastName] ?? '') : '').toString().trim() || null;
+    const fullName = (fieldToCol.fullName ? (row[fieldToCol.fullName] ?? '') : '').toString().trim().replace(/\s+/g, ' ');
+    if (fullName && !firstName && !lastName) {
+      const comma = fullName.indexOf(',');
+      const space = fullName.lastIndexOf(' ');
+      if (comma >= 0) [lastName, firstName] = [fullName.slice(0, comma).trim(), fullName.slice(comma + 1).trim()];
+      else if (space > 0) [firstName, lastName] = [fullName.slice(0, space), fullName.slice(space + 1)];
+      else firstName = fullName;
+      firstName ||= null;
+      lastName ||= null;
+    }
 
     // gender — accept single-char (M/F/X) or full-word values (Male/Female/Non-Binary)
     const rawGender = (fieldToCol.gender ? (row[fieldToCol.gender] ?? '') : '').toString().trim();

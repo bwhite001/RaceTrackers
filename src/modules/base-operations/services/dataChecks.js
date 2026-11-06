@@ -6,7 +6,7 @@
  */
 import TimeUtils from '../../../services/timeUtils.js';
 import { hhmm } from '../../../services/blocks.js';
-import { recordTime } from './receive.js';
+import { recordTime, appliesAt } from './receive.js';
 import { BASE_STATION_CP } from '../../../types/index.js';
 
 export const PACE_LIMIT_KMH = 20;
@@ -85,13 +85,13 @@ export function findOutOfOrder({ sightings, order }) {
 }
 
 /** Seen further on but missing at an earlier checkpoint. */
-export function findSkipped({ sightings, order }) {
+export function findSkipped({ sightings, order, batchOf }) {
   const issues = [];
   for (const [number, trail] of runnerTrails(sightings, order)) {
     const furthest = trail[trail.length - 1];
     const seenIdx = new Set(trail.map(t => t.idx));
     for (let idx = 0; idx < furthest.idx; idx++) {
-      if (seenIdx.has(idx)) continue;
+      if (seenIdx.has(idx) || !appliesAt(order[idx], number, batchOf)) continue;
       const missing = order[idx];
       const before = [...trail].reverse().find(t => t.idx < idx);
       const after = trail.find(t => t.idx > idx);
