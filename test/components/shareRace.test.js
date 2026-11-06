@@ -26,6 +26,17 @@ describe('A7 — sharing a race', () => {
     expect(full.data.checkpointRunners).toHaveLength(1);
   });
 
+  it('a checkpoint only some waves pass keeps its waves on the volunteer device', async () => {
+    const cp = await db.checkpoints.where('raceId').equals(raceId).first();
+    await db.checkpoints.update(cp.id, { allowedBatches: [2, 3] });
+    await db.runners.where('raceId').equals(raceId).modify(r => { r.batchNumber = r.number < 200 ? 1 : 2; });
+    const pkg = await ExportService.exportRaceSetup(raceId);
+    await Promise.all(['races', 'runners', 'checkpoints'].map(t => db[t].clear()));
+    await ImportService.importWithStrategy(pkg, 'newer');
+    expect((await db.checkpoints.toArray())[0].allowedBatches).toEqual([2, 3]);
+    expect((await db.runners.where('number').equals(100).first()).batchNumber).toBe(1);
+  });
+
   it('the email link stays short whatever the race size', () => {
     const name = 'Mt Glorious Mountain Trails';
     const url = shareEmailUrl(name, setupFileName(name));
