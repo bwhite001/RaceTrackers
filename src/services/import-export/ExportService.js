@@ -68,10 +68,13 @@ export class ExportService {
       }
 
       // Every per-race table, so a restore brings back everything base did
+      // One read transaction: a call and its rows land in the backup together
       const exportData = { races: [race] };
-      for (const [key, table] of RACE_TABLES) {
-        exportData[key] = await db[table].where('raceId').equals(raceId).toArray();
-      }
+      await db.transaction('r', RACE_TABLES.map(([, table]) => db[table]), async () => {
+        for (const [key, table] of RACE_TABLES) {
+          exportData[key] = await db[table].where('raceId').equals(raceId).toArray();
+        }
+      });
       const { runners, checkpoints, checkpointRunners, baseStationRunners } = exportData;
 
       // Generate checksum

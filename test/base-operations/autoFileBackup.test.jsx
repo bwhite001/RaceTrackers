@@ -107,6 +107,27 @@ describe('automatic file backup', () => {
     await waitFor(() => expect(again.result.current.idleSeconds).toBe(10));
   });
 
+  it('leaving base writes what is still waiting', async () => {
+    const { result, unmount } = renderHook(() => useAutoFileBackup(raceId));
+    await act(() => result.current.chooseFolder());
+    await act(() => db.radio_calls.add({ raceId, checkpointNumber: 1, receivedAt: '2026-11-07T21:30:00.000Z', undoneAt: null }));
+    await waitFor(() => expect(result.current.status).toBe('pending'));
+    unmount();
+    await waitFor(() => expect(fileData(folder).radioCalls).toHaveLength(1));
+  });
+
+  it('Back up now waits for a write already going — never two at once', async () => {
+    const { result } = renderHook(() => useAutoFileBackup(raceId));
+    await act(() => result.current.chooseFolder());
+    await act(() => db.radio_calls.add({ raceId, checkpointNumber: 1, receivedAt: '2026-11-07T21:30:00.000Z', undoneAt: null }));
+    folder.delay = 50;
+    await tick(30000); // the scheduled write starts and is slow
+    await act(() => result.current.backupNow());
+    await waitFor(() => expect(folder.open).toBe(0));
+    expect(folder.maxOpen).toBe(1);
+    expect(fileData(folder).radioCalls).toHaveLength(1);
+  });
+
   it('hidden when the browser has no folder access', () => {
     delete window.showDirectoryPicker;
     const { container } = render(<FileBackupStatus raceId={1} />);

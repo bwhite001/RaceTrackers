@@ -65,6 +65,7 @@ describe('full race backup', () => {
     await db.audit_log.add({ raceId, entityType: 'radio_call', action: 'receive-call', performedAt: '2026-11-07T21:31:00.000Z' });
     await db.audit_log.add({ raceId, entityType: 'runner', action: 'withdraw', performedAt: '2026-11-07T21:32:00.000Z' });
     await db.base_station_runners.add({ raceId, checkpointNumber: 1, number: 14, status: 'superseded', commonTime: '2026-11-07T21:05:00.000Z' });
+    await db.base_station_runners.add({ raceId, checkpointNumber: 0, number: 12, status: 'passed', commonTime: '2026-11-07T22:05:00.000Z' }); // Finish
     await db.withdrawal_records.add({ raceId, runnerNumber: 15, checkpoint: null, withdrawalTime: '2026-11-07T21:33:00.000Z', reversedAt: null });
     await db.withdrawal_records.add({ raceId, runnerNumber: 16, checkpoint: 0, withdrawalTime: '2026-11-07T21:34:00.000Z', reversedAt: null });
     const pkg = await ExportService.exportRace(raceId);
@@ -72,6 +73,54 @@ describe('full race backup', () => {
     await ImportService.importWithStrategy(pkg, 'newer');
     expect(await db.withdrawal_records.where('raceId').equals(raceId).count()).toBe(3);
     expect(await db.audit_log.where('raceId').equals(raceId).count()).toBe(3);
+  });
+
+  it('restores onto a device with another race without touching it', async () => {
+    const pkg = await ExportService.exportRace(raceId);
+    await clearAll();
+    // The spare device's own race, numbered from 1 too — but not the same record ids
+    await db.races.put({ id: 900, name: 'Training', date: '2026-11-01', startTime: '07:00', minRunner: 1, maxRunner: 5 });
+    await db.radio_calls.add({ raceId: 900, checkpointNumber: 1, receivedAt: '2026-11-01T21:00:00.000Z', undoneAt: null });
+    await ImportService.importWithStrategy(pkg, 'newer');
+    expect(await db.radio_calls.where('raceId').equals(900).count()).toBe(1);
+    expect(await db.radio_calls.where('raceId').equals(raceId).count()).toBe(1);
+  });
+
+  it('refuses, and changes nothing, when a record number belongs to another race on this device', async () => {
+    const pkg = await ExportService.exportRace(raceId);
+    await clearAll();
+    const callId = pkg.data.radioCalls[0].id;
+    await db.races.put({ id: 900, name: 'Training', date: '2026-11-01', startTime: '07:00', minRunner: 1, maxRunner: 5 });
+    await db.radio_calls.put({ id: callId, raceId: 900, checkpointNumber: 1, receivedAt: '2026-11-01T21:00:00.000Z', undoneAt: null });
+    await expect(ImportService.importWithStrategy(pkg, 'newer')).rejects.toThrow(/another race on this device/i);
+    expect((await db.radio_calls.get(callId)).raceId).toBe(900);
+    expect(await db.races.get(raceId)).toBeUndefined();
+  });
+
+  it('a restore replaces the race: rows added since the backup are gone', async () => {
+    const pkg = await ExportService.exportRace(raceId);
+    await db.radio_calls.add({ raceId, checkpointNumber: 2, receivedAt: '2026-11-07T23:00:00.000Z', undoneAt: null });
+    await ImportService.importWithStrategy(pkg, 'newer');
+    expect(await db.radio_calls.where('raceId').equals(raceId).count()).toBe(1);
+  });
+
+  it('a setup file leaves the device\'s own results alone', async () => {
+    const setup = await ExportService.exportRaceSetup(raceId);
+    await ImportService.importWithStrategy(setup, 'newer');
+    expect(await db.checkpoint_runners.where('raceId').equals(raceId).count()).toBe(1);
+    expect(await db.radio_calls.where('raceId').equals(raceId).count()).toBe(1);
+  });
+
+  it('a backup is one consistent snapshot: a call and its finish rows go together', async () => {
+    const write = db.transaction('rw', [db.radio_calls, db.base_station_runners], async () => {
+      await db.radio_calls.add({ raceId, checkpointNumber: 0, receivedAt: '2026-11-07T23:10:00.000Z', undoneAt: null });
+      await db.base_station_runners.add({ raceId, checkpointNumber: 0, number: 13, status: 'passed', commonTime: '2026-11-07T23:10:00.000Z' });
+    });
+    const pkg = await ExportService.exportRace(raceId);
+    await write;
+    const calls = pkg.data.radioCalls.length;
+    const finishes = pkg.data.baseStationRunners.filter(r => r.number === 13).length;
+    expect([calls, finishes]).toSatisfy(([c, f]) => (c === 1 && f === 0) || (c === 2 && f === 1));
   });
 
   it('imports a 3.0.0 package without the new tables', async () => {

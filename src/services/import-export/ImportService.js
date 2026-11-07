@@ -206,8 +206,24 @@ export class ImportService {
     try {
       // Every per-race table in the package (older packages carry fewer)
       await db.transaction('rw', [db.races, ...RACE_TABLES.map(([, table]) => db[table])], async () => {
+        // Record numbers are per device: refuse rather than overwrite another race's rows
+        for (const [key, table] of RACE_TABLES) {
+          for (const row of resolvedData[key] ?? []) {
+            const mine = row.id != null ? await db[table].get(row.id) : null;
+            if (mine && mine.raceId !== row.raceId) {
+              throw new Error('This file uses record numbers that belong to another race on this device. Import it on a device without other races, or delete the other race first.');
+            }
+          }
+        }
+        const raceIds = (data.races ?? []).map(r => r.id);
         for (const race of resolvedData.races ?? []) await db.races.put(race);
         for (const [key, table] of RACE_TABLES) {
+          if (!data[key]) continue; // a setup file carries no results: leave this device's own
+          // The file replaces the race's rows in each table it carries — except rows the
+          // conflict choice kept (their incoming copy was dropped from resolvedData)
+          const incoming = new Set((resolvedData[key] ?? []).map(r => r.id));
+          const kept = new Set(data[key].filter(r => !incoming.has(r.id)).map(r => r.id));
+          await db[table].where('raceId').anyOf(raceIds).filter(r => !kept.has(r.id)).delete();
           for (const row of resolvedData[key] ?? []) await db[table].put(row);
         }
       });

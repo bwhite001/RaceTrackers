@@ -99,7 +99,7 @@ export const checkpointRunnerSchema = z.object({
 export const baseStationRunnerSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
-  checkpointNumber: z.number().int().positive(),
+  checkpointNumber: z.number().int().nonnegative() /* 0 = Finish */,
   number: z.number().int().positive('Runner number must be positive'),
   status: z.enum(RUNNER_STATUSES),
   commonTime: z.string().nullable().optional(),

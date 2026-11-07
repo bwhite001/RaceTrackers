@@ -40,9 +40,15 @@ test.describe('Automatic file backup', () => {
       await expect(page.getByRole('button', { name: /^Backed up \d\d:\d\d$/ })).toBeVisible();
     });
 
-    await step('Take a CP1 call — 30 s later the file has it', async () => {
+    await step('Take a CP1 call and a Finish call — 30 s later the file has both', async () => {
       await page.getByRole('button', { name: /^CP1,/ }).click();
       await page.fill('#bib-heard', '100');
+      await page.keyboard.press('Enter');
+      await page.getByRole('button', { name: /^Complete/ }).click();
+      await page.getByRole('button', { name: 'Next call' }).click();
+      // and a Finish call — base records finishes as checkpoint 0
+      await page.getByRole('button', { name: /^Finish,/ }).click();
+      await page.fill('#bib-heard', '101');
       await page.keyboard.press('Enter');
       await page.getByRole('button', { name: /^Complete/ }).click();
       await page.getByRole('button', { name: 'Next call' }).click();
@@ -50,8 +56,8 @@ test.describe('Automatic file backup', () => {
       await page.clock.fastForward(31000);
       await expect(page.getByRole('button', { name: /^Backed up \d\d:\d\d$/ })).toBeVisible();
       backup = await readBackup(page);
-      expect(backup.data.radioCalls).toHaveLength(1);
-      expect(backup.data.baseStationRunners.map(r => r.number)).toContain(100);
+      expect(backup.data.radioCalls).toHaveLength(2);
+      expect(backup.data.baseStationRunners.map(r => `${r.checkpointNumber}:${r.number}`)).toEqual(expect.arrayContaining(['1:100', '0:101']));
     });
 
     await step('Withdraw a runner — the next backup has the DNF', async () => {
@@ -97,6 +103,8 @@ test.describe('Automatic file backup', () => {
       await other.getByRole('button', { name: /^Call log/ }).click();
       const cp1 = other.getByRole('row').filter({ has: other.getByRole('cell', { name: 'CP1', exact: true }) });
       await expect(cp1.getByRole('cell').nth(1)).toHaveText('1');
+      const finish = other.getByRole('row').filter({ has: other.getByRole('cell', { name: 'Finish', exact: true }) });
+      await expect(finish.getByRole('cell').nth(1)).toHaveText('1');
       await other.getByRole('tab', { name: 'DNF / DNS' }).click();
       await expect(other.getByTestId('out-row').filter({ hasText: '105' })).toBeVisible();
       await ctx.close();

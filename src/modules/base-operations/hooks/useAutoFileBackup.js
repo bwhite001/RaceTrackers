@@ -53,7 +53,7 @@ export function useAutoFileBackup(raceId) {
       if (!folder) return;
       folderRef.current = folder;
       patch({ folderName: folder.name ?? null });
-      write().catch(() => {}); // a fresh copy on opening base, or 'paused' if the browser needs a tap
+      sched.touch(); sched.flush(); // a fresh copy on opening base, or 'paused' if the browser needs a tap
     })();
 
     const onChange = (parts) => {
@@ -68,25 +68,29 @@ export function useAutoFileBackup(raceId) {
       live = false;
       Dexie.on.storagemutated.unsubscribe(onChange);
       document.removeEventListener('visibilitychange', onHide);
+      sched.flush(); // leaving base (or switching race): write what is still waiting
       sched.cancel();
     };
   }, [supported, raceId, write]);
+
+  // Every write goes through the scheduler, so two never run at once
+  const writeNow = () => { schedRef.current?.touch(); return schedRef.current?.flush(); };
 
   const chooseFolder = useCallback(async () => {
     const folder = await window.showDirectoryPicker({ id: 'racetracker-backup', mode: 'readwrite' });
     await saveBackupFolder(folder);
     folderRef.current = folder;
     patch({ folderName: folder.name ?? null });
-    await write().catch(() => {});
-  }, [write]);
+    await writeNow();
+  }, []);
 
   const resume = useCallback(async () => {
     const folder = folderRef.current;
     if (!folder) return;
-    if (await folderPermission(folder, { request: true }) === 'granted') await write().catch(() => {});
-  }, [write]);
+    if (await folderPermission(folder, { request: true }) === 'granted') await writeNow();
+  }, []);
 
-  const backupNow = useCallback(() => write().catch(() => {}), [write]);
+  const backupNow = useCallback(() => writeNow(), []);
 
   const setIdleSeconds = useCallback(async (n) => {
     await saveIdleSeconds(n);
