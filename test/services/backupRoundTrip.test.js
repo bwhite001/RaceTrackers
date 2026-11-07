@@ -61,6 +61,19 @@ describe('full race backup', () => {
     expect((await db.data_issue_resolutions.where('raceId').equals(raceId).first()).issueKey).toBe('skip:12:1');
   });
 
+  it('restores what base really writes: call audit, corrections, a DNF at base or with no checkpoint', async () => {
+    await db.audit_log.add({ raceId, entityType: 'radio_call', action: 'receive-call', performedAt: '2026-11-07T21:31:00.000Z' });
+    await db.audit_log.add({ raceId, entityType: 'runner', action: 'withdraw', performedAt: '2026-11-07T21:32:00.000Z' });
+    await db.base_station_runners.add({ raceId, checkpointNumber: 1, number: 14, status: 'superseded', commonTime: '2026-11-07T21:05:00.000Z' });
+    await db.withdrawal_records.add({ raceId, runnerNumber: 15, checkpoint: null, withdrawalTime: '2026-11-07T21:33:00.000Z', reversedAt: null });
+    await db.withdrawal_records.add({ raceId, runnerNumber: 16, checkpoint: 0, withdrawalTime: '2026-11-07T21:34:00.000Z', reversedAt: null });
+    const pkg = await ExportService.exportRace(raceId);
+    await clearAll();
+    await ImportService.importWithStrategy(pkg, 'newer');
+    expect(await db.withdrawal_records.where('raceId').equals(raceId).count()).toBe(3);
+    expect(await db.audit_log.where('raceId').equals(raceId).count()).toBe(3);
+  });
+
   it('imports a 3.0.0 package without the new tables', async () => {
     const pkg = await ExportService.exportRace(raceId);
     const old = ['races', 'runners', 'checkpoints', 'checkpointRunners', 'baseStationRunners', 'deletedEntries',

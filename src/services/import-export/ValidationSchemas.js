@@ -44,7 +44,7 @@ export const runnerSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
   number: z.number().int().positive('Runner number must be positive'),
-  status: z.enum(['not-started', 'passed', 'dnf', 'non-starter', 'vet-out', 'withdrawn']),
+  status: z.string().min(1), // any status the app writes (e.g. superseded corrections) must round-trip
   notes: z.string().nullable().optional(),
   // Optional fields for extended runner data
   firstName: z.string().nullable().optional(),
@@ -83,7 +83,7 @@ export const checkpointRunnerSchema = z.object({
   raceId: z.union([z.string(), z.number()]),
   checkpointNumber: z.number().int().positive(),
   number: z.number().int().positive('Runner number must be positive'),
-  status: z.enum(['not-started', 'passed', 'dnf', 'non-starter', 'vet-out', 'withdrawn']),
+  status: z.string().min(1), // any status the app writes (e.g. superseded corrections) must round-trip
   markOffTime: z.string().nullable().optional(),
   callInTime: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
@@ -98,7 +98,7 @@ export const baseStationRunnerSchema = z.object({
   raceId: z.union([z.string(), z.number()]),
   checkpointNumber: z.number().int().positive(),
   number: z.number().int().positive('Runner number must be positive'),
-  status: z.enum(['not-started', 'passed', 'dnf', 'non-starter', 'vet-out', 'withdrawn']),
+  status: z.string().min(1), // any status the app writes (e.g. superseded corrections) must round-trip
   commonTime: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
 });
@@ -139,7 +139,7 @@ export const auditLogSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
   entityType: z.string(),
-  action: z.enum(['create', 'update', 'delete', 'restore']),
+  action: z.string().min(1), // e.g. receive-call, withdraw
   performedAt: z.string(),
   performedBy: z.string().optional(),
   changes: z.any().optional(),
@@ -153,7 +153,7 @@ export const withdrawalRecordSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
   runnerNumber: z.number().int().positive(),
-  checkpoint: z.number().int().positive(),
+  checkpoint: z.number().int().nonnegative().nullable().optional(), // 0 = base, null = not said
   withdrawalTime: z.string(),
   reversedAt: z.string().nullable().optional(),
   reason: z.string().optional(),
@@ -168,7 +168,7 @@ export const vetOutRecordSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
   runnerNumber: z.number().int().positive(),
-  checkpoint: z.number().int().positive(),
+  checkpoint: z.number().int().nonnegative().nullable().optional(), // 0 = base, null = not said
   vetOutTime: z.string(),
   reason: z.string().optional(),
   notes: z.string().optional(),
