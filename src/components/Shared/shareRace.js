@@ -13,8 +13,11 @@ export const RESULT_KEYS = [
 
 export const MAILTO_MAX = 1800;
 
+/** File-name form of a race name: "Mt Glorious Trail" → "Mt-Glorious-Trail". */
+export const raceSlug = (raceName) => String(raceName || 'race').trim().replace(/\s+/g, '-');
+
 export function setupFileName(raceName) {
-  return `race-setup-${String(raceName || 'race').trim().replace(/\s+/g, '-')}.json`;
+  return `race-setup-${raceSlug(raceName)}.json`;
 }
 
 /** Short email: instructions only — the setup travels as an attached file. */
