@@ -201,6 +201,17 @@ describe('BaseOperationsRepository reports read base records', () => {
     expect((await repo.getMissingRunners(997, 2)).map(r => r.number)).toEqual([2, 500]);
     expect((await repo.generateMissingNumbersReport(997, 1)).content).toContain('Total Missing: 0');
   });
+  it('Missing Numbers leaves out runners whose wave never passes the checkpoint', async () => {
+    // Mt Glorious: only CP4 sees the 11 km field — here CP2 sees wave 1 only, and runner 2 is wave 2
+    await db.checkpoints.update(99702, { allowedBatches: [1] });
+    await db.runners.update(99712, { batchNumber: 2 });
+    try {
+      expect((await repo.getMissingRunners(997, 2)).map(r => r.number)).toEqual([500]);
+    } finally {
+      await db.checkpoints.update(99702, { allowedBatches: null });
+      await db.runners.update(99712, { batchNumber: 1 });
+    }
+  });
   it('Finisher List has one row per finisher', async () => {
     const { content } = await repo.generateFinisherListReport(997);
     expect(content).toContain('# Total Finishers: 2');

@@ -51,6 +51,7 @@ export const ToastProvider = ({ children }) => {
     error: (message, opts) => add({ message, variant: 'error', ...opts }),
     info: (message, opts) => add({ message, variant: 'info', ...opts }),
     warning: (message, opts) => add({ message, variant: 'warning', ...opts }),
+    addToast: add, // { message, variant } — used by Edit race, Race overview and Race management
   };
 
   return (

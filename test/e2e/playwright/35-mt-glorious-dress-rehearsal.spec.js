@@ -420,7 +420,8 @@ test.describe('Mt Glorious dress rehearsal', () => {
     const board = [];
     const falseDue = { 1: [], 2: [], 3: [], 4: [] };
     const events = new Map();
-    const at = (hm, title, fn) => events.set(mins(hm), { title, fn });
+    // Several events can fall on one minute (a stand-down on a check): keep them all
+    const at = (hm, title, fn) => events.set(mins(hm), [...(events.get(mins(hm)) ?? []), { title, fn }]);
 
     at('07:15', 'CP2 phone restarts, and base reloads, mid-race', async () => {
       const before = await cps[2].page.getByText('Passed').first().locator('..').innerText();
@@ -570,8 +571,7 @@ test.describe('Mt Glorious dress rehearsal', () => {
           }
         }
         if (VIDEO_DIR) await base.page.waitForTimeout(250);
-        const ev = events.get(m);
-        if (ev) {
+        for (const ev of events.get(m) ?? []) {
           for (const s of stations) await setClock(s, m);
           await test.step(`${fmt(m)} ${ev.title}`, async () => {
             log(ev.title);

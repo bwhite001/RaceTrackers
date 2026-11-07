@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useBaseOperationsStore from '../modules/base-operations/store/baseOperationsStore';
 import { BaseOperationsRepository } from '../modules/base-operations/services/BaseOperationsRepository';
+import { appliesAt } from '../modules/base-operations/services/receive';
 import { useRaceStore } from '../store/useRaceStore';
 
 /**
@@ -30,6 +31,7 @@ function LiveDashboardView() {
   }, [raceId]);
 
   const sortedRunners = useMemo(() => [...rows].sort((a, b) => a.number - b.number), [rows]);
+  const batchOf = useMemo(() => new Map(rows.filter(r => r.batchNumber !== '').map(r => [r.number, r.batchNumber])), [rows]);
 
   // Count runners with a sighting per checkpoint
   const cpPassedCounts = useMemo(() => {
@@ -126,7 +128,8 @@ function LiveDashboardView() {
         <div className="flex gap-3 flex-wrap">
           {sortedCheckpoints.map(cp => {
             const passed = cpPassedCounts[cp.number] || 0;
-            const total = sortedRunners.length;
+            // Counted against the runners whose wave passes this checkpoint
+            const total = sortedRunners.filter(r => appliesAt(cp, r.number, batchOf)).length;
             const allDone = total > 0 && passed === total;
             return (
               <div

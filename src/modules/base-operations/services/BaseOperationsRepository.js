@@ -3,6 +3,7 @@ import db from '../../../shared/services/database/schema';
 import { BASE_STATION_CP } from '../../../types/index.js';
 import TimeUtils from '../../../services/timeUtils.js';
 import { raceResults } from './reports.js';
+import { appliesAt } from './receive.js';
 import { fieldNumbers } from './field.js';
 import { hhmm } from '../../../services/blocks.js';
 
@@ -910,8 +911,11 @@ export class BaseOperationsRepository extends BaseRepository {
 
   /** Rejects on a failed read: the Missing Numbers sheet must not say "none missing" for an unreadable database. */
   async getMissingRunners(raceId, checkpoint) {
-    const { rows } = await this.getRaceResults(raceId);
-    return rows.filter(r => r.status !== 'DNS' && r.status !== 'DNF'
+    const { order, rows } = await this.getRaceResults(raceId);
+    // A runner whose wave doesn't pass this checkpoint (11 km at CP1) isn't missing from it
+    const cp = order.find(c => c.number === checkpoint);
+    const batchOf = new Map(rows.filter(r => r.batchNumber !== '').map(r => [r.number, r.batchNumber]));
+    return rows.filter(r => r.status !== 'DNS' && r.status !== 'DNF' && appliesAt(cp, r.number, batchOf)
       && !(checkpoint === BASE_STATION_CP ? r.finish : r.times[checkpoint]));
   }
 
