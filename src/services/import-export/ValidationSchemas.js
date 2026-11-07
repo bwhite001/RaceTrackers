@@ -196,6 +196,14 @@ export const exportPackageSchema = z.object({
     auditLog: z.array(auditLogSchema).optional(),
     withdrawalRecords: z.array(withdrawalRecordSchema).optional(),
     vetOutRecords: z.array(vetOutRecordSchema).optional(),
+    // Added 3.19: the rest of the race tables (restored as-is)
+    importedCheckpointResults: z.array(z.any()).optional(),
+    raceBatches: z.array(z.any()).optional(),
+    radioCalls: z.array(z.any()).optional(),
+    dataIssueResolutions: z.array(z.any()).optional(),
+    readoutProgress: z.array(z.any()).optional(),
+    checkpointFieldChanges: z.array(z.any()).optional(),
+    fieldChanges: z.array(z.any()).optional(),
   }).optional(),
   // Legacy support for old export format
   raceConfig: z.object({

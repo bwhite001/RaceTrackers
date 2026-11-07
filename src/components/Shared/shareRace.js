@@ -8,6 +8,7 @@
 export const RESULT_KEYS = [
   'checkpointRunners', 'baseStationRunners', 'withdrawalRecords', 'vetOutRecords',
   'auditLog', 'deletedEntries', 'strapperCalls', 'radioCalls',
+  'fieldChanges', 'checkpointFieldChanges', 'dataIssueResolutions', 'readoutProgress', 'importedCheckpointResults',
 ];
 
 export const MAILTO_MAX = 1800;

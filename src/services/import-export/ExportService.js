@@ -16,6 +16,20 @@ import CryptoJS from 'crypto-js';
  * @module ExportService
  */
 
+/**
+ * Every per-race table in a full backup: [package key, Dexie table]. Export,
+ * import and the multi-race merge all loop over this list. `races` is separate.
+ */
+export const RACE_TABLES = [
+  ['runners', 'runners'], ['checkpoints', 'checkpoints'], ['checkpointRunners', 'checkpoint_runners'],
+  ['baseStationRunners', 'base_station_runners'], ['deletedEntries', 'deleted_entries'],
+  ['strapperCalls', 'strapper_calls'], ['auditLog', 'audit_log'], ['withdrawalRecords', 'withdrawal_records'],
+  ['vetOutRecords', 'vet_out_records'], ['importedCheckpointResults', 'imported_checkpoint_results'],
+  ['raceBatches', 'race_batches'], ['radioCalls', 'radio_calls'], ['dataIssueResolutions', 'data_issue_resolutions'],
+  ['readoutProgress', 'readout_progress'], ['checkpointFieldChanges', 'checkpoint_field_changes'],
+  ['fieldChanges', 'field_changes'],
+];
+
 export class ExportService {
   /**
    * Generate SHA-256 checksum for data
@@ -53,61 +67,12 @@ export class ExportService {
         throw new Error(`Race not found: ${raceId}`);
       }
 
-      const runners = await db.runners.where('raceId').equals(raceId).toArray();
-      const checkpoints = await db.checkpoints.where('raceId').equals(raceId).toArray();
-      const checkpointRunners = await db.checkpoint_runners.where('raceId').equals(raceId).toArray();
-      const baseStationRunners = await db.base_station_runners.where('raceId').equals(raceId).toArray();
-      
-      // Optional tables (may not exist in all databases)
-      let deletedEntries = [];
-      let strapperCalls = [];
-      let auditLog = [];
-      let withdrawalRecords = [];
-      let vetOutRecords = [];
-
-      try {
-        deletedEntries = await db.deleted_entries?.where('raceId').equals(raceId).toArray() || [];
-      } catch (e) {
-        // Table doesn't exist, skip
+      // Every per-race table, so a restore brings back everything base did
+      const exportData = { races: [race] };
+      for (const [key, table] of RACE_TABLES) {
+        exportData[key] = await db[table].where('raceId').equals(raceId).toArray();
       }
-
-      try {
-        strapperCalls = await db.strapper_calls?.where('raceId').equals(raceId).toArray() || [];
-      } catch (e) {
-        // Table doesn't exist, skip
-      }
-
-      try {
-        auditLog = await db.audit_log?.where('raceId').equals(raceId).toArray() || [];
-      } catch (e) {
-        // Table doesn't exist, skip
-      }
-
-      try {
-        withdrawalRecords = await db.withdrawal_records?.where('raceId').equals(raceId).toArray() || [];
-      } catch (e) {
-        // Table doesn't exist, skip
-      }
-
-      try {
-        vetOutRecords = await db.vet_out_records?.where('raceId').equals(raceId).toArray() || [];
-      } catch (e) {
-        // Table doesn't exist, skip
-      }
-
-      // Build export package
-      const exportData = {
-        races: [race],
-        runners,
-        checkpoints,
-        checkpointRunners,
-        baseStationRunners,
-        deletedEntries,
-        strapperCalls,
-        auditLog,
-        withdrawalRecords,
-        vetOutRecords,
-      };
+      const { runners, checkpoints, checkpointRunners, baseStationRunners } = exportData;
 
       // Generate checksum
       const checksum = this.generateChecksum(exportData);
@@ -148,31 +113,8 @@ export class ExportService {
     );
 
     // Merge all exports
-    const mergedData = {
-      races: [],
-      runners: [],
-      checkpoints: [],
-      checkpointRunners: [],
-      baseStationRunners: [],
-      deletedEntries: [],
-      strapperCalls: [],
-      auditLog: [],
-      withdrawalRecords: [],
-      vetOutRecords: [],
-    };
-
-    allExports.forEach(exp => {
-      mergedData.races.push(...exp.data.races);
-      mergedData.runners.push(...exp.data.runners);
-      mergedData.checkpoints.push(...exp.data.checkpoints);
-      mergedData.checkpointRunners.push(...(exp.data.checkpointRunners || []));
-      mergedData.baseStationRunners.push(...(exp.data.baseStationRunners || []));
-      mergedData.deletedEntries.push(...(exp.data.deletedEntries || []));
-      mergedData.strapperCalls.push(...(exp.data.strapperCalls || []));
-      mergedData.auditLog.push(...(exp.data.auditLog || []));
-      mergedData.withdrawalRecords.push(...(exp.data.withdrawalRecords || []));
-      mergedData.vetOutRecords.push(...(exp.data.vetOutRecords || []));
-    });
+    const keys = ['races', ...RACE_TABLES.map(([key]) => key)];
+    const mergedData = Object.fromEntries(keys.map(key => [key, allExports.flatMap(exp => exp.data[key] || [])]));
 
     const checksum = this.generateChecksum(mergedData);
 
@@ -254,8 +196,9 @@ export class ExportService {
    */
   static async exportRaceSetup(raceId) {
     const full = await this.exportRace(raceId);
-    const { races, runners, checkpoints } = full.data;
-    const data = { races, runners, checkpoints };
+    // raceBatches is setup too: the wave names
+    const { races, runners, checkpoints, raceBatches } = full.data;
+    const data = { races, runners, checkpoints, raceBatches };
     return {
       version: full.version,
       exportDate: full.exportDate,
