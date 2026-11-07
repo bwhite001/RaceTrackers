@@ -22,6 +22,7 @@ import BaseStatusView from '../components/BaseStatusView';
 import ErrorMessage from '../../../components/Layout/ErrorMessage';
 import SettingsModal from '../../../components/Settings/SettingsModal';
 import HelpDialog from '../components/HelpDialog';
+import FileBackupStatus from '../components/FileBackupStatus';
 import LoadingSpinner from '../../../components/Layout/LoadingSpinner';
 
 const HeaderIcon = ({ label, Icon, onClick }) => (
@@ -176,6 +177,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
           onHome={handleExit}
           right={(
             <>
+              <FileBackupStatus raceId={currentRaceId} />
               <HeaderIcon label="Import / Export" Icon={ArrowUpTrayIcon} onClick={() => setShowImportExport(true)} />
               <HeaderIcon label="Live Dashboard" Icon={PresentationChartLineIcon} onClick={() => navigate('/base-station/dashboard')} />
               <HeaderIcon label="Settings" Icon={Cog6ToothIcon} onClick={handleOpenSettings} />

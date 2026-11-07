@@ -6,6 +6,7 @@ export function fakeFolder({ fail = null, permission = 'granted' } = {}) {
     files,
     fail,
     permission,
+    writes: 0,
     async queryPermission() { return this.permission; },
     async requestPermission() { this.permission = 'granted'; return 'granted'; },
     async getFileHandle(name) {
@@ -13,6 +14,7 @@ export function fakeFolder({ fail = null, permission = 'granted' } = {}) {
       return {
         async createWritable() {
           if (folder.fail) { const e = folder.fail; folder.fail = null; throw e; }
+          folder.writes += 1;
           const chunks = [];
           return { async write(c) { chunks.push(c); }, async close() { files[name] = chunks.join(''); } };
         },
