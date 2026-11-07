@@ -27,7 +27,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const PROFILES = path.join(HERE, 'fixtures/MGMT_NOV25.xlsx');
 const ENTRY_LIST = process.env.MGT_ENTRY_LIST;
 const OUT = path.resolve(HERE, '../../../test-results/mt-glorious-2026');
-const BASE = 'http://localhost:3000';
+const BASE = process.env.RACE_BASE_URL ?? 'http://localhost:3000'; // e.g. https://racetrackers.bwhite.id.au to rehearse on the live app
 
 const RACE = { name: 'Mt Glorious Mountain Trail', date: '2026-11-08', start: '06:30' };
 const SHIFT = 30; // 2025 started 07:00, 2026 starts 06:30
