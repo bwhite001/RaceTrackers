@@ -39,7 +39,7 @@ test.describe('Share race', () => {
       expect(decodeURIComponent(mailto)).toContain(name);
       const pkg = JSON.parse(text);
       expect(pkg.exportType).toBe('race-config');
-      expect(Object.keys(pkg.data).sort()).toEqual(['checkpoints', 'races', 'runners']);
+      expect(Object.keys(pkg.data).sort()).toEqual(['checkpoints', 'raceBatches', 'races', 'runners']); // setup + wave names, no results
     });
   });
 

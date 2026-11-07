@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { Button } from '../../../design-system/components';
 import { BottomSheet } from '../../../design-system/components/VK';
 import { hhmm } from '../../../services/blocks.js';
@@ -36,9 +37,11 @@ const FileBackupStatus = ({ raceId }) => {
 
   return (
     <>
-      <button type="button" onClick={onChip} title={b.error ?? undefined}
-        className={`min-h-[36px] px-3 rounded-full text-xs font-bold whitespace-nowrap ${CHIP[b.status]}`}>
-        {label}
+      {/* Text from tablet width up; an icon in the status colour on a phone, where the header is full */}
+      <button type="button" onClick={onChip} aria-label={label} title={b.error ?? label}
+        className={`min-h-[36px] min-w-[36px] px-2 sm:px-3 rounded-full text-xs font-bold whitespace-nowrap flex items-center justify-center ${CHIP[b.status]}`}>
+        <span className="hidden sm:inline">{label}</span>
+        <DocumentArrowDownIcon className="w-5 h-5 sm:hidden" aria-hidden="true" />
       </button>
       <BottomSheet open={open} onClose={() => setOpen(false)} labelledBy="filebackup-hd">
         <h2 id="filebackup-hd" className="font-display font-bold text-xl text-vk-navy dark:text-white">File backup</h2>

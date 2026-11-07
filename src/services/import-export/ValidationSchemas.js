@@ -17,6 +17,9 @@ import { z } from 'zod';
  * Race schema - Validates race entity data
  * @type {import('zod').ZodObject}
  */
+/** Every runner status the app writes — a backup must round-trip them all (superseded = a corrected base time). */
+const RUNNER_STATUSES = ['not-started', 'passed', 'called-in', 'marked-off', 'dnf', 'dns', 'non-starter', 'vet-out', 'withdrawn', 'superseded'];
+
 export const raceSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   name: z.string().min(1, 'Race name is required'),
@@ -44,7 +47,7 @@ export const runnerSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
   number: z.number().int().positive('Runner number must be positive'),
-  status: z.string().min(1), // any status the app writes (e.g. superseded corrections) must round-trip
+  status: z.enum(RUNNER_STATUSES),
   notes: z.string().nullable().optional(),
   // Optional fields for extended runner data
   firstName: z.string().nullable().optional(),
@@ -83,7 +86,7 @@ export const checkpointRunnerSchema = z.object({
   raceId: z.union([z.string(), z.number()]),
   checkpointNumber: z.number().int().positive(),
   number: z.number().int().positive('Runner number must be positive'),
-  status: z.string().min(1), // any status the app writes (e.g. superseded corrections) must round-trip
+  status: z.enum(RUNNER_STATUSES),
   markOffTime: z.string().nullable().optional(),
   callInTime: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
@@ -98,7 +101,7 @@ export const baseStationRunnerSchema = z.object({
   raceId: z.union([z.string(), z.number()]),
   checkpointNumber: z.number().int().positive(),
   number: z.number().int().positive('Runner number must be positive'),
-  status: z.string().min(1), // any status the app writes (e.g. superseded corrections) must round-trip
+  status: z.enum(RUNNER_STATUSES),
   commonTime: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
 });
