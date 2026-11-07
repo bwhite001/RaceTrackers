@@ -15,8 +15,12 @@ const tile = (page, n) => page.getByRole('button', { name: new RegExp(`^Runner $
 
 const editFrequency = async (page, raceId, frequency) => {
   await page.goto(`${BASE}/race-maintenance/edit?raceId=${raceId}`);
+  // Wait for the race to load into the form, or the load overwrites what we type (slow CI)
+  await expect(page.getByRole('textbox', { name: /race name/i })).not.toHaveValue('');
   await page.locator('#frequency').fill(frequency);
   await page.getByRole('button', { name: /next/i }).click();
+  // Next saves, then shows the checkpoints: don't navigate away mid-save
+  await expect(page.getByRole('textbox', { name: 'Checkpoint 1 name' })).toBeVisible();
 };
 
 test.describe('Edit race radio details', () => {
