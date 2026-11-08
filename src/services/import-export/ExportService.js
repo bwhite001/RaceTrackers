@@ -28,6 +28,8 @@ export const RACE_TABLES = [
   ['raceBatches', 'race_batches'], ['radioCalls', 'radio_calls'], ['dataIssueResolutions', 'data_issue_resolutions'],
   ['readoutProgress', 'readout_progress'], ['checkpointFieldChanges', 'checkpoint_field_changes'],
   ['fieldChanges', 'field_changes'],
+  // Crew & vehicle log: personal data — full backups only, never the setup package
+  ['crewVehicles', 'crew_vehicles'],
 ];
 
 export class ExportService {

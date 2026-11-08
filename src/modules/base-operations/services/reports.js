@@ -44,6 +44,12 @@ export function legMedians(sightings, order) {
   });
 }
 
+/** Rows → CSV text, quoting cells with a comma, quote or newline. */
+export const toCsv = (rows) => rows.map(r => r.map(c => {
+  const v = String(c ?? '');
+  return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+}).join(',')).join('\n');
+
 export const OVERDUE_GRACE_MINUTES = 10;
 
 /**

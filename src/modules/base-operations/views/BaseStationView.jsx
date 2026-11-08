@@ -19,6 +19,7 @@ import BaseReports from '../components/BaseReports';
 import BaseOverview from '../components/BaseOverview';
 import WithdrawalDialog from '../components/WithdrawalDialog';
 import BaseStatusView from '../components/BaseStatusView';
+import CrewLog from '../components/CrewLog';
 import ErrorMessage from '../../../components/Layout/ErrorMessage';
 import SettingsModal from '../../../components/Settings/SettingsModal';
 import HelpDialog from '../components/HelpDialog';
@@ -208,6 +209,8 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             {activeTab === 'status' && (
               <BaseStatusView onWithdrawDetails={() => handleWithdrawal('withdrawal')} />
             )}
+
+            {activeTab === 'crews' && <CrewLog />}
 
             {activeTab === 'reports' && (
               <BaseReports key={reportFocus ?? 'reports'} initialReport={reportFocus ?? 'missing'} />

@@ -9,6 +9,7 @@ export const RESULT_KEYS = [
   'checkpointRunners', 'baseStationRunners', 'withdrawalRecords', 'vetOutRecords',
   'auditLog', 'deletedEntries', 'strapperCalls', 'radioCalls',
   'fieldChanges', 'checkpointFieldChanges', 'dataIssueResolutions', 'readoutProgress', 'importedCheckpointResults',
+  'crewVehicles', // personal data (regos, names): never shared
 ];
 
 export const MAILTO_MAX = 1800;

@@ -358,6 +358,18 @@ export class TimeUtils {
   }
 
   /**
+   * Clamp a timestamp to no later than now; no lower bound, so it may be
+   * before the race start (a crew leaving home at 04:30). Null stays null.
+   * @param {string|null} iso
+   * @param {string} now ISO
+   * @returns {string|null} ISO
+   */
+  static clampPast(iso, now) {
+    if (iso == null) return null;
+    return parseISO(iso).getTime() > parseISO(now).getTime() ? parseISO(now).toISOString() : parseISO(iso).toISOString();
+  }
+
+  /**
    * Whole minutes from a to b (b − a), rounded down.
    * @param {string} a ISO
    * @param {string} b ISO

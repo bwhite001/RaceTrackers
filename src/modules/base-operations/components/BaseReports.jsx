@@ -2,10 +2,11 @@ import React, { useMemo, useState } from 'react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import { boardCheckpoints, sightingsByCheckpoint, outStatusMap, buildBoard, reportedUpTo } from '../services/receive';
-import { overdueRunners, stillOnCourse, timesMatrix, callLog, awaitingByCheckpoint, raceCounts, OVERDUE_GRACE_MINUTES } from '../services/reports';
+import { overdueRunners, stillOnCourse, timesMatrix, callLog, awaitingByCheckpoint, raceCounts, toCsv, OVERDUE_GRACE_MINUTES } from '../services/reports';
 import { outRecords } from '../services/statusValidation';
 import { runChecks, checkpointDistances, CHECKS, PACE_LIMIT_KMH } from '../services/dataChecks';
 import { confirmedMissed } from '../services/missed';
+import { crewReportRows, crewSummary, activeVehicles } from '../services/crews';
 import TimeUtils from '../../../services/timeUtils.js';
 import { hhmm } from '../../../services/blocks.js';
 import useNow from '../../../shared/hooks/useNow';
@@ -16,13 +17,9 @@ const REPORTS = [
   { id: 'oncourse', title: 'Still on course', desc: 'Everyone not finished and not out — for sweep and stand-down.' },
   { id: 'results', title: 'Times by checkpoint', desc: 'Every runner’s common time at each checkpoint.' },
   { id: 'calls', title: 'Call log', desc: 'Scores Checkpoint calls received from each station.' },
+  { id: 'crews', title: 'Crew & vehicle log', desc: 'Each vehicle at each checkpoint: rego, people, left home, arrived — for insurance.' },
   { id: 'exports', title: 'Exports', desc: 'Finisher list, race results, split times and officials’ report as files.' },
 ];
-
-const toCsv = (rows) => rows.map(r => r.map(c => {
-  const v = String(c ?? '');
-  return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
-}).join(',')).join('\n');
 
 const Th = ({ children, first, right }) => (
   <th scope="col" className={`py-2 text-[11px] text-vk-muted uppercase tracking-[0.8px] ${first ? 'pl-3.5 pr-2' : 'px-2'} ${right ? 'text-right pr-3.5' : ''}`}>{children}</th>
@@ -36,7 +33,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
   const store = useBaseOperationsStore();
   const {
     currentRace, checkpoints = [], runners = [], radioCalls = [], outList = [], raceRunnerNumbers = [], raceRunnerBatches: batchOf = new Map(),
-    baseRows = [], resolutions = [], downloadReport,
+    baseRows = [], resolutions = [], downloadReport, crewVehicles = [],
   } = store;
   const now = useNow(30000);
   const [sel, setSel] = useState(initialReport || 'missing');
@@ -85,7 +82,10 @@ const BaseReports = ({ initialReport = 'missing' }) => {
     results: raceNumbers.length,
     calls: calls.reduce((n, c) => n + c.calls, 0),
     exports: '',
+    crews: '',
   };
+  const crewRows = useMemo(() => crewReportRows(crewVehicles, checkpoints), [crewVehicles, checkpoints]);
+  const notArrived = crewSummary(activeVehicles(crewVehicles)).notArrived;
   const report = REPORTS.find(r => r.id === sel);
   const check = CHECKS.find(c => c.id === sel);
 
@@ -158,6 +158,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
         ...lateRows.map(o => [o.number, o.status === 'overdue' ? 'Overdue' : 'Awaiting report', o.lastCp.short, hhmm(o.lastTime), o.nextCp.short, hhmm(o.expectedAt), o.overdueMinutes, hhmm(o.upTo)])];
       case 'oncourse': return [['Group', 'Count', 'Bibs'], ...onCourse.map(g => [g.label, g.numbers.length, g.numbers.join(' ')])];
       case 'results': return [['Bib', 'Status', ...cps], ...matrix.map(r => [r.number, r.status, ...r.cells.map(c => c.text)])];
+      case 'crews': return crewRows;
       case 'calls': return [['Checkpoint', 'Calls', 'Numbers', 'Corrections', 'Last call', 'Up to'], ...calls.map(c => [c.short, c.calls, c.numbers, c.corrections, hhmm(c.lastCall), hhmm(c.upTo)])];
       default: return [];
     }
@@ -178,7 +179,9 @@ const BaseReports = ({ initialReport = 'missing' }) => {
         {REPORTS.map(r => (
           <button key={r.id} type="button" onClick={() => pick(r.id)} aria-current={sel === r.id ? 'page' : undefined} className={navBtn(sel === r.id)}>
             <span className="flex-1">{r.title}</span>
-            <span className="text-xs font-bold text-vk-muted">{commonCounts[r.id]}</span>
+            {r.id === 'crews' && notArrived > 0
+              ? <span className="text-xs font-extrabold bg-vk-gold text-vk-ink rounded-full px-2 py-px" data-testid="crew-not-arrived">{notArrived} not arrived</span>
+              : <span className="text-xs font-bold text-vk-muted">{commonCounts[r.id]}</span>}
           </button>
         ))}
         <div className="px-3 pt-3 pb-1.5 flex items-center gap-2 border-t border-vk-border dark:border-gray-700">
@@ -300,6 +303,25 @@ const BaseReports = ({ initialReport = 'missing' }) => {
                     <td className="px-2 py-2.5">{hhmm(c.upTo) || '—'}</td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {sel === 'crews' && (
+          <div className="overflow-x-auto">
+            <div className="px-3.5 py-2 text-[13px] font-semibold text-vk-ink dark:text-white" data-testid="crew-report-title">
+              {currentRace?.name}{currentRace?.date ? ` · ${TimeUtils.formatDate(TimeUtils.createRaceTimestamp(currentRace.date, '12:00'), 'EEE d MMM yyyy')}` : ''} · Prepared by VK4WIP base
+            </div>
+            <table className="w-full border-collapse text-sm min-w-[640px] tabular-nums">
+              <thead><tr className="bg-vk-band dark:bg-gray-700 text-left">{crewRows[0].map((h, i) => <Th key={h} first={i === 0}>{h}</Th>)}</tr></thead>
+              <tbody>
+                {crewRows.slice(1).map((r, i) => (
+                  <tr key={i} className="border-b border-vk-border dark:border-gray-700">
+                    {r.map((c, j) => <td key={j} className={`${j === 0 ? 'pl-3.5 pr-2 font-bold' : 'px-2'} py-2 ${j === 1 ? 'font-display font-extrabold' : ''}`}>{c || (j >= 4 && j <= 7 ? '—' : '')}</td>)}
+                  </tr>
+                ))}
+                {crewRows.length === 1 && <tr><td colSpan={9} className="px-3.5 py-4 text-vk-muted">No vehicles logged. Add them on the Crews tab.</td></tr>}
               </tbody>
             </table>
           </div>

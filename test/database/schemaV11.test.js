@@ -34,7 +34,7 @@ describe('Dexie v11 migration (additive)', () => {
     }
     await upgraded.open();
 
-    expect(upgraded.verno).toBe(12);
+    expect(upgraded.verno).toBe(13);
     expect(await upgraded.checkpoint_runners.count()).toBe(1);
     expect((await upgraded.checkpoint_runners.toArray())[0]).toMatchObject({ number: 101, calledIn: true, status: 'passed' });
     expect(await upgraded.base_station_runners.count()).toBe(1);

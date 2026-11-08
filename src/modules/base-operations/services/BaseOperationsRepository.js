@@ -334,6 +334,53 @@ export class BaseOperationsRepository extends BaseRepository {
     });
   }
 
+  // ── Crew & vehicle log (insurance) ────────────────────────────────────────
+  // Rows are never deleted: an edit adds a new row and supersedes the old one,
+  // a removal supersedes. Each change returns what undoCrewChange() needs.
+
+  async getCrewVehicles(raceId) {
+    return db.crew_vehicles.where('raceId').equals(raceId).toArray();
+  }
+
+  /**
+   * Add a vehicle, or replace `replacesId` with an edited copy.
+   * @returns {Promise<{addedId: number, before: object|null}>}
+   */
+  async saveVehicle(raceId, record, replacesId = null) {
+    return db.transaction('rw', db.crew_vehicles, db.audit_log, async () => {
+      const at = TimeUtils.getCurrentTimestamp();
+      const before = replacesId != null ? await db.crew_vehicles.get(replacesId) : null;
+      if (replacesId != null && (!before || before.supersededAt)) throw new Error('That vehicle was changed elsewhere — reopen it');
+      const addedId = await db.crew_vehicles.add({ raceId, ...record, createdAt: at, supersededAt: null, replaces: replacesId });
+      if (before) await db.crew_vehicles.update(before.id, { supersededAt: at, supersededBy: addedId });
+      await this.logAudit(raceId, before ? 'crew-edit' : 'crew-add', 'crew_vehicle', String(addedId), {
+        checkpointNumber: record.checkpointNumber, rego: record.rego, replaces: replacesId,
+      });
+      return { addedId, before };
+    });
+  }
+
+  /** @returns {Promise<{addedId: null, before: object}>} */
+  async removeVehicle(raceId, id) {
+    return db.transaction('rw', db.crew_vehicles, db.audit_log, async () => {
+      const before = await db.crew_vehicles.get(id);
+      if (!before || before.supersededAt) throw new Error('That vehicle was changed elsewhere — reopen it');
+      await db.crew_vehicles.update(id, { supersededAt: TimeUtils.getCurrentTimestamp(), removedAt: TimeUtils.getCurrentTimestamp() });
+      await this.logAudit(raceId, 'crew-remove', 'crew_vehicle', String(id), { checkpointNumber: before.checkpointNumber, rego: before.rego });
+      return { addedId: null, before };
+    });
+  }
+
+  /** Reverse saveVehicle / removeVehicle exactly: the old row back as it was, the new one set aside. */
+  async undoCrewChange(raceId, { addedId, before }) {
+    await db.transaction('rw', db.crew_vehicles, db.audit_log, async () => {
+      const at = TimeUtils.getCurrentTimestamp();
+      if (addedId != null) await db.crew_vehicles.update(addedId, { supersededAt: at, undoneAt: at });
+      if (before) await db.crew_vehicles.put(before);
+      await this.logAudit(raceId, 'crew-undo', 'crew_vehicle', String(addedId ?? before?.id), {});
+    });
+  }
+
   // ── Field changes (race-day Part B): bibs not in the setup ──────────────
 
   async getFieldChanges(raceId) {

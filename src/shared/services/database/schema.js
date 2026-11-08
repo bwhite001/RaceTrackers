@@ -106,6 +106,16 @@ class RaceTrackerDB extends Dexie {
     //  field_changes: base's additions to the field {kind: 'late', source, createdAt,
     //    cancelledAt, callId} — base's field = setup runners + uncancelled late entries
     //  races gain data column bibsOnTheDay; checkpoint_runners gain notInSetup — no index.
+    // Version 13 (base crew & vehicle log, for insurance): one row per vehicle
+    //  going to a checkpoint (0 = Base) {rego, driver, occupants[], leftHomeAt,
+    //  arrivedAt, leftSiteAt, homeSafeAt, notes}. An edit adds a new row and
+    //  sets supersededAt on the old one; never deleted. Kept out of the race
+    //  setup package (personal data), included in full backups.
+    this.version(13)
+        .stores({
+            crew_vehicles: "++id, [raceId+checkpointNumber], raceId, checkpointNumber, rego, createdAt, supersededAt"
+        });
+
     this.version(12)
         .stores({
             checkpoint_field_changes: "++id, [raceId+checkpointNumber+number], raceId, checkpointNumber, number",
