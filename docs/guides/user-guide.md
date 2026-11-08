@@ -2207,4 +2207,4 @@ For insurance, base logs which car went to each checkpoint, who was in it, and w
 - When an operator radios that they've arrived, tap **Arrived now** on their car. Every save, arrival and removal has Undo.
 - **Return trip (left site, home safe)** is optional.
 - **Reports › Crew & vehicle log** prints or exports the log. It stays on the base device and is never included in the race setup or any shared file.
-- **Wording to be supplied by Brandon (WICEN)** for an operator reporting that they have left home, and that they have arrived at their checkpoint.
+- Operators report leaving home and arriving at their checkpoint in plain words to base; there is no set phrase.
