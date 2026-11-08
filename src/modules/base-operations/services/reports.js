@@ -44,6 +44,12 @@ export function legMedians(sightings, order) {
   });
 }
 
+/** Rows → CSV text, quoting cells with a comma, quote or newline. */
+export const toCsv = (rows) => rows.map(r => r.map(c => {
+  const v = String(c ?? '');
+  return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+}).join(',')).join('\n');
+
 export const OVERDUE_GRACE_MINUTES = 10;
 
 /**
@@ -155,8 +161,11 @@ export function timesMatrix({ sightings, order, out, raceNumbers, missed = new S
 }
 
 /** Calls received per checkpoint: Scores calls, numbers recorded, corrections, last call, up to. */
-export function callLog({ radioCalls, board }) {
+const REASON_TEXT = { correction: 'checkpoint correction', 'base-error': 'base typing error', other: 'other' };
+
+export function callLog({ radioCalls, board, baseEdits = [] }) {
   return board.map(row => {
+    const edits = baseEdits.filter(e => e.checkpointNumber === row.number && !e.undoneAt);
     const all = radioCalls.filter(c => c.checkpointNumber === row.number && !c.undoneAt);
     const calls = all.filter(c => !c.kind); // Scores calls only (not corrections, missed runners or stand-downs)
     return {
@@ -165,6 +174,9 @@ export function callLog({ radioCalls, board }) {
       calls: calls.length,
       numbers: calls.reduce((n, c) => n + (c.recorded?.length ?? 0), 0),
       corrections: all.filter(c => c.kind === 'correction').length,
+      // Records changes base made here (a batch counts once)
+      edits: edits.length,
+      editReasons: [...new Set(edits.map(e => REASON_TEXT[e.reason] ?? e.reason))].join(', '),
       lastCall: all.map(c => c.receivedAt).sort().at(-1) ?? null,
       upTo: row.lastBlock,
     };

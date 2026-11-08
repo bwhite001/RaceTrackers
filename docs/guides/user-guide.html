@@ -44,10 +44,13 @@
   <a href="#base-receive">Base Station: Receiving Calls</a>
   <a href="#base-status">Base Station: DNF, DNS and Overview</a>
   <a href="#base-reports">Base Station: Reports and Data Checks</a>
+  <a href="#base-records">Base Station: Fixing Recorded Numbers (Records)</a>
+  <a href="#base-crews">Base Station: Crew & Vehicle Log</a>
   <a href="#import-export">Importing & Exporting Data</a>
   <a href="#navigation">Navigating the App</a>
   <a href="#settings">Settings</a>
   <a href="#simulation">Complete Race Walkthrough</a>
+  <a href="#linked-checkpoints">Linked Checkpoints (Turnaround Point)</a>
   <a href="#checkpoint-fixes">Checkpoint: Fixing Mistakes and Reading Out</a>
   <a href="#split-role">Split-Role Checkpoint Operations</a>
   <a href="#radio-procedure">Radio Procedure (WICEN)</a>
@@ -56,6 +59,54 @@
 <div id="setup">
 <h2>Setting Up a Race</h2>
 <p class="chapter-intro">Use these steps to create and manage races. This section covers the full setup wizard, runner ranges, checkpoints, waves, and the race overview.</p>
+<section class="task">
+<h3>Race management page lists created races</h3>
+<p class="description">The Race Management page is the race director's central hub where all races are listed. This test confirms that a race created earlier in the test suite appears on that page.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Race Management — page lists all created races</p><img src="assets/race-management-page-lists-created-races-step-01.jpg" alt="Race Management — page lists all created races" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Clicking a race opens its overview</h3>
+<p class="description">When the race director clicks on a race in the management list, they should be taken to that race's overview page where they can see all the details. This test confirms that navigation works correctly.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Race Management — page with race listed</p><img src="assets/clicking-a-race-opens-its-overview-step-01.jpg" alt="Race Management — page with race listed" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Race card — click race name to open overview</p><img src="assets/clicking-a-race-opens-its-overview-step-02.jpg" alt="Race card — click race name to open overview" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Race overview — name and details visible</p><img src="assets/clicking-a-race-opens-its-overview-step-03.jpg" alt="Race overview — name and details visible" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Creates a second race from the management page</h3>
+<p class="description">A race director creates a second race directly from the management screen, going through the full two-step setup wizard (race details, then runner ranges) and landing on the new race's overview page.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Race Management — tap Create New Race button</p><img src="assets/creates-a-second-race-from-the-management-page-step-01.jpg" alt="Race Management — tap Create New Race button" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 1 of 4 — Template: choose Start from Scratch</p><img src="assets/creates-a-second-race-from-the-management-page-step-02.jpg" alt="Step 1 of 4 — Template: choose Start from Scratch" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 2 of 4 — Race Details: enter name, date, start time</p><img src="assets/creates-a-second-race-from-the-management-page-step-03.jpg" alt="Step 2 of 4 — Race Details: enter name, date, start time" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 3 of 4 — Runner Setup: add bib range 500–503</p><img src="assets/creates-a-second-race-from-the-management-page-step-04.jpg" alt="Step 3 of 4 — Runner Setup: add bib range 500–503" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Waves, course map and checkpoint links — accept the defaults to create the race</p><img src="assets/creates-a-second-race-from-the-management-page-step-05.jpg" alt="Waves, course map and checkpoint links — accept the defaults to create the race" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Race overview — second race created successfully</p><img src="assets/creates-a-second-race-from-the-management-page-step-06.jpg" alt="Race overview — second race created successfully" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Race overview shows correct runner and checkpoint counts</h3>
+<p class="description">After creating a race with runner bib numbers 400 to 405 (6 runners) and 2 checkpoints, the race overview page should display &quot;6&quot; as the runner count and &quot;2&quot; as the checkpoint count — no more, no less.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Race overview — runner count 6 and checkpoint count 2 shown</p><img src="assets/race-overview-shows-correct-runner-and-checkpoint-counts-step-01.jpg" alt="Race overview — runner count 6 and checkpoint count 2 shown" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Creates a new race from scratch and verifies the overview</h3>
+<p class="description">A race director fills in all the details needed to create a brand-new race — the race name, date, start time, how many checkpoints there are, and the range of runner bib numbers. Once saved, the race overview page should correctly display the race name, list every checkpoint, and show the right number of registered runners.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Home — Welcome Back screen with 3 module cards</p><img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-01.jpg" alt="Home — Welcome Back screen with 3 module cards" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Race Maintenance → Create New Race — setup wizard opens</p><img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-02.jpg" alt="Race Maintenance → Create New Race — setup wizard opens" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 1 of 4 — Template: choose Start from Scratch</p><img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-03.jpg" alt="Step 1 of 4 — Template: choose Start from Scratch" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 2 of 4 — Race Details: enter name, date, start time and checkpoints</p><img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-04.jpg" alt="Step 2 of 4 — Race Details: enter name, date, start time and checkpoints" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Step 3 of 4 — Runner Setup: add bib number range 101–115</p><img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-05.jpg" alt="Step 3 of 4 — Runner Setup: add bib number range 101–115" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Race overview — name, 3 checkpoints and 15 runners correct</p><img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-06.jpg" alt="Race overview — name, 3 checkpoints and 15 runners correct" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Home — new race listed under module cards</p><img src="assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-07.jpg" alt="Home — new race listed under module cards" loading="lazy"></div>
+</div>
+</section>
 <section class="task">
 <h3>Step indicator advances correctly through setup wizard</h3>
 <p class="description">The race creation wizard has four steps: Template, Race Details, Runner Setup, and Waves. This test checks that the progress indicator at the top updates as you advance through each step, so the race director always knows where they are in the setup process.</p>
@@ -73,22 +124,6 @@
 <div class="step"><p class="step-instruction">Step 2 of 4 — Race Details: fill in race name and details</p><img src="assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-02.jpg" alt="Step 2 of 4 — Race Details: fill in race name and details" loading="lazy"></div>
 <div class="step"><p class="step-instruction">Step 3 of 4 — Runner Setup: navigate forward then press Back</p><img src="assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-03.jpg" alt="Step 3 of 4 — Runner Setup: navigate forward then press Back" loading="lazy"></div>
 <div class="step"><p class="step-instruction">Step 2 of 4 — Race Details: data preserved after Back</p><img src="assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-04.jpg" alt="Step 2 of 4 — Race Details: data preserved after Back" loading="lazy"></div>
-</div>
-</section>
-<section class="task">
-<h3>Race management page lists created races</h3>
-<p class="description">The Race Management page is the race director's central hub where all races are listed. This test confirms that a race created earlier in the test suite appears on that page.</p>
-<div class="steps">
-<div class="step"><p class="step-instruction">Race Management — page lists all created races</p><img src="assets/race-management-page-lists-created-races-step-01.jpg" alt="Race Management — page lists all created races" loading="lazy"></div>
-</div>
-</section>
-<section class="task">
-<h3>Clicking a race opens its overview</h3>
-<p class="description">When the race director clicks on a race in the management list, they should be taken to that race's overview page where they can see all the details. This test confirms that navigation works correctly.</p>
-<div class="steps">
-<div class="step"><p class="step-instruction">Race Management — page with race listed</p><img src="assets/clicking-a-race-opens-its-overview-step-01.jpg" alt="Race Management — page with race listed" loading="lazy"></div>
-<div class="step"><p class="step-instruction">Race card — click race name to open overview</p><img src="assets/clicking-a-race-opens-its-overview-step-02.jpg" alt="Race card — click race name to open overview" loading="lazy"></div>
-<div class="step"><p class="step-instruction">Race overview — name and details visible</p><img src="assets/clicking-a-race-opens-its-overview-step-03.jpg" alt="Race overview — name and details visible" loading="lazy"></div>
 </div>
 </section>
 <section class="task">
@@ -170,10 +205,31 @@
 <div class="step"><p class="step-instruction">Checkpoint 1 — runner 100 still shows its time</p><img src="assets/an-edited-setup-keeps-marks-already-on-a-device-step-04.jpg" alt="Checkpoint 1 — runner 100 still shows its time" loading="lazy"></div>
 </div>
 </section>
+<section class="task">
+<h3>An 11 km field seen only at CP4 is not missed at CP1 to CP3</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Import the entry list — Race No, Name and Wave are picked up on their own</p><img src="assets/an-11-km-field-seen-only-at-cp4-is-not-missed-at-cp1-to-cp3-step-01.jpg" alt="Import the entry list — Race No, Name and Wave are picked up on their own" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Race details — four checkpoints</p><img src="assets/an-11-km-field-seen-only-at-cp4-is-not-missed-at-cp1-to-cp3-step-02.jpg" alt="Race details — four checkpoints" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Edit race — CP1 to CP3 see the two 22 km waves only</p><img src="assets/an-11-km-field-seen-only-at-cp4-is-not-missed-at-cp1-to-cp3-step-03.jpg" alt="Edit race — CP1 to CP3 see the two 22 km waves only" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Base hears CP4 — 11 km bib 150 is not &quot;Not seen CP3&quot;; 22 km bib 10 is</p><img src="assets/an-11-km-field-seen-only-at-cp4-is-not-missed-at-cp1-to-cp3-step-04.jpg" alt="Base hears CP4 — 11 km bib 150 is not &quot;Not seen CP3&quot;; 22 km bib 10 is" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Board — CP1 to CP3 have nobody missed except the 22 km runner</p><img src="assets/an-11-km-field-seen-only-at-cp4-is-not-missed-at-cp1-to-cp3-step-05.jpg" alt="Board — CP1 to CP3 have nobody missed except the 22 km runner" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Stand-down check CP1 — the 11 km runner is not on it</p><img src="assets/an-11-km-field-seen-only-at-cp4-is-not-missed-at-cp1-to-cp3-step-06.jpg" alt="Stand-down check CP1 — the 11 km runner is not on it" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Overview — 22 km and 11 km leaders ranked apart, with the time at their last checkpoint</p><img src="assets/an-11-km-field-seen-only-at-cp4-is-not-missed-at-cp1-to-cp3-step-07.jpg" alt="Overview — 22 km and 11 km leaders ranked apart, with the time at their last checkpoint" loading="lazy"></div>
+</div>
+</section>
 </div>
 <div id="checkpoint">
 <h2>Running a Checkpoint</h2>
 <p class="chapter-intro">Steps for checkpoint volunteers. Covers opening a checkpoint, marking off runners individually and in bulk, reviewing counts, exporting data, and transferring data to another device via QR code.</p>
+<section class="task">
+<h3>Navigates to checkpoint and sees runner grid</h3>
+<p class="description">A checkpoint volunteer opens the app, taps &quot;Checkpoint Operations&quot;, selects their race, and arrives at the correct checkpoint screen. This test confirms that the grid of runner bib numbers — the list of every runner they need to watch for — is visible and fully loaded.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Home — tap Checkpoint Operations module card</p><img src="assets/navigates-to-checkpoint-and-sees-runner-grid-step-01.jpg" alt="Home — tap Checkpoint Operations module card" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Checkpoint view — runner grid loaded with bib numbers 200–210</p><img src="assets/navigates-to-checkpoint-and-sees-runner-grid-step-02.jpg" alt="Checkpoint view — runner grid loaded with bib numbers 200–210" loading="lazy"></div>
+</div>
+</section>
 <section class="task">
 <h3>Marks off a single runner via the runner grid</h3>
 <p class="description">A checkpoint volunteer clicks on a single runner's bib number tile in the grid to record that the runner passed through. The tile should change colour or appearance to make it obvious that runner has been marked as &quot;through&quot;.</p>
@@ -264,6 +320,48 @@
 </div>
 </section>
 <section class="task">
+<h3>Shows empty state warning when no runners are marked off</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Navigate to transfer route with no marked runners</p><img src="assets/shows-empty-state-warning-when-no-runners-are-marked-off-step-01.jpg" alt="Navigate to transfer route with no marked runners" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Send tab — entry count shows 0 entries</p><img src="assets/shows-empty-state-warning-when-no-runners-are-marked-off-step-02.jpg" alt="Send tab — entry count shows 0 entries" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Generate QR Code button is disabled with 0 entries</p><img src="assets/shows-empty-state-warning-when-no-runners-are-marked-off-step-03.jpg" alt="Generate QR Code button is disabled with 0 entries" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Generates a QR code when marked runners are present</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Seed 8 marked runners into checkpoint 1</p><img src="assets/generates-a-qr-code-when-marked-runners-are-present-step-01.jpg" alt="Seed 8 marked runners into checkpoint 1" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Navigate to transfer route</p><img src="assets/generates-a-qr-code-when-marked-runners-are-present-step-02.jpg" alt="Navigate to transfer route" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Send tab — entry count preview shows 8 entries</p><img src="assets/generates-a-qr-code-when-marked-runners-are-present-step-03.jpg" alt="Send tab — entry count preview shows 8 entries" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Click Generate QR Code button</p><img src="assets/generates-a-qr-code-when-marked-runners-are-present-step-04.jpg" alt="Click Generate QR Code button" loading="lazy"></div>
+<div class="step"><p class="step-instruction">QR display — full-screen QR code appears</p><img src="assets/generates-a-qr-code-when-marked-runners-are-present-step-05.jpg" alt="QR display — full-screen QR code appears" loading="lazy"></div>
+<div class="step"><p class="step-instruction">QR display — entry count label is shown</p><img src="assets/generates-a-qr-code-when-marked-runners-are-present-step-06.jpg" alt="QR display — entry count label is shown" loading="lazy"></div>
+<div class="step"><p class="step-instruction">QR display — &quot;Done&quot; and file share buttons are present</p><img src="assets/generates-a-qr-code-when-marked-runners-are-present-step-07.jpg" alt="QR display — &quot;Done&quot; and file share buttons are present" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Delta scope shows only entries newer than last share timestamp</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Seed 5 marked runners and set a last-share timestamp after 3 of them</p><img src="assets/delta-scope-shows-only-entries-newer-than-last-share-timestamp-step-01.jpg" alt="Seed 5 marked runners and set a last-share timestamp after 3 of them" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Navigate to transfer route</p><img src="assets/delta-scope-shows-only-entries-newer-than-last-share-timestamp-step-02.jpg" alt="Navigate to transfer route" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Delta option selected — entry count shows 2 new entries</p><img src="assets/delta-scope-shows-only-entries-newer-than-last-share-timestamp-step-03.jpg" alt="Delta option selected — entry count shows 2 new entries" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Switching to full history shows all 5 entries</p><img src="assets/delta-scope-shows-only-entries-newer-than-last-share-timestamp-step-04.jpg" alt="Switching to full history shows all 5 entries" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Receive tab shows scanner and file import fallback</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Navigate to transfer route and open Receive tab</p><img src="assets/receive-tab-shows-scanner-and-file-import-fallback-step-01.jpg" alt="Navigate to transfer route and open Receive tab" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Receive tab — description text is shown</p><img src="assets/receive-tab-shows-scanner-and-file-import-fallback-step-02.jpg" alt="Receive tab — description text is shown" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Receive tab — Start Scanning button is visible</p><img src="assets/receive-tab-shows-scanner-and-file-import-fallback-step-03.jpg" alt="Receive tab — Start Scanning button is visible" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Start Scanning — the file import fallback is offered under the camera</p><img src="assets/receive-tab-shows-scanner-and-file-import-fallback-step-04.jpg" alt="Start Scanning — the file import fallback is offered under the camera" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
 <h3>Back button returns to the checkpoint view</h3>
 <p class="description"></p>
 <div class="steps">
@@ -310,8 +408,43 @@
 <h2>Operating the Base Station</h2>
 <p class="chapter-intro">Steps for the base station operator. Record finish times, mark DNF/DNS runners, and review race-wide status from the Overview and Reports tabs.</p>
 <section class="task">
+<h3>Base station opens on Receive, ready for the first call</h3>
+<p class="description"></p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Takes a call from CP1, then sees the runners on Overview</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Receive — CP1 calls in 300, 301, 302 and 303</p><img src="assets/takes-a-call-from-cp1-then-sees-the-runners-on-overview-step-01.jpg" alt="Receive — CP1 calls in 300, 301, 302 and 303" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Overview — CP1 progress shows 4 and the leaders list has 300</p><img src="assets/takes-a-call-from-cp1-then-sees-the-runners-on-overview-step-02.jpg" alt="Overview — CP1 progress shows 4 and the leaders list has 300" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Records a DNF via the withdrawal dialog</h3>
+<p class="description">When a runner drops out of the race and does not finish (DNF), the base station operator needs to record this. This test opens the withdrawal dialog, enters a runner's bib number and a reason such as &quot;Injured ankle&quot;, confirms the entry, and checks that the runner now shows a DNF status in the overview.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Receive — press D to open the withdrawal dialog</p><img src="assets/records-a-dnf-via-the-withdrawal-dialog-step-01.jpg" alt="Receive — press D to open the withdrawal dialog" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Withdrawal Dialog — enter runner 310 and reason, then submit</p><img src="assets/records-a-dnf-via-the-withdrawal-dialog-step-02.jpg" alt="Withdrawal Dialog — enter runner 310 and reason, then submit" loading="lazy"></div>
+<div class="step"><p class="step-instruction">DNF / DNS tab — runner 310 is out of the race</p><img src="assets/records-a-dnf-via-the-withdrawal-dialog-step-03.jpg" alt="DNF / DNS tab — runner 310 is out of the race" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Opens Times by checkpoint in Reports</h3>
+<p class="description"></p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
 <h3>Switches to Reports tab and renders a report</h3>
 <p class="description">The Reports tab lets the operator generate a printed summary of race results. This test switches to the tab and checks that the report content — runner totals, times, and status counts — is visible.</p>
+<div class="steps">
+</div>
+</section>
+<section class="task">
+<h3>Exports base station data</h3>
+<p class="description">The base station operator may need to export all their recorded data for backup or to share with the race director. This test checks that the import/export tool can be opened from the base station screen.</p>
 <div class="steps">
 </div>
 </section>
@@ -488,6 +621,22 @@
 <h2>Base Station: DNF, DNS and Overview</h2>
 <p class="chapter-intro">Base keeps the race-wide out list. Mark runners DNF or DNS in bulk by typing or pasting numbers, check the warnings, and clear anyone who is back in. The Overview shows who is on course, overdue alerts, checkpoint progress and the current leaders.</p>
 <section class="task">
+<h3>Overdue waits for the checkpoint to report</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Overview — CP2 is only behind on calls: gold note, no red alert</p><img src="assets/overdue-waits-for-the-checkpoint-to-report-step-01.jpg" alt="Overview — CP2 is only behind on calls: gold note, no red alert" loading="lazy"></div>
+<div class="step"><p class="step-instruction">CP2 calls in up to now without those runners — now they are overdue</p><img src="assets/overdue-waits-for-the-checkpoint-to-report-step-02.jpg" alt="CP2 calls in up to now without those runners — now they are overdue" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>On course count matches report</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Overview — On course tile with &quot;not seen yet&quot;</p><img src="assets/on-course-count-matches-report-step-01.jpg" alt="Overview — On course tile with &quot;not seen yet&quot;" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Reports — Still on course shows the same numbers</p><img src="assets/on-course-count-matches-report-step-02.jpg" alt="Reports — Still on course shows the same numbers" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
 <h3>Base marks a pasted list DNF with checks, clears one and undoes</h3>
 <p class="description"></p>
 <div class="steps">
@@ -505,22 +654,6 @@
 <div class="steps">
 <div class="step"><p class="step-instruction">Overview — stat tiles and checkpoint progress</p><img src="assets/base-overview-shows-tiles-checkpoint-progress-and-current-leaders-step-01.jpg" alt="Overview — stat tiles and checkpoint progress" loading="lazy"></div>
 <div class="step"><p class="step-instruction">Current leaders — furthest along first, gold badge for #1</p><img src="assets/base-overview-shows-tiles-checkpoint-progress-and-current-leaders-step-02.jpg" alt="Current leaders — furthest along first, gold badge for #1" loading="lazy"></div>
-</div>
-</section>
-<section class="task">
-<h3>Overdue waits for the checkpoint to report</h3>
-<p class="description"></p>
-<div class="steps">
-<div class="step"><p class="step-instruction">Overview — CP2 is only behind on calls: gold note, no red alert</p><img src="assets/overdue-waits-for-the-checkpoint-to-report-step-01.jpg" alt="Overview — CP2 is only behind on calls: gold note, no red alert" loading="lazy"></div>
-<div class="step"><p class="step-instruction">CP2 calls in up to now without those runners — now they are overdue</p><img src="assets/overdue-waits-for-the-checkpoint-to-report-step-02.jpg" alt="CP2 calls in up to now without those runners — now they are overdue" loading="lazy"></div>
-</div>
-</section>
-<section class="task">
-<h3>On course count matches report</h3>
-<p class="description"></p>
-<div class="steps">
-<div class="step"><p class="step-instruction">Overview — On course tile with &quot;not seen yet&quot;</p><img src="assets/on-course-count-matches-report-step-01.jpg" alt="Overview — On course tile with &quot;not seen yet&quot;" loading="lazy"></div>
-<div class="step"><p class="step-instruction">Reports — Still on course shows the same numbers</p><img src="assets/on-course-count-matches-report-step-02.jpg" alt="Reports — Still on course shows the same numbers" loading="lazy"></div>
 </div>
 </section>
 <section class="task">
@@ -544,7 +677,7 @@
 <h3>Leaders flag open data issues</h3>
 <p class="description"></p>
 <div class="steps">
-<div class="step"><p class="step-instruction">Overview — 106 (out of order) and 107 (impossible pace) carry the warning; elapsed is HH:MM</p><img src="assets/leaders-flag-open-data-issues-step-01.jpg" alt="Overview — 106 (out of order) and 107 (impossible pace) carry the warning; elapsed is HH:MM" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Overview — 106 (out of order) and 107 (impossible pace) carry the warning; time is HH:MM</p><img src="assets/leaders-flag-open-data-issues-step-01.jpg" alt="Overview — 106 (out of order) and 107 (impossible pace) carry the warning; time is HH:MM" loading="lazy"></div>
 <div class="step"><p class="step-instruction">Mark 107 checked in Reports — its warning goes</p><img src="assets/leaders-flag-open-data-issues-step-02.jpg" alt="Mark 107 checked in Reports — its warning goes" loading="lazy"></div>
 </div>
 </section>
@@ -597,6 +730,14 @@
 <h2>Base Station: Reports and Data Checks</h2>
 <p class="chapter-intro">Overdue runners, who is still on course, times by checkpoint and the call log — each as CSV or print. Needs attention lists duplicates, out-of-order times, skipped checkpoints, sightings after DNF / DNS, unknown bibs and impossible pace; resolve each in place, with Undo.</p>
 <section class="task">
+<h3>Matrix keeps times for DNS runners</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Mark 101 DNS (it was seen — flagged, applied anyway)</p><img src="assets/matrix-keeps-times-for-dns-runners-step-01.jpg" alt="Mark 101 DNS (it was seen — flagged, applied anyway)" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Times by checkpoint — times kept, DNS in the Status column, CSV matches</p><img src="assets/matrix-keeps-times-for-dns-runners-step-02.jpg" alt="Times by checkpoint — times kept, DNS in the Status column, CSV matches" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
 <h3>Base resolves a duplicate and an out-of-order time until checks are clear</h3>
 <p class="description"></p>
 <div class="steps">
@@ -614,14 +755,6 @@
 <div class="step"><p class="step-instruction">Still on course — grouped by last checkpoint passed</p><img src="assets/base-reports-show-still-on-course-times-by-checkpoint-and-the-call-log-step-01.jpg" alt="Still on course — grouped by last checkpoint passed" loading="lazy"></div>
 <div class="step"><p class="step-instruction">Times by checkpoint — one row per bib, CP1 … Finish</p><img src="assets/base-reports-show-still-on-course-times-by-checkpoint-and-the-call-log-step-02.jpg" alt="Times by checkpoint — one row per bib, CP1 … Finish" loading="lazy"></div>
 <div class="step"><p class="step-instruction">Call log — calls and numbers per checkpoint; CSV available</p><img src="assets/base-reports-show-still-on-course-times-by-checkpoint-and-the-call-log-step-03.jpg" alt="Call log — calls and numbers per checkpoint; CSV available" loading="lazy"></div>
-</div>
-</section>
-<section class="task">
-<h3>Matrix keeps times for DNS runners</h3>
-<p class="description"></p>
-<div class="steps">
-<div class="step"><p class="step-instruction">Mark 101 DNS (it was seen — flagged, applied anyway)</p><img src="assets/matrix-keeps-times-for-dns-runners-step-01.jpg" alt="Mark 101 DNS (it was seen — flagged, applied anyway)" loading="lazy"></div>
-<div class="step"><p class="step-instruction">Times by checkpoint — times kept, DNS in the Status column, CSV matches</p><img src="assets/matrix-keeps-times-for-dns-runners-step-02.jpg" alt="Times by checkpoint — times kept, DNS in the Status column, CSV matches" loading="lazy"></div>
 </div>
 </section>
 <section class="task">
@@ -677,9 +810,65 @@
 </div>
 </section>
 </div>
+<div id="base-records">
+<h2>Base Station: Fixing Recorded Numbers (Records)</h2>
+<p class="chapter-intro">Records shows every number base holds for one checkpoint, by block, by number or by call, with what needs checking: duplicates, missed runners, wrong numbers and other checks. Fix a time, a mistyped number or the checkpoint one at a time or as a batch. Each change asks why, keeps history and has Undo.</p>
+<section class="task">
+<h3>Base fixes the numbers it recorded at a checkpoint</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">CP2 header — Records shows how many need checking</p><img src="assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-01.jpg" alt="CP2 header — Records shows how many need checking" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Needs attention at CP2 — counts match, each filter shows only its numbers</p><img src="assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-02.jpg" alt="Needs attention at CP2 — counts match, each filter shows only its numbers" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Change a time — Save is locked until a reason is picked</p><img src="assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-03.jpg" alt="Change a time — Save is locked until a reason is picked" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Undo restores the time exactly</p><img src="assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-04.jpg" alt="Undo restores the time exactly" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Times by checkpoint and the call log show the correction</p><img src="assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-05.jpg" alt="Times by checkpoint and the call log show the correction" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Wrong number — change 999 to 129 (base typing error); 999 stays in history</p><img src="assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-06.jpg" alt="Wrong number — change 999 to 129 (base typing error); 999 stays in history" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Select a block — every bib listed on its own row, moved together, then Undo</p><img src="assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-07.jpg" alt="Select a block — every bib listed on its own row, moved together, then Undo" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Move three numbers to CP3, then Undo</p><img src="assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-08.jpg" alt="Move three numbers to CP3, then Undo" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Remove a number takes two taps, and Undo puts it back</p><img src="assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-09.jpg" alt="Remove a number takes two taps, and Undo puts it back" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Missed runners — CP2 has 110; 111 not seen there</p><img src="assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-10.jpg" alt="Missed runners — CP2 has 110; 111 not seen there" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Records fits the tablet with 150 numbers at one checkpoint</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">150 numbers at CP2 — the list scrolls inside its panel, the page does not</p><img src="assets/records-fits-the-tablet-with-150-numbers-at-one-checkpoint-step-01.jpg" alt="150 numbers at CP2 — the list scrolls inside its panel, the page does not" loading="lazy"></div>
+</div>
+</section>
+</div>
+<div id="base-crews">
+<h2>Base Station: Crew & Vehicle Log</h2>
+<p class="chapter-intro">For insurance, base logs which car went to each checkpoint, who was in it, and when it left home and arrived. Arrived now is one tap when an operator radios in. The log stays on the base device and is never in the race setup sent to volunteers.</p>
+<section class="task">
+<h3>Base logs the crews and vehicles going to each checkpoint</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Crews tab — a card per checkpoint, Base first, nothing logged yet</p><img src="assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-01.jpg" alt="Crews tab — a card per checkpoint, Base first, nothing logged yet" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Add a car to CP3 — rego, driver, passenger, left home 04:45 (before the start)</p><img src="assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-02.jpg" alt="Add a car to CP3 — rego, driver, passenger, left home 04:45 (before the start)" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Add a second car to CP3 — more than one car can go to a checkpoint</p><img src="assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-03.jpg" alt="Add a second car to CP3 — more than one car can go to a checkpoint" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Operator radios in — Arrived now, one tap</p><img src="assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-04.jpg" alt="Operator radios in — Arrived now, one tap" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Undo the last arrival — back on the way</p><img src="assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-05.jpg" alt="Undo the last arrival — back on the way" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Crews fit the tablet — no page scroll at 1112×834</p><img src="assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-06.jpg" alt="Crews fit the tablet — no page scroll at 1112×834" loading="lazy"></div>
+<div class="step"><p class="step-instruction">From Receive, CP3 shows its crew on the way — Crew opens the same editor</p><img src="assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-07.jpg" alt="From Receive, CP3 shows its crew on the way — Crew opens the same editor" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Remove a vehicle takes two taps, and Undo brings it back</p><img src="assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-08.jpg" alt="Remove a vehicle takes two taps, and Undo brings it back" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Reports — Crew &amp; vehicle log for insurance, CSV has every vehicle</p><img src="assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-09.jpg" alt="Reports — Crew &amp; vehicle log for insurance, CSV has every vehicle" loading="lazy"></div>
+<div class="step"><p class="step-instruction">The race setup shared with volunteers carries no crew or rego details</p><img src="assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-10.jpg" alt="The race setup shared with volunteers carries no crew or rego details" loading="lazy"></div>
+</div>
+</section>
+</div>
 <div id="import-export">
 <h2>Importing & Exporting Data</h2>
 <p class="chapter-intro">Transfer race configurations and results between devices. Export from the base station header or race management page; import to restore a race.</p>
+<section class="task">
+<h3>Export modal opens from base station header</h3>
+<p class="description">The base station screen has an import/export button in the header. This test confirms that tapping it opens the data portability dialog where the operator can choose what to export.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Base Station — operations screen with created race</p><img src="assets/export-modal-opens-from-base-station-header-step-01.jpg" alt="Base Station — operations screen with created race" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Base Station header — tap Import/Export button</p><img src="assets/export-modal-opens-from-base-station-header-step-02.jpg" alt="Base Station header — tap Import/Export button" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Data portability dialog — export options visible</p><img src="assets/export-modal-opens-from-base-station-header-step-03.jpg" alt="Data portability dialog — export options visible" loading="lazy"></div>
+</div>
+</section>
 <section class="task">
 <h3>Downloads a race configuration JSON file</h3>
 <p class="description">This test triggers the export function and confirms that a JSON file is actually downloaded to the device. The file should contain the race configuration — name, checkpoints, runner numbers — that can be used to restore the race on another device.</p>
@@ -710,25 +899,21 @@
 <div class="step"><p class="step-instruction">Import — a file that isn't JSON is refused with a plain message</p><img src="assets/import-accepts-octet-stream-step-02.jpg" alt="Import — a file that isn't JSON is refused with a plain message" loading="lazy"></div>
 </div>
 </section>
+<section class="task">
+<h3>Base backs the race up to a folder and a new device restores it</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">File backup off — choose a folder once</p><img src="assets/base-backs-the-race-up-to-a-folder-and-a-new-device-restores-it-step-01.jpg" alt="File backup off — choose a folder once" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Take a CP1 call and a Finish call — 30 s later the file has both</p><img src="assets/base-backs-the-race-up-to-a-folder-and-a-new-device-restores-it-step-02.jpg" alt="Take a CP1 call and a Finish call — 30 s later the file has both" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Withdraw a runner — the next backup has the DNF</p><img src="assets/base-backs-the-race-up-to-a-folder-and-a-new-device-restores-it-step-03.jpg" alt="Withdraw a runner — the next backup has the DNF" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Reload base — the folder is remembered and backing up continues</p><img src="assets/base-backs-the-race-up-to-a-folder-and-a-new-device-restores-it-step-04.jpg" alt="Reload base — the folder is remembered and backing up continues" loading="lazy"></div>
+<div class="step"><p class="step-instruction">A new device restores the file — call log and DNF come back</p><img src="assets/base-backs-the-race-up-to-a-folder-and-a-new-device-restores-it-step-05.jpg" alt="A new device restores the file — call log and DNF come back" loading="lazy"></div>
+</div>
+</section>
 </div>
 <div id="navigation">
 <h2>Navigating the App</h2>
 <p class="chapter-intro">How to move between modules, what to expect on the home screen, and how the app protects active operations from accidental navigation.</p>
-<section class="task">
-<h3>Navigates from race overview to base station</h3>
-<p class="description">From the race overview, a race director can jump straight to the base station. This test clicks the Base Station button on the overview page and confirms the base station operations screen opens.</p>
-<div class="steps">
-<div class="step"><p class="step-instruction">Navigate directly to base station operations</p><img src="assets/navigates-from-race-overview-to-base-station-step-01.jpg" alt="Navigate directly to base station operations" loading="lazy"></div>
-<div class="step"><p class="step-instruction">Base Station — operations screen open</p><img src="assets/navigates-from-race-overview-to-base-station-step-02.jpg" alt="Base Station — operations screen open" loading="lazy"></div>
-</div>
-</section>
-<section class="task">
-<h3>Home page landing shows the race management module card</h3>
-<p class="description">The Race Maintenance module card should always be visible on the home screen so race directors can always find it easily. This test simply confirms the card is present.</p>
-<div class="steps">
-<div class="step"><p class="step-instruction">Home — Race Maintenance module card visible</p><img src="assets/home-page-landing-shows-the-race-management-module-card-step-01.jpg" alt="Home — Race Maintenance module card visible" loading="lazy"></div>
-</div>
-</section>
 <section class="task">
 <h3>Shows protection modal when leaving active checkpoint operation</h3>
 <p class="description">While a checkpoint volunteer is actively recording runners, the app should warn them if they try to navigate away — for example by tapping the back button or going to a different module. This prevents accidentally losing all their recorded data. This test triggers that navigation and confirms the warning appears.</p>
@@ -760,19 +945,27 @@
 </div>
 </section>
 <section class="task">
+<h3>Navigates from race overview to base station</h3>
+<p class="description">From the race overview, a race director can jump straight to the base station. This test clicks the Base Station button on the overview page and confirms the base station operations screen opens.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Navigate directly to base station operations</p><img src="assets/navigates-from-race-overview-to-base-station-step-01.jpg" alt="Navigate directly to base station operations" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Base Station — operations screen open</p><img src="assets/navigates-from-race-overview-to-base-station-step-02.jpg" alt="Base Station — operations screen open" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Home page landing shows the race management module card</h3>
+<p class="description">The Race Maintenance module card should always be visible on the home screen so race directors can always find it easily. This test simply confirms the card is present.</p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Home — Race Maintenance module card visible</p><img src="assets/home-page-landing-shows-the-race-management-module-card-step-01.jpg" alt="Home — Race Maintenance module card visible" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
 <h3>Home shows the three roles, the current race and Scan race QR code</h3>
 <p class="description"></p>
 <div class="steps">
 <div class="step"><p class="step-instruction">Home — choose your role: Checkpoint, Base station or Race setup</p><img src="assets/home-shows-the-three-roles-the-current-race-and-scan-race-qr-code-step-01.jpg" alt="Home — choose your role: Checkpoint, Base station or Race setup" loading="lazy"></div>
 <div class="step"><p class="step-instruction">Current race card shows the race name, checkpoints and start time</p><img src="assets/home-shows-the-three-roles-the-current-race-and-scan-race-qr-code-step-02.jpg" alt="Current race card shows the race name, checkpoints and start time" loading="lazy"></div>
 <div class="step"><p class="step-instruction">Scan race QR code opens the import screen</p><img src="assets/home-shows-the-three-roles-the-current-race-and-scan-race-qr-code-step-03.jpg" alt="Scan race QR code opens the import screen" loading="lazy"></div>
-</div>
-</section>
-<section class="task">
-<h3>Footer names the club</h3>
-<p class="description"></p>
-<div class="steps">
-<div class="step"><p class="step-instruction">Footer — &quot;Ipswich &amp; District Radio Club · VK4WIP&quot;</p><img src="assets/footer-names-the-club-step-01.jpg" alt="Footer — &quot;Ipswich &amp; District Radio Club · VK4WIP&quot;" loading="lazy"></div>
 </div>
 </section>
 <section class="task">
@@ -794,6 +987,13 @@
 <p class="description"></p>
 <div class="steps">
 <div class="step"><p class="step-instruction">Unmark — Undo shows, then goes by itself</p><img src="assets/undo-bar-clears-itself-after-about-six-seconds-step-01.jpg" alt="Unmark — Undo shows, then goes by itself" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Footer names the club</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Footer — &quot;Ipswich &amp; District Radio Club · VK4WIP&quot;</p><img src="assets/footer-names-the-club-step-01.jpg" alt="Footer — &quot;Ipswich &amp; District Radio Club · VK4WIP&quot;" loading="lazy"></div>
 </div>
 </section>
 </div>
@@ -849,6 +1049,20 @@
 </div>
 </section>
 <section class="task">
+<h3>Settings cancel undoes the theme preview</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Pick Dark — the page previews it; Cancel puts Light back</p><img src="assets/settings-cancel-undoes-the-theme-preview-step-01.jpg" alt="Pick Dark — the page previews it; Cancel puts Light back" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Settings persist after reload</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Reload — still Dark</p><img src="assets/settings-persist-after-reload-step-01.jpg" alt="Reload — still Dark" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
 <h3>Locked buttons look locked</h3>
 <p class="description"></p>
 <div class="steps">
@@ -875,20 +1089,6 @@
 <div class="step"><p class="step-instruction">Callout in Sunlight</p><img src="assets/sunlight-on-the-working-screens-step-02.jpg" alt="Callout in Sunlight" loading="lazy"></div>
 <div class="step"><p class="step-instruction">Read-out in Sunlight</p><img src="assets/sunlight-on-the-working-screens-step-03.jpg" alt="Read-out in Sunlight" loading="lazy"></div>
 <div class="step"><p class="step-instruction">Base Receive in Sunlight</p><img src="assets/sunlight-on-the-working-screens-step-04.jpg" alt="Base Receive in Sunlight" loading="lazy"></div>
-</div>
-</section>
-<section class="task">
-<h3>Settings cancel undoes the theme preview</h3>
-<p class="description"></p>
-<div class="steps">
-<div class="step"><p class="step-instruction">Pick Dark — the page previews it; Cancel puts Light back</p><img src="assets/settings-cancel-undoes-the-theme-preview-step-01.jpg" alt="Pick Dark — the page previews it; Cancel puts Light back" loading="lazy"></div>
-</div>
-</section>
-<section class="task">
-<h3>Settings persist after reload</h3>
-<p class="description"></p>
-<div class="steps">
-<div class="step"><p class="step-instruction">Reload — still Dark</p><img src="assets/settings-persist-after-reload-step-01.jpg" alt="Reload — still Dark" loading="lazy"></div>
 </div>
 </section>
 </div>
@@ -947,6 +1147,25 @@
 <h3>Phase 4f — Overview tab shows correct runner statuses</h3>
 <p class="description"></p>
 <div class="steps">
+</div>
+</section>
+</div>
+<div id="linked-checkpoints">
+<h2>Linked Checkpoints (Turnaround Point)</h2>
+<p class="chapter-intro">How to operate two checkpoints at the same physical location — for example, an out-and-back turnaround where CP1 (outbound) and CP4 (return) are staffed by the same volunteers. Covers the checkpoint picker, dual view, tab switching, and cross-checkpoint overview.</p>
+<section class="task">
+<h3>Volunteer operates linked turnaround checkpoints from one interface</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Home screen — navigate to Checkpoint Operations</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-01.jpg" alt="Home screen — navigate to Checkpoint Operations" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Race selection modal — select the Turnaround Ultra race</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-02.jpg" alt="Race selection modal — select the Turnaround Ultra race" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Checkpoint picker — linked pair shown as single card with link icon</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-03.jpg" alt="Checkpoint picker — linked pair shown as single card with link icon" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Select the linked pair — navigate to dual checkpoint view</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-04.jpg" alt="Select the linked pair — navigate to dual checkpoint view" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Dual view loads — CP tab switcher shows CP1 and CP4</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-05.jpg" alt="Dual view loads — CP tab switcher shows CP1 and CP4" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Mark runners 100 and 101 in CP1 (outbound) via quick entry</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-06.jpg" alt="Mark runners 100 and 101 in CP1 (outbound) via quick entry" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Switch to CP4 tab — stars appear on runners 100 and 101</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-07.jpg" alt="Switch to CP4 tab — stars appear on runners 100 and 101" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Mark runner 100 in CP4 (return) via quick entry</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-08.jpg" alt="Mark runner 100 in CP4 (return) via quick entry" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Overview tab — runner 100 shows Both, runner 101 shows CP1 Only</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-09.jpg" alt="Overview tab — runner 100 shows Both, runner 101 shows CP1 Only" loading="lazy"></div>
 </div>
 </section>
 </div>
@@ -1208,6 +1427,25 @@
 <ul>
 <li><strong>DNF / DNS</strong> tab: bulk add by typing or pasting numbers, choose where and why, apply; Clear any entry to put a runner back in the race.</li>
 <li><strong>Reports › Needs attention</strong>: duplicates, out-of-order times, skipped checkpoints, sightings after DNF/DNS, unknown bibs, impossible pace — resolve each in place.</li>
+</ul>
+<h3>Base: fixing recorded numbers (Records)</h3>
+<p>Records is base's own list of every number it holds for one checkpoint. On Receive, tap the checkpoint, then <strong>Records</strong> (a gold count shows how many need checking). Every checkpoint row on the board also has a small <strong>Records</strong> button. <strong>Back to call</strong> returns to the call you were taking, with nothing lost.</p>
+<ul>
+<li>View the numbers <strong>By block</strong>, <strong>By number</strong> or <strong>By call</strong>. <strong>Find number</strong> narrows the list to bibs starting with the digits typed. The filter pills show duplicates, missed runners, wrong numbers and other checks.</li>
+<li>Tap a number to change its <strong>Time</strong>, fix a mistyped <strong>Number</strong>, move it to the right <strong>Checkpoint</strong>, or <strong>Remove</strong> it (tap twice). For a duplicate, <strong>Keep this one</strong> removes the others. For a wrong number heard on a call, use <strong>Change number</strong> or <strong>Record as late entry</strong>.</li>
+<li>Every change asks <strong>Why</strong>: *Checkpoint correction*, *Base typing error* or *Other*. A checkpoint correction is logged as a correction call, so it shows in the call log, the same as Correction mode.</li>
+<li><strong>Select</strong> fixes several numbers at once: tap them, or use <strong>Select block</strong> / <strong>Select call</strong>. Every bib is listed on its own line before you save.</li>
+<li>Nothing is deleted. <strong>Show history</strong> shows what each change replaced, and <strong>Undo</strong> reverses the last change exactly. An edit can lower a checkpoint's &quot;up to&quot;; the status line says so when it does.</li>
+<li>Records only changes base's own records. It never changes what a checkpoint holds, so ask the checkpoint for a correction if their sheet is wrong too.</li>
+</ul>
+<h3>Crew &amp; vehicle log</h3>
+<p>For insurance, base logs which car went to each checkpoint, who was in it, and when it left home and arrived. Use the <strong>Crews</strong> tab, or the <strong>Crew</strong> button on a checkpoint on Receive while you're taking its calls.</p>
+<ul>
+<li><strong>+ Vehicle</strong> adds a car: rego, driver, anyone else in the car, and the times. Times are exact (not 5-minute blocks), can be before the race start, and are never in the future. More than one car can go to a checkpoint.</li>
+<li>When an operator radios that they've arrived, tap <strong>Arrived now</strong> on their car. Every save, arrival and removal has Undo.</li>
+<li><strong>Return trip (left site, home safe)</strong> is optional.</li>
+<li><strong>Reports › Crew &amp; vehicle log</strong> prints or exports the log. It stays on the base device and is never included in the race setup or any shared file.</li>
+<li>Operators report leaving home and arriving at their checkpoint in plain words to base; there is no set phrase.</li>
 </ul>
 </section>
 </div>

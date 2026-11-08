@@ -17,6 +17,9 @@ import { z } from 'zod';
  * Race schema - Validates race entity data
  * @type {import('zod').ZodObject}
  */
+/** Every runner status the app writes — a backup must round-trip them all (superseded = a corrected base time). */
+const RUNNER_STATUSES = ['not-started', 'passed', 'called-in', 'marked-off', 'dnf', 'dns', 'non-starter', 'vet-out', 'withdrawn', 'superseded'];
+
 export const raceSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   name: z.string().min(1, 'Race name is required'),
@@ -44,7 +47,7 @@ export const runnerSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
   number: z.number().int().positive('Runner number must be positive'),
-  status: z.enum(['not-started', 'passed', 'dnf', 'non-starter', 'vet-out', 'withdrawn']),
+  status: z.enum(RUNNER_STATUSES),
   notes: z.string().nullable().optional(),
   // Optional fields for extended runner data
   firstName: z.string().nullable().optional(),
@@ -83,7 +86,7 @@ export const checkpointRunnerSchema = z.object({
   raceId: z.union([z.string(), z.number()]),
   checkpointNumber: z.number().int().positive(),
   number: z.number().int().positive('Runner number must be positive'),
-  status: z.enum(['not-started', 'passed', 'dnf', 'non-starter', 'vet-out', 'withdrawn']),
+  status: z.enum(RUNNER_STATUSES),
   markOffTime: z.string().nullable().optional(),
   callInTime: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
@@ -96,9 +99,9 @@ export const checkpointRunnerSchema = z.object({
 export const baseStationRunnerSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
-  checkpointNumber: z.number().int().positive(),
+  checkpointNumber: z.number().int().nonnegative() /* 0 = Finish */,
   number: z.number().int().positive('Runner number must be positive'),
-  status: z.enum(['not-started', 'passed', 'dnf', 'non-starter', 'vet-out', 'withdrawn']),
+  status: z.enum(RUNNER_STATUSES),
   commonTime: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
 });
@@ -139,7 +142,7 @@ export const auditLogSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
   entityType: z.string(),
-  action: z.enum(['create', 'update', 'delete', 'restore']),
+  action: z.string().min(1), // e.g. receive-call, withdraw
   performedAt: z.string(),
   performedBy: z.string().optional(),
   changes: z.any().optional(),
@@ -153,7 +156,7 @@ export const withdrawalRecordSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
   runnerNumber: z.number().int().positive(),
-  checkpoint: z.number().int().positive(),
+  checkpoint: z.number().int().nonnegative().nullable().optional(), // 0 = base, null = not said
   withdrawalTime: z.string(),
   reversedAt: z.string().nullable().optional(),
   reason: z.string().optional(),
@@ -168,7 +171,7 @@ export const vetOutRecordSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   raceId: z.union([z.string(), z.number()]),
   runnerNumber: z.number().int().positive(),
-  checkpoint: z.number().int().positive(),
+  checkpoint: z.number().int().nonnegative().nullable().optional(), // 0 = base, null = not said
   vetOutTime: z.string(),
   reason: z.string().optional(),
   notes: z.string().optional(),
@@ -196,6 +199,16 @@ export const exportPackageSchema = z.object({
     auditLog: z.array(auditLogSchema).optional(),
     withdrawalRecords: z.array(withdrawalRecordSchema).optional(),
     vetOutRecords: z.array(vetOutRecordSchema).optional(),
+    // Added 3.19: the rest of the race tables (restored as-is)
+    importedCheckpointResults: z.array(z.any()).optional(),
+    raceBatches: z.array(z.any()).optional(),
+    radioCalls: z.array(z.any()).optional(),
+    dataIssueResolutions: z.array(z.any()).optional(),
+    readoutProgress: z.array(z.any()).optional(),
+    checkpointFieldChanges: z.array(z.any()).optional(),
+    fieldChanges: z.array(z.any()).optional(),
+    crewVehicles: z.array(z.any()).optional(), // added 3.20
+    baseEdits: z.array(z.any()).optional(), // added 3.20
   }).optional(),
   // Legacy support for old export format
   raceConfig: z.object({

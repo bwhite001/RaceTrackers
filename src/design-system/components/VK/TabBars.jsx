@@ -52,6 +52,7 @@ export const BASE_TABS = [
   { id: 'overview', label: 'Overview' },
   { id: 'status', label: 'DNF / DNS' },
   { id: 'reports', label: 'Reports' },
+  { id: 'crews', label: 'Crews' },
 ];
 
 /**

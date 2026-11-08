@@ -65,6 +65,8 @@ const useBaseOperationsStore = create(
       raceRunnerBatches: new Map(), // bib → wave, for checkpoints only some waves pass
       fieldChanges: [],
       radioCalls: [],
+      crewVehicles: [],
+      baseEdits: [],
       baseRows: [],
       resolutions: [],
       receive: EMPTY_RECEIVE,
@@ -148,13 +150,15 @@ const useBaseOperationsStore = create(
             console.warn(`Base refresh: could not load ${label}`, err);
             return [];
           });
-          const [raceRunnerRows, radioCalls, outList, baseRows, resolutions, fieldChanges] = await Promise.all([
+          const [raceRunnerRows, radioCalls, outList, baseRows, resolutions, fieldChanges, crewVehicles, baseEdits] = await Promise.all([
             soft('race runners', () => db.runners.where('raceId').equals(raceKey).toArray()),
             soft('radio calls', () => repo.getRadioCalls(raceKey)),
             soft('out list', () => repo.getOutList(raceKey)),
             soft('base records', () => repo.getBaseStationRunners(raceKey)),
             soft('resolutions', () => repo.getResolutions(raceKey)),
             soft('field changes', () => repo.getFieldChanges(raceKey)),
+            soft('crew vehicles', () => repo.getCrewVehicles(raceKey)),
+            soft('base edits', () => repo.getBaseEdits(raceKey)),
           ]);
           const stats = get().calculateStats(runners);
 
@@ -197,6 +201,8 @@ const useBaseOperationsStore = create(
             outList,
             baseRows,
             resolutions,
+            crewVehicles,
+            baseEdits,
             loading: false,
             lastSync: new Date().toISOString()
           });
@@ -469,6 +475,36 @@ const useBaseOperationsStore = create(
 
       restoreBaseRows: async (rows) => {
         await new BaseOperationsRepository().restoreBaseRows(raceKeyOf(get().currentRaceId), rows);
+        await get().refreshData({ silent: true });
+      },
+
+      // Actions - Records (fix what base recorded). editRecords returns the edit id for undoRecordEdit.
+      editRecords: async (checkpointNumber, edit) => {
+        const id = await new BaseOperationsRepository().editRecords(raceKeyOf(get().currentRaceId), checkpointNumber, edit);
+        await get().refreshData({ silent: true });
+        return id;
+      },
+
+      undoRecordEdit: async (editId) => {
+        await new BaseOperationsRepository().undoRecordEdit(editId);
+        await get().refreshData({ silent: true });
+      },
+
+      // Actions - Crew & vehicle log. Each returns the change for undoCrewChange.
+      saveVehicle: async (record, replacesId = null) => {
+        const change = await new BaseOperationsRepository().saveVehicle(raceKeyOf(get().currentRaceId), record, replacesId);
+        await get().refreshData({ silent: true });
+        return change;
+      },
+
+      removeVehicle: async (id) => {
+        const change = await new BaseOperationsRepository().removeVehicle(raceKeyOf(get().currentRaceId), id);
+        await get().refreshData({ silent: true });
+        return change;
+      },
+
+      undoCrewChange: async (change) => {
+        await new BaseOperationsRepository().undoCrewChange(raceKeyOf(get().currentRaceId), change);
         await get().refreshData({ silent: true });
       },
 

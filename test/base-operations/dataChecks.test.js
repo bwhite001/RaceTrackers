@@ -24,7 +24,7 @@ describe('data checks (spec §4.12)', () => {
       ['dup:142:3', 'CP3 — 2 times', false],
       ['dup:205:1', 'CP1 — same time twice', true],
     ]);
-    expect(d[0].detail).toBe('07:40 (call 07:46) and 07:45 (call 07:52)');
+    expect(d[0].detail).toBe('07:40 (entered 07:46) and 07:45 (entered 07:52)');
   });
 
   it('out of order: later checkpoint earlier than the one before', () => {

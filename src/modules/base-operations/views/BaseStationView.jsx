@@ -19,9 +19,11 @@ import BaseReports from '../components/BaseReports';
 import BaseOverview from '../components/BaseOverview';
 import WithdrawalDialog from '../components/WithdrawalDialog';
 import BaseStatusView from '../components/BaseStatusView';
+import CrewLog from '../components/CrewLog';
 import ErrorMessage from '../../../components/Layout/ErrorMessage';
 import SettingsModal from '../../../components/Settings/SettingsModal';
 import HelpDialog from '../components/HelpDialog';
+import FileBackupStatus from '../components/FileBackupStatus';
 import LoadingSpinner from '../../../components/Layout/LoadingSpinner';
 
 const HeaderIcon = ({ label, Icon, onClick }) => (
@@ -176,6 +178,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
           onHome={handleExit}
           right={(
             <>
+              <FileBackupStatus raceId={currentRaceId} />
               <HeaderIcon label="Import / Export" Icon={ArrowUpTrayIcon} onClick={() => setShowImportExport(true)} />
               <HeaderIcon label="Live Dashboard" Icon={PresentationChartLineIcon} onClick={() => navigate('/base-station/dashboard')} />
               <HeaderIcon label="Settings" Icon={Cog6ToothIcon} onClick={handleOpenSettings} />
@@ -206,6 +209,8 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             {activeTab === 'status' && (
               <BaseStatusView onWithdrawDetails={() => handleWithdrawal('withdrawal')} />
             )}
+
+            {activeTab === 'crews' && <CrewLog />}
 
             {activeTab === 'reports' && (
               <BaseReports key={reportFocus ?? 'reports'} initialReport={reportFocus ?? 'missing'} />

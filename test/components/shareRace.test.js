@@ -37,6 +37,20 @@ describe('A7 — sharing a race', () => {
     expect((await db.runners.where('number').equals(100).first()).batchNumber).toBe(1);
   });
 
+  it('the setup file keeps wave names but no results', async () => {
+    await db.race_batches.add({ raceId, batchNumber: 2, batchName: 'Community', startTime: null });
+    await db.radio_calls.add({ raceId, checkpointNumber: 1, receivedAt: '2026-11-07T21:30:00.000Z', undoneAt: null });
+    await db.field_changes.add({ raceId, number: 500, kind: 'late', cancelledAt: null });
+    try {
+      const pkg = await ExportService.exportRaceSetup(raceId);
+      expect(pkg.data.raceBatches).toHaveLength(1);
+      for (const key of RESULT_KEYS) expect(pkg.data[key], key).toBeUndefined();
+      expect(RESULT_KEYS).toEqual(expect.arrayContaining(['radioCalls', 'fieldChanges', 'dataIssueResolutions']));
+    } finally {
+      await Promise.all(['race_batches', 'radio_calls', 'field_changes'].map(t => db[t].clear()));
+    }
+  });
+
   it('the email link stays short whatever the race size', () => {
     const name = 'Mt Glorious Mountain Trails';
     const url = shareEmailUrl(name, setupFileName(name));

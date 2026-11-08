@@ -13,6 +13,10 @@ import {
 import { checkClasses, LOCKED } from '../../../design-system/statusStyles';
 import { BlockPicker, NumberPad, BibChip, BottomSheet } from '../../../design-system/components/VK';
 import useNow from '../../../shared/hooks/useNow';
+import { CrewSheet } from './CrewLog';
+import CheckpointRecords, { useRecordItems } from './CheckpointRecords';
+import { issueCounts } from '../services/records';
+import { crewPillByCheckpoint } from '../services/crews';
 
 const MAX_BLOCKS = 48;
 const MAX_DIGITS = 5;
@@ -28,6 +32,13 @@ const StatusPill = ({ status }) => (
   <span className={`text-[10px] font-extrabold rounded-full px-[7px] py-px ${pill[status]}`}>{pillText[status]}</span>
 );
 
+/** Before the start: is this checkpoint's crew on the way or on site? */
+const CrewPill = ({ kind }) => (kind ? (
+  <span data-testid="crew-status" className={`text-[10px] font-extrabold rounded-full px-[7px] py-px whitespace-nowrap ${kind === 'way' ? 'bg-vk-gold text-vk-ink' : 'bg-vk-navy text-white'}`}>
+    {kind === 'way' ? 'On the way' : 'On site'}
+  </span>
+) : null);
+
 const actionBtn = 'min-h-[48px] rounded-btn font-display font-extrabold text-xs tracking-[0.6px] uppercase';
 
 /**
@@ -39,7 +50,7 @@ const BaseReceive = () => {
   const {
     currentRace, checkpoints = [], runners = [], radioCalls = [], outList = [], raceRunnerNumbers = [], raceRunnerBatches: batchOf = new Map(), resolutions = [],
     receive, setReceive, resetReceive, recordCall, undoCall, setResolutionsAsked, recordCorrection,
-    recordMissed, recordStandDown, addResolution, removeResolution,
+    recordMissed, recordStandDown, addResolution, removeResolution, crewVehicles = [],
   } = store;
   const now = useNow(10000);
   const inputRef = useRef(null);
@@ -51,11 +62,15 @@ const BaseReceive = () => {
   const [exactInvalid, setExactInvalid] = useState(false);
   const [askUndo, setAskUndo] = useState(null); // { cp, ids, text } after "Asked"
   const [standDownCp, setStandDownCp] = useState(null); // checkpoint whose Stand-down check is open
+  const [crewCp, setCrewCp] = useState(null); // checkpoint whose crew sheet is open
+  const [recordsCp, setRecordsCp] = useState(null); // checkpoint whose Records are open (in place of Receive)
 
   const raceStart = currentRace?.date && currentRace?.startTime
     ? TimeUtils.createRaceTimestamp(currentRace.date, currentRace.startTime.slice(0, 5))
     : null;
   const earliest = earliestTime(raceStart, now);
+  // Crew pills only matter while crews are still getting into position
+  const crewPills = useMemo(() => (raceStart && now < raceStart ? crewPillByCheckpoint(crewVehicles) : new Map()), [crewVehicles, raceStart, now]);
   const nowBlock = toBlock(now);
   const out = useMemo(() => outStatusMap(outList, runners), [outList, runners]);
   const sightings = useMemo(() => sightingsByCheckpoint(runners), [runners]);
@@ -97,6 +112,7 @@ const BaseReceive = () => {
     prev: prevCp ? { short: prevCp.short, seen: sightings.get(prevCp.number) ?? new Map(), applies: (n) => appliesAt(prevCp, n, batchOf) } : null,
   }) : []), [cur, prevCp, rx.entries, raceNumbers, out, sightings, batchOf]);
   const goodCount = checked.filter(c => isRecordable(c.kind)).length;
+  const recordIssues = issueCounts(useRecordItems(cur?.number ?? null).items).attn;
 
   // ── actions ──────────────────────────────────────────────────────────────
   const clearTransient = () => { setTyped(''); setUndoEntries(null); setConfirmCancel(false); };
@@ -305,6 +321,11 @@ const BaseReceive = () => {
   const atNow = rx.ctime && toBlock(rx.ctime) >= nowBlock;
   const nextLabel = atNow ? 'At now' : `Next ${hhmm(TimeUtils.addMinutes(toBlock(rx.ctime ?? now), BLOCK_MINUTES))} →`;
 
+  // Records opens in place of the receive panel; the call draft stays in the store for Back to call
+  if (recordsCp != null) {
+    return <CheckpointRecords cpNumber={recordsCp} onBack={() => setRecordsCp(null)} draftCount={rx.step === 'rx' ? (rx.entries ?? []).length : 0} />;
+  }
+
   return (
     <div className="max-w-[1280px] w-full mx-auto p-3 flex flex-wrap gap-3 items-start" data-screenshot-target>
       <section aria-labelledby="rxhd" className="flex-[999_1_480px] min-w-0 flex flex-col gap-3">
@@ -325,6 +346,7 @@ const BaseReceive = () => {
                   <span className="flex items-center gap-2 w-full">
                     <span className="font-display font-extrabold text-lg text-vk-navy dark:text-white">{row.short}</span>
                     <StatusPill status={row.status} />
+                    <CrewPill kind={crewPills.get(row.number)} />
                   </span>
                   <span className="text-xs font-semibold text-vk-muted">
                     {row.lastBlock ? `up to ${hhmm(row.lastBlock)}` : 'no calls yet'}
@@ -398,6 +420,12 @@ const BaseReceive = () => {
               <h1 id="rxhd" className="font-display font-extrabold text-xl text-vk-navy dark:text-white">{cur.short}</h1>
               <div className="text-[13px] text-vk-muted flex-1 min-w-0 truncate">{cur.name}</div>
               <div className="text-[13px] font-bold text-vk-blue whitespace-nowrap">{goodCount} to record</div>
+              <button type="button" onClick={() => setRecordsCp(cur.number)}
+                aria-label={`Records${recordIssues ? `, ${recordIssues} to check` : ''}`}
+                className="min-h-[40px] px-3 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs flex items-center gap-1.5 dark:bg-gray-800 dark:text-gray-100">
+                Records
+                {recordIssues > 0 && <span className="min-w-[20px] rounded-full bg-vk-gold text-vk-ink text-[11px] font-extrabold px-1.5" data-testid="records-badge">{recordIssues}</span>}
+              </button>
               <button type="button" onClick={openCorrection}
                 className="min-h-[40px] px-3 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs dark:bg-gray-800 dark:text-gray-100">
                 Correction
@@ -405,6 +433,10 @@ const BaseReceive = () => {
               <button type="button" onClick={() => setStandDownCp(cur.number)}
                 className="min-h-[40px] px-3 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs dark:bg-gray-800 dark:text-gray-100">
                 Stand-down check
+              </button>
+              <button type="button" onClick={() => setCrewCp(cur.number)}
+                className="min-h-[40px] px-3 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs dark:bg-gray-800 dark:text-gray-100">
+                Crew
               </button>
             </div>
 
@@ -564,7 +596,10 @@ const BaseReceive = () => {
         {board.map(row => (
           <div key={row.number} data-testid={`board-${row.short}`}
             className={`flex items-center gap-2 px-3 py-[7px] border-b border-vk-border dark:border-gray-700 last:border-b-0 ${row.number === rx.cp && rx.step !== 'idle' ? 'bg-vk-gold-tint' : ''}`}>
-            <div className="w-[46px] font-display font-extrabold text-[15px] text-vk-navy dark:text-white">{row.short}</div>
+            <div className="w-[46px] flex flex-col items-start gap-0.5">
+              <span className="font-display font-extrabold text-[15px] text-vk-navy dark:text-white">{row.short}</span>
+              <CrewPill kind={crewPills.get(row.number)} />
+            </div>
             <div className="flex-1 min-w-0 flex flex-col gap-1">
               <div className="text-xs text-vk-muted leading-snug">{row.text}</div>
               {asks.has(row.number) && (
@@ -579,10 +614,16 @@ const BaseReceive = () => {
                   Missed: {missedText(missed.get(row.number))}
                 </div>
               )}
-              <button type="button" onClick={() => setStandDownCp(row.number)} aria-label={`Stand-down check ${row.short}`}
-                className="self-start min-h-[32px] px-2 rounded-lg text-xs font-semibold text-vk-blue">
-                Stand-down check
-              </button>
+              <span className="flex flex-wrap gap-x-1">
+                <button type="button" onClick={() => setRecordsCp(row.number)} aria-label={`Records ${row.short}`}
+                  className="min-h-[32px] px-2 rounded-lg text-xs font-semibold text-vk-blue">
+                  Records
+                </button>
+                <button type="button" onClick={() => setStandDownCp(row.number)} aria-label={`Stand-down check ${row.short}`}
+                  className="min-h-[32px] px-2 rounded-lg text-xs font-semibold text-vk-blue">
+                  Stand-down check
+                </button>
+              </span>
               {askUndo?.cp === row.number && !asks.has(row.number) && (
                 <div className="flex items-center gap-1.5 text-xs text-vk-muted" role="status">
                   <span className="flex-1">{askUndo.text}</span>
@@ -597,6 +638,8 @@ const BaseReceive = () => {
           </div>
         ))}
       </aside>
+
+      {crewCp != null && <CrewSheet cpNumber={crewCp} onClose={() => setCrewCp(null)} />}
 
       {standDownCp != null && (() => {
         const row = board.find(b => b.number === standDownCp);

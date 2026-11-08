@@ -8,6 +8,98 @@
 
 Use these steps to create and manage races. This section covers the full setup wizard, runner ranges, checkpoints, waves, and the race overview.
 
+### Race management page lists created races
+
+The Race Management page is the race director's central hub where all races are listed. This test confirms that a race created earlier in the test suite appears on that page.
+
+**Race Management — page lists all created races**
+
+![Race Management — page lists all created races](assets/race-management-page-lists-created-races-step-01.jpg)
+
+### Clicking a race opens its overview
+
+When the race director clicks on a race in the management list, they should be taken to that race's overview page where they can see all the details. This test confirms that navigation works correctly.
+
+**Race Management — page with race listed**
+
+![Race Management — page with race listed](assets/clicking-a-race-opens-its-overview-step-01.jpg)
+
+**Race card — click race name to open overview**
+
+![Race card — click race name to open overview](assets/clicking-a-race-opens-its-overview-step-02.jpg)
+
+**Race overview — name and details visible**
+
+![Race overview — name and details visible](assets/clicking-a-race-opens-its-overview-step-03.jpg)
+
+### Creates a second race from the management page
+
+A race director creates a second race directly from the management screen, going through the full two-step setup wizard (race details, then runner ranges) and landing on the new race's overview page.
+
+**Race Management — tap Create New Race button**
+
+![Race Management — tap Create New Race button](assets/creates-a-second-race-from-the-management-page-step-01.jpg)
+
+**Step 1 of 4 — Template: choose Start from Scratch**
+
+![Step 1 of 4 — Template: choose Start from Scratch](assets/creates-a-second-race-from-the-management-page-step-02.jpg)
+
+**Step 2 of 4 — Race Details: enter name, date, start time**
+
+![Step 2 of 4 — Race Details: enter name, date, start time](assets/creates-a-second-race-from-the-management-page-step-03.jpg)
+
+**Step 3 of 4 — Runner Setup: add bib range 500–503**
+
+![Step 3 of 4 — Runner Setup: add bib range 500–503](assets/creates-a-second-race-from-the-management-page-step-04.jpg)
+
+**Waves, course map and checkpoint links — accept the defaults to create the race**
+
+![Waves, course map and checkpoint links — accept the defaults to create the race](assets/creates-a-second-race-from-the-management-page-step-05.jpg)
+
+**Race overview — second race created successfully**
+
+![Race overview — second race created successfully](assets/creates-a-second-race-from-the-management-page-step-06.jpg)
+
+### Race overview shows correct runner and checkpoint counts
+
+After creating a race with runner bib numbers 400 to 405 (6 runners) and 2 checkpoints, the race overview page should display "6" as the runner count and "2" as the checkpoint count — no more, no less.
+
+**Race overview — runner count 6 and checkpoint count 2 shown**
+
+![Race overview — runner count 6 and checkpoint count 2 shown](assets/race-overview-shows-correct-runner-and-checkpoint-counts-step-01.jpg)
+
+### Creates a new race from scratch and verifies the overview
+
+A race director fills in all the details needed to create a brand-new race — the race name, date, start time, how many checkpoints there are, and the range of runner bib numbers. Once saved, the race overview page should correctly display the race name, list every checkpoint, and show the right number of registered runners.
+
+**Home — Welcome Back screen with 3 module cards**
+
+![Home — Welcome Back screen with 3 module cards](assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-01.jpg)
+
+**Race Maintenance → Create New Race — setup wizard opens**
+
+![Race Maintenance → Create New Race — setup wizard opens](assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-02.jpg)
+
+**Step 1 of 4 — Template: choose Start from Scratch**
+
+![Step 1 of 4 — Template: choose Start from Scratch](assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-03.jpg)
+
+**Step 2 of 4 — Race Details: enter name, date, start time and checkpoints**
+
+![Step 2 of 4 — Race Details: enter name, date, start time and checkpoints](assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-04.jpg)
+
+**Step 3 of 4 — Runner Setup: add bib number range 101–115**
+
+![Step 3 of 4 — Runner Setup: add bib number range 101–115](assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-05.jpg)
+
+**Race overview — name, 3 checkpoints and 15 runners correct**
+
+![Race overview — name, 3 checkpoints and 15 runners correct](assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-06.jpg)
+
+**Home — new race listed under module cards**
+
+![Home — new race listed under module cards](assets/creates-a-new-race-from-scratch-and-verifies-the-overview-step-07.jpg)
+
 ### Step indicator advances correctly through setup wizard
 
 The race creation wizard has four steps: Template, Race Details, Runner Setup, and Waves. This test checks that the progress indicator at the top updates as you advance through each step, so the race director always knows where they are in the setup process.
@@ -43,30 +135,6 @@ If a race director fills in the race name and other details on Step 2 of 4 (Race
 **Step 2 of 4 — Race Details: data preserved after Back**
 
 ![Step 2 of 4 — Race Details: data preserved after Back](assets/back-button-on-step-2-returns-to-race-details-with-data-preserved-step-04.jpg)
-
-### Race management page lists created races
-
-The Race Management page is the race director's central hub where all races are listed. This test confirms that a race created earlier in the test suite appears on that page.
-
-**Race Management — page lists all created races**
-
-![Race Management — page lists all created races](assets/race-management-page-lists-created-races-step-01.jpg)
-
-### Clicking a race opens its overview
-
-When the race director clicks on a race in the management list, they should be taken to that race's overview page where they can see all the details. This test confirms that navigation works correctly.
-
-**Race Management — page with race listed**
-
-![Race Management — page with race listed](assets/clicking-a-race-opens-its-overview-step-01.jpg)
-
-**Race card — click race name to open overview**
-
-![Race card — click race name to open overview](assets/clicking-a-race-opens-its-overview-step-02.jpg)
-
-**Race overview — name and details visible**
-
-![Race overview — name and details visible](assets/clicking-a-race-opens-its-overview-step-03.jpg)
 
 ### Runner name/gender section appears after adding a range
 
@@ -204,9 +272,53 @@ A race director can give each wave a custom name (e.g. "Wave B") and a specific 
 
 ![Checkpoint 1 — runner 100 still shows its time](assets/an-edited-setup-keeps-marks-already-on-a-device-step-04.jpg)
 
+### An 11 km field seen only at CP4 is not missed at CP1 to CP3
+
+
+
+**Import the entry list — Race No, Name and Wave are picked up on their own**
+
+![Import the entry list — Race No, Name and Wave are picked up on their own](assets/an-11-km-field-seen-only-at-cp4-is-not-missed-at-cp1-to-cp3-step-01.jpg)
+
+**Race details — four checkpoints**
+
+![Race details — four checkpoints](assets/an-11-km-field-seen-only-at-cp4-is-not-missed-at-cp1-to-cp3-step-02.jpg)
+
+**Edit race — CP1 to CP3 see the two 22 km waves only**
+
+![Edit race — CP1 to CP3 see the two 22 km waves only](assets/an-11-km-field-seen-only-at-cp4-is-not-missed-at-cp1-to-cp3-step-03.jpg)
+
+**Base hears CP4 — 11 km bib 150 is not "Not seen CP3"; 22 km bib 10 is**
+
+![Base hears CP4 — 11 km bib 150 is not "Not seen CP3"; 22 km bib 10 is](assets/an-11-km-field-seen-only-at-cp4-is-not-missed-at-cp1-to-cp3-step-04.jpg)
+
+**Board — CP1 to CP3 have nobody missed except the 22 km runner**
+
+![Board — CP1 to CP3 have nobody missed except the 22 km runner](assets/an-11-km-field-seen-only-at-cp4-is-not-missed-at-cp1-to-cp3-step-05.jpg)
+
+**Stand-down check CP1 — the 11 km runner is not on it**
+
+![Stand-down check CP1 — the 11 km runner is not on it](assets/an-11-km-field-seen-only-at-cp4-is-not-missed-at-cp1-to-cp3-step-06.jpg)
+
+**Overview — 22 km and 11 km leaders ranked apart, with the time at their last checkpoint**
+
+![Overview — 22 km and 11 km leaders ranked apart, with the time at their last checkpoint](assets/an-11-km-field-seen-only-at-cp4-is-not-missed-at-cp1-to-cp3-step-07.jpg)
+
 ## Running a Checkpoint
 
 Steps for checkpoint volunteers. Covers opening a checkpoint, marking off runners individually and in bulk, reviewing counts, exporting data, and transferring data to another device via QR code.
+
+### Navigates to checkpoint and sees runner grid
+
+A checkpoint volunteer opens the app, taps "Checkpoint Operations", selects their race, and arrives at the correct checkpoint screen. This test confirms that the grid of runner bib numbers — the list of every runner they need to watch for — is visible and fully loaded.
+
+**Home — tap Checkpoint Operations module card**
+
+![Home — tap Checkpoint Operations module card](assets/navigates-to-checkpoint-and-sees-runner-grid-step-01.jpg)
+
+**Checkpoint view — runner grid loaded with bib numbers 200–210**
+
+![Checkpoint view — runner grid loaded with bib numbers 200–210](assets/navigates-to-checkpoint-and-sees-runner-grid-step-02.jpg)
 
 ### Marks off a single runner via the runner grid
 
@@ -364,6 +476,94 @@ When a checkpoint volunteer marks a runner as called in, the pending count badge
 
 ![Transfer view — scope options are visible](assets/navigates-to-transfer-view-and-shows-send-and-receive-tabs-step-05.jpg)
 
+### Shows empty state warning when no runners are marked off
+
+
+
+**Navigate to transfer route with no marked runners**
+
+![Navigate to transfer route with no marked runners](assets/shows-empty-state-warning-when-no-runners-are-marked-off-step-01.jpg)
+
+**Send tab — entry count shows 0 entries**
+
+![Send tab — entry count shows 0 entries](assets/shows-empty-state-warning-when-no-runners-are-marked-off-step-02.jpg)
+
+**Generate QR Code button is disabled with 0 entries**
+
+![Generate QR Code button is disabled with 0 entries](assets/shows-empty-state-warning-when-no-runners-are-marked-off-step-03.jpg)
+
+### Generates a QR code when marked runners are present
+
+
+
+**Seed 8 marked runners into checkpoint 1**
+
+![Seed 8 marked runners into checkpoint 1](assets/generates-a-qr-code-when-marked-runners-are-present-step-01.jpg)
+
+**Navigate to transfer route**
+
+![Navigate to transfer route](assets/generates-a-qr-code-when-marked-runners-are-present-step-02.jpg)
+
+**Send tab — entry count preview shows 8 entries**
+
+![Send tab — entry count preview shows 8 entries](assets/generates-a-qr-code-when-marked-runners-are-present-step-03.jpg)
+
+**Click Generate QR Code button**
+
+![Click Generate QR Code button](assets/generates-a-qr-code-when-marked-runners-are-present-step-04.jpg)
+
+**QR display — full-screen QR code appears**
+
+![QR display — full-screen QR code appears](assets/generates-a-qr-code-when-marked-runners-are-present-step-05.jpg)
+
+**QR display — entry count label is shown**
+
+![QR display — entry count label is shown](assets/generates-a-qr-code-when-marked-runners-are-present-step-06.jpg)
+
+**QR display — "Done" and file share buttons are present**
+
+![QR display — "Done" and file share buttons are present](assets/generates-a-qr-code-when-marked-runners-are-present-step-07.jpg)
+
+### Delta scope shows only entries newer than last share timestamp
+
+
+
+**Seed 5 marked runners and set a last-share timestamp after 3 of them**
+
+![Seed 5 marked runners and set a last-share timestamp after 3 of them](assets/delta-scope-shows-only-entries-newer-than-last-share-timestamp-step-01.jpg)
+
+**Navigate to transfer route**
+
+![Navigate to transfer route](assets/delta-scope-shows-only-entries-newer-than-last-share-timestamp-step-02.jpg)
+
+**Delta option selected — entry count shows 2 new entries**
+
+![Delta option selected — entry count shows 2 new entries](assets/delta-scope-shows-only-entries-newer-than-last-share-timestamp-step-03.jpg)
+
+**Switching to full history shows all 5 entries**
+
+![Switching to full history shows all 5 entries](assets/delta-scope-shows-only-entries-newer-than-last-share-timestamp-step-04.jpg)
+
+### Receive tab shows scanner and file import fallback
+
+
+
+**Navigate to transfer route and open Receive tab**
+
+![Navigate to transfer route and open Receive tab](assets/receive-tab-shows-scanner-and-file-import-fallback-step-01.jpg)
+
+**Receive tab — description text is shown**
+
+![Receive tab — description text is shown](assets/receive-tab-shows-scanner-and-file-import-fallback-step-02.jpg)
+
+**Receive tab — Start Scanning button is visible**
+
+![Receive tab — Start Scanning button is visible](assets/receive-tab-shows-scanner-and-file-import-fallback-step-03.jpg)
+
+**Start Scanning — the file import fallback is offered under the camera**
+
+![Start Scanning — the file import fallback is offered under the camera](assets/receive-tab-shows-scanner-and-file-import-fallback-step-04.jpg)
+
 ### Back button returns to the checkpoint view
 
 
@@ -436,9 +636,49 @@ When a checkpoint volunteer marks a runner as called in, the pending count badge
 
 Steps for the base station operator. Record finish times, mark DNF/DNS runners, and review race-wide status from the Overview and Reports tabs.
 
+### Base station opens on Receive, ready for the first call
+
+
+
+### Takes a call from CP1, then sees the runners on Overview
+
+
+
+**Receive — CP1 calls in 300, 301, 302 and 303**
+
+![Receive — CP1 calls in 300, 301, 302 and 303](assets/takes-a-call-from-cp1-then-sees-the-runners-on-overview-step-01.jpg)
+
+**Overview — CP1 progress shows 4 and the leaders list has 300**
+
+![Overview — CP1 progress shows 4 and the leaders list has 300](assets/takes-a-call-from-cp1-then-sees-the-runners-on-overview-step-02.jpg)
+
+### Records a DNF via the withdrawal dialog
+
+When a runner drops out of the race and does not finish (DNF), the base station operator needs to record this. This test opens the withdrawal dialog, enters a runner's bib number and a reason such as "Injured ankle", confirms the entry, and checks that the runner now shows a DNF status in the overview.
+
+**Receive — press D to open the withdrawal dialog**
+
+![Receive — press D to open the withdrawal dialog](assets/records-a-dnf-via-the-withdrawal-dialog-step-01.jpg)
+
+**Withdrawal Dialog — enter runner 310 and reason, then submit**
+
+![Withdrawal Dialog — enter runner 310 and reason, then submit](assets/records-a-dnf-via-the-withdrawal-dialog-step-02.jpg)
+
+**DNF / DNS tab — runner 310 is out of the race**
+
+![DNF / DNS tab — runner 310 is out of the race](assets/records-a-dnf-via-the-withdrawal-dialog-step-03.jpg)
+
+### Opens Times by checkpoint in Reports
+
+
+
 ### Switches to Reports tab and renders a report
 
 The Reports tab lets the operator generate a printed summary of race results. This test switches to the tab and checks that the report content — runner totals, times, and status counts — is visible.
+
+### Exports base station data
+
+The base station operator may need to export all their recorded data for backup or to share with the race director. This test checks that the import/export tool can be opened from the base station screen.
 
 ## Base Station: Receiving Calls
 
@@ -724,6 +964,30 @@ Take a Scores Checkpoint call one checkpoint at a time: pick who is calling, tak
 
 Base keeps the race-wide out list. Mark runners DNF or DNS in bulk by typing or pasting numbers, check the warnings, and clear anyone who is back in. The Overview shows who is on course, overdue alerts, checkpoint progress and the current leaders.
 
+### Overdue waits for the checkpoint to report
+
+
+
+**Overview — CP2 is only behind on calls: gold note, no red alert**
+
+![Overview — CP2 is only behind on calls: gold note, no red alert](assets/overdue-waits-for-the-checkpoint-to-report-step-01.jpg)
+
+**CP2 calls in up to now without those runners — now they are overdue**
+
+![CP2 calls in up to now without those runners — now they are overdue](assets/overdue-waits-for-the-checkpoint-to-report-step-02.jpg)
+
+### On course count matches report
+
+
+
+**Overview — On course tile with "not seen yet"**
+
+![Overview — On course tile with "not seen yet"](assets/on-course-count-matches-report-step-01.jpg)
+
+**Reports — Still on course shows the same numbers**
+
+![Reports — Still on course shows the same numbers](assets/on-course-count-matches-report-step-02.jpg)
+
 ### Base marks a pasted list DNF with checks, clears one and undoes
 
 
@@ -764,30 +1028,6 @@ Base keeps the race-wide out list. Mark runners DNF or DNS in bulk by typing or 
 
 ![Current leaders — furthest along first, gold badge for #1](assets/base-overview-shows-tiles-checkpoint-progress-and-current-leaders-step-02.jpg)
 
-### Overdue waits for the checkpoint to report
-
-
-
-**Overview — CP2 is only behind on calls: gold note, no red alert**
-
-![Overview — CP2 is only behind on calls: gold note, no red alert](assets/overdue-waits-for-the-checkpoint-to-report-step-01.jpg)
-
-**CP2 calls in up to now without those runners — now they are overdue**
-
-![CP2 calls in up to now without those runners — now they are overdue](assets/overdue-waits-for-the-checkpoint-to-report-step-02.jpg)
-
-### On course count matches report
-
-
-
-**Overview — On course tile with "not seen yet"**
-
-![Overview — On course tile with "not seen yet"](assets/on-course-count-matches-report-step-01.jpg)
-
-**Reports — Still on course shows the same numbers**
-
-![Reports — Still on course shows the same numbers](assets/on-course-count-matches-report-step-02.jpg)
-
 ### Rejected chips match receive and out list rows are not cut off
 
 
@@ -820,9 +1060,9 @@ Base keeps the race-wide out list. Mark runners DNF or DNS in bulk by typing or 
 
 
 
-**Overview — 106 (out of order) and 107 (impossible pace) carry the warning; elapsed is HH:MM**
+**Overview — 106 (out of order) and 107 (impossible pace) carry the warning; time is HH:MM**
 
-![Overview — 106 (out of order) and 107 (impossible pace) carry the warning; elapsed is HH:MM](assets/leaders-flag-open-data-issues-step-01.jpg)
+![Overview — 106 (out of order) and 107 (impossible pace) carry the warning; time is HH:MM](assets/leaders-flag-open-data-issues-step-01.jpg)
 
 **Mark 107 checked in Reports — its warning goes**
 
@@ -888,6 +1128,18 @@ Base keeps the race-wide out list. Mark runners DNF or DNS in bulk by typing or 
 
 Overdue runners, who is still on course, times by checkpoint and the call log — each as CSV or print. Needs attention lists duplicates, out-of-order times, skipped checkpoints, sightings after DNF / DNS, unknown bibs and impossible pace; resolve each in place, with Undo.
 
+### Matrix keeps times for DNS runners
+
+
+
+**Mark 101 DNS (it was seen — flagged, applied anyway)**
+
+![Mark 101 DNS (it was seen — flagged, applied anyway)](assets/matrix-keeps-times-for-dns-runners-step-01.jpg)
+
+**Times by checkpoint — times kept, DNS in the Status column, CSV matches**
+
+![Times by checkpoint — times kept, DNS in the Status column, CSV matches](assets/matrix-keeps-times-for-dns-runners-step-02.jpg)
+
 ### Base resolves a duplicate and an out-of-order time until checks are clear
 
 
@@ -927,18 +1179,6 @@ Overdue runners, who is still on course, times by checkpoint and the call log �
 **Call log — calls and numbers per checkpoint; CSV available**
 
 ![Call log — calls and numbers per checkpoint; CSV available](assets/base-reports-show-still-on-course-times-by-checkpoint-and-the-call-log-step-03.jpg)
-
-### Matrix keeps times for DNS runners
-
-
-
-**Mark 101 DNS (it was seen — flagged, applied anyway)**
-
-![Mark 101 DNS (it was seen — flagged, applied anyway)](assets/matrix-keeps-times-for-dns-runners-step-01.jpg)
-
-**Times by checkpoint — times kept, DNS in the Status column, CSV matches**
-
-![Times by checkpoint — times kept, DNS in the Status column, CSV matches](assets/matrix-keeps-times-for-dns-runners-step-02.jpg)
 
 ### Reports undo stays with its list and says what it undoes
 
@@ -1008,9 +1248,129 @@ Overdue runners, who is still on course, times by checkpoint and the call log �
 
 ![Reports — Times by checkpoint reads "missed" at CP1; Skipped check is clear](assets/not-seen-there-shows-missed-in-the-times-table-step-02.jpg)
 
+## Base Station: Fixing Recorded Numbers (Records)
+
+Records shows every number base holds for one checkpoint, by block, by number or by call, with what needs checking: duplicates, missed runners, wrong numbers and other checks. Fix a time, a mistyped number or the checkpoint one at a time or as a batch. Each change asks why, keeps history and has Undo.
+
+### Base fixes the numbers it recorded at a checkpoint
+
+
+
+**CP2 header — Records shows how many need checking**
+
+![CP2 header — Records shows how many need checking](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-01.jpg)
+
+**Needs attention at CP2 — counts match, each filter shows only its numbers**
+
+![Needs attention at CP2 — counts match, each filter shows only its numbers](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-02.jpg)
+
+**Change a time — Save is locked until a reason is picked**
+
+![Change a time — Save is locked until a reason is picked](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-03.jpg)
+
+**Undo restores the time exactly**
+
+![Undo restores the time exactly](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-04.jpg)
+
+**Times by checkpoint and the call log show the correction**
+
+![Times by checkpoint and the call log show the correction](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-05.jpg)
+
+**Wrong number — change 999 to 129 (base typing error); 999 stays in history**
+
+![Wrong number — change 999 to 129 (base typing error); 999 stays in history](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-06.jpg)
+
+**Select a block — every bib listed on its own row, moved together, then Undo**
+
+![Select a block — every bib listed on its own row, moved together, then Undo](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-07.jpg)
+
+**Move three numbers to CP3, then Undo**
+
+![Move three numbers to CP3, then Undo](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-08.jpg)
+
+**Remove a number takes two taps, and Undo puts it back**
+
+![Remove a number takes two taps, and Undo puts it back](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-09.jpg)
+
+**Missed runners — CP2 has 110; 111 not seen there**
+
+![Missed runners — CP2 has 110; 111 not seen there](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-10.jpg)
+
+### Records fits the tablet with 150 numbers at one checkpoint
+
+
+
+**150 numbers at CP2 — the list scrolls inside its panel, the page does not**
+
+![150 numbers at CP2 — the list scrolls inside its panel, the page does not](assets/records-fits-the-tablet-with-150-numbers-at-one-checkpoint-step-01.jpg)
+
+## Base Station: Crew & Vehicle Log
+
+For insurance, base logs which car went to each checkpoint, who was in it, and when it left home and arrived. Arrived now is one tap when an operator radios in. The log stays on the base device and is never in the race setup sent to volunteers.
+
+### Base logs the crews and vehicles going to each checkpoint
+
+
+
+**Crews tab — a card per checkpoint, Base first, nothing logged yet**
+
+![Crews tab — a card per checkpoint, Base first, nothing logged yet](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-01.jpg)
+
+**Add a car to CP3 — rego, driver, passenger, left home 04:45 (before the start)**
+
+![Add a car to CP3 — rego, driver, passenger, left home 04:45 (before the start)](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-02.jpg)
+
+**Add a second car to CP3 — more than one car can go to a checkpoint**
+
+![Add a second car to CP3 — more than one car can go to a checkpoint](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-03.jpg)
+
+**Operator radios in — Arrived now, one tap**
+
+![Operator radios in — Arrived now, one tap](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-04.jpg)
+
+**Undo the last arrival — back on the way**
+
+![Undo the last arrival — back on the way](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-05.jpg)
+
+**Crews fit the tablet — no page scroll at 1112×834**
+
+![Crews fit the tablet — no page scroll at 1112×834](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-06.jpg)
+
+**From Receive, CP3 shows its crew on the way — Crew opens the same editor**
+
+![From Receive, CP3 shows its crew on the way — Crew opens the same editor](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-07.jpg)
+
+**Remove a vehicle takes two taps, and Undo brings it back**
+
+![Remove a vehicle takes two taps, and Undo brings it back](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-08.jpg)
+
+**Reports — Crew & vehicle log for insurance, CSV has every vehicle**
+
+![Reports — Crew & vehicle log for insurance, CSV has every vehicle](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-09.jpg)
+
+**The race setup shared with volunteers carries no crew or rego details**
+
+![The race setup shared with volunteers carries no crew or rego details](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-10.jpg)
+
 ## Importing & Exporting Data
 
 Transfer race configurations and results between devices. Export from the base station header or race management page; import to restore a race.
+
+### Export modal opens from base station header
+
+The base station screen has an import/export button in the header. This test confirms that tapping it opens the data portability dialog where the operator can choose what to export.
+
+**Base Station — operations screen with created race**
+
+![Base Station — operations screen with created race](assets/export-modal-opens-from-base-station-header-step-01.jpg)
+
+**Base Station header — tap Import/Export button**
+
+![Base Station header — tap Import/Export button](assets/export-modal-opens-from-base-station-header-step-02.jpg)
+
+**Data portability dialog — export options visible**
+
+![Data portability dialog — export options visible](assets/export-modal-opens-from-base-station-header-step-03.jpg)
 
 ### Downloads a race configuration JSON file
 
@@ -1052,29 +1412,33 @@ After wiping all data from the app, this test uploads a previously exported race
 
 ![Import — a file that isn't JSON is refused with a plain message](assets/import-accepts-octet-stream-step-02.jpg)
 
+### Base backs the race up to a folder and a new device restores it
+
+
+
+**File backup off — choose a folder once**
+
+![File backup off — choose a folder once](assets/base-backs-the-race-up-to-a-folder-and-a-new-device-restores-it-step-01.jpg)
+
+**Take a CP1 call and a Finish call — 30 s later the file has both**
+
+![Take a CP1 call and a Finish call — 30 s later the file has both](assets/base-backs-the-race-up-to-a-folder-and-a-new-device-restores-it-step-02.jpg)
+
+**Withdraw a runner — the next backup has the DNF**
+
+![Withdraw a runner — the next backup has the DNF](assets/base-backs-the-race-up-to-a-folder-and-a-new-device-restores-it-step-03.jpg)
+
+**Reload base — the folder is remembered and backing up continues**
+
+![Reload base — the folder is remembered and backing up continues](assets/base-backs-the-race-up-to-a-folder-and-a-new-device-restores-it-step-04.jpg)
+
+**A new device restores the file — call log and DNF come back**
+
+![A new device restores the file — call log and DNF come back](assets/base-backs-the-race-up-to-a-folder-and-a-new-device-restores-it-step-05.jpg)
+
 ## Navigating the App
 
 How to move between modules, what to expect on the home screen, and how the app protects active operations from accidental navigation.
-
-### Navigates from race overview to base station
-
-From the race overview, a race director can jump straight to the base station. This test clicks the Base Station button on the overview page and confirms the base station operations screen opens.
-
-**Navigate directly to base station operations**
-
-![Navigate directly to base station operations](assets/navigates-from-race-overview-to-base-station-step-01.jpg)
-
-**Base Station — operations screen open**
-
-![Base Station — operations screen open](assets/navigates-from-race-overview-to-base-station-step-02.jpg)
-
-### Home page landing shows the race management module card
-
-The Race Maintenance module card should always be visible on the home screen so race directors can always find it easily. This test simply confirms the card is present.
-
-**Home — Race Maintenance module card visible**
-
-![Home — Race Maintenance module card visible](assets/home-page-landing-shows-the-race-management-module-card-step-01.jpg)
 
 ### Shows protection modal when leaving active checkpoint operation
 
@@ -1116,6 +1480,26 @@ If someone types a web address that doesn't exist in the app (perhaps a typo or 
 
 ![Unknown route — redirects to home page](assets/unknown-routes-redirect-to-home-step-01.jpg)
 
+### Navigates from race overview to base station
+
+From the race overview, a race director can jump straight to the base station. This test clicks the Base Station button on the overview page and confirms the base station operations screen opens.
+
+**Navigate directly to base station operations**
+
+![Navigate directly to base station operations](assets/navigates-from-race-overview-to-base-station-step-01.jpg)
+
+**Base Station — operations screen open**
+
+![Base Station — operations screen open](assets/navigates-from-race-overview-to-base-station-step-02.jpg)
+
+### Home page landing shows the race management module card
+
+The Race Maintenance module card should always be visible on the home screen so race directors can always find it easily. This test simply confirms the card is present.
+
+**Home — Race Maintenance module card visible**
+
+![Home — Race Maintenance module card visible](assets/home-page-landing-shows-the-race-management-module-card-step-01.jpg)
+
 ### Home shows the three roles, the current race and Scan race QR code
 
 
@@ -1131,14 +1515,6 @@ If someone types a web address that doesn't exist in the app (perhaps a typo or 
 **Scan race QR code opens the import screen**
 
 ![Scan race QR code opens the import screen](assets/home-shows-the-three-roles-the-current-race-and-scan-race-qr-code-step-03.jpg)
-
-### Footer names the club
-
-
-
-**Footer — "Ipswich & District Radio Club · VK4WIP"**
-
-![Footer — "Ipswich & District Radio Club · VK4WIP"](assets/footer-names-the-club-step-01.jpg)
 
 ### Sheets trap focus and close on Escape
 
@@ -1163,6 +1539,14 @@ If someone types a web address that doesn't exist in the app (perhaps a typo or 
 **Unmark — Undo shows, then goes by itself**
 
 ![Unmark — Undo shows, then goes by itself](assets/undo-bar-clears-itself-after-about-six-seconds-step-01.jpg)
+
+### Footer names the club
+
+
+
+**Footer — "Ipswich & District Radio Club · VK4WIP"**
+
+![Footer — "Ipswich & District Radio Club · VK4WIP"](assets/footer-names-the-club-step-01.jpg)
 
 ## Settings
 
@@ -1260,6 +1644,22 @@ Changes made in settings should be saved and remembered. If dark mode is turned 
 
 ![Back — returns to Settings](assets/share-race-screen-offers-qr-download-email-and-copy-step-03.jpg)
 
+### Settings cancel undoes the theme preview
+
+
+
+**Pick Dark — the page previews it; Cancel puts Light back**
+
+![Pick Dark — the page previews it; Cancel puts Light back](assets/settings-cancel-undoes-the-theme-preview-step-01.jpg)
+
+### Settings persist after reload
+
+
+
+**Reload — still Dark**
+
+![Reload — still Dark](assets/settings-persist-after-reload-step-01.jpg)
+
 ### Locked buttons look locked
 
 
@@ -1316,22 +1716,6 @@ Changes made in settings should be saved and remembered. If dark mode is turned 
 
 ![Base Receive in Sunlight](assets/sunlight-on-the-working-screens-step-04.jpg)
 
-### Settings cancel undoes the theme preview
-
-
-
-**Pick Dark — the page previews it; Cancel puts Light back**
-
-![Pick Dark — the page previews it; Cancel puts Light back](assets/settings-cancel-undoes-the-theme-preview-step-01.jpg)
-
-### Settings persist after reload
-
-
-
-**Reload — still Dark**
-
-![Reload — still Dark](assets/settings-persist-after-reload-step-01.jpg)
-
 ## Complete Race Walkthrough
 
 A full end-to-end race simulation: race director creates the race, checkpoint volunteers mark off runners, and the base station records finish times and statuses.
@@ -1371,6 +1755,50 @@ A full end-to-end race simulation: race director creates the race, checkpoint vo
 ### Phase 4f — Overview tab shows correct runner statuses
 
 
+
+## Linked Checkpoints (Turnaround Point)
+
+How to operate two checkpoints at the same physical location — for example, an out-and-back turnaround where CP1 (outbound) and CP4 (return) are staffed by the same volunteers. Covers the checkpoint picker, dual view, tab switching, and cross-checkpoint overview.
+
+### Volunteer operates linked turnaround checkpoints from one interface
+
+
+
+**Home screen — navigate to Checkpoint Operations**
+
+![Home screen — navigate to Checkpoint Operations](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-01.jpg)
+
+**Race selection modal — select the Turnaround Ultra race**
+
+![Race selection modal — select the Turnaround Ultra race](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-02.jpg)
+
+**Checkpoint picker — linked pair shown as single card with link icon**
+
+![Checkpoint picker — linked pair shown as single card with link icon](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-03.jpg)
+
+**Select the linked pair — navigate to dual checkpoint view**
+
+![Select the linked pair — navigate to dual checkpoint view](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-04.jpg)
+
+**Dual view loads — CP tab switcher shows CP1 and CP4**
+
+![Dual view loads — CP tab switcher shows CP1 and CP4](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-05.jpg)
+
+**Mark runners 100 and 101 in CP1 (outbound) via quick entry**
+
+![Mark runners 100 and 101 in CP1 (outbound) via quick entry](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-06.jpg)
+
+**Switch to CP4 tab — stars appear on runners 100 and 101**
+
+![Switch to CP4 tab — stars appear on runners 100 and 101](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-07.jpg)
+
+**Mark runner 100 in CP4 (return) via quick entry**
+
+![Mark runner 100 in CP4 (return) via quick entry](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-08.jpg)
+
+**Overview tab — runner 100 shows Both, runner 101 shows CP1 Only**
+
+![Overview tab — runner 100 shows Both, runner 101 shows CP1 Only](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-09.jpg)
 
 ## Checkpoint: Fixing Mistakes and Reading Out
 
@@ -1759,3 +2187,24 @@ Checkpoint:
 Base:
 - **DNF / DNS** tab: bulk add by typing or pasting numbers, choose where and why, apply; Clear any entry to put a runner back in the race.
 - **Reports › Needs attention**: duplicates, out-of-order times, skipped checkpoints, sightings after DNF/DNS, unknown bibs, impossible pace — resolve each in place.
+
+### Base: fixing recorded numbers (Records)
+
+Records is base's own list of every number it holds for one checkpoint. On Receive, tap the checkpoint, then **Records** (a gold count shows how many need checking). Every checkpoint row on the board also has a small **Records** button. **Back to call** returns to the call you were taking, with nothing lost.
+
+- View the numbers **By block**, **By number** or **By call**. **Find number** narrows the list to bibs starting with the digits typed. The filter pills show duplicates, missed runners, wrong numbers and other checks.
+- Tap a number to change its **Time**, fix a mistyped **Number**, move it to the right **Checkpoint**, or **Remove** it (tap twice). For a duplicate, **Keep this one** removes the others. For a wrong number heard on a call, use **Change number** or **Record as late entry**.
+- Every change asks **Why**: *Checkpoint correction*, *Base typing error* or *Other*. A checkpoint correction is logged as a correction call, so it shows in the call log, the same as Correction mode.
+- **Select** fixes several numbers at once: tap them, or use **Select block** / **Select call**. Every bib is listed on its own line before you save.
+- Nothing is deleted. **Show history** shows what each change replaced, and **Undo** reverses the last change exactly. An edit can lower a checkpoint's "up to"; the status line says so when it does.
+- Records only changes base's own records. It never changes what a checkpoint holds, so ask the checkpoint for a correction if their sheet is wrong too.
+
+### Crew & vehicle log
+
+For insurance, base logs which car went to each checkpoint, who was in it, and when it left home and arrived. Use the **Crews** tab, or the **Crew** button on a checkpoint on Receive while you're taking its calls.
+
+- **+ Vehicle** adds a car: rego, driver, anyone else in the car, and the times. Times are exact (not 5-minute blocks), can be before the race start, and are never in the future. More than one car can go to a checkpoint.
+- When an operator radios that they've arrived, tap **Arrived now** on their car. Every save, arrival and removal has Undo.
+- **Return trip (left site, home safe)** is optional.
+- **Reports › Crew & vehicle log** prints or exports the log. It stays on the base device and is never included in the race setup or any shared file.
+- Operators report leaving home and arriving at their checkpoint in plain words to base; there is no set phrase.

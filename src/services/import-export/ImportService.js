@@ -1,6 +1,6 @@
 import db from '../../shared/services/database/schema.js';
 import { safeValidateExportPackage } from './ValidationSchemas.js';
-import { ExportService } from './ExportService.js';
+import { ExportService, RACE_TABLES } from './ExportService.js';
 
 /**
  * Import Service
@@ -204,58 +204,33 @@ export class ImportService {
 
     // Import using transaction
     try {
-      await db.transaction('rw', [
-        db.races,
-        db.runners,
-        db.checkpoints,
-        db.checkpoint_runners,
-        db.base_station_runners,
-      ], async () => {
-        // Import races
-        if (resolvedData.races) {
-          for (const race of resolvedData.races) {
-            await db.races.put(race);
+      // Every per-race table in the package (older packages carry fewer)
+      await db.transaction('rw', [db.races, ...RACE_TABLES.map(([, table]) => db[table])], async () => {
+        // Record numbers are per device: refuse rather than overwrite another race's rows
+        for (const [key, table] of RACE_TABLES) {
+          for (const row of resolvedData[key] ?? []) {
+            const mine = row.id != null ? await db[table].get(row.id) : null;
+            if (mine && mine.raceId !== row.raceId) {
+              throw new Error('This file uses record numbers that belong to another race on this device. Import it on a device without other races, or delete the other race first.');
+            }
           }
         }
-
-        // Import runners
-        if (resolvedData.runners) {
-          for (const runner of resolvedData.runners) {
-            await db.runners.put(runner);
-          }
-        }
-
-        // Import checkpoints
-        if (resolvedData.checkpoints) {
-          for (const checkpoint of resolvedData.checkpoints) {
-            await db.checkpoints.put(checkpoint);
-          }
-        }
-
-        // Import checkpoint runners
-        if (resolvedData.checkpointRunners) {
-          for (const runner of resolvedData.checkpointRunners) {
-            await db.checkpoint_runners.put(runner);
-          }
-        }
-
-        // Import base station runners
-        if (resolvedData.baseStationRunners) {
-          for (const runner of resolvedData.baseStationRunners) {
-            await db.base_station_runners.put(runner);
-          }
+        const raceIds = (data.races ?? []).map(r => r.id);
+        for (const race of resolvedData.races ?? []) await db.races.put(race);
+        for (const [key, table] of RACE_TABLES) {
+          if (!data[key]) continue; // a setup file carries no results: leave this device's own
+          // The file replaces the race's rows in each table it carries — except rows the
+          // conflict choice kept (their incoming copy was dropped from resolvedData)
+          const incoming = new Set((resolvedData[key] ?? []).map(r => r.id));
+          const kept = new Set(data[key].filter(r => !incoming.has(r.id)).map(r => r.id));
+          await db[table].where('raceId').anyOf(raceIds).filter(r => !kept.has(r.id)).delete();
+          for (const row of resolvedData[key] ?? []) await db[table].put(row);
         }
       });
 
       return {
         success: true,
-        imported: {
-          races: resolvedData.races?.length || 0,
-          runners: resolvedData.runners?.length || 0,
-          checkpoints: resolvedData.checkpoints?.length || 0,
-          checkpointRunners: resolvedData.checkpointRunners?.length || 0,
-          baseStationRunners: resolvedData.baseStationRunners?.length || 0,
-        },
+        imported: Object.fromEntries(['races', ...RACE_TABLES.map(([key]) => key)].map(key => [key, resolvedData[key]?.length || 0])),
         conflicts: conflicts.length,
       };
     } catch (error) {

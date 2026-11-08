@@ -94,7 +94,22 @@ describe('base reports', () => {
       ],
       board: [{ number: 1, short: 'CP1', lastBlock: at(7, 10) }],
     });
-    expect(log).toEqual([{ number: 1, short: 'CP1', calls: 2, numbers: 3, corrections: 0, lastCall: at(7, 15), upTo: at(7, 10) }]);
+    expect(log).toEqual([{ number: 1, short: 'CP1', calls: 2, numbers: 3, corrections: 0, edits: 0, editReasons: '', lastCall: at(7, 15), upTo: at(7, 10) }]);
+  });
+
+  it('call log shows Records edits per checkpoint with their reasons (undone edits left out)', () => {
+    const [row] = callLog({
+      radioCalls: [],
+      board: [{ number: 2, short: 'CP2', lastBlock: null }],
+      baseEdits: [
+        { checkpointNumber: 2, reason: 'base-error', undoneAt: null },
+        { checkpointNumber: 2, reason: 'correction', undoneAt: null },
+        { checkpointNumber: 2, reason: 'base-error', undoneAt: null },
+        { checkpointNumber: 2, reason: 'other', undoneAt: at(8, 0) },
+        { checkpointNumber: 1, reason: 'other', undoneAt: null },
+      ],
+    });
+    expect(row).toMatchObject({ edits: 3, editReasons: 'base typing error, checkpoint correction' });
   });
 
   it('leaders: furthest first, then fastest; the time at the last checkpoint (the start is not tracked)', () => {
