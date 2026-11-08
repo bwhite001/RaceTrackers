@@ -26,6 +26,7 @@ const ROWS = {
   readout_progress: { checkpointNumber: 1, blockTime: '2026-11-07T21:00:00.000Z' },
   checkpoint_field_changes: { checkpointNumber: 1, number: 500, kind: 'late', source: 'checkpoint' },
   field_changes: { number: 500, kind: 'late', source: 'base', callId: 1, cancelledAt: null },
+  base_edits: { checkpointNumber: 1, createdAt: '2026-11-07T21:50:00.000Z', undoneAt: null, kind: 'time', reason: 'base-error', changes: [] },
   crew_vehicles: { checkpointNumber: 4, rego: '147 STU', driver: 'VK4AJG', occupants: ['VK4DTB'], leftHomeAt: '2026-11-07T18:45:00.000Z', arrivedAt: null, createdAt: '2026-11-07T18:40:00.000Z', supersededAt: null },
 };
 

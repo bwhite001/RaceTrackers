@@ -78,6 +78,25 @@ const CHECK_CLASSES = {
   [CHECK_KIND.BAD]: 'bg-white text-vk-red border-2 border-vk-red line-through',
 };
 
+/**
+ * Base Records chips (BASE_EDIT_CREW_LOG A3). Lightness, border and dash tell
+ * them apart, not hue alone; the selected chip adds a navy outline.
+ */
+const RECORD_CLASSES = {
+  ok: PASSED_BG,
+  checked: PASSED_BG,
+  info: CHECK_CLASSES[CHECK_KIND.INFO],                                  // late entry
+  warn: CHECK_CLASSES[CHECK_KIND.WARN],                                  // duplicate, out of order, pace
+  alert: 'bg-white text-vk-red border-2 border-vk-red',                  // after DNF / DNS
+  bad: CHECK_CLASSES[CHECK_KIND.BAD],                                    // not in race (struck)
+  missed: 'bg-white text-vk-blue border-2 border-dashed border-vk-blue', // seen further on
+  old: 'bg-vk-paper text-vk-muted border border-dashed border-vk-muted line-through', // history
+};
+
+export function recordClasses(kind) {
+  return RECORD_CLASSES[kind] ?? RECORD_CLASSES.ok;
+}
+
 /** Locked / disabled button (spec §3.4) for raw <button>s; the design-system Button applies it itself. */
 export const LOCKED = 'bg-white text-vk-muted border-2 border-dashed border-vk-border cursor-not-allowed dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600';
 

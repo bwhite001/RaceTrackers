@@ -14,6 +14,8 @@ import { checkClasses, LOCKED } from '../../../design-system/statusStyles';
 import { BlockPicker, NumberPad, BibChip, BottomSheet } from '../../../design-system/components/VK';
 import useNow from '../../../shared/hooks/useNow';
 import { CrewSheet } from './CrewLog';
+import CheckpointRecords, { useRecordItems } from './CheckpointRecords';
+import { issueCounts } from '../services/records';
 import { crewPillByCheckpoint } from '../services/crews';
 
 const MAX_BLOCKS = 48;
@@ -61,6 +63,7 @@ const BaseReceive = () => {
   const [askUndo, setAskUndo] = useState(null); // { cp, ids, text } after "Asked"
   const [standDownCp, setStandDownCp] = useState(null); // checkpoint whose Stand-down check is open
   const [crewCp, setCrewCp] = useState(null); // checkpoint whose crew sheet is open
+  const [recordsCp, setRecordsCp] = useState(null); // checkpoint whose Records are open (in place of Receive)
 
   const raceStart = currentRace?.date && currentRace?.startTime
     ? TimeUtils.createRaceTimestamp(currentRace.date, currentRace.startTime.slice(0, 5))
@@ -109,6 +112,7 @@ const BaseReceive = () => {
     prev: prevCp ? { short: prevCp.short, seen: sightings.get(prevCp.number) ?? new Map(), applies: (n) => appliesAt(prevCp, n, batchOf) } : null,
   }) : []), [cur, prevCp, rx.entries, raceNumbers, out, sightings, batchOf]);
   const goodCount = checked.filter(c => isRecordable(c.kind)).length;
+  const recordIssues = issueCounts(useRecordItems(cur?.number ?? null).items).attn;
 
   // ── actions ──────────────────────────────────────────────────────────────
   const clearTransient = () => { setTyped(''); setUndoEntries(null); setConfirmCancel(false); };
@@ -317,6 +321,11 @@ const BaseReceive = () => {
   const atNow = rx.ctime && toBlock(rx.ctime) >= nowBlock;
   const nextLabel = atNow ? 'At now' : `Next ${hhmm(TimeUtils.addMinutes(toBlock(rx.ctime ?? now), BLOCK_MINUTES))} →`;
 
+  // Records opens in place of the receive panel; the call draft stays in the store for Back to call
+  if (recordsCp != null) {
+    return <CheckpointRecords cpNumber={recordsCp} onBack={() => setRecordsCp(null)} draftCount={rx.step === 'rx' ? (rx.entries ?? []).length : 0} />;
+  }
+
   return (
     <div className="max-w-[1280px] w-full mx-auto p-3 flex flex-wrap gap-3 items-start" data-screenshot-target>
       <section aria-labelledby="rxhd" className="flex-[999_1_480px] min-w-0 flex flex-col gap-3">
@@ -411,6 +420,12 @@ const BaseReceive = () => {
               <h1 id="rxhd" className="font-display font-extrabold text-xl text-vk-navy dark:text-white">{cur.short}</h1>
               <div className="text-[13px] text-vk-muted flex-1 min-w-0 truncate">{cur.name}</div>
               <div className="text-[13px] font-bold text-vk-blue whitespace-nowrap">{goodCount} to record</div>
+              <button type="button" onClick={() => setRecordsCp(cur.number)}
+                aria-label={`Records${recordIssues ? `, ${recordIssues} to check` : ''}`}
+                className="min-h-[40px] px-3 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs flex items-center gap-1.5 dark:bg-gray-800 dark:text-gray-100">
+                Records
+                {recordIssues > 0 && <span className="min-w-[20px] rounded-full bg-vk-gold text-vk-ink text-[11px] font-extrabold px-1.5" data-testid="records-badge">{recordIssues}</span>}
+              </button>
               <button type="button" onClick={openCorrection}
                 className="min-h-[40px] px-3 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs dark:bg-gray-800 dark:text-gray-100">
                 Correction
@@ -599,10 +614,16 @@ const BaseReceive = () => {
                   Missed: {missedText(missed.get(row.number))}
                 </div>
               )}
-              <button type="button" onClick={() => setStandDownCp(row.number)} aria-label={`Stand-down check ${row.short}`}
-                className="self-start min-h-[32px] px-2 rounded-lg text-xs font-semibold text-vk-blue">
-                Stand-down check
-              </button>
+              <span className="flex flex-wrap gap-x-1">
+                <button type="button" onClick={() => setRecordsCp(row.number)} aria-label={`Records ${row.short}`}
+                  className="min-h-[32px] px-2 rounded-lg text-xs font-semibold text-vk-blue">
+                  Records
+                </button>
+                <button type="button" onClick={() => setStandDownCp(row.number)} aria-label={`Stand-down check ${row.short}`}
+                  className="min-h-[32px] px-2 rounded-lg text-xs font-semibold text-vk-blue">
+                  Stand-down check
+                </button>
+              </span>
               {askUndo?.cp === row.number && !asks.has(row.number) && (
                 <div className="flex items-center gap-1.5 text-xs text-vk-muted" role="status">
                   <span className="flex-1">{askUndo.text}</span>

@@ -334,6 +334,114 @@ export class BaseOperationsRepository extends BaseRepository {
     });
   }
 
+  // ── Records: fix what base recorded at a checkpoint ───────────────────────
+  // Every change is one base_edits row. Old rows are superseded, never
+  // deleted; undoRecordEdit() puts them back exactly.
+
+  async getBaseEdits(raceId) {
+    return db.base_edits.where('raceId').equals(raceId).toArray();
+  }
+
+  /**
+   * Apply one Records change (single or batch).
+   * @param {number} raceId
+   * @param {number} checkpointNumber  the checkpoint Records is open on
+   * @param {object} edit
+   * @param {'time'|'number'|'cp'|'remove'|'keep'} edit.kind
+   * @param {'correction'|'base-error'|'other'} edit.reason
+   * @param {Array} edit.changes  [{ rowId, toCp?, toTime?, toNumber?, manual?, remove?, note }]
+   *   or, for a number rejected on a call, [{ rejected: { issueKey, callId }, number, toNumber, toTime, toCp, manual }]
+   * @param {number[]} [edit.late]  numbers this edit adds to the field as late entries
+   * @param {string} [edit.supersededReason]
+   * @returns {Promise<number>} base_edits id
+   */
+  async editRecords(raceId, checkpointNumber, { kind, reason, note = '', changes, late = [], supersededReason }, at = TimeUtils.getCurrentTimestamp()) {
+    const tables = [db.base_station_runners, db.base_edits, db.radio_calls, db.audit_log, db.field_changes, db.data_issue_resolutions];
+    return db.transaction('rw', tables, async () => {
+      const editId = await db.base_edits.add({ raceId, checkpointNumber, createdAt: at, undoneAt: null, kind, reason, note, batchId: changes.length > 1 ? `batch-${at}` : null, changes: [] });
+      const done = [];
+      const resolutionIds = [];
+      for (const c of changes) {
+        let before = null;
+        if (c.rowId != null) {
+          before = await db.base_station_runners.get(c.rowId);
+          if (!before || before.status === 'superseded') throw new Error(`${before?.number ?? 'That number'} was changed elsewhere — reopen Records`);
+        }
+        const fromCp = before?.checkpointNumber ?? checkpointNumber;
+        const fromTime = before?.commonTime ?? c.toTime ?? null;
+        const fromNumber = before?.number ?? c.number;
+        let newRowId = null;
+        if (!c.remove) {
+          newRowId = await db.base_station_runners.add({
+            raceId,
+            checkpointNumber: c.toCp ?? fromCp,
+            number: c.toNumber ?? fromNumber,
+            status: 'passed',
+            commonTime: c.toTime ?? fromTime,
+            markOffEntryTime: before?.markOffEntryTime ?? at,
+            notes: before?.notes ?? null,
+            ...((c.manual ?? before?.manualTime) === true && { manualTime: true }),
+            ...(before?.missedReport && { missedReport: true }),
+            editId,
+            replacesRow: before?.id ?? null,
+            fromCallId: before ? (before.callId ?? before.fromCallId ?? null) : (c.rejected?.callId ?? null),
+          });
+        }
+        if (before) {
+          await db.base_station_runners.update(before.id, {
+            status: 'superseded', supersededAt: at, supersededReason: supersededReason ?? reason, supersededBy: editId, supersededNote: c.note ?? null,
+          });
+        }
+        if (c.rejected) resolutionIds.push(await this.addResolution(raceId, c.rejected.issueKey, c.toNumber != null && c.toNumber !== c.number ? `renumbered ${c.toNumber}` : 'late entry'));
+        done.push({
+          number: fromNumber, fromCp, toCp: c.remove ? null : (c.toCp ?? fromCp), fromTime, toTime: c.remove ? null : (c.toTime ?? fromTime),
+          fromNumber, toNumber: c.remove ? null : (c.toNumber ?? fromNumber), rowId: before?.id ?? null, newRowId, before,
+        });
+      }
+      const fieldChangeIds = late.length ? await this.addFieldChanges(raceId, late, 'records', { editId }) : [];
+      // A checkpoint correction counts as a call (Due timing) but never moves "up to"
+      let callId = null;
+      if (reason === 'correction') {
+        callId = await db.radio_calls.add({
+          raceId, checkpointNumber, receivedAt: at, kind: 'correction', source: 'records', editId,
+          blocks: [], recorded: done.filter(d => d.toCp === checkpointNumber).map(d => d.toNumber), skipped: [], rejected: [],
+          corrections: done.map(d => ({ number: d.number, from: d.fromTime, to: d.toTime, notPassed: d.toCp == null })),
+          undoneAt: null, replaced: [],
+        });
+      }
+      await db.base_edits.update(editId, { changes: done, fieldChangeIds, resolutionIds, callId });
+      await this.logAudit(raceId, `records-${kind}`, 'base_station', done.map(d => d.number).join(','), {
+        checkpointNumber, reason, editId, batchId: changes.length > 1 ? `batch-${at}` : null,
+        changes: done.map(({ before: _b, ...d }) => d),
+      });
+      return editId;
+    });
+  }
+
+  /** Reverse a Records change exactly: old rows back as they were, new rows set aside. */
+  async undoRecordEdit(editId) {
+    const tables = [db.base_station_runners, db.base_edits, db.radio_calls, db.audit_log, db.field_changes, db.data_issue_resolutions];
+    await db.transaction('rw', tables, async () => {
+      const edit = await db.base_edits.get(editId);
+      if (!edit || edit.undoneAt) return;
+      const at = TimeUtils.getCurrentTimestamp();
+      for (const d of edit.changes) {
+        if (d.newRowId == null) continue;
+        const now = await db.base_station_runners.get(d.newRowId);
+        if (now?.status === 'superseded') throw new Error(`${d.toNumber} was changed again since — undo that first`);
+      }
+      for (const d of edit.changes) {
+        if (d.newRowId != null) await db.base_station_runners.update(d.newRowId, { status: 'superseded', supersededAt: at, supersededReason: 'undone', supersededNote: 'Undone' });
+        if (d.before) await db.base_station_runners.put(d.before);
+      }
+      await this.cancelFieldChanges(edit.raceId, edit.fieldChangeIds ?? []);
+      for (const id of edit.resolutionIds ?? []) await this.removeResolution(id);
+      if (edit.callId) await db.radio_calls.update(edit.callId, { undoneAt: at });
+      await db.base_edits.update(editId, { undoneAt: at });
+      await this.logAudit(edit.raceId, 'records-undo', 'base_station', edit.changes.map(d => d.number).join(','), { editId });
+    });
+  }
+
   // ── Crew & vehicle log (insurance) ────────────────────────────────────────
   // Rows are never deleted: an edit adds a new row and supersedes the old one,
   // a removal supersedes. Each change returns what undoCrewChange() needs.

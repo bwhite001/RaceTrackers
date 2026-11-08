@@ -17,7 +17,7 @@ describe('Simple Database Test', () => {
   });
 
   it('should be at the current schema version (12)', () => {
-    expect(db.verno).toBe(13);
+    expect(db.verno).toBe(14);
   });
 
   it('should have all expected tables', () => {

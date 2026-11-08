@@ -106,6 +106,18 @@ class RaceTrackerDB extends Dexie {
     //  field_changes: base's additions to the field {kind: 'late', source, createdAt,
     //    cancelledAt, callId} — base's field = setup runners + uncancelled late entries
     //  races gain data column bibsOnTheDay; checkpoint_runners gain notInSetup — no index.
+    // Version 14 (base Records — fix what base recorded at a checkpoint):
+    //  base_edits: one row per Records change (a batch is one row)
+    //  {kind, reason, note, batchId, callId, changes: [{number, fromCp, toCp,
+    //  fromTime, toTime, fromNumber, rowId, newRowId, before}], fieldChangeIds,
+    //  resolutionIds}. Undo sets undoneAt and restores the rows; nothing deleted.
+    //  base_station_runners gain data columns editId, replacesRow, fromCallId,
+    //  supersededNote — no index.
+    this.version(14)
+        .stores({
+            base_edits: "++id, raceId, checkpointNumber, createdAt, undoneAt"
+        });
+
     // Version 13 (base crew & vehicle log, for insurance): one row per vehicle
     //  going to a checkpoint (0 = Base) {rego, driver, occupants[], leftHomeAt,
     //  arrivedAt, leftSiteAt, homeSafeAt, notes}. An edit adds a new row and

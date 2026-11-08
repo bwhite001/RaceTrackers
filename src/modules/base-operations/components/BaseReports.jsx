@@ -33,7 +33,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
   const store = useBaseOperationsStore();
   const {
     currentRace, checkpoints = [], runners = [], radioCalls = [], outList = [], raceRunnerNumbers = [], raceRunnerBatches: batchOf = new Map(),
-    baseRows = [], resolutions = [], downloadReport, crewVehicles = [],
+    baseRows = [], resolutions = [], downloadReport, crewVehicles = [], baseEdits = [],
   } = store;
   const now = useNow(30000);
   const [sel, setSel] = useState(initialReport || 'missing');
@@ -69,7 +69,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
   const matrix = useMemo(() => timesMatrix({ sightings, order, out: outForMatrix, raceNumbers, missed, batchOf }), [sightings, order, outForMatrix, raceNumbers, missed, batchOf]);
   const board = useMemo(() => buildBoard({ checkpoints, records: runners, radioCalls, now, raceStart, fieldSize: raceNumbers.length, outCount: out.size, distances, raceNumbers, out, batchOf }),
     [checkpoints, runners, radioCalls, now, raceStart, raceNumbers, out, distances, batchOf]);
-  const calls = useMemo(() => callLog({ radioCalls, board }), [radioCalls, board]);
+  const calls = useMemo(() => callLog({ radioCalls, board, baseEdits }), [radioCalls, board, baseEdits]);
   const issues = useMemo(() => runChecks({
     baseRows, order, sightings, outByNumber, radioCalls, distances, limitKmh: currentRace?.paceLimitKmh ?? PACE_LIMIT_KMH,
     raceNumbers: new Set(raceNumbers), batchOf,
@@ -159,7 +159,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
       case 'oncourse': return [['Group', 'Count', 'Bibs'], ...onCourse.map(g => [g.label, g.numbers.length, g.numbers.join(' ')])];
       case 'results': return [['Bib', 'Status', ...cps], ...matrix.map(r => [r.number, r.status, ...r.cells.map(c => c.text)])];
       case 'crews': return crewRows;
-      case 'calls': return [['Checkpoint', 'Calls', 'Numbers', 'Corrections', 'Last call', 'Up to'], ...calls.map(c => [c.short, c.calls, c.numbers, c.corrections, hhmm(c.lastCall), hhmm(c.upTo)])];
+      case 'calls': return [['Checkpoint', 'Calls', 'Numbers', 'Corrections', 'Edits at base', 'Edit reasons', 'Last call', 'Up to'], ...calls.map(c => [c.short, c.calls, c.numbers, c.corrections, c.edits, c.editReasons, hhmm(c.lastCall), hhmm(c.upTo)])];
       default: return [];
     }
   };
@@ -291,7 +291,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
         {sel === 'calls' && (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm min-w-[520px]">
-              <thead><tr className="bg-vk-band dark:bg-gray-700 text-left"><Th first>Checkpoint</Th><Th>Calls</Th><Th>Numbers</Th><Th>Corrections</Th><Th>Last call</Th><Th>Up to</Th></tr></thead>
+              <thead><tr className="bg-vk-band dark:bg-gray-700 text-left"><Th first>Checkpoint</Th><Th>Calls</Th><Th>Numbers</Th><Th>Corrections</Th><Th>Edits at base</Th><Th>Last call</Th><Th>Up to</Th></tr></thead>
               <tbody>
                 {calls.map(c => (
                   <tr key={c.number} className="border-b border-vk-border dark:border-gray-700">
@@ -299,6 +299,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
                     <td className="px-2 py-2.5">{c.calls}</td>
                     <td className="px-2 py-2.5">{c.numbers}</td>
                     <td className="px-2 py-2.5">{c.corrections}</td>
+                    <td className="px-2 py-2.5" data-testid={`edits-${c.short}`}>{c.edits}{c.edits ? <span className="block text-xs text-vk-muted">{c.editReasons}</span> : null}</td>
                     <td className="px-2 py-2.5">{hhmm(c.lastCall) || '—'}</td>
                     <td className="px-2 py-2.5">{hhmm(c.upTo) || '—'}</td>
                   </tr>

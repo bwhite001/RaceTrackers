@@ -38,7 +38,8 @@ export function findDuplicates({ baseRows, order }) {
     const { number, checkpointNumber } = rows[0];
     const short = shortOf(order, checkpointNumber);
     const same = rows.every(r => hhmm(r.commonTime) === hhmm(rows[0].commonTime));
-    const describe = (r) => `${hhmm(r.commonTime)}${r.markOffEntryTime ? ` (call ${hhmm(r.markOffEntryTime)})` : ''}`;
+    // markOffEntryTime is when base typed it in, which can lag well behind the radio call
+    const describe = (r) => `${hhmm(r.commonTime)}${r.markOffEntryTime ? ` (entered ${hhmm(r.markOffEntryTime)})` : ''}`;
     issues.push({
       key: `dup:${number}:${checkpointNumber}`,
       check: 'dup',

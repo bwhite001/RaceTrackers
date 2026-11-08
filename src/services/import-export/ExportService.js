@@ -30,6 +30,7 @@ export const RACE_TABLES = [
   ['fieldChanges', 'field_changes'],
   // Crew & vehicle log: personal data — full backups only, never the setup package
   ['crewVehicles', 'crew_vehicles'],
+  ['baseEdits', 'base_edits'],
 ];
 
 export class ExportService {

@@ -66,6 +66,7 @@ const useBaseOperationsStore = create(
       fieldChanges: [],
       radioCalls: [],
       crewVehicles: [],
+      baseEdits: [],
       baseRows: [],
       resolutions: [],
       receive: EMPTY_RECEIVE,
@@ -149,7 +150,7 @@ const useBaseOperationsStore = create(
             console.warn(`Base refresh: could not load ${label}`, err);
             return [];
           });
-          const [raceRunnerRows, radioCalls, outList, baseRows, resolutions, fieldChanges, crewVehicles] = await Promise.all([
+          const [raceRunnerRows, radioCalls, outList, baseRows, resolutions, fieldChanges, crewVehicles, baseEdits] = await Promise.all([
             soft('race runners', () => db.runners.where('raceId').equals(raceKey).toArray()),
             soft('radio calls', () => repo.getRadioCalls(raceKey)),
             soft('out list', () => repo.getOutList(raceKey)),
@@ -157,6 +158,7 @@ const useBaseOperationsStore = create(
             soft('resolutions', () => repo.getResolutions(raceKey)),
             soft('field changes', () => repo.getFieldChanges(raceKey)),
             soft('crew vehicles', () => repo.getCrewVehicles(raceKey)),
+            soft('base edits', () => repo.getBaseEdits(raceKey)),
           ]);
           const stats = get().calculateStats(runners);
 
@@ -200,6 +202,7 @@ const useBaseOperationsStore = create(
             baseRows,
             resolutions,
             crewVehicles,
+            baseEdits,
             loading: false,
             lastSync: new Date().toISOString()
           });
@@ -472,6 +475,18 @@ const useBaseOperationsStore = create(
 
       restoreBaseRows: async (rows) => {
         await new BaseOperationsRepository().restoreBaseRows(raceKeyOf(get().currentRaceId), rows);
+        await get().refreshData({ silent: true });
+      },
+
+      // Actions - Records (fix what base recorded). editRecords returns the edit id for undoRecordEdit.
+      editRecords: async (checkpointNumber, edit) => {
+        const id = await new BaseOperationsRepository().editRecords(raceKeyOf(get().currentRaceId), checkpointNumber, edit);
+        await get().refreshData({ silent: true });
+        return id;
+      },
+
+      undoRecordEdit: async (editId) => {
+        await new BaseOperationsRepository().undoRecordEdit(editId);
         await get().refreshData({ silent: true });
       },
 

@@ -208,6 +208,7 @@ export const exportPackageSchema = z.object({
     checkpointFieldChanges: z.array(z.any()).optional(),
     fieldChanges: z.array(z.any()).optional(),
     crewVehicles: z.array(z.any()).optional(), // added 3.20
+    baseEdits: z.array(z.any()).optional(), // added 3.20
   }).optional(),
   // Legacy support for old export format
   raceConfig: z.object({
