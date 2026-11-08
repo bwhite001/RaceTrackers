@@ -1248,6 +1248,110 @@ Overdue runners, who is still on course, times by checkpoint and the call log �
 
 ![Reports — Times by checkpoint reads "missed" at CP1; Skipped check is clear](assets/not-seen-there-shows-missed-in-the-times-table-step-02.jpg)
 
+## Base Station: Fixing Recorded Numbers (Records)
+
+Records shows every number base holds for one checkpoint, by block, by number or by call, with what needs checking: duplicates, missed runners, wrong numbers and other checks. Fix a time, a mistyped number or the checkpoint one at a time or as a batch. Each change asks why, keeps history and has Undo.
+
+### Base fixes the numbers it recorded at a checkpoint
+
+
+
+**CP2 header — Records shows how many need checking**
+
+![CP2 header — Records shows how many need checking](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-01.jpg)
+
+**Needs attention at CP2 — counts match, each filter shows only its numbers**
+
+![Needs attention at CP2 — counts match, each filter shows only its numbers](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-02.jpg)
+
+**Change a time — Save is locked until a reason is picked**
+
+![Change a time — Save is locked until a reason is picked](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-03.jpg)
+
+**Undo restores the time exactly**
+
+![Undo restores the time exactly](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-04.jpg)
+
+**Times by checkpoint and the call log show the correction**
+
+![Times by checkpoint and the call log show the correction](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-05.jpg)
+
+**Wrong number — change 999 to 129 (base typing error); 999 stays in history**
+
+![Wrong number — change 999 to 129 (base typing error); 999 stays in history](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-06.jpg)
+
+**Select a block — every bib listed on its own row, moved together, then Undo**
+
+![Select a block — every bib listed on its own row, moved together, then Undo](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-07.jpg)
+
+**Move three numbers to CP3, then Undo**
+
+![Move three numbers to CP3, then Undo](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-08.jpg)
+
+**Remove a number takes two taps, and Undo puts it back**
+
+![Remove a number takes two taps, and Undo puts it back](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-09.jpg)
+
+**Missed runners — CP2 has 110; 111 not seen there**
+
+![Missed runners — CP2 has 110; 111 not seen there](assets/base-fixes-the-numbers-it-recorded-at-a-checkpoint-step-10.jpg)
+
+### Records fits the tablet with 150 numbers at one checkpoint
+
+
+
+**150 numbers at CP2 — the list scrolls inside its panel, the page does not**
+
+![150 numbers at CP2 — the list scrolls inside its panel, the page does not](assets/records-fits-the-tablet-with-150-numbers-at-one-checkpoint-step-01.jpg)
+
+## Base Station: Crew & Vehicle Log
+
+For insurance, base logs which car went to each checkpoint, who was in it, and when it left home and arrived. Arrived now is one tap when an operator radios in. The log stays on the base device and is never in the race setup sent to volunteers.
+
+### Base logs the crews and vehicles going to each checkpoint
+
+
+
+**Crews tab — a card per checkpoint, Base first, nothing logged yet**
+
+![Crews tab — a card per checkpoint, Base first, nothing logged yet](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-01.jpg)
+
+**Add a car to CP3 — rego, driver, passenger, left home 04:45 (before the start)**
+
+![Add a car to CP3 — rego, driver, passenger, left home 04:45 (before the start)](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-02.jpg)
+
+**Add a second car to CP3 — more than one car can go to a checkpoint**
+
+![Add a second car to CP3 — more than one car can go to a checkpoint](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-03.jpg)
+
+**Operator radios in — Arrived now, one tap**
+
+![Operator radios in — Arrived now, one tap](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-04.jpg)
+
+**Undo the last arrival — back on the way**
+
+![Undo the last arrival — back on the way](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-05.jpg)
+
+**Crews fit the tablet — no page scroll at 1112×834**
+
+![Crews fit the tablet — no page scroll at 1112×834](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-06.jpg)
+
+**From Receive, CP3 shows its crew on the way — Crew opens the same editor**
+
+![From Receive, CP3 shows its crew on the way — Crew opens the same editor](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-07.jpg)
+
+**Remove a vehicle takes two taps, and Undo brings it back**
+
+![Remove a vehicle takes two taps, and Undo brings it back](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-08.jpg)
+
+**Reports — Crew & vehicle log for insurance, CSV has every vehicle**
+
+![Reports — Crew & vehicle log for insurance, CSV has every vehicle](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-09.jpg)
+
+**The race setup shared with volunteers carries no crew or rego details**
+
+![The race setup shared with volunteers carries no crew or rego details](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-10.jpg)
+
 ## Importing & Exporting Data
 
 Transfer race configurations and results between devices. Export from the base station header or race management page; import to restore a race.
@@ -1423,6 +1527,10 @@ The Race Maintenance module card should always be visible on the home screen so 
 ### Status lines are polite live regions
 
 
+
+**Mark off, Receive, DNF / DNS and Reports status lines use aria-live="polite"**
+
+![Mark off, Receive, DNF / DNS and Reports status lines use aria-live="polite"](assets/status-lines-are-polite-live-regions-step-01.jpg)
 
 ### Undo bar clears itself after about six seconds
 
@@ -1668,25 +1776,29 @@ How to operate two checkpoints at the same physical location — for example, an
 
 ![Checkpoint picker — linked pair shown as single card with link icon](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-03.jpg)
 
+**Select the linked pair — navigate to dual checkpoint view**
+
+![Select the linked pair — navigate to dual checkpoint view](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-04.jpg)
+
 **Dual view loads — CP tab switcher shows CP1 and CP4**
 
-![Dual view loads — CP tab switcher shows CP1 and CP4](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-04.jpg)
+![Dual view loads — CP tab switcher shows CP1 and CP4](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-05.jpg)
 
 **Mark runners 100 and 101 in CP1 (outbound) via quick entry**
 
-![Mark runners 100 and 101 in CP1 (outbound) via quick entry](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-05.jpg)
+![Mark runners 100 and 101 in CP1 (outbound) via quick entry](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-06.jpg)
 
 **Switch to CP4 tab — stars appear on runners 100 and 101**
 
-![Switch to CP4 tab — stars appear on runners 100 and 101](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-06.jpg)
+![Switch to CP4 tab — stars appear on runners 100 and 101](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-07.jpg)
 
 **Mark runner 100 in CP4 (return) via quick entry**
 
-![Mark runner 100 in CP4 (return) via quick entry](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-07.jpg)
+![Mark runner 100 in CP4 (return) via quick entry](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-08.jpg)
 
 **Overview tab — runner 100 shows Both, runner 101 shows CP1 Only**
 
-![Overview tab — runner 100 shows Both, runner 101 shows CP1 Only](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-08.jpg)
+![Overview tab — runner 100 shows Both, runner 101 shows CP1 Only](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-09.jpg)
 
 ## Checkpoint: Fixing Mistakes and Reading Out
 
@@ -2075,3 +2187,24 @@ Checkpoint:
 Base:
 - **DNF / DNS** tab: bulk add by typing or pasting numbers, choose where and why, apply; Clear any entry to put a runner back in the race.
 - **Reports › Needs attention**: duplicates, out-of-order times, skipped checkpoints, sightings after DNF/DNS, unknown bibs, impossible pace — resolve each in place.
+
+### Base: fixing recorded numbers (Records)
+
+Records is base's own list of every number it holds for one checkpoint. On Receive, tap the checkpoint, then **Records** (a gold count shows how many need checking). Every checkpoint row on the board also has a small **Records** button. **Back to call** returns to the call you were taking, with nothing lost.
+
+- View the numbers **By block**, **By number** or **By call**. **Find number** narrows the list to bibs starting with the digits typed. The filter pills show duplicates, missed runners, wrong numbers and other checks.
+- Tap a number to change its **Time**, fix a mistyped **Number**, move it to the right **Checkpoint**, or **Remove** it (tap twice). For a duplicate, **Keep this one** removes the others. For a wrong number heard on a call, use **Change number** or **Record as late entry**.
+- Every change asks **Why**: *Checkpoint correction*, *Base typing error* or *Other*. A checkpoint correction is logged as a correction call, so it shows in the call log, the same as Correction mode.
+- **Select** fixes several numbers at once: tap them, or use **Select block** / **Select call**. Every bib is listed on its own line before you save.
+- Nothing is deleted. **Show history** shows what each change replaced, and **Undo** reverses the last change exactly. An edit can lower a checkpoint's "up to"; the status line says so when it does.
+- Records only changes base's own records. It never changes what a checkpoint holds, so ask the checkpoint for a correction if their sheet is wrong too.
+
+### Crew & vehicle log
+
+For insurance, base logs which car went to each checkpoint, who was in it, and when it left home and arrived. Use the **Crews** tab, or the **Crew** button on a checkpoint on Receive while you're taking its calls.
+
+- **+ Vehicle** adds a car: rego, driver, anyone else in the car, and the times. Times are exact (not 5-minute blocks), can be before the race start, and are never in the future. More than one car can go to a checkpoint.
+- When an operator radios that they've arrived, tap **Arrived now** on their car. Every save, arrival and removal has Undo.
+- **Return trip (left site, home safe)** is optional.
+- **Reports › Crew & vehicle log** prints or exports the log. It stays on the base device and is never included in the race setup or any shared file.
+- **Wording to be supplied by Brandon (WICEN)** for an operator reporting that they have left home, and that they have arrived at their checkpoint.

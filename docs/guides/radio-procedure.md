@@ -89,3 +89,24 @@ Checkpoint:
 Base:
 - **DNF / DNS** tab: bulk add by typing or pasting numbers, choose where and why, apply; Clear any entry to put a runner back in the race.
 - **Reports › Needs attention**: duplicates, out-of-order times, skipped checkpoints, sightings after DNF/DNS, unknown bibs, impossible pace — resolve each in place.
+
+## Base: fixing recorded numbers (Records)
+
+Records is base's own list of every number it holds for one checkpoint. On Receive, tap the checkpoint, then **Records** (a gold count shows how many need checking). Every checkpoint row on the board also has a small **Records** button. **Back to call** returns to the call you were taking, with nothing lost.
+
+- View the numbers **By block**, **By number** or **By call**. **Find number** narrows the list to bibs starting with the digits typed. The filter pills show duplicates, missed runners, wrong numbers and other checks.
+- Tap a number to change its **Time**, fix a mistyped **Number**, move it to the right **Checkpoint**, or **Remove** it (tap twice). For a duplicate, **Keep this one** removes the others. For a wrong number heard on a call, use **Change number** or **Record as late entry**.
+- Every change asks **Why**: *Checkpoint correction*, *Base typing error* or *Other*. A checkpoint correction is logged as a correction call, so it shows in the call log, the same as Correction mode.
+- **Select** fixes several numbers at once: tap them, or use **Select block** / **Select call**. Every bib is listed on its own line before you save.
+- Nothing is deleted. **Show history** shows what each change replaced, and **Undo** reverses the last change exactly. An edit can lower a checkpoint's "up to"; the status line says so when it does.
+- Records only changes base's own records. It never changes what a checkpoint holds, so ask the checkpoint for a correction if their sheet is wrong too.
+
+## Crew & vehicle log
+
+For insurance, base logs which car went to each checkpoint, who was in it, and when it left home and arrived. Use the **Crews** tab, or the **Crew** button on a checkpoint on Receive while you're taking its calls.
+
+- **+ Vehicle** adds a car: rego, driver, anyone else in the car, and the times. Times are exact (not 5-minute blocks), can be before the race start, and are never in the future. More than one car can go to a checkpoint.
+- When an operator radios that they've arrived, tap **Arrived now** on their car. Every save, arrival and removal has Undo.
+- **Return trip (left site, home safe)** is optional.
+- **Reports › Crew & vehicle log** prints or exports the log. It stays on the base device and is never included in the race setup or any shared file.
+- **Wording to be supplied by Brandon (WICEN)** for an operator reporting that they have left home, and that they have arrived at their checkpoint.
