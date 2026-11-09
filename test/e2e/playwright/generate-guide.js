@@ -11,6 +11,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { KEY_ACTIONS, WHERE_DID_IT_GO } from '../../../src/modules/base-operations/services/keymap.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../../..');
@@ -208,6 +209,44 @@ const CHAPTERS = [
   { key: 'split-role', title: 'Split-Role Checkpoint Operations', intro: 'How two operators can share one checkpoint — a Marker records runner times and shares batches via QR code, while a Radio Operator scans the QR and calls runners in to base.' },
 ];
 
+// "Coming from WICEN2" reference, generated from the keymap table so the guide,
+// the shortcut sheet and the keys themselves can't drift apart.
+function wicen2Reference() {
+  const md = [
+    '### Entering a call, as in WICEN2', '',
+    'Type the checkpoint, Enter, the time, Enter, then each number followed by Enter. Alt+U completes the call.', '',
+    '`1 ⏎ 0815 ⏎ 129 ⏎ 136 ⏎ … Alt+U`', '',
+    '- Enter on the Time box without typing keeps the time shown (the next block).',
+    '- A time on a 5-minute mark selects that block; any other time is kept exactly as typed.',
+    '- Shift+Tab goes back to Time, twice to CheckPt. Esc clears the typed number; it never cancels the call.',
+    '- Typing a different checkpoint while a call has numbers completes that call (with Undo) and opens the new one.',
+    '- Alt+Shift+letter works as well as Alt+letter, for any browser that keeps an Alt key for itself.',
+    '- Hold Alt to see each button\'s key. Alt+H (or ?) lists every key and prints a keyboard card for the base table.',
+    '- On a touch-only tablet the screens look as before: the CheckPt box and key hints appear once a keyboard is used.', '',
+    '### WICEN2 keys', '',
+    '| Key | WICEN2 | RaceTracker |', '|---|---|---|',
+    ...KEY_ACTIONS.map(a => `| Alt+${a.letter} | ${a.wicen2} | ${a.message ?? a.here} |`), '',
+    '### Where did it go?', '',
+    '| WICEN2 | RaceTracker |', '|---|---|',
+    ...WHERE_DID_IT_GO.map(w => `| ${w.wicen2} | ${w.here} |`), '',
+    'Nothing changes on air: the radio procedure is the same.', '',
+  ];
+  const table = (head, rows) => `<table class="ref"><thead><tr>${head.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${escapeHtml(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  const li = md.filter(l => l.startsWith('- ')).map(l => `<li>${escapeHtml(l.slice(2))}</li>`).join('');
+  const html = `<section class="task radio">
+<h3>Entering a call, as in WICEN2</h3>
+<p>Type the checkpoint, Enter, the time, Enter, then each number followed by Enter. Alt+U completes the call.</p>
+<p><code>1 ⏎ 0815 ⏎ 129 ⏎ 136 ⏎ … Alt+U</code></p>
+<ul>${li}</ul>
+<h3>WICEN2 keys</h3>
+${table(['Key', 'WICEN2', 'RaceTracker'], KEY_ACTIONS.map(a => [`Alt+${a.letter}`, a.wicen2, a.message ?? a.here]))}
+<h3>Where did it go?</h3>
+${table(['WICEN2', 'RaceTracker'], WHERE_DID_IT_GO.map(w => [w.wicen2, w.here]))}
+<p>Nothing changes on air: the radio procedure is the same.</p>
+</section>`;
+  return { md: md.join('\n'), html };
+}
+
 // Radio wording is deliberately kept out of the app screens (VK4WIP redesign);
 // it lives here, appended to the guide. Kept in docs/guides/ (tracked), so CI's
 // fresh checkout has it.
@@ -364,6 +403,7 @@ function main() {
     const items = chapters[ch.key];
     if (!items.length) continue;
     mdLines.push(`## ${ch.title}`, '', ch.intro, '');
+    if (ch.key === 'wicen2') mdLines.push(wicen2Reference().md);
     for (const test of items) {
       mdLines.push(`### ${capitalize(test.title)}`, '', unescapeHtml(test.description), '');
       for (const { path, label } of test.screenshotPaths) {
@@ -386,6 +426,7 @@ function main() {
     const items = chapters[ch.key];
     if (!items.length) continue;
     let block = `<div id="${ch.key}">\n<h2>${ch.title}</h2>\n<p class="chapter-intro">${ch.intro}</p>\n`;
+    if (ch.key === 'wicen2') block += `${wicen2Reference().html}\n`;
     for (const test of items) {
       const desc = escapeHtml(unescapeHtml(test.description));
       block += `<section class="task">\n<h3>${capitalize(test.title)}</h3>\n<p class="description">${desc}</p>\n<div class="steps">\n`;
@@ -436,6 +477,7 @@ function main() {
   .step { display: flex; flex-direction: column; gap: 8px; }
   .step-instruction { font-weight: 600; font-size: .95rem; color: #1e293b; margin: 0; }
   .step img { max-width: 100%; width: 640px; border-radius: 8px; border: 1px solid #e2e8f0; display: block; }
+  table.ref { border-collapse: collapse; width: 100%; font-size: .85rem; margin-bottom: 12px; } table.ref th, table.ref td { border-bottom: 1px solid #e2e8f0; padding: 4px 8px; text-align: left; }
   .radio h3 { margin: 16px 0 6px; } .radio ul, .radio ol { margin: 0 0 8px 20px; font-size: .9rem; } .radio p { font-size: .9rem; margin-bottom: 8px; }
   .page-footer { text-align: center; padding: 24px; font-size: .75rem; color: #94a3b8; border-top: 1px solid #e2e8f0; margin-top: 40px; }
   @media (max-width: 640px) { .step img { width: 100%; } main { padding: 16px; } }
