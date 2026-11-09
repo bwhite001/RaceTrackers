@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import useKeyboardStore from '../../../shared/store/keyboardStore';
+import KeyHint from './KeyHint';
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { Button } from '../../../design-system/components';
 import { BottomSheet } from '../../../design-system/components/VK';
 import { hhmm } from '../../../services/blocks.js';
+import TimeUtils from '../../../services/timeUtils.js';
 import { useAutoFileBackup } from '../hooks/useAutoFileBackup.js';
 
 const IDLE_CHOICES = [10, 30, 60, 120];
@@ -23,6 +26,23 @@ const CHIP = {
 const FileBackupStatus = ({ raceId }) => {
   const b = useAutoFileBackup(raceId);
   const [open, setOpen] = useState(false);
+  const say = useKeyboardStore(st => st.say);
+  // Alt+K (WICEN2 Backup): back up now, from anywhere on Base
+  const bRef = useRef(b);
+  bRef.current = b;
+  useEffect(() => {
+    const onKey = async () => {
+      const cur = bRef.current;
+      if (!cur.supported) { say('File backup needs Chrome or Edge on a computer. Use Import / Export to save a copy.'); return; }
+      if (!cur.folderName) { say('No backup folder yet. Tap the backup chip to choose one.'); setOpen(true); return; }
+      say('Backing up…');
+      await cur.backupNow();
+      const after = bRef.current;
+      say(after.error ? `Backup failed: ${after.error}` : `Backed up ${hhmm(after.lastAt ?? TimeUtils.getCurrentTimestamp())}`);
+    };
+    window.addEventListener('racetracker:backup-now', onKey);
+    return () => window.removeEventListener('racetracker:backup-now', onKey);
+  }, [say]);
   if (!b.supported) return null;
 
   const label = {
@@ -39,9 +59,10 @@ const FileBackupStatus = ({ raceId }) => {
     <>
       {/* Text from tablet width up; an icon in the status colour on a phone, where the header is full */}
       <button type="button" onClick={onChip} aria-label={label} title={b.error ?? label}
-        className={`min-h-[36px] min-w-[36px] px-2 sm:px-3 rounded-full text-xs font-bold whitespace-nowrap flex items-center justify-center ${CHIP[b.status]}`}>
+        className={`relative min-h-[36px] min-w-[36px] px-2 sm:px-3 rounded-full text-xs font-bold whitespace-nowrap flex items-center justify-center ${CHIP[b.status]}`}>
         <span className="hidden sm:inline">{label}</span>
         <DocumentArrowDownIcon className="w-5 h-5 sm:hidden" aria-hidden="true" />
+        <KeyHint action="backup" />
       </button>
       <BottomSheet open={open} onClose={() => setOpen(false)} labelledBy="filebackup-hd">
         <h2 id="filebackup-hd" className="font-display font-bold text-xl text-vk-navy dark:text-white">File backup</h2>

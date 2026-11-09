@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import {
@@ -8,8 +8,12 @@ import { missedReminders, missedText, standDownLists, MISSED_CONFIRMED } from '.
 import { checkpointDistances } from '../services/dataChecks';
 import TimeUtils from '../../../services/timeUtils.js';
 import {
-  toBlock, hhmm, blocksBetween, earliestTime, parseExactTime, BLOCK_MINUTES,
+  toBlock, hhmm, blocksBetween, earliestTime, parseExactTime, isBlockTime, BLOCK_MINUTES,
 } from '../../../services/blocks.js';
+import { matchCheckpoint, isNumLockOff, RECORD_VIEW } from '../services/keymap';
+import useKeyboardStore from '../../../shared/store/keyboardStore';
+import { useRaceStore } from '../../../store/useRaceStore.js';
+import KeyHint from './KeyHint';
 import { checkClasses, LOCKED } from '../../../design-system/statusStyles';
 import { BlockPicker, NumberPad, BibChip, BottomSheet } from '../../../design-system/components/VK';
 import useNow from '../../../shared/hooks/useNow';
@@ -45,7 +49,7 @@ const actionBtn = 'min-h-[48px] rounded-btn font-display font-extrabold text-xs 
  * Base — Receive (spec §4.9). One responsive component for desktop, tablet
  * (fits 1112×834 without page scroll) and phone (stacks, receive panel first).
  */
-const BaseReceive = () => {
+const BaseReceive = forwardRef((_props, ref) => {
   const store = useBaseOperationsStore();
   const {
     currentRace, checkpoints = [], runners = [], radioCalls = [], outList = [], raceRunnerNumbers = [], raceRunnerBatches: batchOf = new Map(), resolutions = [],
@@ -64,6 +68,18 @@ const BaseReceive = () => {
   const [standDownCp, setStandDownCp] = useState(null); // checkpoint whose Stand-down check is open
   const [crewCp, setCrewCp] = useState(null); // checkpoint whose crew sheet is open
   const [recordsCp, setRecordsCp] = useState(null); // checkpoint whose Records are open (in place of Receive)
+  const [recordsView, setRecordsView] = useState('block');
+  // WICEN2 keyboard layer: only once a physical keyboard is used, so touch looks the same
+  const physical = useKeyboardStore(s => s.physical);
+  const say = useKeyboardStore(s => s.say);
+  const keysOn = useRaceStore(s => s.settings?.wicen2Keys) !== false;
+  const kb = physical && keysOn;
+  const cpRef = useRef(null);
+  const timeRef = useRef(null);
+  const cpTyping = useRef(false);
+  const [cpText, setCpText] = useState('');
+  const [timeDraft, setTimeDraft] = useState(null); // text typed in the Time box, not yet accepted
+  const [switchUndo, setSwitchUndo] = useState(null); // { callId, snapshot, short } after K2 auto-complete
 
   const raceStart = currentRace?.date && currentRace?.startTime
     ? TimeUtils.createRaceTimestamp(currentRace.date, currentRace.startTime.slice(0, 5))
@@ -122,7 +138,10 @@ const BaseReceive = () => {
     setReceive({ step: 'rx', cp: row.number, entries: [], ctime: next > nowBlock ? nowBlock : next, manual: false, manualText: '', summary: null, lastCallId: null, raceId: store.currentRaceId, corr: null, missedUndo: null });
     clearTransient();
     setFlash('');
-    setTimeout(() => inputRef.current?.focus(), 0);
+    setCpText(row.short);
+    setTimeDraft(null);
+    setExactInvalid(false);
+    setTimeout(() => (kb ? timeRef.current?.focus() : inputRef.current?.focus()), 0);
   };
 
   const setBlock = (t, manual = false, text = '') => {
@@ -136,6 +155,7 @@ const BaseReceive = () => {
     if (!/^\d+$/.test(s)) { setFlash('Type a number first'); return; }
     setReceive(r => ({ entries: [...r.entries, { num: Number(s), t: r.ctime, manual: r.manual }] }));
     setTyped('');
+    setSwitchUndo(null);
     setConfirmCancel(false);
     setUndoEntries(null);
     setFlash(`${s} added at ${hhmm(rx.ctime)}`);
@@ -273,6 +293,7 @@ const BaseReceive = () => {
     setBusy(true);
     try {
       const callId = await recordCall(cur.number, checked);
+      if (kb) setTimeout(() => { setCpText(''); cpRef.current?.focus(); }, 0);
       const times = [...new Set(rx.entries.map(e => e.t))].sort();
       const bad = rx.entries.length - goodCount;
       const label = times.length > 1 ? `Blocks ${times.map(hhmm).join(', ')}` : `Common time ${hhmm(times[0])}`;
@@ -295,6 +316,120 @@ const BaseReceive = () => {
     setReceive({ step: 'rx', summary: null, lastCallId: null });
     setFlash('Call reopened');
   };
+
+  // ── WICEN2 keyboard: CheckPt → Time → Number ────────────────────────────
+  const tell = (msg) => (rx.step === 'rx' ? setFlash(msg) : say(msg));
+  const focusSel = (r) => setTimeout(() => { r.current?.focus(); r.current?.select?.(); }, 0);
+
+  // DECISION K2: a new checkpoint while the call has numbers completes it (Undo reopens it exactly)
+  const enterCheckpoint = async (text) => {
+    const row = matchCheckpoint(text, board);
+    if (!row) { tell(`No checkpoint ${String(text).trim()}`); focusSel(cpRef); return; }
+    if (rx.step === 'rx' && rx.corr) { tell('Finish or close the correction first'); return; }
+    if (rx.step === 'rx' && row.number === rx.cp) { focusSel(timeRef); return; }
+    if (rx.step === 'rx' && rx.entries.length) {
+      if (busy) return;
+      setBusy(true);
+      try {
+        const snapshot = { ...rx };
+        const from = cur.short;
+        const callId = await recordCall(cur.number, checked);
+        pickCheckpoint(row);
+        setSwitchUndo({ callId, snapshot, short: from });
+        setFlash(`${from} call completed · ${goodCount} recorded`);
+      } catch (err) {
+        setFlash(`Could not record the call: ${err.message}`);
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
+    pickCheckpoint(row);
+  };
+
+  const undoSwitch = async () => {
+    const u = switchUndo;
+    setSwitchUndo(null);
+    await undoCall(u.callId);
+    setReceive(u.snapshot);
+    setCpText(u.short);
+    setFlash(`${u.short} call reopened`);
+    inputRef.current?.focus();
+  };
+
+  // Time box: Enter (or Tab) accepts what is shown; a typed time is checked on accept
+  const shownTime = rx.manual ? rx.manualText : (rx.ctime ? hhmm(rx.ctime) : '');
+  const acceptTime = (next) => {
+    if (timeDraft == null || timeDraft === shownTime) { setTimeDraft(null); if (next) next.current?.focus(); return true; }
+    const t = parseExactTime(timeDraft, now);
+    if (!t || t < earliest || t > now) {
+      setExactInvalid(true);
+      setFlash(t ? `Time must be between ${hhmm(earliest)} and now` : `${timeDraft} isn't a time — type HHMM`);
+      timeRef.current?.select();
+      return false;
+    }
+    setExactInvalid(false);
+    setTimeDraft(null);
+    // On a block boundary it is that block; otherwise exact (DECISION K3: never moved "up to")
+    if (isBlockTime(t)) setBlock(t); else setBlock(t, true, hhmm(t));
+    if (next) next.current?.focus();
+    return true;
+  };
+
+  const onCpKey = (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); enterCheckpoint(cpText); }
+    else if (e.key === 'Tab' && !e.shiftKey && rx.step === 'rx') { e.preventDefault(); focusSel(timeRef); }
+    else if (e.key === 'Escape') setCpText(cur && rx.step === 'rx' ? cur.short : '');
+    else if (isNumLockOff(e)) tell('Num Lock is off');
+  };
+
+  const onTimeKey = (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); acceptTime(inputRef); }
+    else if (e.key === 'Tab') { e.preventDefault(); if (acceptTime(null)) (e.shiftKey ? focusSel(cpRef) : inputRef.current?.focus()); }
+    else if (e.key === 'Escape') { setTimeDraft(null); setExactInvalid(false); }
+    else if (isNumLockOff(e)) setFlash('Num Lock is off');
+  };
+
+  const onNumberKey = (e) => {
+    if (e.key === ' ') { e.preventDefault(); addNum(); }
+    else if (e.key === 'Escape') { setTyped(''); setFlash(''); }
+    else if (e.key === 'Tab' && e.shiftKey && kb) { e.preventDefault(); focusSel(timeRef); }
+    else if (isNumLockOff(e)) setFlash('Num Lock is off');
+  };
+
+  const needCall = () => { tell('Open a call first — type its checkpoint'); focusSel(cpRef); };
+  useImperativeHandle(ref, () => ({
+    /** A digit / S / F typed outside any field: it starts the CheckPt box */
+    typeCheckpoint: (ch) => {
+      setRecordsCp(null);
+      setCpText(t => (cpTyping.current ? t + ch : ch));
+      if (cpTyping.current) return;
+      cpTyping.current = true;
+      setTimeout(() => {
+        cpTyping.current = false;
+        const el = cpRef.current;
+        el?.focus();
+        el?.setSelectionRange?.(el.value.length, el.value.length);
+      }, 0);
+    },
+    handle: (action) => {
+      const open = rx.step === 'rx' && cur && !rx.corr;
+      switch (action) {
+        case 'focusCp': setRecordsCp(null); focusSel(cpRef); break;
+        case 'focusTime': if (open) focusSel(timeRef); else needCall(); break;
+        case 'focusNumber': if (open) inputRef.current?.focus(); else needCall(); break;
+        case 'addNumber': if (open) addNum(); else needCall(); break;
+        case 'complete': if (open && rx.entries.length) complete(); else tell(open ? 'No numbers in this call yet' : 'No call open'); break;
+        case 'removeLast': if (open && rx.entries.length) removeAt(rx.entries.length - 1); else tell('Nothing to remove'); break;
+        default:
+          if (RECORD_VIEW[action]) {
+            if (!cur) { needCall(); break; }
+            setRecordsView(RECORD_VIEW[action]);
+            setRecordsCp(cur.number);
+          }
+      }
+    },
+  }));
 
   // ── derived view data ───────────────────────────────────────────────────
   let blocks = [];
@@ -323,15 +458,31 @@ const BaseReceive = () => {
 
   // Records opens in place of the receive panel; the call draft stays in the store for Back to call
   if (recordsCp != null) {
-    return <CheckpointRecords cpNumber={recordsCp} onBack={() => setRecordsCp(null)} draftCount={rx.step === 'rx' ? (rx.entries ?? []).length : 0} />;
+    return <CheckpointRecords key={`${recordsCp}-${recordsView}`} cpNumber={recordsCp} initialView={recordsView}
+      onBack={() => { setRecordsCp(null); setRecordsView('block'); }} draftCount={rx.step === 'rx' ? (rx.entries ?? []).length : 0} />;
   }
+
+  // CheckPt box (WICEN2): above the grid when idle, in the call header when a call is open
+  const cpBox = kb && (
+    <span className="relative flex items-center gap-1.5 shrink-0">
+      <label htmlFor="rx-cp" className="text-xs font-bold text-vk-muted uppercase tracking-[0.8px]">CheckPt</label>
+      <input id="rx-cp" ref={cpRef} type="text" autoComplete="off" value={cpText}
+        onChange={e => setCpText(e.target.value.slice(0, 8))} onKeyDown={onCpKey} onFocus={e => e.target.select()}
+        placeholder="1, F"
+        className="w-[72px] min-h-[44px] rounded-btn px-2 font-display font-extrabold text-base text-center text-vk-ink bg-white border-2 border-vk-blue dark:bg-gray-900 dark:text-white" />
+      <KeyHint action="focusCp" />
+    </span>
+  );
 
   return (
     <div className="max-w-[1280px] w-full mx-auto p-3 flex flex-wrap gap-3 items-start" data-screenshot-target>
       <section aria-labelledby="rxhd" className="flex-[999_1_480px] min-w-0 flex flex-col gap-3">
         {rx.step === 'idle' && (
           <div className="bg-white dark:bg-gray-800 border border-vk-border dark:border-gray-700 rounded-card p-3 flex flex-col gap-2.5">
-            <h1 id="rxhd" className="font-display font-bold text-base text-vk-navy dark:text-white">Who&apos;s calling?</h1>
+            <div className="flex items-center gap-3">
+              <h1 id="rxhd" className="font-display font-bold text-base text-vk-navy dark:text-white flex-1">Who&apos;s calling?</h1>
+              {cpBox}
+            </div>
             <div className="grid gap-2 grid-cols-[repeat(auto-fill,minmax(140px,1fr))]">
               {board.map(row => (
                 <button
@@ -417,13 +568,15 @@ const BaseReceive = () => {
         {rx.step === 'rx' && cur && !rx.corr && (
           <div className="bg-white dark:bg-gray-800 border-2 border-vk-gold rounded-card p-3 flex flex-col gap-2.5">
             <div className="flex items-center gap-2.5">
+              {cpBox}
               <h1 id="rxhd" className="font-display font-extrabold text-xl text-vk-navy dark:text-white">{cur.short}</h1>
               <div className="text-[13px] text-vk-muted flex-1 min-w-0 truncate">{cur.name}</div>
               <div className="text-[13px] font-bold text-vk-blue whitespace-nowrap">{goodCount} to record</div>
               <button type="button" onClick={() => setRecordsCp(cur.number)}
                 aria-label={`Records${recordIssues ? `, ${recordIssues} to check` : ''}`}
-                className="min-h-[40px] px-3 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs flex items-center gap-1.5 dark:bg-gray-800 dark:text-gray-100">
+                className="relative min-h-[40px] px-3 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs flex items-center gap-1.5 dark:bg-gray-800 dark:text-gray-100">
                 Records
+                <KeyHint action="viewCall" />
                 {recordIssues > 0 && <span className="min-w-[20px] rounded-full bg-vk-gold text-vk-ink text-[11px] font-extrabold px-1.5" data-testid="records-badge">{recordIssues}</span>}
               </button>
               <button type="button" onClick={openCorrection}
@@ -466,11 +619,17 @@ const BaseReceive = () => {
 
             <BlockPicker
               blocks={blocks}
-              onPick={(t) => setBlock(t)}
-              exactText={rx.manualText}
-              onExactChange={onExact}
+              onPick={(t) => { setTimeDraft(null); setBlock(t); }}
+              exactText={kb ? (timeDraft ?? shownTime) : rx.manualText}
+              onExactChange={kb ? (v) => { setTimeDraft(v.replace(/[^\d:.]/g, '').slice(0, 5)); setExactInvalid(false); } : onExact}
               exactActive={rx.manual}
               exactInvalid={exactInvalid}
+              exactLabel={kb ? 'Time' : 'Exact time'}
+              exactProps={kb ? {
+                ref: timeRef, onKeyDown: onTimeKey, onFocus: e => e.target.select(),
+                onBlur: () => { if (timeDraft != null && !acceptTime(null)) { setTimeDraft(null); setExactInvalid(false); } },
+              } : {}}
+              exactAddon={<KeyHint action="focusTime" />}
             />
 
             <div className="flex flex-wrap gap-3 items-stretch">
@@ -508,6 +667,7 @@ const BaseReceive = () => {
                 )}
                 <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); addNum(); }}>
                   <label htmlFor="bib-heard" className="sr-only">Number heard</label>
+                  <span className="relative flex-1 min-w-0 flex">
                   <input
                     id="bib-heard"
                     ref={inputRef}
@@ -516,13 +676,22 @@ const BaseReceive = () => {
                     autoComplete="off"
                     value={typed}
                     onChange={e => { setTyped(e.target.value.replace(/\D/g, '').slice(0, MAX_DIGITS)); setFlash(''); }}
+                    onKeyDown={onNumberKey}
                     placeholder="Number heard"
-                    className="flex-1 min-w-0 font-display font-extrabold text-[26px] text-vk-ink bg-white border-2 border-vk-blue rounded-btn px-3 py-1 min-h-[52px] dark:bg-gray-900 dark:text-white"
+                    className="flex-1 min-w-0 w-full font-display font-extrabold text-[26px] text-vk-ink bg-white border-2 border-vk-blue rounded-btn px-3 py-1 min-h-[52px] dark:bg-gray-900 dark:text-white"
                   />
-                  <button type="submit" className="font-display font-extrabold text-sm tracking-[0.6px] uppercase bg-vk-blue text-white rounded-btn px-4 min-h-[52px]">Add</button>
+                  <KeyHint action="focusNumber" />
+                  </span>
+                  <button type="submit" className="relative font-display font-extrabold text-sm tracking-[0.6px] uppercase bg-vk-blue text-white rounded-btn px-4 min-h-[52px]">Add<KeyHint action="addNumber" /></button>
                 </form>
                 <div className="flex items-center gap-2 min-h-[28px]">
                   <span className="flex-1 text-xs font-semibold text-vk-blue" aria-live="polite" data-testid="rx-flash">{flash}</span>
+                  {switchUndo && !rx.entries.length && (
+                    <button type="button" onClick={undoSwitch} data-testid="switch-undo"
+                      className="min-h-[32px] px-3 rounded-lg bg-vk-ink text-white font-bold text-xs">
+                      Undo
+                    </button>
+                  )}
                   {undoEntries && (
                     <button type="button" onClick={() => { setReceive({ entries: undoEntries }); setUndoEntries(null); setFlash('Restored'); }}
                       className="min-h-[32px] px-3 rounded-lg bg-vk-ink text-white font-bold text-xs">
@@ -555,12 +724,13 @@ const BaseReceive = () => {
               {/* Nothing recordable: still log the call (rejected numbers feed the
                   Unknown bibs check), but not as the gold primary */}
               <button type="button" onClick={complete} disabled={!rx.entries.length || busy}
-                className={`${actionBtn} ${!rx.entries.length || busy
+                className={`relative ${actionBtn} ${!rx.entries.length || busy
                   ? LOCKED
                   : !goodCount
                     ? 'bg-white text-vk-ink border border-vk-muted dark:bg-gray-800 dark:text-gray-100'
                     : 'bg-vk-gold text-vk-ink shadow-btn'}`}>
                 {rx.entries.length && !goodCount ? 'Log call · 0' : `Complete · ${goodCount}`}
+                <KeyHint action="complete" />
               </button>
             </div>
           </div>
@@ -575,12 +745,13 @@ const BaseReceive = () => {
               <div className="font-display font-extrabold text-[17px] text-vk-navy dark:text-white">{rx.summary.title}</div>
               <div className="text-[13px] text-vk-muted">{rx.summary.sub}</div>
             </div>
+            {cpBox}
             <div className="flex gap-2">
               <button type="button" onClick={reopen}
                 className="min-h-[44px] px-3.5 rounded-btn border-2 border-vk-blue text-vk-blue font-display font-extrabold text-xs tracking-[0.6px] uppercase">
                 Undo
               </button>
-              <button type="button" onClick={() => { resetReceive(); setFlash(''); }}
+              <button type="button" onClick={() => { resetReceive(); setFlash(''); if (kb) focusSel(cpRef); }}
                 className="min-h-[44px] px-3.5 rounded-btn bg-vk-gold text-vk-ink font-display font-extrabold text-xs tracking-[0.6px] uppercase">
                 Next call
               </button>
@@ -662,7 +833,8 @@ const BaseReceive = () => {
       })()}
     </div>
   );
-};
+});
+BaseReceive.displayName = 'BaseReceive';
 
 /**
  * Stand-down check (Part E2): who is still unaccounted for at a checkpoint

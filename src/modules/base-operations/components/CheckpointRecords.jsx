@@ -60,7 +60,7 @@ export function useRecordItems(cpNumber) {
  * base holds there, what's wrong with them, and edits one at a time or as a
  * batch. Every change keeps history and has Undo.
  */
-const CheckpointRecords = ({ cpNumber, onBack, draftCount = 0 }) => {
+const CheckpointRecords = ({ cpNumber, onBack, draftCount = 0, initialView = 'block' }) => {
   const store = useBaseOperationsStore();
   const { currentRace, checkpoints = [], baseRows = [], radioCalls = [], raceRunnerNumbers = [] } = store;
   const now = useNow(15000);
@@ -72,7 +72,7 @@ const CheckpointRecords = ({ cpNumber, onBack, draftCount = 0 }) => {
 
   const { items, upTo } = useRecordItems(cpNumber);
 
-  const [view, setView] = useState('block');
+  const [view, setView] = useState(initialView);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [history, setHistory] = useState(false);

@@ -416,6 +416,19 @@ const useBaseOperationsStore = create(
         await get().refreshData({ silent: true });
       },
 
+      /** Alt+D (WICEN2 Add Number): bibs join base's field as late entries. @returns ids for Undo */
+      addLateEntries: async (numbers) => {
+        const raceKey = raceKeyOf(get().currentRaceId);
+        const ids = await new BaseOperationsRepository().addFieldChanges(raceKey, numbers, 'base');
+        await get().refreshData({ silent: true });
+        return ids;
+      },
+
+      cancelLateEntries: async (ids) => {
+        await new BaseOperationsRepository().cancelFieldChanges(raceKeyOf(get().currentRaceId), ids);
+        await get().refreshData({ silent: true });
+      },
+
       /** Put a runner back in the race (Clear on the out list). */
       clearOutStatus: async (record) => {
         const { currentRaceId } = get();

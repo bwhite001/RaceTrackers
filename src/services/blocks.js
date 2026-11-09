@@ -61,11 +61,11 @@ export function earliestTime(raceStart, now) {
 }
 
 /**
- * Parse an exact time typed as HH:MM or HHMM onto the date of `now`.
+ * Parse an exact time typed as HH:MM, HH.MM, HHMM or HMM onto the date of `now`.
  * @returns {string|null} ISO, or null when it isn't a valid clock time
  */
 export function parseExactTime(text, now) {
-  const m = String(text ?? '').trim().match(/^(\d{1,2}):?(\d{2})$/);
+  const m = String(text ?? '').trim().match(/^(\d{1,2})[:.]?(\d{2})$/);
   if (!m) return null;
   const h = Number(m[1]);
   const min = Number(m[2]);
