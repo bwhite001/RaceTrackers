@@ -296,7 +296,7 @@ const useBaseOperationsStore = create(
         }
       },
 
-      // Primary entry point for DataEntry and WithdrawalDialog
+      // Primary entry point for WithdrawalDialog
       bulkMarkRunners: async (runnerNumbers, timeOrOptions) => {
         const { currentRaceId } = get();
         if (!currentRaceId) throw new Error('No active race');

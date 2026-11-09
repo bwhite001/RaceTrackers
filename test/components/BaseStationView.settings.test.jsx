@@ -58,7 +58,6 @@ vi.mock('components/ImportExport/ImportExportModal', () => ({ default: () => nul
 
 // ─── Component mocks ──────────────────────────────────────────────────────────
 
-vi.mock('modules/base-operations/components/DataEntry', () => ({ default: () => <div>DataEntry</div> }));
 vi.mock('modules/base-operations/components/BatchEntryLayout', () => ({ default: () => <div>BatchEntryLayout</div> }));
 vi.mock('modules/base-operations/components/BaseReceive', () => ({ default: () => <div>Receive</div> }));
 vi.mock('modules/base-operations/components/RaceOverview', () => ({ default: () => <div>RaceOverview</div> }));
