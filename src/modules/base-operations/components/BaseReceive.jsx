@@ -10,6 +10,7 @@ import { checkpointDistances } from '../services/dataChecks';
 import TimeUtils from '../../../services/timeUtils.js';
 import {
   toBlock, hhmm, blocksBetween, earliestTime, parseExactTime, isBlockTime, BLOCK_MINUTES,
+  parseElapsed, formatElapsed, clockText,
 } from '../../../services/blocks.js';
 import { matchCheckpoint, isNumLockOff, RECORD_VIEW } from '../services/keymap';
 import useKeyboardStore from '../../../shared/store/keyboardStore';
@@ -56,7 +57,7 @@ const BaseReceive = forwardRef((_props, ref) => {
   const store = useBaseOperationsStore();
   const {
     currentRace, checkpoints = [], runners = [], radioCalls = [], outList = [], raceRunnerNumbers = [], raceRunnerBatches: batchOf = new Map(), resolutions = [],
-    receive, setReceive, resetReceive, recordCall, undoCall, setResolutionsAsked, recordCorrection,
+    receive, setReceive, resetReceive, recordCall, undoCall, setResolutionsAsked, recordCorrection, waveStarts = new Map(),
     recordMissed, recordStandDown, addResolution, removeResolution, crewVehicles = [],
   } = store;
   const now = useNow(10000);
@@ -146,7 +147,11 @@ const BaseReceive = forwardRef((_props, ref) => {
     // Render now and focus at once: keys typed straight after must land in the right box
     // (the browser runs key events ahead of timers, so a deferred focus loses them)
     flushSync(() => {
-      setReceive({ step: 'rx', cp: row.number, entries: [], ctime: next > nowBlock ? nowBlock : next, manual: false, manualText: '', summary: null, lastCallId: null, raceId: store.currentRaceId, corr: null, missedUndo: null });
+      setReceive({
+        step: 'rx', cp: row.number, entries: [], ctime: next > nowBlock ? nowBlock : next, manual: false, manualText: '', summary: null, lastCallId: null, raceId: store.currentRaceId, corr: null, missedUndo: null,
+        // WICEN2 Auto Time: set per checkpoint in race setup, switchable for this call
+        own: (currentRace?.ownTimeCheckpoints ?? []).includes(row.number), ownMode: 'clock', ownEl: null,
+      });
       clearTransient();
       setFlash('');
       setCpText(row.short);
@@ -162,9 +167,41 @@ const BaseReceive = forwardRef((_props, ref) => {
     setFlash((rx.entries ?? []).length ? `Now taking ${hhmm(t)}` : '');
   };
 
+  // Own time per runner: the elapsed time is counted from this runner's wave start
+  const waveStartOf = (num) => {
+    const w = waveStarts.get(batchOf.get(num));
+    return w ? TimeUtils.createRaceTimestamp(w.slice(0, 10), w.slice(11, 16)) : raceStart;
+  };
+
+  const addOwn = (s) => {
+    const num = Number(s);
+    let el = rx.ownEl ?? null;
+    let t = rx.ctime;
+    if (timeDraft != null && timeDraft !== shownTime) {
+      const r = acceptTime(null);
+      if (!r) return;
+      if (r.el != null) el = r.el; else { t = r.t; el = null; }
+    }
+    if (el != null) {
+      const start = waveStartOf(num);
+      if (!start) { setFlash('No start time — type the time of day'); return; }
+      t = TimeUtils.addSeconds(start, el);
+      if (t > now) { setFlash(`${num}: ${clockText(t)} is in the future — check the elapsed time`); return; }
+    }
+    setReceive(r => ({ entries: [...r.entries, { num, t, manual: true, ...(el != null && { el }) }] }));
+    setTyped('');
+    setSwitchUndo(null);
+    setConfirmCancel(false);
+    setUndoEntries(null);
+    setFlash(`${num} at ${clockText(t)}${el != null ? ` · ${formatElapsed(el)}` : ''}`);
+    // Each runner has a time: back to Time for the next one
+    if (kb) focusSel(timeRef); else inputRef.current?.focus();
+  };
+
   const addNum = (raw = typed) => {
     const s = String(raw).trim();
     if (!/^\d+$/.test(s)) { setFlash('Type a number first'); return; }
+    if (rx.own) { addOwn(s); return; }
     setReceive(r => ({ entries: [...r.entries, { num: Number(s), t: r.ctime, manual: r.manual }] }));
     setTyped('');
     setSwitchUndo(null);
@@ -309,7 +346,8 @@ const BaseReceive = forwardRef((_props, ref) => {
       const callId = await recordCall(cur.number, checked);
       const times = [...new Set(rx.entries.map(e => e.t))].sort();
       const bad = rx.entries.length - goodCount;
-      const label = times.length > 1 ? `Blocks ${times.map(hhmm).join(', ')}` : `Common time ${hhmm(times[0])}`;
+      const label = rx.own ? `Own time per runner · ${times.length} time${times.length === 1 ? '' : 's'}`
+        : times.length > 1 ? `Blocks ${times.map(hhmm).join(', ')}` : `Common time ${hhmm(times[0])}`;
       flushSync(() => {
         setReceive({
           step: 'done',
@@ -378,10 +416,25 @@ const BaseReceive = forwardRef((_props, ref) => {
   };
 
   // Time box: Enter (or Tab) accepts what is shown; a typed time is checked on accept
-  const shownTime = rx.manual ? rx.manualText : (rx.ctime ? hhmm(rx.ctime) : '');
+  const shownTime = rx.own && rx.ownEl != null ? `+${formatElapsed(rx.ownEl)}`
+    : rx.manual ? rx.manualText : (rx.ctime ? hhmm(rx.ctime) : '');
   const acceptTime = (next) => {
     if (timeDraft == null || timeDraft === shownTime) { setTimeDraft(null); if (next) next.current?.focus(); return true; }
-    const t = parseExactTime(timeDraft, now);
+    if (rx.own && (rx.ownMode === 'elapsed' || timeDraft.trim().startsWith('+'))) {
+      const el = parseElapsed(timeDraft);
+      if (el == null) {
+        setExactInvalid(true);
+        setFlash(`${timeDraft} isn't an elapsed time — type +H:MM:SS`);
+        timeRef.current?.select();
+        return false;
+      }
+      setExactInvalid(false);
+      setTimeDraft(null);
+      setReceive({ ownEl: el });
+      if (next) next.current?.focus();
+      return { el };
+    }
+    const t = parseExactTime(timeDraft, now, { seconds: !!rx.own });
     if (!t || t < earliest || t > now) {
       setExactInvalid(true);
       setFlash(t ? `Time must be between ${hhmm(earliest)} and now` : `${timeDraft} isn't a time — type HHMM`);
@@ -390,10 +443,26 @@ const BaseReceive = forwardRef((_props, ref) => {
     }
     setExactInvalid(false);
     setTimeDraft(null);
-    // On a block boundary it is that block; otherwise exact (DECISION K3: never moved "up to")
-    if (isBlockTime(t)) setBlock(t); else setBlock(t, true, hhmm(t));
+    if (rx.own) {
+      // Own time: always exact, seconds kept; never moves "up to"
+      setReceive({ ctime: t, manual: true, manualText: clockText(t), ownEl: null });
+    } else if (isBlockTime(t)) setBlock(t); // a block boundary is that block
+    else setBlock(t, true, hhmm(t)); // otherwise exact (DECISION K3: never moved "up to")
     if (next) next.current?.focus();
-    return true;
+    return { t };
+  };
+
+  const toggleOwn = () => {
+    setTimeDraft(null);
+    setExactInvalid(false);
+    if (rx.own) {
+      setReceive({ own: false, ownEl: null, ctime: toBlock(rx.ctime ?? now), manual: false, manualText: '' });
+      setFlash('Own times off — 5-minute blocks');
+    } else {
+      setReceive({ own: true, ownMode: 'clock', ownEl: null });
+      setFlash('Own time per runner: type each runner\'s time, then the number');
+      if (kb) focusSel(timeRef);
+    }
   };
 
   const onCpKey = (e) => {
@@ -469,8 +538,10 @@ const BaseReceive = forwardRef((_props, ref) => {
       };
     });
   }
-  const chips = checked.map((c, i) => ({ ...c, i })).filter(c => c.t === rx.ctime);
-  const otherTimes = [...new Set(checked.map(c => c.t))].filter(t => t !== rx.ctime).sort();
+  const chips = rx.own
+    ? checked.map((c, i) => ({ ...c, i, note: [clockText(c.t), c.el != null && formatElapsed(c.el), c.note].filter(Boolean).join(' · ') }))
+    : checked.map((c, i) => ({ ...c, i })).filter(c => c.t === rx.ctime);
+  const otherTimes = rx.own ? [] : [...new Set(checked.map(c => c.t))].filter(t => t !== rx.ctime).sort();
   const atNow = rx.ctime && toBlock(rx.ctime) >= nowBlock;
   const nextLabel = atNow ? 'At now' : `Next ${hhmm(TimeUtils.addMinutes(toBlock(rx.ctime ?? now), BLOCK_MINUTES))} →`;
 
@@ -636,18 +707,34 @@ const BaseReceive = forwardRef((_props, ref) => {
             )}
 
             <BlockPicker
-              blocks={blocks}
+              blocks={rx.own ? [] : blocks}
               onPick={(t) => { setTimeDraft(null); setBlock(t); }}
-              exactText={kb ? (timeDraft ?? shownTime) : rx.manualText}
-              onExactChange={kb ? (v) => { setTimeDraft(v.replace(/[^\d:.]/g, '').slice(0, 5)); setExactInvalid(false); } : onExact}
-              exactActive={rx.manual}
+              exactText={kb || rx.own ? (timeDraft ?? shownTime) : rx.manualText}
+              onExactChange={kb || rx.own
+                ? (v) => { setTimeDraft(v.replace(rx.own ? /[^\d:.+]/g : /[^\d:.]/g, '').slice(0, rx.own ? 9 : 5)); setExactInvalid(false); }
+                : onExact}
+              exactActive={rx.manual || rx.own}
               exactInvalid={exactInvalid}
-              exactLabel={kb ? 'Time' : 'Exact time'}
-              exactProps={kb ? {
+              exactLabel={kb || rx.own ? 'Time' : 'Exact time'}
+              exactProps={kb || rx.own ? {
                 ref: timeRef, onKeyDown: onTimeKey, onFocus: e => e.target.select(),
-                onBlur: () => { if (timeDraft != null && !acceptTime(null)) { setTimeDraft(null); setExactInvalid(false); } },
+                // Tapping Add (touch, own times) takes the typed time itself; don't accept it twice
+                onBlur: () => { if (kb && timeDraft != null && !acceptTime(null)) { setTimeDraft(null); setExactInvalid(false); } },
+                ...(rx.own && { placeholder: 'Time' }),
               } : {}}
-              exactAddon={<KeyHint action="focusTime" />}
+              exactAddon={(
+                <>
+                  <KeyHint action="focusTime" />
+                  {rx.own && (
+                    <button type="button" onClick={() => { setReceive({ ownMode: rx.ownMode === 'elapsed' ? 'clock' : 'elapsed', ownEl: null }); setTimeDraft(null); }}
+                      aria-label={`Typing ${rx.ownMode === 'elapsed' ? 'elapsed time' : 'time of day'} — switch`}
+                      data-testid="own-mode"
+                      className="ml-1.5 min-h-[48px] mb-1 px-2.5 rounded-btn border border-vk-muted bg-white text-vk-ink font-bold text-xs dark:bg-gray-800 dark:text-gray-100">
+                      {rx.ownMode === 'elapsed' ? 'Elapsed' : 'Clock'}
+                    </button>
+                  )}
+                </>
+              )}
             />
 
             <div className="flex flex-wrap gap-3 items-stretch">
@@ -732,13 +819,21 @@ const BaseReceive = forwardRef((_props, ref) => {
                 className={`${actionBtn} ${confirmCancel ? 'bg-vk-red text-white' : 'bg-white text-vk-red border-2 border-vk-red dark:bg-gray-800'}`}>
                 {confirmCancel ? 'Tap again to cancel' : 'Cancel call'}
               </button>
-              <button type="button" onClick={clearBlock} className={`${actionBtn} bg-white text-vk-ink border border-vk-muted dark:bg-gray-800 dark:text-gray-100`}>
-                Clear {hhmm(rx.ctime)}
+              <button type="button" onClick={toggleOwn} aria-pressed={!!rx.own}
+                className={`${actionBtn} ${rx.own ? 'bg-vk-navy text-white' : 'bg-white text-vk-ink border border-vk-muted dark:bg-gray-800 dark:text-gray-100'}`}>
+                Own times
               </button>
-              <button type="button" onClick={goNextBlock} disabled={atNow}
-                className={`${actionBtn} ${atNow ? LOCKED : 'bg-vk-blue text-white'}`}>
-                {nextLabel}
-              </button>
+              {!rx.own && (
+                <button type="button" onClick={clearBlock} className={`${actionBtn} bg-white text-vk-ink border border-vk-muted dark:bg-gray-800 dark:text-gray-100`}>
+                  Clear {hhmm(rx.ctime)}
+                </button>
+              )}
+              {!rx.own && (
+                <button type="button" onClick={goNextBlock} disabled={atNow}
+                  className={`${actionBtn} ${atNow ? LOCKED : 'bg-vk-blue text-white'}`}>
+                  {nextLabel}
+                </button>
+              )}
               {/* Nothing recordable: still log the call (rejected numbers feed the
                   Unknown bibs check), but not as the gold primary */}
               <button type="button" onClick={complete} disabled={!rx.entries.length || busy}

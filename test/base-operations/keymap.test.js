@@ -116,3 +116,30 @@ describe('physical keyboard detection', () => {
     expect(isNumLockOff({ code: 'NumpadEnter', key: 'Enter' })).toBe(false);
   });
 });
+
+describe('own time per runner (Phase 3)', () => {
+  const now = TimeUtils.atLocalTime('2026-11-08T00:00:00.000Z', 11, 0);
+  it('time of day keeps seconds', () => {
+    expect(TimeUtils.formatTime(parseExactTime('101215', now, { seconds: true }), 'HH:mm:ss')).toBe('10:12:15');
+    expect(TimeUtils.formatTime(parseExactTime('10:12:15', now, { seconds: true }), 'HH:mm:ss')).toBe('10:12:15');
+    expect(TimeUtils.formatTime(parseExactTime('1012', now), 'HH:mm:ss')).toBe('10:12:00');
+    expect(parseExactTime('101275', now, { seconds: true })).toBeNull();
+  });
+  it('elapsed: +1:42:15, +14215, 1:42', async () => {
+    const { parseElapsed, formatElapsed } = await import('../../src/services/blocks.js');
+    expect(parseElapsed('+1:42:15')).toBe(6135);
+    expect(parseElapsed('+14215')).toBe(6135);
+    expect(parseElapsed('1:42')).toBe(6120);
+    expect(parseElapsed('+142')).toBe(6120);
+    expect(parseElapsed('+1:72:00')).toBeNull();
+    expect(parseElapsed('abc')).toBeNull();
+    expect(formatElapsed(6135)).toBe('1:42:15');
+  });
+  it('elapsed → clock from the wave start; clock text shows seconds only when there are any', async () => {
+    const { clockText } = await import('../../src/services/blocks.js');
+    const start = TimeUtils.atLocalTime(now, 8, 30);
+    const t = TimeUtils.addSeconds(start, 6135);
+    expect(clockText(t)).toBe('10:12:15');
+    expect(clockText(TimeUtils.atLocalTime(now, 10, 12))).toBe('10:12');
+  });
+});

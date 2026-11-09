@@ -63,6 +63,7 @@ const useBaseOperationsStore = create(
       outList: [],
       raceRunnerNumbers: [],
       raceRunnerBatches: new Map(), // bib → wave, for checkpoints only some waves pass
+      waveStarts: new Map(),
       fieldChanges: [],
       radioCalls: [],
       crewVehicles: [],
@@ -196,6 +197,8 @@ const useBaseOperationsStore = create(
             // Base's field = setup runners + late entries (race-day Part B)
             raceRunnerNumbers: fieldNumbers(raceRunnerRows.map(r => r.number), fieldChanges),
             raceRunnerBatches: new Map(raceRunnerRows.filter(r => r.batchNumber != null).map(r => [r.number, r.batchNumber])),
+            // Wave → start ("YYYY-MM-DDTHH:MM…"), for elapsed own times (WICEN2 parity Phase 3)
+            waveStarts: new Map(batches.filter(b => b.startTime).map(b => [b.batchNumber, b.startTime])),
             fieldChanges,
             radioCalls,
             outList,

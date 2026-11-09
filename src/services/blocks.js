@@ -61,16 +61,47 @@ export function earliestTime(raceStart, now) {
 }
 
 /**
- * Parse an exact time typed as HH:MM, HH.MM, HHMM or HMM onto the date of `now`.
+ * Parse an exact time typed as HH:MM, HH.MM, HHMM or HMM onto the date of `now`,
+ * with seconds (HH:MM:SS, HHMMSS) when `seconds` is set (own times per runner).
  * @returns {string|null} ISO, or null when it isn't a valid clock time
  */
-export function parseExactTime(text, now) {
-  const m = String(text ?? '').trim().match(/^(\d{1,2})[:.]?(\d{2})$/);
+export function parseExactTime(text, now, { seconds = false } = {}) {
+  const re = seconds ? /^(\d{1,2})[:.]?(\d{2})(?:[:.]?(\d{2}))?$/ : /^(\d{1,2})[:.]?(\d{2})()$/;
+  const m = String(text ?? '').trim().match(re);
   if (!m) return null;
   const h = Number(m[1]);
   const min = Number(m[2]);
-  if (h > 23 || min > 59) return null;
-  return TimeUtils.atLocalTime(now, h, min);
+  const sec = Number(m[3] || 0);
+  if (h > 23 || min > 59 || sec > 59) return null;
+  return TimeUtils.atLocalTime(now, h, min, sec);
+}
+
+/**
+ * Elapsed race time typed for an own-time finish: `1:42:15`, `14215` (H MM SS),
+ * `1:42` / `142` (H MM). A leading `+` is allowed.
+ * @returns {number|null} seconds
+ */
+export function parseElapsed(text) {
+  const t = String(text ?? '').trim().replace(/^\+/, '');
+  const m = t.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/) ?? t.match(/^(\d{1,2})(\d{2})(\d{2})?$/);
+  if (!m) return null;
+  const [h, min, sec] = [Number(m[1]), Number(m[2]), Number(m[3] ?? 0)];
+  if (min > 59 || sec > 59) return null;
+  return h * 3600 + min * 60 + sec;
+}
+
+/** 6135 → "1:42:15" */
+export function formatElapsed(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const sec = seconds % 60;
+  return `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+}
+
+/** HH:MM, or HH:MM:SS when the time has seconds (own times per runner). */
+export function clockText(iso) {
+  if (!iso) return '';
+  return TimeUtils.formatTime(iso, 'ss') === '00' ? hhmm(iso) : TimeUtils.formatTime(iso, 'HH:mm:ss');
 }
 
 /** True when `iso` sits exactly on a block boundary. */

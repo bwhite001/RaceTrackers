@@ -43,6 +43,7 @@ const SECTION_MAP = {
   'a WICEN2 operator takes calls at base from the keyboard':             'wicen2',
   'the race director turns WICEN2 keys off in Settings':                 'wicen2',
   'base lists who is missing at a checkpoint and who is out':            'wicen2',
+  'base records a stopwatch finish, one time per runner':                'wicen2',
   'Records fits the tablet with 150 numbers at one checkpoint':          'base-records',
   'callout sheet tab shows runners who passed but not called in':        'checkpoint',
   'pending count badge decrements when runner is called in':             'checkpoint',

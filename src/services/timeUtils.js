@@ -1,4 +1,4 @@
-import { format, parseISO, addMinutes, startOfMinute, formatDistanceToNow } from 'date-fns';
+import { format, parseISO, addMinutes, addSeconds, startOfMinute, formatDistanceToNow } from 'date-fns';
 
 /**
  * Utility functions for time management in the race tracker
@@ -357,6 +357,11 @@ export class TimeUtils {
     return addMinutes(parseISO(iso), minutes).toISOString();
   }
 
+  /** @returns {string} ISO `seconds` after `iso` */
+  static addSeconds(iso, seconds) {
+    return addSeconds(parseISO(iso), seconds).toISOString();
+  }
+
   /**
    * Clamp a timestamp to no later than now; no lower bound, so it may be
    * before the race start (a crew leaving home at 04:30). Null stays null.
@@ -385,9 +390,9 @@ export class TimeUtils {
    * @param {number} minutes
    * @returns {string} ISO
    */
-  static atLocalTime(refIso, hours, minutes) {
+  static atLocalTime(refIso, hours, minutes, seconds = 0) {
     const d = parseISO(refIso);
-    d.setHours(hours, minutes, 0, 0);
+    d.setHours(hours, minutes, seconds, 0);
     return d.toISOString();
   }
 
