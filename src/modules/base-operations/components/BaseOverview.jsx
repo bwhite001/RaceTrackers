@@ -5,6 +5,7 @@ import { boardCheckpoints, sightingsByCheckpoint, outStatusMap, reportedUpTo, ap
 import { overdueRunners, currentLeaders, awaitingByCheckpoint, raceCounts, OVERDUE_GRACE_MINUTES } from '../services/reports';
 import { runChecks, checkpointDistances, openIssueNumbers, PACE_LIMIT_KMH } from '../services/dataChecks';
 import { outRecords } from '../services/statusValidation';
+import { checkpointTally } from '../services/tally';
 import { hhmm } from '../../../services/blocks.js';
 import { BASE_STATION_CP } from '../../../types/index.js';
 import useNow from '../../../shared/hooks/useNow';
@@ -56,6 +57,10 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
   const activeField = Math.max(0, field - out.size);
   // One definition shared with Reports (D2): on course = in the race, not finished
   const fieldUnknown = !!currentRace?.bibsOnTheDay && !raceRunnerNumbers.length;
+  const tally = useMemo(() => checkpointTally({
+    order, sightings, raceNumbers: raceRunnerNumbers, outRecs: outRecords(outList), batchOf,
+    fieldKnown: !(currentRace?.bibsOnTheDay && !raceRunnerNumbers.length),
+  }), [order, sightings, raceRunnerNumbers, outList, batchOf, currentRace?.bibsOnTheDay]);
   const tiles = useMemo(() => raceCounts({ sightings, out, raceNumbers: raceRunnerNumbers }), [sightings, out, raceRunnerNumbers]);
   const starters = field - tiles.dns; // DNS never started, so they are not in the percentage
   const waves = [...new Set(raceRunners.map(r => r.batchNumber).filter(Boolean))].sort((a, b) => a - b);
@@ -135,7 +140,7 @@ const BaseOverview = ({ raceRunners = [], mapCheckpoints = [], groupedRunners = 
               <div key={cp.number} className="flex flex-col gap-1.5">
                 <div className="flex justify-between text-sm">
                   <span className="font-bold">{cp.short}</span>
-                  <span><strong>{count}</strong> <span className="text-vk-muted">· {pct}%</span></span>
+                  <span data-testid={`tally-${cp.short}`}><strong>{count}</strong> past <span className="text-vk-muted">· {tally.get(cp.number)?.toCome ?? '—'} to come · {pct}%</span></span>
                 </div>
                 <div className="h-3 rounded-full bg-vk-band dark:bg-gray-700 overflow-hidden" role="img" aria-label={`${cp.short}: ${count} of ${cpStarters}`}>
                   <div className={`h-full ${finish ? 'bg-vk-gold' : closed ? 'bg-vk-navy' : 'bg-vk-blue'}`} style={{ width: `${pct}%` }} />

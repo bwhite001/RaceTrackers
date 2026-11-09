@@ -1,4 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import {
@@ -21,6 +22,8 @@ import { CrewSheet } from './CrewLog';
 import CheckpointRecords, { useRecordItems } from './CheckpointRecords';
 import { issueCounts } from '../services/records';
 import { crewPillByCheckpoint } from '../services/crews';
+import { checkpointTally } from '../services/tally';
+import { outRecords } from '../services/statusValidation';
 
 const MAX_BLOCKS = 48;
 const MAX_DIGITS = 5;
@@ -76,7 +79,6 @@ const BaseReceive = forwardRef((_props, ref) => {
   const kb = physical && keysOn;
   const cpRef = useRef(null);
   const timeRef = useRef(null);
-  const cpTyping = useRef(false);
   const [cpText, setCpText] = useState('');
   const [timeDraft, setTimeDraft] = useState(null); // text typed in the Time box, not yet accepted
   const [switchUndo, setSwitchUndo] = useState(null); // { callId, snapshot, short } after K2 auto-complete
@@ -97,6 +99,12 @@ const BaseReceive = forwardRef((_props, ref) => {
     fieldSize: raceRunnerNumbers.length, outCount: out.size, raceNumbers: raceRunnerNumbers, out, batchOf,
     dueMinutes: currentRace?.baseCallDueMinutes ?? CALL_DUE_MINUTES,
   }), [checkpoints, runners, radioCalls, now, raceStart, raceRunnerNumbers, out, batchOf, currentRace?.baseCallDueMinutes, distances]);
+
+  // WICEN2 Tally: "N to come" on each board row
+  const tally = useMemo(() => checkpointTally({
+    order: boardCheckpoints(checkpoints), sightings, raceNumbers: raceRunnerNumbers, outRecs: outRecords(outList), batchOf,
+    fieldKnown: !(currentRace?.bibsOnTheDay && !raceRunnerNumbers.length),
+  }), [checkpoints, sightings, raceRunnerNumbers, outList, batchOf, currentRace?.bibsOnTheDay]);
 
   // "Ask CPx" reminders set in Reports › Needs attention, until marked asked
   const asks = useMemo(() => askReminders(resolutions, board), [resolutions, board]);
@@ -135,13 +143,17 @@ const BaseReceive = forwardRef((_props, ref) => {
 
   const pickCheckpoint = (row) => {
     const next = row.lastBlock ? TimeUtils.addMinutes(row.lastBlock, BLOCK_MINUTES) : nowBlock;
-    setReceive({ step: 'rx', cp: row.number, entries: [], ctime: next > nowBlock ? nowBlock : next, manual: false, manualText: '', summary: null, lastCallId: null, raceId: store.currentRaceId, corr: null, missedUndo: null });
-    clearTransient();
-    setFlash('');
-    setCpText(row.short);
-    setTimeDraft(null);
-    setExactInvalid(false);
-    setTimeout(() => (kb ? timeRef.current?.focus() : inputRef.current?.focus()), 0);
+    // Render now and focus at once: keys typed straight after must land in the right box
+    // (the browser runs key events ahead of timers, so a deferred focus loses them)
+    flushSync(() => {
+      setReceive({ step: 'rx', cp: row.number, entries: [], ctime: next > nowBlock ? nowBlock : next, manual: false, manualText: '', summary: null, lastCallId: null, raceId: store.currentRaceId, corr: null, missedUndo: null });
+      clearTransient();
+      setFlash('');
+      setCpText(row.short);
+      setTimeDraft(null);
+      setExactInvalid(false);
+    });
+    (kb ? timeRef : inputRef).current?.focus();
   };
 
   const setBlock = (t, manual = false, text = '') => {
@@ -292,18 +304,22 @@ const BaseReceive = forwardRef((_props, ref) => {
     if (!rx.entries.length || busy) return;
     setBusy(true);
     try {
+      // Keyboard: CheckPt takes focus straight away, so the next checkpoint can be typed while it saves
+      if (kb) { flushSync(() => setCpText('')); cpRef.current?.focus(); }
       const callId = await recordCall(cur.number, checked);
-      if (kb) setTimeout(() => { setCpText(''); cpRef.current?.focus(); }, 0);
       const times = [...new Set(rx.entries.map(e => e.t))].sort();
       const bad = rx.entries.length - goodCount;
       const label = times.length > 1 ? `Blocks ${times.map(hhmm).join(', ')}` : `Common time ${hhmm(times[0])}`;
-      setReceive({
-        step: 'done',
-        lastCallId: callId,
-        summary: { title: `${goodCount} recorded at ${cur.short}${bad ? ` · ${bad} skipped (flagged)` : ''}`, sub: label },
+      flushSync(() => {
+        setReceive({
+          step: 'done',
+          lastCallId: callId,
+          summary: { title: `${goodCount} recorded at ${cur.short}${bad ? ` · ${bad} skipped (flagged)` : ''}`, sub: label },
+        });
+        clearTransient();
+        setFlash('');
       });
-      clearTransient();
-      setFlash('');
+      if (kb) { const el = cpRef.current; el?.focus(); el?.setSelectionRange?.(el.value.length, el.value.length); }
     } catch (err) {
       setFlash(`Could not record the call: ${err.message}`);
     } finally {
@@ -319,7 +335,11 @@ const BaseReceive = forwardRef((_props, ref) => {
 
   // ── WICEN2 keyboard: CheckPt → Time → Number ────────────────────────────
   const tell = (msg) => (rx.step === 'rx' ? setFlash(msg) : say(msg));
-  const focusSel = (r) => setTimeout(() => { r.current?.focus(); r.current?.select?.(); }, 0);
+  // Focus now when the field is on screen (keys typed next must land in it); after render otherwise
+  const focusSel = (r) => {
+    const go = () => { r.current?.focus(); r.current?.select?.(); };
+    if (r.current) go(); else setTimeout(go, 0);
+  };
 
   // DECISION K2: a new checkpoint while the call has numbers completes it (Undo reopens it exactly)
   const enterCheckpoint = async (text) => {
@@ -400,17 +420,15 @@ const BaseReceive = forwardRef((_props, ref) => {
   const needCall = () => { tell('Open a call first — type its checkpoint'); focusSel(cpRef); };
   useImperativeHandle(ref, () => ({
     /** A digit / S / F typed outside any field: it starts the CheckPt box */
-    typeCheckpoint: (ch) => {
-      setRecordsCp(null);
-      setCpText(t => (cpTyping.current ? t + ch : ch));
-      if (cpTyping.current) return;
-      cpTyping.current = true;
-      setTimeout(() => {
-        cpTyping.current = false;
-        const el = cpRef.current;
-        el?.focus();
-        el?.setSelectionRange?.(el.value.length, el.value.length);
-      }, 0);
+    // A digit / S / F typed with nothing focused: focus the CheckPt box during the keydown,
+    // so the browser types the key into it. @returns false when there is no box to take it
+    focusCheckpointForTyping: () => {
+      if (recordsCp != null) flushSync(() => setRecordsCp(null));
+      const el = cpRef.current;
+      if (!el) return false;
+      el.focus();
+      el.select();
+      return true;
     },
     handle: (action) => {
       const open = rx.step === 'rx' && cur && !rx.corr;
@@ -463,10 +481,10 @@ const BaseReceive = forwardRef((_props, ref) => {
   }
 
   // CheckPt box (WICEN2): above the grid when idle, in the call header when a call is open
-  const cpBox = kb && (
-    <span className="relative flex items-center gap-1.5 shrink-0">
+  const cpBox = keysOn && (
+    <span className={kb ? 'relative flex items-center gap-1.5 shrink-0' : 'sr-only'} aria-hidden={kb ? undefined : true}>
       <label htmlFor="rx-cp" className="text-xs font-bold text-vk-muted uppercase tracking-[0.8px]">CheckPt</label>
-      <input id="rx-cp" ref={cpRef} type="text" autoComplete="off" value={cpText}
+      <input id="rx-cp" ref={cpRef} type="text" autoComplete="off" value={cpText} tabIndex={kb ? undefined : -1}
         onChange={e => setCpText(e.target.value.slice(0, 8))} onKeyDown={onCpKey} onFocus={e => e.target.select()}
         placeholder="1, F"
         className="w-[72px] min-h-[44px] rounded-btn px-2 font-display font-extrabold text-base text-center text-vk-ink bg-white border-2 border-vk-blue dark:bg-gray-900 dark:text-white" />
@@ -769,6 +787,8 @@ const BaseReceive = forwardRef((_props, ref) => {
             className={`flex items-center gap-2 px-3 py-[7px] border-b border-vk-border dark:border-gray-700 last:border-b-0 ${row.number === rx.cp && rx.step !== 'idle' ? 'bg-vk-gold-tint' : ''}`}>
             <div className="w-[46px] flex flex-col items-start gap-0.5">
               <span className="font-display font-extrabold text-[15px] text-vk-navy dark:text-white">{row.short}</span>
+              {/* WICEN2 Tally: in the label column, so the row keeps its height */}
+              <span className="text-[10px] font-semibold text-vk-muted leading-tight" data-testid={`board-text-${row.short}`}>{tally.get(row.number)?.toCome ?? '—'} to come</span>
               <CrewPill kind={crewPills.get(row.number)} />
             </div>
             <div className="flex-1 min-w-0 flex flex-col gap-1">

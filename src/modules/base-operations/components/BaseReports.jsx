@@ -7,6 +7,7 @@ import { outRecords } from '../services/statusValidation';
 import { runChecks, checkpointDistances, CHECKS, PACE_LIMIT_KMH } from '../services/dataChecks';
 import { confirmedMissed } from '../services/missed';
 import { crewReportRows, crewSummary, activeVehicles } from '../services/crews';
+import { missingAt } from '../services/tally';
 import TimeUtils from '../../../services/timeUtils.js';
 import { hhmm } from '../../../services/blocks.js';
 import useNow from '../../../shared/hooks/useNow';
@@ -14,6 +15,8 @@ import ReportsPanel from './ReportsPanel';
 
 const REPORTS = [
   { id: 'missing', title: 'Overdue runners', desc: 'Passed a checkpoint but not reached the next one in the expected time.' },
+  { id: 'cpmissing', title: 'Missing at a checkpoint', desc: 'Everyone in the field not recorded at one checkpoint, less DNS and anyone out before it — the WICEN2 Missing list.' },
+  { id: 'out', title: 'Out of the race', desc: 'Every DNS and DNF with where, when, reason and comments — the WICEN2 Out List.' },
   { id: 'oncourse', title: 'Still on course', desc: 'Everyone not finished and not out — for sweep and stand-down.' },
   { id: 'results', title: 'Times by checkpoint', desc: 'Every runner’s common time at each checkpoint.' },
   { id: 'calls', title: 'Call log', desc: 'Scores Checkpoint calls received from each station.' },
@@ -29,7 +32,7 @@ const Th = ({ children, first, right }) => (
  * Base — Reports & data checks (spec §4.12). Reports with CSV / Print; the
  * "Needs attention" checks resolve in place, each with Undo.
  */
-const BaseReports = ({ initialReport = 'missing' }) => {
+const BaseReports = ({ initialReport = 'missing', initialCp = null }) => {
   const store = useBaseOperationsStore();
   const {
     currentRace, checkpoints = [], runners = [], radioCalls = [], outList = [], raceRunnerNumbers = [], raceRunnerBatches: batchOf = new Map(),
@@ -42,6 +45,8 @@ const BaseReports = ({ initialReport = 'missing' }) => {
   const [busy, setBusy] = useState(false);
   // Undo belongs to the list it was done in — switching lists drops it
   const pick = (id) => { setSel(id); setFlash(''); setUndo(null); };
+  const [missCp, setMissCp] = useState(initialCp);
+  const [missWave, setMissWave] = useState(null);
 
   const raceStart = currentRace?.date && currentRace?.startTime
     ? TimeUtils.createRaceTimestamp(currentRace.date, currentRace.startTime.slice(0, 5))
@@ -50,6 +55,7 @@ const BaseReports = ({ initialReport = 'missing' }) => {
   const sightings = useMemo(() => sightingsByCheckpoint(runners), [runners]);
   const out = useMemo(() => outStatusMap(outList, runners), [outList, runners]);
   const outByNumber = useMemo(() => new Map(outRecords(outList).map(r => [r.number, r])), [outList]);
+  const outRecs = useMemo(() => [...outByNumber.values()], [outByNumber]);
   const outForMatrix = useMemo(() => new Map([...out].map(([n, s]) => [n, {
     status: s, checkpoint: outByNumber.get(n)?.checkpoint ?? null, time: outByNumber.get(n)?.time ?? null,
   }])), [out, outByNumber]);
@@ -83,8 +89,18 @@ const BaseReports = ({ initialReport = 'missing' }) => {
     calls: calls.reduce((n, c) => n + c.calls, 0),
     exports: '',
     crews: '',
+    cpmissing: '',
+    out: outRecs.length,
   };
   const crewRows = useMemo(() => crewReportRows(crewVehicles, checkpoints), [crewVehicles, checkpoints]);
+  // WICEN2 Missing / Out List (Phase 2)
+  const missCpRow = order.find(c => c.number === missCp) ?? order[0];
+  const waves = useMemo(() => [...new Set(batchOf.values())].sort((a, b) => a - b), [batchOf]);
+  const fieldKnown = !(currentRace?.bibsOnTheDay && !raceNumbers.length);
+  const missing = useMemo(() => (missCpRow ? missingAt({
+    cpNumber: missCpRow.number, order, sightings, raceNumbers, outRecs, batchOf, fieldKnown, wave: missWave,
+  }) : { rows: [], fieldKnown }), [missCpRow, order, sightings, raceNumbers, outRecs, batchOf, fieldKnown, missWave]);
+  const cpShort = (n) => (n == null ? 'On course' : order.find(c => c.number === n)?.short ?? `CP${n}`);
   const notArrived = crewSummary(activeVehicles(crewVehicles)).notArrived;
   const report = REPORTS.find(r => r.id === sel);
   const check = CHECKS.find(c => c.id === sel);
@@ -159,6 +175,10 @@ const BaseReports = ({ initialReport = 'missing' }) => {
       case 'oncourse': return [['Group', 'Count', 'Bibs'], ...onCourse.map(g => [g.label, g.numbers.length, g.numbers.join(' ')])];
       case 'results': return [['Bib', 'Status', ...cps], ...matrix.map(r => [r.number, r.status, ...r.cells.map(c => c.text)])];
       case 'crews': return crewRows;
+      case 'cpmissing': return [['Bib', 'Checkpoint', 'Last seen', 'Note'],
+        ...missing.rows.map(r => [r.number, missCpRow.short, r.last ?? 'Not seen', r.seenAt ? `Seen ${r.seenAt} — missed here` : ''])];
+      case 'out': return [['Bib', 'Status', 'Checkpoint', 'Time', 'Reason', 'Comments'],
+        ...outRecs.map(r => [r.number, r.status, r.status === 'DNS' ? '' : cpShort(r.checkpoint), hhmm(r.time), r.reason ?? '', r.comments ?? ''])];
       case 'calls': return [['Checkpoint', 'Calls', 'Numbers', 'Corrections', 'Edits at base', 'Edit reasons', 'Last call', 'Up to'], ...calls.map(c => [c.short, c.calls, c.numbers, c.corrections, c.edits, c.editReasons, hhmm(c.lastCall), hhmm(c.upTo)])];
       default: return [];
     }
@@ -217,6 +237,75 @@ const BaseReports = ({ initialReport = 'missing' }) => {
             </div>
           )}
         </div>
+
+        {(sel === 'cpmissing' || sel === 'out') && (
+          <div className="hidden print:block px-3.5 pt-2 text-sm" data-testid="print-line">
+            {currentRace?.name}{sel === 'cpmissing' && missCpRow ? ` · ${missCpRow.short}${missWave != null ? ` · Wave ${missWave}` : ''}` : ''} · Printed {hhmm(now)}
+          </div>
+        )}
+
+        {sel === 'cpmissing' && missCpRow && (
+          <div className="flex flex-col">
+            <div className="px-3.5 py-2.5 flex flex-wrap items-center gap-1.5 border-b border-vk-border dark:border-gray-700 no-print" role="group" aria-label="Checkpoint">
+              {order.map(c => (
+                <button key={c.number} type="button" aria-pressed={c.number === missCpRow.number} onClick={() => setMissCp(c.number)}
+                  className={`min-h-[44px] px-3 rounded-full text-[13px] font-bold ${c.number === missCpRow.number ? 'bg-vk-navy text-white' : 'bg-white text-vk-ink border border-vk-border dark:bg-gray-800 dark:text-gray-100'}`}>{c.short}</button>
+              ))}
+              {waves.length > 1 && (
+                <span className="flex items-center gap-1.5 ml-2" role="group" aria-label="Wave">
+                  {[null, ...waves].map(w => (
+                    <button key={w ?? 'all'} type="button" aria-pressed={missWave === w} onClick={() => setMissWave(w)}
+                      className={`min-h-[44px] px-3 rounded-full text-[13px] font-bold ${missWave === w ? 'bg-vk-blue text-white' : 'bg-white text-vk-ink border border-vk-border dark:bg-gray-800 dark:text-gray-100'}`}>{w == null ? 'All' : `Wave ${w}`}</button>
+                  ))}
+                </span>
+              )}
+            </div>
+            {!missing.fieldKnown ? (
+              <div className="px-3.5 py-4 text-[13px] text-vk-muted">Field not known (bibs assigned on the day).</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-sm min-w-[420px]" data-testid="missing-table">
+                  <thead><tr className="bg-vk-band dark:bg-gray-700 text-left"><Th first>Bib</Th><Th>Last seen</Th><Th>Note</Th></tr></thead>
+                  <tbody>
+                    {missing.rows.map(r => (
+                      <tr key={r.number} className="border-b border-vk-border dark:border-gray-700" data-testid="missing-row">
+                        <td className="pl-3.5 pr-2 py-2 font-display font-extrabold text-base tabular-nums">{r.number}</td>
+                        <td className="px-2 py-2">{r.last ?? 'Not seen'}</td>
+                        <td className="px-2 py-2">{r.seenAt && <span className="text-xs font-bold bg-vk-gold-tint border border-vk-gold rounded-chip px-1.5 py-0.5">Seen {r.seenAt} — missed here</span>}</td>
+                      </tr>
+                    ))}
+                    {!missing.rows.length && <tr><td colSpan={3} className="px-3.5 py-4 text-vk-muted">Nobody missing at {missCpRow.short}.</td></tr>}
+                  </tbody>
+                </table>
+                <div className="px-3.5 py-2.5 text-sm font-bold" data-testid="missing-total">{missing.rows.length} missing at {missCpRow.short}</div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {sel === 'out' && (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm min-w-[520px]" data-testid="out-table">
+              <thead><tr className="bg-vk-band dark:bg-gray-700 text-left"><Th first>Bib</Th><Th>Status</Th><Th>Where</Th><Th>Time</Th><Th>Reason</Th><Th>Comments</Th></tr></thead>
+              <tbody>
+                {outRecs.map(r => (
+                  <tr key={r.number} className="border-b border-vk-border dark:border-gray-700" data-testid="out-report-row">
+                    <td className="pl-3.5 pr-2 py-2 font-display font-extrabold text-base tabular-nums">{r.number}</td>
+                    <td className="px-2 py-2">{r.status}</td>
+                    <td className="px-2 py-2">{r.status === 'DNS' ? '' : cpShort(r.checkpoint)}</td>
+                    <td className="px-2 py-2">{hhmm(r.time)}</td>
+                    <td className="px-2 py-2">{r.reason}</td>
+                    <td className="px-2 py-2">{r.comments}</td>
+                  </tr>
+                ))}
+                {!outRecs.length && <tr><td colSpan={6} className="px-3.5 py-4 text-vk-muted">Nobody is out.</td></tr>}
+              </tbody>
+            </table>
+            <div className="px-3.5 py-2.5 text-sm font-bold" data-testid="out-total">
+              {outRecs.length} out · {outRecs.filter(r => r.status === 'DNS').length} DNS · {outRecs.filter(r => r.status === 'DNF').length} DNF
+            </div>
+          </div>
+        )}
 
         {sel === 'missing' && (
           <div className="overflow-x-auto">

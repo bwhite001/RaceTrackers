@@ -93,6 +93,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   // Local state
   const [activeTab, setActiveTab] = useState('receive');
   const [reportFocus, setReportFocus] = useState(null);
+  const [reportCp, setReportCp] = useState(null);
   const [showWithdrawalDialog, setShowWithdrawalDialog] = useState(false);
   const [withdrawalType, setWithdrawalType] = useState('dnf');
   const withdrawUndo = useUndo();
@@ -173,8 +174,13 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     switch (r.action) {
       case 'withdraw': setSheet('withdraw'); break;
       case 'lateEntry': setSheet('late'); break;
-      case 'missing': setReportFocus('missing'); setActiveTab('reports'); break;
-      case 'outList': handleTabChange('status'); break;
+      case 'missing': {
+        // The checkpoint whose call is open (or was last taken) is preselected
+        const rx = useBaseOperationsStore.getState().receive;
+        setReportCp(rx && rx.step !== 'idle' ? rx.cp ?? null : null);
+        setReportFocus(`cpmissing:${Date.now()}`); setActiveTab('reports'); break;
+      }
+      case 'outList': setReportFocus(`out:${Date.now()}`); setActiveTab('reports'); break;
       case 'reports': handleTabChange('reports'); break;
       case 'backup': window.dispatchEvent(new Event('racetracker:backup-now')); break;
       case 'help': setSheet(s => (s === 'keys' ? null : 'keys')); break;
@@ -203,8 +209,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
       if (e.key === '?') { e.preventDefault(); setSheet('keys'); return; }
       // A checkpoint typed with nothing focused starts the CheckPt box
       if (tabRef.current === 'receive' && /^[0-9sSfF]$/.test(e.key)) {
-        e.preventDefault(); e.stopPropagation();
-        receiveRef.current?.typeCheckpoint(e.key);
+        if (receiveRef.current?.focusCheckpointForTyping()) e.stopPropagation(); // the key itself types into the box
       }
     };
     const onUp = (e) => { if (e.key === 'Alt') { e.preventDefault(); stopHints(); } };
@@ -290,7 +295,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             {activeTab === 'crews' && <CrewLog />}
 
             {activeTab === 'reports' && (
-              <BaseReports key={reportFocus ?? 'reports'} initialReport={reportFocus ?? 'missing'} />
+              <BaseReports key={reportFocus ?? 'reports'} initialReport={reportFocus?.split(':')[0] ?? 'missing'} initialCp={reportCp} />
             )}
 
           </div>

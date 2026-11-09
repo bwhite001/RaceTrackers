@@ -1149,7 +1149,9 @@ export class BaseOperationsRepository extends BaseRepository {
       const status = withdrawal ? 'withdrawn'
         : vetOut ? 'vet-out'
         : cpEntry?.status ?? base.status ?? 'unknown';
-      return { ...base, status, withdrawalDetails: withdrawal, vetOutDetails: vetOut };
+      // A DNF recorded at a checkpoint keeps where (WICEN2 "to come" drops only after it)
+      const dnfCheckpoint = !withdrawal && !vetOut && cpEntry?.status === 'dnf' ? cpEntry.checkpointNumber : null;
+      return { ...base, status, withdrawalDetails: withdrawal, vetOutDetails: vetOut, dnfCheckpoint };
     });
 
     return outList.sort((a, b) => a.number - b.number);
