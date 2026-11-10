@@ -711,7 +711,7 @@ test.describe('Mt Glorious dress rehearsal', () => {
       });
       await check('Base', 'Overview shows CP1 at 100%', async () => {
         const cpText = (await page.locator('section[aria-labelledby="cphd"]').innerText()).replace(/\s+/g, ' ');
-        if (!/CP1\D*121\D*100%/.test(cpText)) throw new Error(`CP1 progress is not 100%: ${cpText.slice(0, 120)}`);
+        if (!/CP1 121 past · 0 to come · 100%/.test(cpText)) throw new Error(`CP1 progress is not 100%: ${cpText.slice(0, 120)}`);
       });
       await shot(base, '30-cp3-imported');
       await baseTab(page, 'Reports').click();

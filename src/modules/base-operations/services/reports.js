@@ -3,7 +3,7 @@
  * (base_station_runners + imported checkpoint_runners) and radio calls.
  */
 import TimeUtils from '../../../services/timeUtils.js';
-import { hhmm } from '../../../services/blocks.js';
+import { hhmm, clockText } from '../../../services/blocks.js';
 import { BASE_STATION_CP } from '../../../types/index.js';
 import { sightingsByCheckpoint, outStatusMap, boardCheckpoints, appliesAt } from './receive.js';
 import { outRecords } from './statusValidation.js';
@@ -146,7 +146,7 @@ export function timesMatrix({ sightings, order, out, raceNumbers, missed = new S
       const t = sightings.get(cp.number)?.get(number);
       if (t) {
         const flag = o?.status === 'DNS' || (o?.status === 'DNF' && !!o.time && t > o.time);
-        return { text: hhmm(t), flag };
+        return { text: clockText(t), flag }; // seconds only for own times per runner
       }
       if (o?.status === 'DNF' && o.checkpoint != null && o.checkpoint === cp.number) return { text: 'DNF', flag: false };
       // The checkpoint confirmed it never saw this runner (Part E1)

@@ -511,3 +511,10 @@
   border-width: 2px !important;
   border-color: #5A6579 !important;
 }
+
+/* Shortcut sheet › Print keyboard card: print only the card */
+@media print {
+  body.print-keycard > *:not(#keycard-print) {
+    display: none !important;
+  }
+}

@@ -425,6 +425,29 @@ const RaceEditView = () => {
               ))}
             </div>
 
+            {/* WICEN2 Auto Time: base types a time for each runner (stopwatch finish). Off by default. */}
+            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700" data-testid="own-time-setup">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Own time per runner</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                Optional. Base types each runner&apos;s own time (time of day or elapsed) instead of 5-minute blocks — for example a stopwatch finish.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                {[...checkpoints.filter(cp => cp.number !== 0).sort((a, b) => a.number - b.number).map(cp => ({ number: cp.number, label: `CP${cp.number}` })), { number: 0, label: 'Finish' }]
+                  .map(c => {
+                    const list = currentRace?.ownTimeCheckpoints ?? [];
+                    const on = list.includes(c.number);
+                    return (
+                      <label key={c.number} className="flex items-center gap-2 text-sm cursor-pointer min-h-[44px]">
+                        <input type="checkbox" checked={on} className="w-5 h-5"
+                          onChange={() => updateRace(raceId, { ownTimeCheckpoints: on ? list.filter(n => n !== c.number) : [...list, c.number].sort((a, b) => a - b) })}
+                          aria-label={`Own time per runner at ${c.label}`} />
+                        {c.label}
+                      </label>
+                    );
+                  })}
+              </div>
+            </div>
+
             <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
               <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                 Add Checkpoint

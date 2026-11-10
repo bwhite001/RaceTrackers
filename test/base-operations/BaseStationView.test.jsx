@@ -46,13 +46,9 @@ vi.mock('../../src/modules/base-operations/components/HelpDialog', () => ({ defa
 vi.mock('../../src/modules/base-operations/components/HeadsUpGrid', () => ({ default: () => null }));
 vi.mock('../../src/modules/base-operations/components/Leaderboard', () => ({ default: () => null }));
 vi.mock('../../src/modules/base-operations/components/CheckpointImportPanel', () => ({ default: () => null }));
-vi.mock('../../src/modules/base-operations/components/OutList', () => ({ default: () => <div data-testid="out-list" /> }));
 vi.mock('../../src/modules/base-operations/components/CheckpointGroupingView', () => ({ default: () => null }));
 
 // Mock the components
-vi.mock('../../src/modules/base-operations/components/DataEntry', () => ({
-  default: () => <div data-testid="data-entry">Data Entry</div>
-}));
 
 vi.mock('../../src/modules/base-operations/components/BatchEntryLayout', () => ({
   default: () => <div data-testid="batch-entry">Batch Entry</div>
@@ -210,7 +206,7 @@ describe('BaseStationView', () => {
       <BaseStationView setHasUnsavedChanges={setHasUnsavedChanges} />
     );
 
-    // DataEntry is mocked, so we can't trigger unsaved changes through it.
+    // No data entry here, so we can't trigger unsaved changes through it.
     // Just verify that the component mounts and data-entry tab is shown.
     expect(screen.getByTestId('data-entry')).toBeInTheDocument();
   });

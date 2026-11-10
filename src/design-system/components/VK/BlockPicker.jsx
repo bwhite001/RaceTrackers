@@ -8,7 +8,7 @@ import { cn } from '../../utils/classNames';
  *
  * blocks: [{ key, label: '07:40', sub: 'done'|'next'|'this call'|'', selected, done, has }]
  */
-const BlockPicker = ({ blocks, onPick, exactText, onExactChange, exactActive, exactInvalid = false, exactLabel = 'Exact time' }) => {
+const BlockPicker = ({ blocks, onPick, exactText, onExactChange, exactActive, exactInvalid = false, exactLabel = 'Exact time', exactProps = {}, exactAddon = null }) => {
   const rowRef = useRef(null);
   const selectedKey = blocks.find(b => b.selected)?.key;
 
@@ -43,6 +43,7 @@ const BlockPicker = ({ blocks, onPick, exactText, onExactChange, exactActive, ex
         ))}
       </div>
       <label className="sr-only" htmlFor="exact-time">{exactLabel}</label>
+      <span className="relative shrink-0 flex">
       <input
         id="exact-time"
         type="text"
@@ -60,7 +61,10 @@ const BlockPicker = ({ blocks, onPick, exactText, onExactChange, exactActive, ex
               ? 'bg-white text-vk-ink border-2 border-vk-red'
               : 'bg-white text-vk-ink border border-dashed border-vk-muted',
         )}
+        {...exactProps}
       />
+      {exactAddon}
+      </span>
     </div>
   );
 };

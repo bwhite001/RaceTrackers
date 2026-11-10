@@ -19,6 +19,7 @@ import BaseStationView from './modules/base-operations/views/BaseStationView';
 import RaceOverview from './views/RaceOverview';
 import RaceEditView from './modules/race-maintenance/views/RaceEditView';
 import LiveDashboardView from './views/LiveDashboardView';
+import KeyCheckView from './views/dev/KeyCheckView';
 import Footer from './components/Layout/Footer';
 
 // Screens not yet on the full-bleed VK4WIP shell keep the old padded container
@@ -80,6 +81,8 @@ function App() {
           <Routes>
             {/* Home page - accessible to all */}
             <Route path="/" element={<Homepage />} />
+            {/* Hidden: WICEN2 parity key capture check (no module, no data) */}
+            <Route path="/dev/keys" element={<KeyCheckView />} />
 
             {/* Race Management - Dedicated page for managing all races */}
             <Route

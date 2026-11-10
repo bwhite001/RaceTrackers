@@ -404,9 +404,13 @@ At the end of a checkpoint shift, a volunteer may need to export their recorded 
 
 From the race overview, a race director can jump straight to any checkpoint's live mark-off screen. This test clicks the Checkpoint 1 link and confirms the checkpoint mark-off screen opens.
 
+**Navigate directly to checkpoint 1**
+
+![Navigate directly to checkpoint 1](assets/navigates-from-race-overview-to-a-checkpoint-step-01.jpg)
+
 **Checkpoint view — mark-off screen for CP1 open**
 
-![Checkpoint view — mark-off screen for CP1 open](assets/navigates-from-race-overview-to-a-checkpoint-step-01.jpg)
+![Checkpoint view — mark-off screen for CP1 open](assets/navigates-from-race-overview-to-a-checkpoint-step-02.jpg)
 
 ### Callout sheet tab shows runners who passed but not called in
 
@@ -1352,6 +1356,173 @@ For insurance, base logs which car went to each checkpoint, who was in it, and w
 
 ![The race setup shared with volunteers carries no crew or rego details](assets/base-logs-the-crews-and-vehicles-going-to-each-checkpoint-step-10.jpg)
 
+## Coming from WICEN2
+
+Base works from the keyboard the way WICEN2 did: type the checkpoint, the time and each number, pressing Enter after each, then Alt+U. The same Alt keys reach the same jobs, and a key whose job has moved says where it went. Hold Alt to see each button's key; Alt+H lists them all and prints a keyboard card for the base table.
+
+### Entering a call, as in WICEN2
+
+Type the checkpoint, Enter, the time, Enter, then each number followed by Enter. Alt+U completes the call.
+
+`1 ⏎ 0815 ⏎ 129 ⏎ 136 ⏎ … Alt+U`
+
+- Enter on the Time box without typing keeps the time shown (the next block).
+- A time on a 5-minute mark selects that block; any other time is kept exactly as typed.
+- Shift+Tab goes back to Time, twice to CheckPt. Esc clears the typed number; it never cancels the call.
+- Typing a different checkpoint while a call has numbers completes that call (with Undo) and opens the new one.
+- Alt+Shift+letter works as well as Alt+letter, for any browser that keeps an Alt key for itself.
+- Hold Alt to see each button's key. Alt+H (or ?) lists every key and prints a keyboard card for the base table.
+- On a touch-only tablet the screens look as before: the CheckPt box and key hints appear once a keyboard is used.
+
+### WICEN2 keys
+
+| Key | WICEN2 | RaceTracker |
+|---|---|---|
+| Alt+C | Go to CheckPt | CheckPt box |
+| Alt+T | Go to Time | Time box |
+| Alt+N | Go to Number | Number box |
+| Alt+X | Next (save entry) | Add the typed number |
+| Alt+U | Update Main | Complete the call |
+| Alt+E | Delete Entry | Remove the last number added (Undo) |
+| Alt+W | Withdraw | Quick withdraw line |
+| Alt+D | Add Number | Add a late entry to the field |
+| Alt+G | Missing | Reports › Missing at a checkpoint |
+| Alt+S | Show Out List | Reports › Out of the race |
+| Alt+R | Reports / Print | Reports tab |
+| Alt+K | Backup | Back up now (file backup) |
+| Alt+M | Sort Normal | Records, by call |
+| Alt+B | Sort Number | Records, by number |
+| Alt+P | Sort CP & No | Records, by number |
+| Alt+I | Sort CP & Time | Records, by block |
+| Alt+H | Help | This shortcut sheet |
+| Alt+A | About | Version |
+| Alt+V | Vet Out | Vet Out isn't used in running events |
+| Alt+O | Comments | No comments box. Use Withdraw (Alt+W) or Records |
+| Alt+L | Clear Strapper List | No strapper list in running events |
+| Alt+Q | Quit | Close the app window to quit. Your data is saved. |
+
+### Where did it go?
+
+| WICEN2 | RaceTracker |
+|---|---|
+| Update Main | Complete on each call (Alt+U) |
+| Tally | Checkpoints board on Receive, and Overview › Checkpoint progress |
+| View Dupes | Reports › Needs attention › Duplicates |
+| View Deleted | Records, with Show history on |
+| Reports table | Reports tab (Alt+R) |
+| Crystal Reports | Print on each report |
+| BACK.MDB | Automatic file backup (chip in the app bar, Alt+K) |
+
+Nothing changes on air: the radio procedure is the same.
+
+### Base lists who is missing at a checkpoint and who is out
+
+
+
+**The board shows how many are still to come at each checkpoint**
+
+![The board shows how many are still to come at each checkpoint](assets/base-lists-who-is-missing-at-a-checkpoint-and-who-is-out-step-01.jpg)
+
+**Alt+G with CP2 open — Missing at CP2, every bib on its own row**
+
+![Alt+G with CP2 open — Missing at CP2, every bib on its own row](assets/base-lists-who-is-missing-at-a-checkpoint-and-who-is-out-step-02.jpg)
+
+**Print view — race, checkpoint and the time printed**
+
+![Print view — race, checkpoint and the time printed](assets/base-lists-who-is-missing-at-a-checkpoint-and-who-is-out-step-03.jpg)
+
+**Alt+S — Out of the race matches the DNF / DNS tab**
+
+![Alt+S — Out of the race matches the DNF / DNS tab](assets/base-lists-who-is-missing-at-a-checkpoint-and-who-is-out-step-04.jpg)
+
+**A DNF at CP2 lowers "to come" at CP3 and Finish only**
+
+![A DNF at CP2 lowers "to come" at CP3 and Finish only](assets/base-lists-who-is-missing-at-a-checkpoint-and-who-is-out-step-05.jpg)
+
+### A WICEN2 operator takes calls at base from the keyboard
+
+
+
+**1 ⏎ time ⏎ then numbers — four chips at that time, Alt+U completes**
+
+![1 ⏎ time ⏎ then numbers — four chips at that time, Alt+U completes](assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-01.jpg)
+
+**1 ⏎ ⏎ number — Enter on the Time box keeps the block shown**
+
+![1 ⏎ ⏎ number — Enter on the Time box keeps the block shown](assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-02.jpg)
+
+**Shift+Tab back to Time, a new time — "Also in this call" shows the first**
+
+![Shift+Tab back to Time, a new time — "Also in this call" shows the first](assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-03.jpg)
+
+**Alt+C 2 ⏎ mid-call — CP1 is completed with Undo, CP2 opens**
+
+![Alt+C 2 ⏎ mid-call — CP1 is completed with Undo, CP2 opens](assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-04.jpg)
+
+**Alt+E removes the last number; Esc clears a typed number**
+
+![Alt+E removes the last number; Esc clears a typed number](assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-05.jpg)
+
+**A time off the 5-minute mark stays exact; a future time is refused**
+
+![A time off the 5-minute mark stays exact; a future time is refused](assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-06.jpg)
+
+**Numeric keypad — the same entry sequence on Numpad keys**
+
+![Numeric keypad — the same entry sequence on Numpad keys](assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-07.jpg)
+
+**Alt+W quick withdraw — preview, Enter applies; "128 *" puts them back**
+
+![Alt+W quick withdraw — preview, Enter applies; "128 *" puts them back](assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-08.jpg)
+
+**WICEN2 keys with no job here say where the job went**
+
+![WICEN2 keys with no job here say where the job went](assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-09.jpg)
+
+**Hold Alt — each button shows its key, and nothing moves**
+
+![Hold Alt — each button shows its key, and nothing moves](assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-10.jpg)
+
+**Alt+H — the shortcut sheet, and a printable keyboard card**
+
+![Alt+H — the shortcut sheet, and a printable keyboard card](assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-11.jpg)
+
+### The race director turns WICEN2 keys off in Settings
+
+
+
+**Settings › WICEN2 keyboard shortcuts off**
+
+![Settings › WICEN2 keyboard shortcuts off](assets/the-race-director-turns-wicen2-keys-off-in-settings-step-01.jpg)
+
+**Keys off — typing a checkpoint and Alt+U do nothing**
+
+![Keys off — typing a checkpoint and Alt+U do nothing](assets/the-race-director-turns-wicen2-keys-off-in-settings-step-02.jpg)
+
+### Base records a stopwatch finish, one time per runner
+
+
+
+**Race setup — Own time per runner at the Finish (off by default)**
+
+![Race setup — Own time per runner at the Finish (off by default)](assets/base-records-a-stopwatch-finish-one-time-per-runner-step-01.jpg)
+
+**F ⏎ time ⏎ number ⏎ — focus goes back to Time for the next runner**
+
+![F ⏎ time ⏎ number ⏎ — focus goes back to Time for the next runner](assets/base-records-a-stopwatch-finish-one-time-per-runner-step-02.jpg)
+
+**Elapsed time +1:30:15 — counted from the runner's wave start**
+
+![Elapsed time +1:30:15 — counted from the runner's wave start](assets/base-records-a-stopwatch-finish-one-time-per-runner-step-03.jpg)
+
+**Times by checkpoint shows the exact finish times, with seconds**
+
+![Times by checkpoint shows the exact finish times, with seconds](assets/base-records-a-stopwatch-finish-one-time-per-runner-step-04.jpg)
+
+**Own times off for this call — back to 5-minute blocks**
+
+![Own times off for this call — back to 5-minute blocks](assets/base-records-a-stopwatch-finish-one-time-per-runner-step-05.jpg)
+
 ## Importing & Exporting Data
 
 Transfer race configurations and results between devices. Export from the base station header or race management page; import to restore a race.
@@ -1776,29 +1947,25 @@ How to operate two checkpoints at the same physical location — for example, an
 
 ![Checkpoint picker — linked pair shown as single card with link icon](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-03.jpg)
 
-**Select the linked pair — navigate to dual checkpoint view**
-
-![Select the linked pair — navigate to dual checkpoint view](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-04.jpg)
-
 **Dual view loads — CP tab switcher shows CP1 and CP4**
 
-![Dual view loads — CP tab switcher shows CP1 and CP4](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-05.jpg)
+![Dual view loads — CP tab switcher shows CP1 and CP4](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-04.jpg)
 
 **Mark runners 100 and 101 in CP1 (outbound) via quick entry**
 
-![Mark runners 100 and 101 in CP1 (outbound) via quick entry](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-06.jpg)
+![Mark runners 100 and 101 in CP1 (outbound) via quick entry](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-05.jpg)
 
 **Switch to CP4 tab — stars appear on runners 100 and 101**
 
-![Switch to CP4 tab — stars appear on runners 100 and 101](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-07.jpg)
+![Switch to CP4 tab — stars appear on runners 100 and 101](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-06.jpg)
 
 **Mark runner 100 in CP4 (return) via quick entry**
 
-![Mark runner 100 in CP4 (return) via quick entry](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-08.jpg)
+![Mark runner 100 in CP4 (return) via quick entry](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-07.jpg)
 
 **Overview tab — runner 100 shows Both, runner 101 shows CP1 Only**
 
-![Overview tab — runner 100 shows Both, runner 101 shows CP1 Only](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-09.jpg)
+![Overview tab — runner 100 shows Both, runner 101 shows CP1 Only](assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-08.jpg)
 
 ## Checkpoint: Fixing Mistakes and Reading Out
 

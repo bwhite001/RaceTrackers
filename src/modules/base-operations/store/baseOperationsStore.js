@@ -63,6 +63,7 @@ const useBaseOperationsStore = create(
       outList: [],
       raceRunnerNumbers: [],
       raceRunnerBatches: new Map(), // bib → wave, for checkpoints only some waves pass
+      waveStarts: new Map(),
       fieldChanges: [],
       radioCalls: [],
       crewVehicles: [],
@@ -196,6 +197,8 @@ const useBaseOperationsStore = create(
             // Base's field = setup runners + late entries (race-day Part B)
             raceRunnerNumbers: fieldNumbers(raceRunnerRows.map(r => r.number), fieldChanges),
             raceRunnerBatches: new Map(raceRunnerRows.filter(r => r.batchNumber != null).map(r => [r.number, r.batchNumber])),
+            // Wave → start ("YYYY-MM-DDTHH:MM…"), for elapsed own times (WICEN2 parity Phase 3)
+            waveStarts: new Map(batches.filter(b => b.startTime).map(b => [b.batchNumber, b.startTime])),
             fieldChanges,
             radioCalls,
             outList,
@@ -293,7 +296,7 @@ const useBaseOperationsStore = create(
         }
       },
 
-      // Primary entry point for DataEntry and WithdrawalDialog
+      // Primary entry point for WithdrawalDialog
       bulkMarkRunners: async (runnerNumbers, timeOrOptions) => {
         const { currentRaceId } = get();
         if (!currentRaceId) throw new Error('No active race');
@@ -413,6 +416,19 @@ const useBaseOperationsStore = create(
           else await repo.reverseNonStarter(raceKey, num);
           if (before) await get()._restoreOut(repo, raceKey, before);
         }
+        await get().refreshData({ silent: true });
+      },
+
+      /** Alt+D (WICEN2 Add Number): bibs join base's field as late entries. @returns ids for Undo */
+      addLateEntries: async (numbers) => {
+        const raceKey = raceKeyOf(get().currentRaceId);
+        const ids = await new BaseOperationsRepository().addFieldChanges(raceKey, numbers, 'base');
+        await get().refreshData({ silent: true });
+        return ids;
+      },
+
+      cancelLateEntries: async (ids) => {
+        await new BaseOperationsRepository().cancelFieldChanges(raceKeyOf(get().currentRaceId), ids);
         await get().refreshData({ silent: true });
       },
 

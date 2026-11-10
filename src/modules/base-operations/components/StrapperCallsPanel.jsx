@@ -1,3 +1,8 @@
+/*
+ * Kept unwired on purpose (WICEN2 parity, K8, 9 Nov 2026): a WICEN2 horse-ride
+ * job. Running events don't use it. Wire it in only if a horse-ride mode is
+ * built, and restyle it to the club palette then (see palette.test.js).
+ */
 import React, { useState, useEffect } from 'react';
 import useBaseOperationsStore from '../store/baseOperationsStore';
 import TimeUtils from '../../../services/timeUtils';

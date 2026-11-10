@@ -27,6 +27,7 @@
   .step { display: flex; flex-direction: column; gap: 8px; }
   .step-instruction { font-weight: 600; font-size: .95rem; color: #1e293b; margin: 0; }
   .step img { max-width: 100%; width: 640px; border-radius: 8px; border: 1px solid #e2e8f0; display: block; }
+  table.ref { border-collapse: collapse; width: 100%; font-size: .85rem; margin-bottom: 12px; } table.ref th, table.ref td { border-bottom: 1px solid #e2e8f0; padding: 4px 8px; text-align: left; }
   .radio h3 { margin: 16px 0 6px; } .radio ul, .radio ol { margin: 0 0 8px 20px; font-size: .9rem; } .radio p { font-size: .9rem; margin-bottom: 8px; }
   .page-footer { text-align: center; padding: 24px; font-size: .75rem; color: #94a3b8; border-top: 1px solid #e2e8f0; margin-top: 40px; }
   @media (max-width: 640px) { .step img { width: 100%; } main { padding: 16px; } }
@@ -46,6 +47,7 @@
   <a href="#base-reports">Base Station: Reports and Data Checks</a>
   <a href="#base-records">Base Station: Fixing Recorded Numbers (Records)</a>
   <a href="#base-crews">Base Station: Crew & Vehicle Log</a>
+  <a href="#wicen2">Coming from WICEN2</a>
   <a href="#import-export">Importing & Exporting Data</a>
   <a href="#navigation">Navigating the App</a>
   <a href="#settings">Settings</a>
@@ -279,7 +281,8 @@
 <h3>Navigates from race overview to a checkpoint</h3>
 <p class="description">From the race overview, a race director can jump straight to any checkpoint's live mark-off screen. This test clicks the Checkpoint 1 link and confirms the checkpoint mark-off screen opens.</p>
 <div class="steps">
-<div class="step"><p class="step-instruction">Checkpoint view — mark-off screen for CP1 open</p><img src="assets/navigates-from-race-overview-to-a-checkpoint-step-01.jpg" alt="Checkpoint view — mark-off screen for CP1 open" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Navigate directly to checkpoint 1</p><img src="assets/navigates-from-race-overview-to-a-checkpoint-step-01.jpg" alt="Navigate directly to checkpoint 1" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Checkpoint view — mark-off screen for CP1 open</p><img src="assets/navigates-from-race-overview-to-a-checkpoint-step-02.jpg" alt="Checkpoint view — mark-off screen for CP1 open" loading="lazy"></div>
 </div>
 </section>
 <section class="task">
@@ -857,6 +860,68 @@
 </div>
 </section>
 </div>
+<div id="wicen2">
+<h2>Coming from WICEN2</h2>
+<p class="chapter-intro">Base works from the keyboard the way WICEN2 did: type the checkpoint, the time and each number, pressing Enter after each, then Alt+U. The same Alt keys reach the same jobs, and a key whose job has moved says where it went. Hold Alt to see each button's key; Alt+H lists them all and prints a keyboard card for the base table.</p>
+<section class="task radio">
+<h3>Entering a call, as in WICEN2</h3>
+<p>Type the checkpoint, Enter, the time, Enter, then each number followed by Enter. Alt+U completes the call.</p>
+<p><code>1 ⏎ 0815 ⏎ 129 ⏎ 136 ⏎ … Alt+U</code></p>
+<ul><li>Enter on the Time box without typing keeps the time shown (the next block).</li><li>A time on a 5-minute mark selects that block; any other time is kept exactly as typed.</li><li>Shift+Tab goes back to Time, twice to CheckPt. Esc clears the typed number; it never cancels the call.</li><li>Typing a different checkpoint while a call has numbers completes that call (with Undo) and opens the new one.</li><li>Alt+Shift+letter works as well as Alt+letter, for any browser that keeps an Alt key for itself.</li><li>Hold Alt to see each button's key. Alt+H (or ?) lists every key and prints a keyboard card for the base table.</li><li>On a touch-only tablet the screens look as before: the CheckPt box and key hints appear once a keyboard is used.</li></ul>
+<h3>WICEN2 keys</h3>
+<table class="ref"><thead><tr><th>Key</th><th>WICEN2</th><th>RaceTracker</th></tr></thead><tbody><tr><td>Alt+C</td><td>Go to CheckPt</td><td>CheckPt box</td></tr><tr><td>Alt+T</td><td>Go to Time</td><td>Time box</td></tr><tr><td>Alt+N</td><td>Go to Number</td><td>Number box</td></tr><tr><td>Alt+X</td><td>Next (save entry)</td><td>Add the typed number</td></tr><tr><td>Alt+U</td><td>Update Main</td><td>Complete the call</td></tr><tr><td>Alt+E</td><td>Delete Entry</td><td>Remove the last number added (Undo)</td></tr><tr><td>Alt+W</td><td>Withdraw</td><td>Quick withdraw line</td></tr><tr><td>Alt+D</td><td>Add Number</td><td>Add a late entry to the field</td></tr><tr><td>Alt+G</td><td>Missing</td><td>Reports › Missing at a checkpoint</td></tr><tr><td>Alt+S</td><td>Show Out List</td><td>Reports › Out of the race</td></tr><tr><td>Alt+R</td><td>Reports / Print</td><td>Reports tab</td></tr><tr><td>Alt+K</td><td>Backup</td><td>Back up now (file backup)</td></tr><tr><td>Alt+M</td><td>Sort Normal</td><td>Records, by call</td></tr><tr><td>Alt+B</td><td>Sort Number</td><td>Records, by number</td></tr><tr><td>Alt+P</td><td>Sort CP &amp; No</td><td>Records, by number</td></tr><tr><td>Alt+I</td><td>Sort CP &amp; Time</td><td>Records, by block</td></tr><tr><td>Alt+H</td><td>Help</td><td>This shortcut sheet</td></tr><tr><td>Alt+A</td><td>About</td><td>Version</td></tr><tr><td>Alt+V</td><td>Vet Out</td><td>Vet Out isn't used in running events</td></tr><tr><td>Alt+O</td><td>Comments</td><td>No comments box. Use Withdraw (Alt+W) or Records</td></tr><tr><td>Alt+L</td><td>Clear Strapper List</td><td>No strapper list in running events</td></tr><tr><td>Alt+Q</td><td>Quit</td><td>Close the app window to quit. Your data is saved.</td></tr></tbody></table>
+<h3>Where did it go?</h3>
+<table class="ref"><thead><tr><th>WICEN2</th><th>RaceTracker</th></tr></thead><tbody><tr><td>Update Main</td><td>Complete on each call (Alt+U)</td></tr><tr><td>Tally</td><td>Checkpoints board on Receive, and Overview › Checkpoint progress</td></tr><tr><td>View Dupes</td><td>Reports › Needs attention › Duplicates</td></tr><tr><td>View Deleted</td><td>Records, with Show history on</td></tr><tr><td>Reports table</td><td>Reports tab (Alt+R)</td></tr><tr><td>Crystal Reports</td><td>Print on each report</td></tr><tr><td>BACK.MDB</td><td>Automatic file backup (chip in the app bar, Alt+K)</td></tr></tbody></table>
+<p>Nothing changes on air: the radio procedure is the same.</p>
+</section>
+<section class="task">
+<h3>Base lists who is missing at a checkpoint and who is out</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">The board shows how many are still to come at each checkpoint</p><img src="assets/base-lists-who-is-missing-at-a-checkpoint-and-who-is-out-step-01.jpg" alt="The board shows how many are still to come at each checkpoint" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Alt+G with CP2 open — Missing at CP2, every bib on its own row</p><img src="assets/base-lists-who-is-missing-at-a-checkpoint-and-who-is-out-step-02.jpg" alt="Alt+G with CP2 open — Missing at CP2, every bib on its own row" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Print view — race, checkpoint and the time printed</p><img src="assets/base-lists-who-is-missing-at-a-checkpoint-and-who-is-out-step-03.jpg" alt="Print view — race, checkpoint and the time printed" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Alt+S — Out of the race matches the DNF / DNS tab</p><img src="assets/base-lists-who-is-missing-at-a-checkpoint-and-who-is-out-step-04.jpg" alt="Alt+S — Out of the race matches the DNF / DNS tab" loading="lazy"></div>
+<div class="step"><p class="step-instruction">A DNF at CP2 lowers &quot;to come&quot; at CP3 and Finish only</p><img src="assets/base-lists-who-is-missing-at-a-checkpoint-and-who-is-out-step-05.jpg" alt="A DNF at CP2 lowers &quot;to come&quot; at CP3 and Finish only" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>A WICEN2 operator takes calls at base from the keyboard</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">1 ⏎ time ⏎ then numbers — four chips at that time, Alt+U completes</p><img src="assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-01.jpg" alt="1 ⏎ time ⏎ then numbers — four chips at that time, Alt+U completes" loading="lazy"></div>
+<div class="step"><p class="step-instruction">1 ⏎ ⏎ number — Enter on the Time box keeps the block shown</p><img src="assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-02.jpg" alt="1 ⏎ ⏎ number — Enter on the Time box keeps the block shown" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Shift+Tab back to Time, a new time — &quot;Also in this call&quot; shows the first</p><img src="assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-03.jpg" alt="Shift+Tab back to Time, a new time — &quot;Also in this call&quot; shows the first" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Alt+C 2 ⏎ mid-call — CP1 is completed with Undo, CP2 opens</p><img src="assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-04.jpg" alt="Alt+C 2 ⏎ mid-call — CP1 is completed with Undo, CP2 opens" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Alt+E removes the last number; Esc clears a typed number</p><img src="assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-05.jpg" alt="Alt+E removes the last number; Esc clears a typed number" loading="lazy"></div>
+<div class="step"><p class="step-instruction">A time off the 5-minute mark stays exact; a future time is refused</p><img src="assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-06.jpg" alt="A time off the 5-minute mark stays exact; a future time is refused" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Numeric keypad — the same entry sequence on Numpad keys</p><img src="assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-07.jpg" alt="Numeric keypad — the same entry sequence on Numpad keys" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Alt+W quick withdraw — preview, Enter applies; &quot;128 *&quot; puts them back</p><img src="assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-08.jpg" alt="Alt+W quick withdraw — preview, Enter applies; &quot;128 *&quot; puts them back" loading="lazy"></div>
+<div class="step"><p class="step-instruction">WICEN2 keys with no job here say where the job went</p><img src="assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-09.jpg" alt="WICEN2 keys with no job here say where the job went" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Hold Alt — each button shows its key, and nothing moves</p><img src="assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-10.jpg" alt="Hold Alt — each button shows its key, and nothing moves" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Alt+H — the shortcut sheet, and a printable keyboard card</p><img src="assets/a-wicen2-operator-takes-calls-at-base-from-the-keyboard-step-11.jpg" alt="Alt+H — the shortcut sheet, and a printable keyboard card" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>The race director turns WICEN2 keys off in Settings</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Settings › WICEN2 keyboard shortcuts off</p><img src="assets/the-race-director-turns-wicen2-keys-off-in-settings-step-01.jpg" alt="Settings › WICEN2 keyboard shortcuts off" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Keys off — typing a checkpoint and Alt+U do nothing</p><img src="assets/the-race-director-turns-wicen2-keys-off-in-settings-step-02.jpg" alt="Keys off — typing a checkpoint and Alt+U do nothing" loading="lazy"></div>
+</div>
+</section>
+<section class="task">
+<h3>Base records a stopwatch finish, one time per runner</h3>
+<p class="description"></p>
+<div class="steps">
+<div class="step"><p class="step-instruction">Race setup — Own time per runner at the Finish (off by default)</p><img src="assets/base-records-a-stopwatch-finish-one-time-per-runner-step-01.jpg" alt="Race setup — Own time per runner at the Finish (off by default)" loading="lazy"></div>
+<div class="step"><p class="step-instruction">F ⏎ time ⏎ number ⏎ — focus goes back to Time for the next runner</p><img src="assets/base-records-a-stopwatch-finish-one-time-per-runner-step-02.jpg" alt="F ⏎ time ⏎ number ⏎ — focus goes back to Time for the next runner" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Elapsed time +1:30:15 — counted from the runner's wave start</p><img src="assets/base-records-a-stopwatch-finish-one-time-per-runner-step-03.jpg" alt="Elapsed time +1:30:15 — counted from the runner's wave start" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Times by checkpoint shows the exact finish times, with seconds</p><img src="assets/base-records-a-stopwatch-finish-one-time-per-runner-step-04.jpg" alt="Times by checkpoint shows the exact finish times, with seconds" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Own times off for this call — back to 5-minute blocks</p><img src="assets/base-records-a-stopwatch-finish-one-time-per-runner-step-05.jpg" alt="Own times off for this call — back to 5-minute blocks" loading="lazy"></div>
+</div>
+</section>
+</div>
 <div id="import-export">
 <h2>Importing & Exporting Data</h2>
 <p class="chapter-intro">Transfer race configurations and results between devices. Export from the base station header or race management page; import to restore a race.</p>
@@ -1160,12 +1225,11 @@
 <div class="step"><p class="step-instruction">Home screen — navigate to Checkpoint Operations</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-01.jpg" alt="Home screen — navigate to Checkpoint Operations" loading="lazy"></div>
 <div class="step"><p class="step-instruction">Race selection modal — select the Turnaround Ultra race</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-02.jpg" alt="Race selection modal — select the Turnaround Ultra race" loading="lazy"></div>
 <div class="step"><p class="step-instruction">Checkpoint picker — linked pair shown as single card with link icon</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-03.jpg" alt="Checkpoint picker — linked pair shown as single card with link icon" loading="lazy"></div>
-<div class="step"><p class="step-instruction">Select the linked pair — navigate to dual checkpoint view</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-04.jpg" alt="Select the linked pair — navigate to dual checkpoint view" loading="lazy"></div>
-<div class="step"><p class="step-instruction">Dual view loads — CP tab switcher shows CP1 and CP4</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-05.jpg" alt="Dual view loads — CP tab switcher shows CP1 and CP4" loading="lazy"></div>
-<div class="step"><p class="step-instruction">Mark runners 100 and 101 in CP1 (outbound) via quick entry</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-06.jpg" alt="Mark runners 100 and 101 in CP1 (outbound) via quick entry" loading="lazy"></div>
-<div class="step"><p class="step-instruction">Switch to CP4 tab — stars appear on runners 100 and 101</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-07.jpg" alt="Switch to CP4 tab — stars appear on runners 100 and 101" loading="lazy"></div>
-<div class="step"><p class="step-instruction">Mark runner 100 in CP4 (return) via quick entry</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-08.jpg" alt="Mark runner 100 in CP4 (return) via quick entry" loading="lazy"></div>
-<div class="step"><p class="step-instruction">Overview tab — runner 100 shows Both, runner 101 shows CP1 Only</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-09.jpg" alt="Overview tab — runner 100 shows Both, runner 101 shows CP1 Only" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Dual view loads — CP tab switcher shows CP1 and CP4</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-04.jpg" alt="Dual view loads — CP tab switcher shows CP1 and CP4" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Mark runners 100 and 101 in CP1 (outbound) via quick entry</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-05.jpg" alt="Mark runners 100 and 101 in CP1 (outbound) via quick entry" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Switch to CP4 tab — stars appear on runners 100 and 101</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-06.jpg" alt="Switch to CP4 tab — stars appear on runners 100 and 101" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Mark runner 100 in CP4 (return) via quick entry</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-07.jpg" alt="Mark runner 100 in CP4 (return) via quick entry" loading="lazy"></div>
+<div class="step"><p class="step-instruction">Overview tab — runner 100 shows Both, runner 101 shows CP1 Only</p><img src="assets/volunteer-operates-linked-turnaround-checkpoints-from-one-interface-step-08.jpg" alt="Overview tab — runner 100 shows Both, runner 101 shows CP1 Only" loading="lazy"></div>
 </div>
 </section>
 </div>

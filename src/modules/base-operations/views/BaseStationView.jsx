@@ -25,13 +25,24 @@ import SettingsModal from '../../../components/Settings/SettingsModal';
 import HelpDialog from '../components/HelpDialog';
 import FileBackupStatus from '../components/FileBackupStatus';
 import LoadingSpinner from '../../../components/Layout/LoadingSpinner';
+import KeyHint from '../components/KeyHint';
+import QuickWithdrawSheet from '../components/QuickWithdrawSheet';
+import LateEntrySheet from '../components/LateEntrySheet';
+import ShortcutSheet from '../components/ShortcutSheet';
+import useKeyboardStore from '../../../shared/store/keyboardStore';
+import { resolveKey, isPhysicalKey } from '../services/keymap';
 
-const HeaderIcon = ({ label, Icon, onClick }) => (
+const HeaderIcon = ({ label, Icon, onClick, hint }) => (
   <button type="button" onClick={onClick} aria-label={label} title={label}
-    className="w-11 h-11 flex items-center justify-center rounded-btn text-white hover:bg-white/10">
+    className="relative w-11 h-11 flex items-center justify-center rounded-btn text-white hover:bg-white/10">
     <Icon className="w-[22px] h-[22px]" aria-hidden="true" />
+    {hint && <KeyHint action={hint} />}
   </button>
 );
+
+const isEditable = (el) => !!el && (/^(input|textarea|select)$/i.test(el.tagName) || el.isContentEditable);
+/* global __APP_VERSION__ */
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '';
 
 /**
  * BaseStationView Component
@@ -82,12 +93,27 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
   // Local state
   const [activeTab, setActiveTab] = useState('receive');
   const [reportFocus, setReportFocus] = useState(null);
+  const [reportCp, setReportCp] = useState(null);
   const [showWithdrawalDialog, setShowWithdrawalDialog] = useState(false);
   const [withdrawalType, setWithdrawalType] = useState('dnf');
   const withdrawUndo = useUndo();
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
+  const [sheet, setSheet] = useState(null); // 'withdraw' | 'late' | 'keys'
+  const receiveRef = useRef(null);
+  const keysOn = useRaceStore(s => s.settings?.wicen2Keys) !== false;
+  const message = useKeyboardStore(s => s.message);
+  const say = useKeyboardStore(s => s.say);
+  const setPhysical = useKeyboardStore(s => s.setPhysical);
+  const setAltHeld = useKeyboardStore(s => s.setAltHeld);
+
+  // The status line answers a key, then clears
+  useEffect(() => {
+    if (!message) return undefined;
+    const t = setTimeout(() => say(''), 6000);
+    return () => clearTimeout(t);
+  }, [message, say]);
 
   // Initialize base station from selectedRaceForMode, or redirect if no race
   useEffect(() => {
@@ -142,6 +168,62 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
     }
   }, [onExitAttempt, navigate]);
 
+  // ── WICEN2 keyboard layer (docs/design-handoff/WICEN2_PARITY.md) ─────────
+  // Keys call the same handlers as the buttons: no second write path.
+  const runKey = (r) => {
+    switch (r.action) {
+      case 'withdraw': setSheet('withdraw'); break;
+      case 'lateEntry': setSheet('late'); break;
+      case 'missing': {
+        // The checkpoint whose call is open (or was last taken) is preselected
+        const rx = useBaseOperationsStore.getState().receive;
+        setReportCp(rx && rx.step !== 'idle' ? rx.cp ?? null : null);
+        setReportFocus(`cpmissing:${Date.now()}`); setActiveTab('reports'); break;
+      }
+      case 'outList': setReportFocus(`out:${Date.now()}`); setActiveTab('reports'); break;
+      case 'reports': handleTabChange('reports'); break;
+      case 'backup': window.dispatchEvent(new Event('racetracker:backup-now')); break;
+      case 'help': setSheet(s => (s === 'keys' ? null : 'keys')); break;
+      case 'about': say(`RaceTracker Pro ${APP_VERSION}`.trim()); break;
+      case 'unused': say(r.message); break;
+      default: receiveRef.current?.handle(r.action);
+    }
+  };
+  const runKeyRef = useRef(runKey);
+  runKeyRef.current = runKey;
+  const tabRef = useRef(activeTab);
+  tabRef.current = activeTab;
+
+  useEffect(() => {
+    let altTimer = null;
+    const stopHints = () => { clearTimeout(altTimer); altTimer = null; setAltHeld(false); };
+    const onDown = (e) => {
+      const editable = isEditable(e.target);
+      if (isPhysicalKey(e, editable)) setPhysical();
+      if (!keysOn) return;
+      if (e.key === 'Alt' && !altTimer) altTimer = setTimeout(() => setAltHeld(true), 500);
+      const sheetOpen = !!document.querySelector('[role="dialog"]');
+      const r = resolveKey(e, { enabled: keysOn, tab: tabRef.current, sheetOpen });
+      if (r) { e.preventDefault(); e.stopPropagation(); runKeyRef.current(r); return; }
+      if (editable || sheetOpen || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (e.key === '?') { e.preventDefault(); setSheet('keys'); return; }
+      // A checkpoint typed with nothing focused starts the CheckPt box
+      if (tabRef.current === 'receive' && /^[0-9sSfF]$/.test(e.key)) {
+        if (receiveRef.current?.focusCheckpointForTyping()) e.stopPropagation(); // the key itself types into the box
+      }
+    };
+    const onUp = (e) => { if (e.key === 'Alt') { e.preventDefault(); stopHints(); } };
+    document.addEventListener('keydown', onDown, true);
+    document.addEventListener('keyup', onUp, true);
+    window.addEventListener('blur', stopHints);
+    return () => {
+      stopHints();
+      document.removeEventListener('keydown', onDown, true);
+      document.removeEventListener('keyup', onUp, true);
+      window.removeEventListener('blur', stopHints);
+    };
+  }, [keysOn, setPhysical, setAltHeld]);
+
   // Define hotkeys
   const hotkeys = {
     [HOTKEYS.NEW_ENTRY]: () => handleTabChange('receive'),
@@ -182,7 +264,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
               <HeaderIcon label="Import / Export" Icon={ArrowUpTrayIcon} onClick={() => setShowImportExport(true)} />
               <HeaderIcon label="Live Dashboard" Icon={PresentationChartLineIcon} onClick={() => navigate('/base-station/dashboard')} />
               <HeaderIcon label="Settings" Icon={Cog6ToothIcon} onClick={handleOpenSettings} />
-              <HeaderIcon label="Help" Icon={QuestionMarkCircleIcon} onClick={handleOpenHelp} />
+              <HeaderIcon label="Help" Icon={QuestionMarkCircleIcon} onClick={handleOpenHelp} hint="help" />
             </>
           )}
         />
@@ -195,7 +277,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             className="space-y-6"
             data-screenshot-target
           >
-            {activeTab === 'receive' && <BaseReceive />}
+            {activeTab === 'receive' && <BaseReceive ref={receiveRef} />}
 
             {activeTab === 'overview' && (
               <BaseOverview
@@ -213,7 +295,7 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
             {activeTab === 'crews' && <CrewLog />}
 
             {activeTab === 'reports' && (
-              <BaseReports key={reportFocus ?? 'reports'} initialReport={reportFocus ?? 'missing'} />
+              <BaseReports key={reportFocus ?? 'reports'} initialReport={reportFocus?.split(':')[0] ?? 'missing'} initialCp={reportCp} />
             )}
 
           </div>
@@ -228,6 +310,15 @@ const BaseStationView = ({ onExitAttempt, setHasUnsavedChanges }) => {
           onDone={withdrawUndo.offer}
         />
         <UndoBar {...withdrawUndo.bar} className="fixed left-4 right-4 bottom-6 z-40 max-w-xl mx-auto" />
+        <QuickWithdrawSheet open={sheet === 'withdraw'} onClose={() => setSheet(null)} onDone={withdrawUndo.offer} />
+        <LateEntrySheet open={sheet === 'late'} onClose={() => setSheet(null)} onDone={withdrawUndo.offer} />
+        <ShortcutSheet open={sheet === 'keys'} onClose={() => setSheet(null)} />
+        {message && (
+          <div role="status" data-testid="kb-status"
+            className="fixed left-4 bottom-24 z-40 max-w-md rounded-btn bg-vk-ink text-white text-sm font-semibold px-3 py-2 shadow-btn">
+            {message}
+          </div>
+        )}
 
 
         <SettingsModal

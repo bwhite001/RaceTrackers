@@ -251,6 +251,9 @@ const SettingsModal = ({ isOpen, onClose }) => {
           <section className="flex flex-col gap-2.5">
             <SectionHeading>More options</SectionHeading>
             <Panel className="px-4 py-2 flex flex-col divide-y divide-vk-border dark:divide-gray-700">
+              <SettingItem label="WICEN2 keyboard shortcuts" description="Base: Alt keys and the CheckPt → Time → Number entry sequence">
+                <Toggle aria-label="WICEN2 keyboard shortcuts" checked={localSettings.wicen2Keys !== false} onChange={v => change({ wicen2Keys: v })} />
+              </SettingItem>
               <SettingItem label="High contrast" description="Thicker borders and bolder text">
                 <Toggle checked={!!localSettings.highContrastMode} onChange={v => change({ highContrastMode: v })} />
               </SettingItem>
